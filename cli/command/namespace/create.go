@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/dnephin/cobra"
-	runconfigopts "github.com/docker/docker/runconfig/opts"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
@@ -20,7 +19,7 @@ type createOptions struct {
 }
 
 func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	opts := createOptions{
+	opt := createOptions{
 		labels: opts.NewListOpts(opts.ValidateEnv),
 	}
 
@@ -30,33 +29,33 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 1 {
-				if opts.name != "" {
+				if opt.name != "" {
 					fmt.Fprint(storageosCli.Err(), "Conflicting options: either specify --name or provide positional arg, not both\n")
 					return cli.StatusError{StatusCode: 1}
 				}
-				opts.name = args[0]
+				opt.name = args[0]
 			}
-			return runCreate(storageosCli, opts)
+			return runCreate(storageosCli, opt)
 		},
 	}
 	flags := cmd.Flags()
-	flags.StringVar(&opts.name, "name", "", "Specify namespace name")
+	flags.StringVar(&opt.name, "name", "", "Specify namespace name")
 	flags.Lookup("name").Hidden = true
-	flags.StringVar(&opts.displayName, "display-name", "", "Namespace display name")
-	flags.StringVarP(&opts.description, "description", "d", "", "Namespace description")
-	flags.Var(&opts.labels, "label", "Set metadata for a namespace")
+	flags.StringVar(&opt.displayName, "display-name", "", "Namespace display name")
+	flags.StringVarP(&opt.description, "description", "d", "", "Namespace description")
+	flags.Var(&opt.labels, "label", "Set metadata for a namespace")
 
 	return cmd
 }
 
-func runCreate(storageosCli *command.StorageOSCli, opts createOptions) error {
+func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 	client := storageosCli.Client()
 
 	params := types.NamespaceCreateOptions{
-		Name:        opts.name,
-		DisplayName: opts.displayName,
-		Description: opts.description,
-		Labels:      runconfigopts.ConvertKVStringsToMap(opts.labels.GetAll()),
+		Name:        opt.name,
+		DisplayName: opt.displayName,
+		Description: opt.description,
+		Labels:      opts.ConvertKVStringsToMap(opt.labels.GetAll()),
 		Context:     context.Background(),
 	}
 

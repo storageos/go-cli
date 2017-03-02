@@ -26,7 +26,7 @@ type listOptions struct {
 }
 
 func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	opts := listOptions{filter: opts.NewFilterOpt()}
+	opt := listOptions{filter: opts.NewFilterOpt()}
 
 	cmd := &cobra.Command{
 		Use:     "ls [OPTIONS]",
@@ -34,34 +34,34 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Short:   "List capacity pools",
 		Args:    cli.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runList(storageosCli, opts)
+			return runList(storageosCli, opt)
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.BoolVarP(&opts.quiet, "quiet", "q", false, "Only display pool names")
-	flags.StringVar(&opts.format, "format", "", "Pretty-print pools using a Go template")
-	flags.VarP(&opts.filter, "filter", "f", "Provide filter values (e.g. 'dangling=true')")
+	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display pool names")
+	flags.StringVar(&opt.format, "format", "", "Pretty-print pools using a Go template")
+	flags.VarP(&opt.filter, "filter", "f", "Provide filter values (e.g. 'dangling=true')")
 
 	return cmd
 }
 
-func runList(storageosCli *command.StorageOSCli, opts listOptions) error {
+func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 	client := storageosCli.Client()
 
 	params := types.ListOptions{
-	// LabelSelector: opts.filter.Value(),
+	// LabelSelector: opt.filter.Value(),
 	}
 
-	// pools, err := client.PoolList(context.Background(), opts.filter.Value())
+	// pools, err := client.PoolList(context.Background(), opt.filter.Value())
 	pools, err := client.PoolList(params)
 	if err != nil {
 		return err
 	}
 
-	format := opts.format
+	format := opt.format
 	if len(format) == 0 {
-		if len(storageosCli.ConfigFile().PoolsFormat) > 0 && !opts.quiet {
+		if len(storageosCli.ConfigFile().PoolsFormat) > 0 && !opt.quiet {
 			format = storageosCli.ConfigFile().PoolsFormat
 		} else {
 			format = formatter.TableFormatKey
@@ -72,7 +72,7 @@ func runList(storageosCli *command.StorageOSCli, opts listOptions) error {
 
 	poolCtx := formatter.Context{
 		Output: storageosCli.Out(),
-		Format: formatter.NewPoolFormat(format, opts.quiet),
+		Format: formatter.NewPoolFormat(format, opt.quiet),
 	}
 	return formatter.PoolWrite(poolCtx, pools)
 }

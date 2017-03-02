@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/dnephin/cobra"
-	runconfigopts "github.com/docker/docker/runconfig/opts"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
@@ -24,7 +23,7 @@ type createOptions struct {
 }
 
 func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	opts := createOptions{
+	opt := createOptions{
 		controllers: opts.NewListOpts(opts.ValidateEnv),
 		drivers:     opts.NewListOpts(opts.ValidateEnv),
 		labels:      opts.NewListOpts(opts.ValidateEnv),
@@ -36,41 +35,41 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 1 {
-				if opts.name != "" {
+				if opt.name != "" {
 					fmt.Fprint(storageosCli.Err(), "Conflicting options: either specify --name or provide positional arg, not both\n")
 					return cli.StatusError{StatusCode: 1}
 				}
-				opts.name = args[0]
+				opt.name = args[0]
 			}
-			return runCreate(storageosCli, opts)
+			return runCreate(storageosCli, opt)
 		},
 	}
 	flags := cmd.Flags()
-	flags.StringVar(&opts.name, "name", "", "Specify pool name")
+	flags.StringVar(&opt.name, "name", "", "Specify pool name")
 	flags.Lookup("name").Hidden = true
-	flags.StringVarP(&opts.description, "description", "d", "", "Pool description")
-	flags.BoolVar(&opts.isDefault, "default", false, "Set as default pool")
-	flags.StringVar(&opts.defaultDriver, "default-driver", "", "Default capacity driver")
-	flags.Var(&opts.controllers, "controllers", "Controllers that contribute capacity to the pool")
-	flags.Var(&opts.drivers, "drivers", "Drivers providing capacity to the pool")
-	flags.BoolVar(&opts.active, "active", true, "Enable or disable the pool")
-	flags.Var(&opts.labels, "label", "Set metadata for a pool")
+	flags.StringVarP(&opt.description, "description", "d", "", "Pool description")
+	flags.BoolVar(&opt.isDefault, "default", false, "Set as default pool")
+	flags.StringVar(&opt.defaultDriver, "default-driver", "", "Default capacity driver")
+	flags.Var(&opt.controllers, "controllers", "Controllers that contribute capacity to the pool")
+	flags.Var(&opt.drivers, "drivers", "Drivers providing capacity to the pool")
+	flags.BoolVar(&opt.active, "active", true, "Enable or disable the pool")
+	flags.Var(&opt.labels, "label", "Set metadata for a pool")
 
 	return cmd
 }
 
-func runCreate(storageosCli *command.StorageOSCli, opts createOptions) error {
+func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 	client := storageosCli.Client()
 
 	params := types.PoolCreateOptions{
-		Name:            opts.name,
-		Description:     opts.description,
-		Default:         opts.isDefault,
-		DefaultDriver:   opts.defaultDriver,
-		ControllerNames: opts.controllers.GetAll(),
-		DriverNames:     opts.drivers.GetAll(),
-		Active:          opts.active,
-		Labels:          runconfigopts.ConvertKVStringsToMap(opts.labels.GetAll()),
+		Name:            opt.name,
+		Description:     opt.description,
+		Default:         opt.isDefault,
+		DefaultDriver:   opt.defaultDriver,
+		ControllerNames: opt.controllers.GetAll(),
+		DriverNames:     opt.drivers.GetAll(),
+		Active:          opt.active,
+		Labels:          opts.ConvertKVStringsToMap(opt.labels.GetAll()),
 		Context:         context.Background(),
 	}
 
