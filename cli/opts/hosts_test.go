@@ -19,22 +19,18 @@ func TestParseHost(t *testing.T) {
 		"":                         DefaultHost,
 		" ":                        DefaultHost,
 		"  ":                       DefaultHost,
-		"fd://":                    "fd://",
-		"fd://something":           "fd://something",
 		"tcp://host:":              fmt.Sprintf("tcp://host:%d", DefaultHTTPPort),
 		"tcp://":                   DefaultTCPHost,
-		"tcp://:2375":              fmt.Sprintf("tcp://%s:2375", DefaultHTTPHost),
+		"tcp://:5705":              fmt.Sprintf("tcp://%s:5705", DefaultHTTPHost),
 		"tcp://:2376":              fmt.Sprintf("tcp://%s:2376", DefaultHTTPHost),
 		"tcp://0.0.0.0:8080":       "tcp://0.0.0.0:8080",
 		"tcp://192.168.0.0:12000":  "tcp://192.168.0.0:12000",
 		"tcp://192.168:8080":       "tcp://192.168:8080",
 		"tcp://0.0.0.0:1234567890": "tcp://0.0.0.0:1234567890", // yeah it's valid :P
 		" tcp://:7777/path ":       fmt.Sprintf("tcp://%s:7777/path", DefaultHTTPHost),
-		"tcp://docker.com:2375":    "tcp://docker.com:2375",
+		"tcp://storageos.com:5705": "tcp://storageos.com:5705",
 		"unix://":                  "unix://" + DefaultUnixSocket,
 		"unix://path/to/socket":    "unix://path/to/socket",
-		"npipe://":                 "npipe://" + DefaultNamedPipe,
-		"npipe:////./pipe/foo":     "npipe:////./pipe/foo",
 	}
 
 	for _, value := range invalid {
@@ -50,7 +46,7 @@ func TestParseHost(t *testing.T) {
 	}
 }
 
-func TestParseDockerDaemonHost(t *testing.T) {
+func TestParseAddr(t *testing.T) {
 	invalids := map[string]string{
 
 		"tcp:a.b.c.d":                   "Invalid bind address format: tcp:a.b.c.d",
@@ -62,12 +58,12 @@ func TestParseDockerDaemonHost(t *testing.T) {
 		"":                              "Invalid bind address format: ",
 	}
 	valids := map[string]string{
-		"0.0.0.1:":                    "tcp://0.0.0.1:2375",
+		"0.0.0.1:":                    "tcp://0.0.0.1:5705",
 		"0.0.0.1:5555":                "tcp://0.0.0.1:5555",
 		"0.0.0.1:5555/path":           "tcp://0.0.0.1:5555/path",
-		"[::1]:":                      "tcp://[::1]:2375",
+		"[::1]:":                      "tcp://[::1]:5705",
 		"[::1]:5555/path":             "tcp://[::1]:5555/path",
-		"[0:0:0:0:0:0:0:1]:":          "tcp://[0:0:0:0:0:0:0:1]:2375",
+		"[0:0:0:0:0:0:0:1]:":          "tcp://[0:0:0:0:0:0:0:1]:5705",
 		"[0:0:0:0:0:0:0:1]:5555/path": "tcp://[0:0:0:0:0:0:0:1]:5555/path",
 		":6666":                   fmt.Sprintf("tcp://%s:6666", DefaultHTTPHost),
 		":6666/path":              fmt.Sprintf("tcp://%s:6666/path", DefaultHTTPHost),
@@ -76,19 +72,17 @@ func TestParseDockerDaemonHost(t *testing.T) {
 		"tcp://:7777/path":        fmt.Sprintf("tcp://%s:7777/path", DefaultHTTPHost),
 		"unix:///run/docker.sock": "unix:///run/docker.sock",
 		"unix://":                 "unix://" + DefaultUnixSocket,
-		"fd://":                   "fd://",
-		"fd://something":          "fd://something",
-		"localhost:":              "tcp://localhost:2375",
+		"localhost:":              "tcp://localhost:5705",
 		"localhost:5555":          "tcp://localhost:5555",
 		"localhost:5555/path":     "tcp://localhost:5555/path",
 	}
 	for invalidAddr, expectedError := range invalids {
-		if addr, err := parseDockerDaemonHost(invalidAddr); err == nil || err.Error() != expectedError {
+		if addr, err := parseAddr(invalidAddr); err == nil || err.Error() != expectedError {
 			t.Errorf("tcp %v address expected error %q return, got %q and addr %v", invalidAddr, expectedError, err, addr)
 		}
 	}
 	for validAddr, expectedAddr := range valids {
-		if addr, err := parseDockerDaemonHost(validAddr); err != nil || addr != expectedAddr {
+		if addr, err := parseAddr(validAddr); err != nil || addr != expectedAddr {
 			t.Errorf("%v -> expected %v, got (%v) addr (%v)", validAddr, expectedAddr, err, addr)
 		}
 	}
@@ -96,7 +90,7 @@ func TestParseDockerDaemonHost(t *testing.T) {
 
 func TestParseTCP(t *testing.T) {
 	var (
-		defaultHTTPHost = "tcp://127.0.0.1:2376"
+		defaultHTTPHost = "tcp://127.0.0.1:5705"
 	)
 	invalids := map[string]string{
 		"tcp:a.b.c.d":          "Invalid bind address format: tcp:a.b.c.d",
@@ -107,20 +101,20 @@ func TestParseTCP(t *testing.T) {
 	valids := map[string]string{
 		"":                            defaultHTTPHost,
 		"tcp://":                      defaultHTTPHost,
-		"0.0.0.1:":                    "tcp://0.0.0.1:2376",
+		"0.0.0.1:":                    "tcp://0.0.0.1:5705",
 		"0.0.0.1:5555":                "tcp://0.0.0.1:5555",
 		"0.0.0.1:5555/path":           "tcp://0.0.0.1:5555/path",
 		":6666":                       "tcp://127.0.0.1:6666",
 		":6666/path":                  "tcp://127.0.0.1:6666/path",
 		"tcp://:7777":                 "tcp://127.0.0.1:7777",
 		"tcp://:7777/path":            "tcp://127.0.0.1:7777/path",
-		"[::1]:":                      "tcp://[::1]:2376",
+		"[::1]:":                      "tcp://[::1]:5705",
 		"[::1]:5555":                  "tcp://[::1]:5555",
 		"[::1]:5555/path":             "tcp://[::1]:5555/path",
-		"[0:0:0:0:0:0:0:1]:":          "tcp://[0:0:0:0:0:0:0:1]:2376",
+		"[0:0:0:0:0:0:0:1]:":          "tcp://[0:0:0:0:0:0:0:1]:5705",
 		"[0:0:0:0:0:0:0:1]:5555":      "tcp://[0:0:0:0:0:0:0:1]:5555",
 		"[0:0:0:0:0:0:0:1]:5555/path": "tcp://[0:0:0:0:0:0:0:1]:5555/path",
-		"localhost:":                  "tcp://localhost:2376",
+		"localhost:":                  "tcp://localhost:5705",
 		"localhost:5555":              "tcp://localhost:5555",
 		"localhost:5555/path":         "tcp://localhost:5555/path",
 	}
