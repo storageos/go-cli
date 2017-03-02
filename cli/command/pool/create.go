@@ -25,12 +25,14 @@ type createOptions struct {
 
 func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opts := createOptions{
-		labels: opts.NewListOpts(opts.ValidateEnv),
+		controllers: opts.NewListOpts(opts.ValidateEnv),
+		drivers:     opts.NewListOpts(opts.ValidateEnv),
+		labels:      opts.NewListOpts(opts.ValidateEnv),
 	}
 
 	cmd := &cobra.Command{
-		Use:   "create [OPTIONS] [VOLUME]",
-		Short: "Create a pool",
+		Use:   "create [OPTIONS] [POOL]",
+		Short: "Create a capacity pool",
 		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 1 {
@@ -49,6 +51,8 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVarP(&opts.description, "description", "d", "", "Pool description")
 	flags.BoolVar(&opts.isDefault, "default", false, "Set as default pool")
 	flags.StringVar(&opts.defaultDriver, "default-driver", "", "Default capacity driver")
+	flags.Var(&opts.controllers, "controllers", "Controllers that contribute capacity to the pool")
+	flags.Var(&opts.drivers, "drivers", "Drivers providing capacity to the pool")
 	flags.BoolVar(&opts.active, "active", true, "Enable or disable the pool")
 	flags.Var(&opts.labels, "label", "Set metadata for a pool")
 
@@ -58,18 +62,19 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 func runCreate(storageosCli *command.StorageOSCli, opts createOptions) error {
 	client := storageosCli.Client()
 
-	poolReq := types.PoolCreateOptions{
-		Name:          opts.name,
-		Description:   opts.description,
-		Default:       opts.isDefault,
-		DefaultDriver: opts.defaultDriver,
-		// ControllerNames: opts.controllers,
-		// DriverNames:     opts.drivers,
-		Labels:  runconfigopts.ConvertKVStringsToMap(opts.labels.GetAll()),
-		Context: context.Background(),
+	params := types.PoolCreateOptions{
+		Name:            opts.name,
+		Description:     opts.description,
+		Default:         opts.isDefault,
+		DefaultDriver:   opts.defaultDriver,
+		ControllerNames: opts.controllers.GetAll(),
+		DriverNames:     opts.drivers.GetAll(),
+		Active:          opts.active,
+		Labels:          runconfigopts.ConvertKVStringsToMap(opts.labels.GetAll()),
+		Context:         context.Background(),
 	}
 
-	pool, err := client.PoolCreate(poolReq)
+	pool, err := client.PoolCreate(params)
 	if err != nil {
 		return err
 	}

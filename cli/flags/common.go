@@ -34,6 +34,8 @@ var (
 type CommonOptions struct {
 	Debug      bool
 	Hosts      []string
+	Username   string
+	Password   string
 	LogLevel   string
 	TLS        bool
 	TLSVerify  bool
@@ -71,6 +73,9 @@ func (commonOpts *CommonOptions) InstallFlags(flags *pflag.FlagSet) {
 
 	hostOpt := opts.NewNamedListOptsRef("hosts", &commonOpts.Hosts, opts.ValidateHost)
 	flags.VarP(hostOpt, "host", "H", "Daemon socket(s) to connect to")
+
+	flags.StringVarP(&commonOpts.Username, "username", "u", "", `API username`)
+	flags.StringVarP(&commonOpts.Password, "password", "p", "", `API password`)
 }
 
 // SetDefaultOptions sets default values for options after flag parsing is

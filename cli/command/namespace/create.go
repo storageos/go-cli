@@ -1,4 +1,4 @@
-package volume
+package namespace
 
 import (
 	"fmt"
@@ -14,11 +14,8 @@ import (
 
 type createOptions struct {
 	name        string
+	displayName string
 	description string
-	size        int
-	pool        string
-	fsType      string
-	namespace   string
 	labels      opts.ListOpts
 }
 
@@ -28,8 +25,8 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "create [OPTIONS] [VOLUME]",
-		Short: "Create a volume",
+		Use:   "create [OPTIONS] [NAMESPACE]",
+		Short: "Create a capcity namespace",
 		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 1 {
@@ -43,14 +40,11 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		},
 	}
 	flags := cmd.Flags()
-	flags.StringVar(&opts.name, "name", "", "Specify volume name")
+	flags.StringVar(&opts.name, "name", "", "Specify namespace name")
 	flags.Lookup("name").Hidden = true
-	flags.StringVarP(&opts.description, "description", "d", "", "Volume description")
-	flags.IntVarP(&opts.size, "size", "s", 5, "Volume size in GB")
-	flags.StringVarP(&opts.pool, "pool", "p", "default", "Volume capacity poool")
-	flags.StringVarP(&opts.fsType, "fstype", "f", "", "Requested filesystem type")
-	flags.StringVarP(&opts.namespace, "namespace", "n", "", "Volume namespace")
-	flags.Var(&opts.labels, "label", "Set metadata for a volume")
+	flags.StringVar(&opts.displayName, "display-name", "", "Namespace display name")
+	flags.StringVarP(&opts.description, "description", "d", "", "Namespace description")
+	flags.Var(&opts.labels, "label", "Set metadata for a namespace")
 
 	return cmd
 }
@@ -58,22 +52,19 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 func runCreate(storageosCli *command.StorageOSCli, opts createOptions) error {
 	client := storageosCli.Client()
 
-	params := types.VolumeCreateOptions{
+	params := types.NamespaceCreateOptions{
 		Name:        opts.name,
+		DisplayName: opts.displayName,
 		Description: opts.description,
-		Size:        opts.size,
-		Pool:        opts.pool,
-		FSType:      opts.fsType,
-		Namespace:   opts.namespace,
 		Labels:      runconfigopts.ConvertKVStringsToMap(opts.labels.GetAll()),
 		Context:     context.Background(),
 	}
 
-	vol, err := client.VolumeCreate(params)
+	namespace, err := client.NamespaceCreate(params)
 	if err != nil {
 		return err
 	}
 
-	fmt.Fprintf(storageosCli.Out(), "%s/%s\n", vol.Namespace, vol.Name)
+	fmt.Fprintf(storageosCli.Out(), "%s\n", namespace.Name)
 	return nil
 }

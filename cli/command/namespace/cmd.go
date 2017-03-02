@@ -1,4 +1,4 @@
-package volume
+package namespace
 
 import (
 	"github.com/dnephin/cobra"
@@ -7,11 +7,11 @@ import (
 	"github.com/storageos/go-cli/cli/command"
 )
 
-// NewVolumeCommand returns a cobra command for `volume` subcommands
-func NewVolumeCommand(storageosCli *command.StorageOSCli) *cobra.Command {
+// NewNamespaceCommand returns a cobra command for `namespace` subcommands
+func NewNamespaceCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "volume",
-		Short: "Manage volumes",
+		Use:   "namespace",
+		Short: "Manage namespaces",
 		Args:  cli.NoArgs,
 		RunE:  storageosCli.ShowHelp,
 	}

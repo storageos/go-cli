@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/pkg/homedir"
+	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli/config/configfile"
 )
 
@@ -41,8 +41,8 @@ func SetDir(dir string) {
 func NewConfigFile(fn string) *configfile.ConfigFile {
 	return &configfile.ConfigFile{
 		AuthConfigs: make(map[string]types.AuthConfig),
-		HTTPHeaders: make(map[string]string),
-		Filename:    fn,
+		// HTTPHeaders: make(map[string]string),
+		Filename: fn,
 	}
 }
 

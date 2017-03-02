@@ -11,16 +11,16 @@ import (
 // SetupRootCommand sets default usage, help, and error handling for the
 // root command.
 func SetupRootCommand(rootCmd *cobra.Command) {
-	// cobra.AddTemplateFunc("hasSubCommands", hasSubCommands)
-	// cobra.AddTemplateFunc("hasManagementSubCommands", hasManagementSubCommands)
-	// cobra.AddTemplateFunc("operationSubCommands", operationSubCommands)
-	// cobra.AddTemplateFunc("managementSubCommands", managementSubCommands)
-	// cobra.AddTemplateFunc("wrappedFlagUsages", wrappedFlagUsages)
+	cobra.AddTemplateFunc("hasSubCommands", hasSubCommands)
+	cobra.AddTemplateFunc("hasManagementSubCommands", hasManagementSubCommands)
+	cobra.AddTemplateFunc("operationSubCommands", operationSubCommands)
+	cobra.AddTemplateFunc("managementSubCommands", managementSubCommands)
+	cobra.AddTemplateFunc("wrappedFlagUsages", wrappedFlagUsages)
 
-	// rootCmd.SetUsageTemplate(usageTemplate)
-	// rootCmd.SetHelpTemplate(helpTemplate)
-	// rootCmd.SetFlagErrorFunc(FlagErrorFunc)
-	// rootCmd.SetHelpCommand(helpCommand)
+	rootCmd.SetUsageTemplate(usageTemplate)
+	rootCmd.SetHelpTemplate(helpTemplate)
+	rootCmd.SetFlagErrorFunc(FlagErrorFunc)
+	rootCmd.SetHelpCommand(helpCommand)
 
 	rootCmd.PersistentFlags().BoolP("help", "h", false, "Print usage")
 	rootCmd.PersistentFlags().MarkShorthandDeprecated("help", "please use --help")

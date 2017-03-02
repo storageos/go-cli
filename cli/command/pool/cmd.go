@@ -16,14 +16,10 @@ func NewPoolCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		RunE:  storageosCli.ShowHelp,
 	}
 	cmd.AddCommand(
-		// newCreateCommand(dockerCli),
-		// newInspectCommand(dockerCli),
-		// newPsCommand(dockerCli),
+		newCreateCommand(storageosCli),
+		newInspectCommand(storageosCli),
 		newListCommand(storageosCli),
-	// newRemoveCommand(dockerCli),
-	// newScaleCommand(dockerCli),
-	// newUpdateCommand(dockerCli),
-	// newLogsCommand(dockerCli),
+		newRemoveCommand(storageosCli),
 	)
 	return cmd
 }

@@ -35,6 +35,8 @@ type Cli interface {
 // Instances of the client can be returned from NewStorageOSCli.
 type StorageOSCli struct {
 	configFile      *configfile.ConfigFile
+	username        string
+	password        string
 	in              *InStream
 	out             *OutStream
 	err             io.Writer
@@ -153,7 +155,18 @@ func NewAPIClientFromFlags(opts *cliflags.CommonOptions) (*api.Client, error) {
 		verStr = tmpStr
 	}
 
-	return api.NewVersionedClient(host, verStr)
+	client, err := api.NewVersionedClient(host, verStr)
+	if err != nil {
+		return &api.Client{}, err
+	}
+
+	username := getUsername(opts.Username)
+	password := getPassword(opts.Password)
+	if username != "" && password != "" {
+		client.SetAuth(username, password)
+	}
+
+	return client, nil
 }
 
 func getServerHost(hosts []string, tlsOptions *tlsconfig.Options) (host string, err error) {
@@ -168,4 +181,18 @@ func getServerHost(hosts []string, tlsOptions *tlsconfig.Options) (host string, 
 
 	host, err = opts.ParseHost(tlsOptions != nil, host)
 	return
+}
+
+func getUsername(username string) string {
+	if len(username) == 0 {
+		return os.Getenv("STORAGEOS_USERNAME")
+	}
+	return username
+}
+
+func getPassword(password string) string {
+	if len(password) == 0 {
+		return os.Getenv("STORAGEOS_PASSWORD")
+	}
+	return password
 }

@@ -10,12 +10,11 @@ import (
 
 const (
 	defaultVolumeQuietFormat = "{{.Name}}"
-	defaultVolumeTableFormat = "table {{.Driver}}\t{{.Name}}"
+	defaultVolumeTableFormat = "table {{.Name}}\t{{.Size}}\t{{.MountedBy}}\t{{.Status}}"
 
-	volumeNameHeader = "VOLUME NAME"
-	mountpointHeader = "MOUNTPOINT"
-	linksHeader      = "LINKS"
-	// Status header ?
+	volumeNameHeader      = "NAMESPACE/NAME"
+	volumeMountedByHeader = "MOUNTED BY"
+	volumeStatusHeader    = "STATUS"
 )
 
 // NewVolumeFormat returns a format for use with a volume Context
@@ -59,7 +58,7 @@ func (c *volumeContext) MarshalJSON() ([]byte, error) {
 
 func (c *volumeContext) Name() string {
 	c.AddHeader(volumeNameHeader)
-	return c.v.Name
+	return fmt.Sprintf("%s/%s", c.v.Namespace, c.v.Name)
 }
 
 func (c *volumeContext) Labels() string {
@@ -90,14 +89,19 @@ func (c *volumeContext) Label(name string) string {
 }
 
 func (c *volumeContext) MountedBy() string {
-	c.AddHeader(linksHeader)
-	if c.v.Mounted {
-		return "N/A"
+	c.AddHeader(volumeMountedByHeader)
+	if c.v.MountedBy == "" {
+		return ""
 	}
 	return fmt.Sprintf("%d", c.v.MountedBy)
 }
 
 func (c *volumeContext) Size() string {
 	c.AddHeader(sizeHeader)
-	return units.HumanSize(float64(c.v.Size))
+	return units.HumanSize(float64(c.v.Size * 1000000000))
+}
+
+func (c *volumeContext) Status() string {
+	c.AddHeader(volumeStatusHeader)
+	return c.v.Status
 }

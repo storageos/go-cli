@@ -4,15 +4,20 @@ import (
 	"fmt"
 	"strings"
 
+	units "github.com/docker/go-units"
 	"github.com/storageos/go-api/types"
 )
 
 const (
 	defaultPoolQuietFormat = "{{.Name}}"
-	defaultPoolTableFormat = "table {{.Driver}}\t{{.Name}}"
+	defaultPoolTableFormat = "table {{.Name}}\t{{.Drivers}}\t{{.Controllers}}\t{{.Available}}\t{{.Total}}\t{{.Active}}"
 
-	poolNameHeader = "POOL NAME"
-	// Status header ?
+	poolNameHeader        = "POOL NAME"
+	poolDriversHeader     = "DRIVERS"
+	poolControllersHeader = "CONTROLLERS"
+	poolAvailHeader       = "AVAIL"
+	poolTotalHeader       = "TOTAL"
+	poolActiveHeader      = "STATUS"
 )
 
 // NewPoolFormat returns a format for use with a pool Context
@@ -57,6 +62,34 @@ func (c *poolContext) MarshalJSON() ([]byte, error) {
 func (c *poolContext) Name() string {
 	c.AddHeader(poolNameHeader)
 	return c.v.Name
+}
+
+func (c *poolContext) Drivers() string {
+	c.AddHeader(poolDriversHeader)
+	return strings.Join(c.v.DriverNames, ", ")
+}
+
+func (c *poolContext) Controllers() string {
+	c.AddHeader(poolControllersHeader)
+	return strings.Join(c.v.ControllerNames, ", ")
+}
+
+func (c *poolContext) Available() string {
+	c.AddHeader(poolAvailHeader)
+	return units.HumanSize(float64(c.v.CapacityStats.AvailableCapacityBytes))
+}
+
+func (c *poolContext) Total() string {
+	c.AddHeader(poolTotalHeader)
+	return units.HumanSize(float64(c.v.CapacityStats.TotalCapacityBytes))
+}
+
+func (c *poolContext) Active() string {
+	c.AddHeader(poolActiveHeader)
+	if c.v.Active {
+		return "active"
+	}
+	return "disabled"
 }
 
 func (c *poolContext) Labels() string {

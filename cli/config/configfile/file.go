@@ -5,65 +5,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/docker/docker/api/types"
+	"github.com/storageos/go-api/types"
 )
 
-// ConfigFile ~/.docker/config.json file info
+// ConfigFile ~/.storageos/config.json file info
 type ConfigFile struct {
-	AuthConfigs          map[string]types.AuthConfig `json:"auths"`
-	HTTPHeaders          map[string]string           `json:"HttpHeaders,omitempty"`
-	VolumesFormat        string                      `json:"volumesFormat,omitempty"`
-	PoolsFormat          string                      `json:"poolsFormat,omitempty"`
-	DetachKeys           string                      `json:"detachKeys,omitempty"`
-	CredentialsStore     string                      `json:"credsStore,omitempty"`
-	CredentialHelpers    map[string]string           `json:"credHelpers,omitempty"`
-	Filename             string                      `json:"-"` // Note: for internal use only
-	ServiceInspectFormat string                      `json:"serviceInspectFormat,omitempty"`
-	ServicesFormat       string                      `json:"servicesFormat,omitempty"`
-	TasksFormat          string                      `json:"tasksFormat,omitempty"`
-}
-
-// LegacyLoadFromReader reads the non-nested configuration data given and sets up the
-// auth config information with given directory and populates the receiver object
-func (configFile *ConfigFile) LegacyLoadFromReader(configData io.Reader) error {
-	b, err := ioutil.ReadAll(configData)
-	if err != nil {
-		return err
-	}
-
-	if err := json.Unmarshal(b, &configFile.AuthConfigs); err != nil {
-		arr := strings.Split(string(b), "\n")
-		if len(arr) < 2 {
-			return fmt.Errorf("The Auth config file is empty")
-		}
-		authConfig := types.AuthConfig{}
-		origAuth := strings.Split(arr[0], " = ")
-		if len(origAuth) != 2 {
-			return fmt.Errorf("Invalid Auth config file")
-		}
-		authConfig.Username, authConfig.Password, err = decodeAuth(origAuth[1])
-		if err != nil {
-			return err
-		}
-		// authConfig.ServerAddress = defaultIndexserver
-		// configFile.AuthConfigs[defaultIndexserver] = authConfig
-	} else {
-		for k, authConfig := range configFile.AuthConfigs {
-			authConfig.Username, authConfig.Password, err = decodeAuth(authConfig.Auth)
-			if err != nil {
-				return err
-			}
-			authConfig.Auth = ""
-			authConfig.ServerAddress = k
-			configFile.AuthConfigs[k] = authConfig
-		}
-	}
-	return nil
+	AuthConfigs map[string]types.AuthConfig `json:"auths"`
+	// HTTPHeaders          map[string]string           `json:"HttpHeaders,omitempty"`
+	VolumesFormat    string `json:"volumesFormat,omitempty"`
+	PoolsFormat      string `json:"poolsFormat,omitempty"`
+	NamespacesFormat string `json:"namespacesFormat,omitempty"`
+	RulesFormat      string `json:"rulesFormat,omitempty"`
+	TemplatesFormat  string `json:"templatesFormat,omitempty"`
+	// DetachKeys           string                      `json:"detachKeys,omitempty"`
+	// CredentialsStore     string                      `json:"credsStore,omitempty"`
+	// CredentialHelpers    map[string]string           `json:"credHelpers,omitempty"`
+	Filename string `json:"-"` // Note: for internal use only
 }
 
 // LoadFromReader reads the configuration data given and sets up the auth config
@@ -88,9 +49,10 @@ func (configFile *ConfigFile) LoadFromReader(configData io.Reader) error {
 // ContainsAuth returns whether there is authentication configured
 // in this file or not.
 func (configFile *ConfigFile) ContainsAuth() bool {
-	return configFile.CredentialsStore != "" ||
-		len(configFile.CredentialHelpers) > 0 ||
-		len(configFile.AuthConfigs) > 0
+	// return configFile.CredentialsStore != "" ||
+	// 	len(configFile.CredentialHelpers) > 0 ||
+	// 	len(configFile.AuthConfigs) > 0
+	return len(configFile.AuthConfigs) > 0
 }
 
 // SaveToWriter encodes and writes out all the authorization information to

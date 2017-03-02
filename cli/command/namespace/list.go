@@ -1,4 +1,4 @@
-package volume
+package namespace
 
 import (
 	"sort"
@@ -11,19 +11,18 @@ import (
 	"github.com/storageos/go-cli/cli/opts"
 )
 
-type byVolumeName []*types.Volume
+type byNamespaceName []*types.Namespace
 
-func (r byVolumeName) Len() int      { return len(r) }
-func (r byVolumeName) Swap(i, j int) { r[i], r[j] = r[j], r[i] }
-func (r byVolumeName) Less(i, j int) bool {
+func (r byNamespaceName) Len() int      { return len(r) }
+func (r byNamespaceName) Swap(i, j int) { r[i], r[j] = r[j], r[i] }
+func (r byNamespaceName) Less(i, j int) bool {
 	return r[i].Name < r[j].Name
 }
 
 type listOptions struct {
-	quiet     bool
-	format    string
-	filter    opts.FilterOpt
-	namespace string
+	quiet  bool
+	format string
+	filter opts.FilterOpt
 }
 
 func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
@@ -32,7 +31,7 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "ls [OPTIONS]",
 		Aliases: []string{"list"},
-		Short:   "List volumes",
+		Short:   "List namespaces",
 		Args:    cli.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runList(storageosCli, opts)
@@ -40,10 +39,9 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.BoolVarP(&opts.quiet, "quiet", "q", false, "Only display volume names")
-	flags.StringVar(&opts.format, "format", "", "Pretty-print volumes using a Go template")
+	flags.BoolVarP(&opts.quiet, "quiet", "q", false, "Only display namespace names")
+	flags.StringVar(&opts.format, "format", "", "Pretty-print namespaces using a Go template")
 	flags.VarP(&opts.filter, "filter", "f", "Provide filter values (e.g. 'dangling=true')")
-	flags.StringVarP(&opts.namespace, "namespace", "n", "", "Namespace scope")
 
 	return cmd
 }
@@ -52,30 +50,29 @@ func runList(storageosCli *command.StorageOSCli, opts listOptions) error {
 	client := storageosCli.Client()
 
 	params := types.ListOptions{
-		// LabelSelector: opts.filter.Value(),
-		Namespace: opts.namespace,
+	// LabelSelector: opts.filter.Value(),
 	}
 
-	// volumes, err := client.VolumeList(context.Background(), opts.filter.Value())
-	volumes, err := client.VolumeList(params)
+	// namespaces, err := client.NamespaceList(context.Background(), opts.filter.Value())
+	namespaces, err := client.NamespaceList(params)
 	if err != nil {
 		return err
 	}
 
 	format := opts.format
 	if len(format) == 0 {
-		if len(storageosCli.ConfigFile().VolumesFormat) > 0 && !opts.quiet {
-			format = storageosCli.ConfigFile().VolumesFormat
+		if len(storageosCli.ConfigFile().NamespacesFormat) > 0 && !opts.quiet {
+			format = storageosCli.ConfigFile().NamespacesFormat
 		} else {
 			format = formatter.TableFormatKey
 		}
 	}
 
-	sort.Sort(byVolumeName(volumes))
+	sort.Sort(byNamespaceName(namespaces))
 
-	volumeCtx := formatter.Context{
+	namespaceCtx := formatter.Context{
 		Output: storageosCli.Out(),
-		Format: formatter.NewVolumeFormat(format, opts.quiet),
+		Format: formatter.NewNamespaceFormat(format, opts.quiet),
 	}
-	return formatter.VolumeWrite(volumeCtx, volumes)
+	return formatter.NamespaceWrite(namespaceCtx, namespaces)
 }
