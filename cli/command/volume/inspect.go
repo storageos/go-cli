@@ -14,24 +14,24 @@ type inspectOptions struct {
 }
 
 func newInspectCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	var opts inspectOptions
+	var opt inspectOptions
 
 	cmd := &cobra.Command{
 		Use:   "inspect [OPTIONS] VOLUME [VOLUME...]",
 		Short: "Display detailed information on one or more volumes",
 		Args:  cli.RequiresMinArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			opts.names = args
-			return runInspect(storageosCli, opts)
+			opt.names = args
+			return runInspect(storageosCli, opt)
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.format, "format", "f", "", "Format the output using the given Go template")
+	cmd.Flags().StringVarP(&opt.format, "format", "f", "", "Format the output using the given Go template")
 
 	return cmd
 }
 
-func runInspect(storageosCli *command.StorageOSCli, opts inspectOptions) error {
+func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	client := storageosCli.Client()
 
 	getFunc := func(ref string) (interface{}, []byte, error) {
@@ -43,5 +43,5 @@ func runInspect(storageosCli *command.StorageOSCli, opts inspectOptions) error {
 		return i, nil, err
 	}
 
-	return inspect.Inspect(storageosCli.Out(), opts.names, opts.format, getFunc)
+	return inspect.Inspect(storageosCli.Out(), opt.names, opt.format, getFunc)
 }

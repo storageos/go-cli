@@ -1,7 +1,6 @@
 package namespace
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/dnephin/cobra"
@@ -27,12 +26,8 @@ type updateOptions struct {
 	labels      opts.ListOpts
 }
 
-var (
-	errNoRoleChange = errors.New("role was already set to the requested value")
-)
-
 func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	opt := createOptions{
+	opt := updateOptions{
 		labels: opts.NewListOpts(opts.ValidateEnv),
 	}
 
@@ -73,9 +68,6 @@ func updateNamespaces(storageosCli *command.StorageOSCli, names []string, mergeN
 
 		err = mergeNamespace(namespace)
 		if err != nil {
-			if err == errNoRoleChange {
-				continue
-			}
 			return err
 		}
 		params := types.NamespaceCreateOptions{

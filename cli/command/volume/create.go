@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/dnephin/cobra"
-	runconfigopts "github.com/docker/docker/runconfig/opts"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
@@ -23,7 +22,7 @@ type createOptions struct {
 }
 
 func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	opts := createOptions{
+	opt := createOptions{
 		labels: opts.NewListOpts(opts.ValidateEnv),
 	}
 
@@ -33,39 +32,39 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 1 {
-				if opts.name != "" {
+				if opt.name != "" {
 					fmt.Fprint(storageosCli.Err(), "Conflicting options: either specify --name or provide positional arg, not both\n")
 					return cli.StatusError{StatusCode: 1}
 				}
-				opts.name = args[0]
+				opt.name = args[0]
 			}
-			return runCreate(storageosCli, opts)
+			return runCreate(storageosCli, opt)
 		},
 	}
 	flags := cmd.Flags()
-	flags.StringVar(&opts.name, "name", "", "Specify volume name")
+	flags.StringVar(&opt.name, "name", "", "Specify volume name")
 	flags.Lookup("name").Hidden = true
-	flags.StringVarP(&opts.description, "description", "d", "", "Volume description")
-	flags.IntVarP(&opts.size, "size", "s", 5, "Volume size in GB")
-	flags.StringVarP(&opts.pool, "pool", "p", "default", "Volume capacity poool")
-	flags.StringVarP(&opts.fsType, "fstype", "f", "", "Requested filesystem type")
-	flags.StringVarP(&opts.namespace, "namespace", "n", "", "Volume namespace")
-	flags.Var(&opts.labels, "label", "Set metadata for a volume")
+	flags.StringVarP(&opt.description, "description", "d", "", "Volume description")
+	flags.IntVarP(&opt.size, "size", "s", 5, "Volume size in GB")
+	flags.StringVarP(&opt.pool, "pool", "p", "default", "Volume capacity poool")
+	flags.StringVarP(&opt.fsType, "fstype", "f", "", "Requested filesystem type")
+	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Volume namespace")
+	flags.Var(&opt.labels, "label", "Set metadata for a volume")
 
 	return cmd
 }
 
-func runCreate(storageosCli *command.StorageOSCli, opts createOptions) error {
+func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 	client := storageosCli.Client()
 
 	params := types.VolumeCreateOptions{
-		Name:        opts.name,
-		Description: opts.description,
-		Size:        opts.size,
-		Pool:        opts.pool,
-		FSType:      opts.fsType,
-		Namespace:   opts.namespace,
-		Labels:      runconfigopts.ConvertKVStringsToMap(opts.labels.GetAll()),
+		Name:        opt.name,
+		Description: opt.description,
+		Size:        opt.size,
+		Pool:        opt.pool,
+		FSType:      opt.fsType,
+		Namespace:   opt.namespace,
+		Labels:      opts.ConvertKVStringsToMap(opt.labels.GetAll()),
 		Context:     context.Background(),
 	}
 
