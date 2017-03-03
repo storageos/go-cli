@@ -41,7 +41,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags := cmd.Flags()
 	flags.StringVar(&opt.name, "name", "", "Specify namespace name")
 	flags.Lookup("name").Hidden = true
-	flags.StringVar(&opt.displayName, "display-name", "", "Namespace display name")
+	flags.StringVar(&opt.displayName, "display-name", "", "Display name of the namespace")
 	flags.StringVarP(&opt.description, "description", "d", "", "Namespace description")
 	flags.Var(&opt.labels, "label", "Set metadata for a namespace")
 
