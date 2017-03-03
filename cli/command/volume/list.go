@@ -27,7 +27,7 @@ type listOptions struct {
 }
 
 func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	opts := listOptions{filter: opts.NewFilterOpt()}
+	opt := listOptions{filter: opts.NewFilterOpt()}
 
 	cmd := &cobra.Command{
 		Use:     "ls [OPTIONS]",
@@ -35,25 +35,25 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Short:   "List volumes",
 		Args:    cli.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runList(storageosCli, opts)
+			return runList(storageosCli, opt)
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.BoolVarP(&opts.quiet, "quiet", "q", false, "Only display volume names")
-	flags.StringVar(&opts.format, "format", "", "Pretty-print volumes using a Go template")
-	flags.VarP(&opts.filter, "filter", "f", "Provide filter values (e.g. 'dangling=true')")
-	flags.StringVarP(&opts.namespace, "namespace", "n", "", "Namespace scope")
+	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display volume names")
+	flags.StringVar(&opt.format, "format", "", "Pretty-print volumes using a Go template")
+	flags.VarP(&opt.filter, "filter", "f", "Provide filter values (e.g. 'dangling=true')")
+	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Namespace scope")
 
 	return cmd
 }
 
-func runList(storageosCli *command.StorageOSCli, opts listOptions) error {
+func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 	client := storageosCli.Client()
 
 	params := types.ListOptions{
 		// LabelSelector: opts.filter.Value(),
-		Namespace: opts.namespace,
+		Namespace: opt.namespace,
 	}
 
 	// volumes, err := client.VolumeList(context.Background(), opts.filter.Value())
@@ -62,9 +62,9 @@ func runList(storageosCli *command.StorageOSCli, opts listOptions) error {
 		return err
 	}
 
-	format := opts.format
+	format := opt.format
 	if len(format) == 0 {
-		if len(storageosCli.ConfigFile().VolumesFormat) > 0 && !opts.quiet {
+		if len(storageosCli.ConfigFile().VolumesFormat) > 0 && !opt.quiet {
 			format = storageosCli.ConfigFile().VolumesFormat
 		} else {
 			format = formatter.TableFormatKey
@@ -75,7 +75,7 @@ func runList(storageosCli *command.StorageOSCli, opts listOptions) error {
 
 	volumeCtx := formatter.Context{
 		Output: storageosCli.Out(),
-		Format: formatter.NewVolumeFormat(format, opts.quiet),
+		Format: formatter.NewVolumeFormat(format, opt.quiet),
 	}
 	return formatter.VolumeWrite(volumeCtx, volumes)
 }

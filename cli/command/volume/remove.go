@@ -18,7 +18,7 @@ type removeOptions struct {
 }
 
 func newRemoveCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	var opts removeOptions
+	var opt removeOptions
 
 	cmd := &cobra.Command{
 		Use:     "rm [OPTIONS] VOLUME [VOLUME...]",
@@ -28,21 +28,21 @@ func newRemoveCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Example: removeExample,
 		Args:    cli.RequiresMinArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			opts.volumes = args
-			return runRemove(storageosCli, &opts)
+			opt.volumes = args
+			return runRemove(storageosCli, &opt)
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.BoolVarP(&opts.force, "force", "f", false, "Force the removal of one or more volumes")
+	flags.BoolVarP(&opt.force, "force", "f", false, "Force the removal of one or more volumes")
 	return cmd
 }
 
-func runRemove(storageosCli *command.StorageOSCli, opts *removeOptions) error {
+func runRemove(storageosCli *command.StorageOSCli, opt *removeOptions) error {
 	client := storageosCli.Client()
 	status := 0
 
-	for _, ref := range opts.volumes {
+	for _, ref := range opt.volumes {
 		namespace, name, err := storageos.ParseRef(ref)
 		if err != nil {
 			fmt.Fprintf(storageosCli.Err(), "%s\n", err)
@@ -52,7 +52,7 @@ func runRemove(storageosCli *command.StorageOSCli, opts *removeOptions) error {
 		params := types.DeleteOptions{
 			Name:      name,
 			Namespace: namespace,
-			Force:     opts.force,
+			Force:     opt.force,
 			Context:   context.Background(),
 		}
 

@@ -90,12 +90,12 @@ func (cli *StorageOSCli) ConfigFile() *configfile.ConfigFile {
 
 // Initialize the dockerCli runs initialization that must happen after command
 // line flags are parsed.
-func (cli *StorageOSCli) Initialize(opts *cliflags.ClientOptions) error {
+func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 	cli.configFile = LoadDefaultConfigFile(cli.err)
 
 	var err error
 	// cli.client, err = NewAPIClientFromFlags(opts.Common, cli.configFile)
-	cli.client, err = NewAPIClientFromFlags(opts.Common)
+	cli.client, err = NewAPIClientFromFlags(opt.Common)
 	if err != nil {
 		return err
 	}
@@ -144,8 +144,8 @@ func LoadDefaultConfigFile(err io.Writer) *configfile.ConfigFile {
 
 // NewAPIClientFromFlags creates a new APIClient from command line flags
 // func NewAPIClientFromFlags(opts *cliflags.CommonOptions, configFile *configfile.ConfigFile) (client.APIClient, error) {
-func NewAPIClientFromFlags(opts *cliflags.CommonOptions) (*api.Client, error) {
-	host, err := getServerHost(opts.Hosts, opts.TLSOptions)
+func NewAPIClientFromFlags(opt *cliflags.CommonOptions) (*api.Client, error) {
+	host, err := getServerHost(opt.Hosts, opt.TLSOptions)
 	if err != nil {
 		return &api.Client{}, err
 	}
@@ -160,8 +160,8 @@ func NewAPIClientFromFlags(opts *cliflags.CommonOptions) (*api.Client, error) {
 		return &api.Client{}, err
 	}
 
-	username := getUsername(opts.Username)
-	password := getPassword(opts.Password)
+	username := getUsername(opt.Username)
+	password := getPassword(opt.Password)
 	if username != "" && password != "" {
 		client.SetAuth(username, password)
 	}
