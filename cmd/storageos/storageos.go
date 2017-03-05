@@ -16,6 +16,7 @@ import (
 	cliconfig "github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/cli/debug"
 	cliflags "github.com/storageos/go-cli/cli/flags"
+	"github.com/storageos/go-cli/version"
 )
 
 func newStorageOSCommand(storageosCli *command.StorageOSCli) *cobra.Command {
@@ -183,7 +184,7 @@ func main() {
 }
 
 func showVersion() {
-	// fmt.Printf("Docker version %s, build %s\n", dockerversion.Version, dockerversion.GitCommit)
+	fmt.Printf("StorageOS version %s, build %s\n", version.Version, version.Revision)
 	// TODO: better version
 	// fmt.Printf("StorageOS API version %s\n", storageosCli.Client().ClientVersion())
 }
