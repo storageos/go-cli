@@ -19,6 +19,7 @@ func NewRuleCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		newCreateCommand(storageosCli),
 		newInspectCommand(storageosCli),
 		newListCommand(storageosCli),
+		newUpdateCommand(storageosCli),
 		newRemoveCommand(storageosCli),
 	)
 	return cmd
