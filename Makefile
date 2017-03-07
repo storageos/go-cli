@@ -18,3 +18,11 @@ $(CLIENT_BINARY):
 		-i \
 		-o ./storageos \
 		cmd/storageos/storageos.go
+
+storageos.exe:
+	@echo "++ Building storageos Windows binary"
+	GOOS=windows GOARCH=amd64 go build \
+		-ldflags "$(LDFLAGS)" \
+		-i \
+		-o ./storageos.exe \
+		cmd/storageos/storageos.go
