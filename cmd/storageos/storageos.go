@@ -7,15 +7,17 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/dnephin/cobra"
-	"github.com/docker/docker/api/types/versions"
-	"github.com/docker/docker/pkg/term"
+
 	"github.com/spf13/pflag"
+
+	"github.com/storageos/go-api/types/versions"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/commands"
 	cliconfig "github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/cli/debug"
 	cliflags "github.com/storageos/go-cli/cli/flags"
+	"github.com/storageos/go-cli/pkg/term"
 	"github.com/storageos/go-cli/version"
 )
 

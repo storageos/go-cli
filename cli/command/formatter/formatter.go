@@ -8,7 +8,7 @@ import (
 	"text/tabwriter"
 	"text/template"
 
-	"github.com/docker/docker/pkg/templates"
+	"github.com/storageos/go-cli/pkg/templates"
 )
 
 // Format keys used to specify certain kinds of output formats

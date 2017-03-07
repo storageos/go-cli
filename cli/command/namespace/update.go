@@ -9,7 +9,7 @@ import (
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/opts"
-	"golang.org/x/net/context"
+	"context"
 )
 
 const (
