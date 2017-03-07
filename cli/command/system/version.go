@@ -42,7 +42,7 @@ func NewVersionCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "version [OPTIONS]",
-		Short: "Show the Docker version information",
+		Short: "Show the StorageOS version information",
 		Args:  cli.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runVersion(storageosCli, &opts)
