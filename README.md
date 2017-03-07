@@ -1,6 +1,6 @@
 # StorageOS CLI
 
-StorageOS client for Mac/Linux
+StorageOS client for Mac/Linux/Windows
 
 ## Getting started
 
