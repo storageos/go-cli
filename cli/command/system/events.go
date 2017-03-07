@@ -7,7 +7,7 @@ import (
 	"text/template"
 	"time"
 
-	"golang.org/x/net/context"
+	"context"
 
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
