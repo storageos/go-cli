@@ -3,7 +3,7 @@ package rule
 import (
 	"fmt"
 
-	"golang.org/x/net/context"
+	"context"
 
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api"
