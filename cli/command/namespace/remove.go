@@ -63,7 +63,7 @@ func runRemove(storageosCli *command.StorageOSCli, opt *removeOptions) error {
 }
 
 var removeDescription = `
-Remove one or more namespaces. You cannot remove a namespace that is active.
+Remove one or more namespaces. To delete a namespace that has mounted volumes - supply force flag.
 `
 
 var removeExample = `
