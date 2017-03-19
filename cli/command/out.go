@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/docker/docker/pkg/term"
+	"github.com/storageos/go-cli/pkg/term"
 )
 
 // OutStream is an output stream used by the DockerCli to write normal program

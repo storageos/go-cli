@@ -6,7 +6,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/docker/docker/pkg/term"
+	"github.com/storageos/go-cli/pkg/term"
 )
 
 // InStream is an input stream used by the DockerCli to read user input
