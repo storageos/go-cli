@@ -50,12 +50,12 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVarP(&opt.description, "description", "d", "", "Rule description")
 	flags.StringVarP(&opt.ruleAction, "action", "a", "add", "Rule action (add|remove)")
 	flags.StringVarP(&opt.operator, "operator", "o", "==", "Comparison operator (!|=|==|in|!=|notin|exists|gt|lt)")
-	flags.VarP(&opt.selectors, "selector", "s", "Selectors; trigger rule on these labels")
+	flags.VarP(&opt.selectors, "selector", "s", "key=value selectors to trigger rule")
 	flags.IntVarP(&opt.weight, "weight", "w", 5, "Rule weight determines processing order (0-10)")
 	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Volume namespace")
 	flags.BoolVar(&opt.active, "active", true, "Enable or disable the rule")
 
-	flags.Var(&opt.labels, "label", "Labels to apply to new volumes")
+	flags.Var(&opt.labels, "label", "Labels to apply when rule is triggered")
 
 	return cmd
 }
