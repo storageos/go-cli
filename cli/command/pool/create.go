@@ -45,7 +45,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		},
 	}
 	flags := cmd.Flags()
-	flags.StringVar(&opt.name, "name", "", "Specify pool name")
+	flags.StringVar(&opt.name, "name", "", "Pool name")
 	flags.Lookup("name").Hidden = true
 	flags.StringVarP(&opt.description, "description", "d", "", "Pool description")
 	flags.BoolVar(&opt.isDefault, "default", false, "Set as default pool")
@@ -53,7 +53,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.Var(&opt.controllers, "controllers", "Controllers that contribute capacity to the pool")
 	flags.Var(&opt.drivers, "drivers", "Drivers providing capacity to the pool")
 	flags.BoolVar(&opt.active, "active", true, "Enable or disable the pool")
-	flags.Var(&opt.labels, "label", "Set metadata for a pool")
+	flags.Var(&opt.labels, "label", "Set metadata (key=value pairs) on the pool")
 
 	return cmd
 }

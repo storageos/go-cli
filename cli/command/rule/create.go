@@ -45,24 +45,22 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		},
 	}
 	flags := cmd.Flags()
-	flags.StringVar(&opt.name, "name", "", "Specify rule name")
+	flags.StringVar(&opt.name, "name", "", "Rule name")
 	flags.Lookup("name").Hidden = true
 	flags.StringVarP(&opt.description, "description", "d", "", "Rule description")
-	flags.StringVarP(&opt.ruleAction, "action", "a", "add", "Rule action (add|remove) (default add)")
-	flags.StringVarP(&opt.operator, "operator", "o", "==", "Comparison operator (!|=|==|in|!=|notin|exists|gt|lt) (default ==)")
-	flags.VarP(&opt.selectors, "selector", "s", "Set selector for a rule")
-	flags.IntVarP(&opt.weight, "weight", "w", 5, "Rule weight determines processing order (0-10) (default 5)")
+	flags.StringVarP(&opt.ruleAction, "action", "a", "add", "Rule action (add|remove)")
+	flags.StringVarP(&opt.operator, "operator", "o", "==", "Comparison operator (!|=|==|in|!=|notin|exists|gt|lt)")
+	flags.VarP(&opt.selectors, "selector", "s", "key=value selectors to trigger rule")
+	flags.IntVarP(&opt.weight, "weight", "w", 5, "Rule weight determines processing order (0-10)")
 	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Volume namespace")
-	flags.BoolVar(&opt.active, "active", true, "Enable or disable the pool")
+	flags.BoolVar(&opt.active, "active", true, "Enable or disable the rule")
 
-	flags.Var(&opt.labels, "label", "Set metadata for a rule")
+	flags.Var(&opt.labels, "label", "Labels to apply when rule is triggered")
 
 	return cmd
 }
 
 func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
-
-	fmt.Printf("runCreate: operator: %s\n", opt.operator)
 	if _, err := opts.ValidateOperator(opt.operator); err != nil {
 		return err
 	}

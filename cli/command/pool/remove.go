@@ -63,7 +63,7 @@ func runRemove(storageosCli *command.StorageOSCli, opt *removeOptions) error {
 }
 
 var removeDescription = `
-Remove one or more capcity pools. You cannot remove a pool that is active.
+Remove one or more capacity pools. You cannot remove a pool that is active.
 `
 
 var removeExample = `
