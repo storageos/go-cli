@@ -25,7 +25,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "create [OPTIONS] [NAMESPACE]",
-		Short: "Create a capcity namespace",
+		Short: "Create a capacity namespace",
 		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 1 {
