@@ -49,7 +49,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVarP(&opt.pool, "pool", "p", "default", "Volume capacity poool")
 	flags.StringVarP(&opt.fsType, "fstype", "f", "", "Requested filesystem type")
 	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Volume namespace")
-	flags.Var(&opt.labels, "label", "Set metadata for a volume")
+	flags.Var(&opt.labels, "label", "Set key:value metadata on the volume")
 
 	return cmd
 }

@@ -53,7 +53,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.Var(&opt.controllers, "controllers", "Controllers that contribute capacity to the pool")
 	flags.Var(&opt.drivers, "drivers", "Drivers providing capacity to the pool")
 	flags.BoolVar(&opt.active, "active", true, "Enable or disable the pool")
-	flags.Var(&opt.labels, "label", "Set metadata for a pool")
+	flags.Var(&opt.labels, "label", "Set key:value metadata on the pool")
 
 	return cmd
 }

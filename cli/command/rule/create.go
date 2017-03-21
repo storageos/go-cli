@@ -41,10 +41,6 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 				}
 				opt.name = args[0]
 			}
-			if opt.name == "" {
-				fmt.Fprint(storageosCli.Err(), "No rule name specified, set as first arg or with --name\n")
-				return cli.StatusError{StatusCode: 1}
-			}
 			return runCreate(storageosCli, opt)
 		},
 	}
@@ -57,7 +53,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.VarP(&opt.selectors, "selector", "s", "Selectors; trigger rule on these labels")
 	flags.IntVarP(&opt.weight, "weight", "w", 5, "Rule weight determines processing order (0-10)")
 	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Volume namespace")
-	flags.BoolVar(&opt.active, "active", true, "Enable or disable the pool")
+	flags.BoolVar(&opt.active, "active", true, "Enable or disable the rule")
 
 	flags.Var(&opt.labels, "label", "Labels to apply to new volumes")
 

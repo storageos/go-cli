@@ -52,7 +52,7 @@ func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.IntVarP(&opt.size, flagSize, "s", 5, "Volume size in GB")
 	flags.Var(&opt.labels, flagLabelAdd, "Add or update a volume label (key=value)")
 	labelKeys := opts.NewListOpts(nil)
-	flags.Var(&labelKeys, flagLabelRemove, "Remove a node label if exists")
+	flags.Var(&labelKeys, flagLabelRemove, "Remove a volume label if exists")
 	return cmd
 }
 
