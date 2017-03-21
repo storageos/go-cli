@@ -45,7 +45,7 @@ func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVarP(&opt.description, flagDescription, "d", "", `Namespace description`)
 	flags.Var(&opt.labels, flagLabelAdd, "Add or update a namespace label (key=value)")
 	labelKeys := opts.NewListOpts(nil)
-	flags.Var(&labelKeys, flagLabelRemove, "Remove a node label if exists")
+	flags.Var(&labelKeys, flagLabelRemove, "Remove a namespace label if exists")
 	return cmd
 }
 

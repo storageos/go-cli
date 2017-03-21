@@ -30,7 +30,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "create [OPTIONS] [RULE NAME]",
+		Use:   "create [OPTIONS] [RULE]",
 		Short: "Create a rule",
 		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {

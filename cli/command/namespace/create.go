@@ -35,6 +35,10 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 				}
 				opt.name = args[0]
 			}
+			if opt.name == "" {
+				fmt.Fprint(storageosCli.Err(), "No rule name specified, set as first arg or with --name\n")
+				return cli.StatusError{StatusCode: 1}
+			}
 			return runCreate(storageosCli, opt)
 		},
 	}
@@ -43,7 +47,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.Lookup("name").Hidden = true
 	flags.StringVar(&opt.displayName, "display-name", "", "Display name of the namespace")
 	flags.StringVarP(&opt.description, "description", "d", "", "Namespace description")
-	flags.Var(&opt.labels, "label", "Set metadata for a namespace")
+	flags.Var(&opt.labels, "label", "Add labels for the namespace")
 
 	return cmd
 }
