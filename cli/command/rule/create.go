@@ -3,12 +3,12 @@ package rule
 import (
 	"fmt"
 
+	"context"
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/opts"
-	"context"
 )
 
 type createOptions struct {
@@ -30,9 +30,11 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "create [OPTIONS] [RULE]",
-		Short: "Create a rule",
-		Args:  cli.RequiresMaxArgs(1),
+		Use: "create [OPTIONS] [RULE]",
+		Short: `Creates a rule. To create a rule that configures 2 replicas for volumes with the label env=prod, run:
+storageos rule create --namespace default --selector env=prod --operator == --action add --label storageos.feature.replicas=2 replicator
+		`,
+		Args: cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 1 {
 				if opt.name != "" {
