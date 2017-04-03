@@ -28,7 +28,7 @@ func newStorageOSCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:              "storageos [OPTIONS] COMMAND [ARG...]",
 		Short:            "Converged storage for containers",
-		Long:             ,
+		Long:             legalDisclaimer + betaWarning,
 		SilenceUsage:     true,
 		SilenceErrors:    true,
 		TraverseChildren: true,
