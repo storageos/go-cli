@@ -13,7 +13,6 @@ import (
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
-	"github.com/storageos/go-cli/cli/opts"
 	"github.com/storageos/go-cli/pkg/jsonlog"
 	"github.com/storageos/go-cli/pkg/templates"
 )
@@ -21,13 +20,12 @@ import (
 type eventsOptions struct {
 	since  string
 	until  string
-	filter opts.FilterOpt
 	format string
 }
 
 // NewEventsCommand creates a new cobra.Command for `docker events`
 func NewEventsCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	opt := eventsOptions{filter: opts.NewFilterOpt()}
+	opt := eventsOptions{}
 
 	cmd := &cobra.Command{
 		Use:   "events [OPTIONS]",
@@ -41,7 +39,6 @@ func NewEventsCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags := cmd.Flags()
 	flags.StringVar(&opt.since, "since", "", "Show all events created since timestamp")
 	flags.StringVar(&opt.until, "until", "", "Stream events until this timestamp")
-	flags.VarP(&opt.filter, "filter", "f", "Filter output based on conditions provided")
 	flags.StringVar(&opt.format, "format", "", "Format the output using the given Go template")
 
 	return cmd
