@@ -8,7 +8,6 @@ import (
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
-	"github.com/storageos/go-cli/cli/opts"
 )
 
 type byNamespaceName []*types.Namespace
@@ -20,13 +19,13 @@ func (r byNamespaceName) Less(i, j int) bool {
 }
 
 type listOptions struct {
-	quiet  bool
-	format string
-	filter opts.FilterOpt
+	quiet    bool
+	format   string
+	selector string
 }
 
 func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	opt := listOptions{filter: opts.NewFilterOpt()}
+	opt := listOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "ls [OPTIONS]",
@@ -41,7 +40,7 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display namespace names")
 	flags.StringVar(&opt.format, "format", "", "Pretty-print namespaces using a Go template")
-	flags.VarP(&opt.filter, "filter", "f", "Provide filter values (e.g. 'dangling=true')")
+	flags.StringVarP(&opt.selector, "selector", "s", "", "Provide selector (e.g. to list all namespaces with label app=cassandra ' --selector=app=cassandra')")
 
 	return cmd
 }
@@ -50,7 +49,7 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 	client := storageosCli.Client()
 
 	params := types.ListOptions{
-	// LabelSelector: opt.filter.Value(),
+		LabelSelector: opt.selector,
 	}
 
 	// namespaces, err := client.NamespaceList(context.Background(), opt.filter.Value())
