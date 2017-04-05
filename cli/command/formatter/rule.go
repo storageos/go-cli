@@ -65,20 +65,7 @@ func (c *ruleContext) Name() string {
 
 func (c *ruleContext) Selector() string {
 	c.AddHeader(ruleSelectorHeader)
-	if c.v.Selectors == nil {
-		return ""
-	}
-
-	var joinSelectors []string
-	for k, v := range c.v.Selectors {
-		joinSelectors = append(joinSelectors, fmt.Sprintf("%s=%s", k, v))
-	}
-	return strings.Join(joinSelectors, ",")
-}
-
-func (c *ruleContext) Operator() string {
-	c.AddHeader(ruleOperatorHeader)
-	return fmt.Sprintf("%s", c.v.Operator)
+	return c.v.Selector
 }
 
 func (c *ruleContext) RuleAction() string {

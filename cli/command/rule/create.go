@@ -19,20 +19,19 @@ type createOptions struct {
 	weight      int
 	operator    string
 	ruleAction  string
-	selectors   opts.ListOpts
+	selector    string
 	labels      opts.ListOpts
 }
 
 func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := createOptions{
-		selectors: opts.NewListOpts(opts.ValidateEnv),
-		labels:    opts.NewListOpts(opts.ValidateEnv),
+		labels: opts.NewListOpts(opts.ValidateEnv),
 	}
 
 	cmd := &cobra.Command{
 		Use: "create [OPTIONS] [RULE]",
 		Short: `Creates a rule. To create a rule that configures 2 replicas for volumes with the label env=prod, run:
-storageos rule create --namespace default --selector env=prod --operator == --action add --label storageos.feature.replicas=2 replicator
+storageos rule create --namespace default --selector env==prod --action add --label storageos.feature.replicas=2 replicator
 		`,
 		Args: cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -51,8 +50,8 @@ storageos rule create --namespace default --selector env=prod --operator == --ac
 	flags.Lookup("name").Hidden = true
 	flags.StringVarP(&opt.description, "description", "d", "", "Rule description")
 	flags.StringVarP(&opt.ruleAction, "action", "a", "add", "Rule action (add|remove)")
-	flags.StringVarP(&opt.operator, "operator", "o", "==", "Comparison operator (!|=|==|in|!=|notin|exists|gt|lt)")
-	flags.VarP(&opt.selectors, "selector", "s", "key=value selectors to trigger rule")
+	flags.StringVarP(&opt.operator, "operator", "o", "==", "Comparison operator (!|=|==|in|!=|notin|exists|<|>)")
+	flags.StringVarP(&opt.selector, "selector", "s", "", "selectors to trigger rule, i.e. 'environment = production' (operators !|=|==|in|!=|notin|exists|<|>")
 	flags.IntVarP(&opt.weight, "weight", "w", 5, "Rule weight determines processing order (0-10)")
 	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Volume namespace")
 	flags.BoolVar(&opt.active, "active", true, "Enable or disable the rule")
@@ -78,7 +77,7 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 		Description: opt.description,
 		RuleAction:  opt.ruleAction,
 		Operator:    opt.operator,
-		Selectors:   opts.ConvertKVStringsToMap(opt.selectors.GetAll()),
+		Selector:    opt.selector,
 		Active:      opt.active,
 		Weight:      opt.weight,
 		Labels:      opts.ConvertKVStringsToMap(opt.labels.GetAll()),

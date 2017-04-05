@@ -3,6 +3,7 @@ package rule
 import (
 	"fmt"
 
+	"context"
 	"github.com/dnephin/cobra"
 	"github.com/spf13/pflag"
 	storageos "github.com/storageos/go-api"
@@ -10,19 +11,19 @@ import (
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/opts"
-	"context"
 )
 
 const (
-	flagDescription    = "description"
-	flagActive         = "active"
-	flagWeight         = "weight"
-	flagOperator       = "operator"
-	flagRuleAction     = "action"
-	flagSelectorAdd    = "selector-add"
-	flagSelectorRemove = "selector-rm"
-	flagLabelAdd       = "label-add"
-	flagLabelRemove    = "label-rm"
+	flagDescription = "description"
+	flagActive      = "active"
+	flagWeight      = "weight"
+	flagOperator    = "operator"
+	flagRuleAction  = "action"
+	flagSelector    = "selector"
+	// flagSelectorAdd    = "selector-add"
+	// flagSelectorRemove = "selector-rm"
+	flagLabelAdd    = "label-add"
+	flagLabelRemove = "label-rm"
 )
 
 type updateOptions struct {
@@ -55,9 +56,7 @@ func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVarP(&opt.description, flagDescription, "d", "", `Rule description`)
 	flags.StringVarP(&opt.ruleAction, flagRuleAction, "a", "add", "Rule action (add|remove)")
 	flags.StringVarP(&opt.operator, flagOperator, "o", "==", "Comparison operator (!|=|==|in|!=|notin|exists|gt|lt)")
-	flags.Var(&opt.selectors, flagSelectorAdd, "Add or update a rule selector (key=value)")
-	selectorKeys := opts.NewListOpts(nil)
-	flags.Var(&selectorKeys, flagSelectorRemove, "Remove a rule selector if exists")
+	flags.Var(&opt.selectors, flagSelector, "Rule selector (key==value)")
 	flags.IntVarP(&opt.weight, flagWeight, "w", 5, "Rule weight determines processing order (0-10)")
 	flags.BoolVar(&opt.active, flagActive, true, "Enable or disable the pool")
 	flags.Var(&opt.labels, flagLabelAdd, "Add or update a label (key=value)")
@@ -98,8 +97,7 @@ func updateRules(storageosCli *command.StorageOSCli, refs []string, mergeRule fu
 			Namespace:   rule.Namespace,
 			Description: rule.Description,
 			RuleAction:  rule.RuleAction,
-			Operator:    rule.Operator,
-			Selectors:   rule.Selectors,
+			Selector:    rule.Selector,
 			Active:      rule.Active,
 			Weight:      rule.Weight,
 			Labels:      rule.Labels,
@@ -130,32 +128,15 @@ func mergeRuleUpdate(flags *pflag.FlagSet) func(*types.Rule) error {
 			}
 			rule.RuleAction = str
 		}
-		if flags.Changed(flagOperator) {
-			str, err := flags.GetString(flagOperator)
+
+		if flags.Changed(flagSelector) {
+			str, err := flags.GetString(flagSelector)
 			if err != nil {
 				return err
 			}
-			rule.Operator = str
+			rule.Selector = str
 		}
-		if rule.Selectors == nil {
-			rule.Selectors = make(map[string]string)
-		}
-		if flags.Changed(flagSelectorAdd) {
-			selectors := flags.Lookup(flagSelectorAdd).Value.(*opts.ListOpts).GetAll()
-			for k, v := range opts.ConvertKVStringsToMap(selectors) {
-				rule.Selectors[k] = v
-			}
-		}
-		if flags.Changed(flagSelectorRemove) {
-			keys := flags.Lookup(flagSelectorRemove).Value.(*opts.ListOpts).GetAll()
-			for _, k := range keys {
-				// if a key doesn't exist, fail the command explicitly
-				if _, exists := rule.Selectors[k]; !exists {
-					return fmt.Errorf("key %s doesn't exist in rule's selectors", k)
-				}
-				delete(rule.Selectors, k)
-			}
-		}
+
 		if flags.Changed(flagActive) {
 			active, err := flags.GetBool(flagActive)
 			if err != nil {
