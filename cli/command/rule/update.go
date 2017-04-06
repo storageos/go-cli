@@ -20,8 +20,6 @@ const (
 	flagOperator    = "operator"
 	flagRuleAction  = "action"
 	flagSelector    = "selector"
-	// flagSelectorAdd    = "selector-add"
-	// flagSelectorRemove = "selector-rm"
 	flagLabelAdd    = "label-add"
 	flagLabelRemove = "label-rm"
 )
@@ -33,14 +31,13 @@ type updateOptions struct {
 	weight      int
 	operator    string
 	ruleAction  string
-	selectors   opts.ListOpts
+	selector    string
 	labels      opts.ListOpts
 }
 
 func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := updateOptions{
-		selectors: opts.NewListOpts(opts.ValidateEnv),
-		labels:    opts.NewListOpts(opts.ValidateEnv),
+		labels: opts.NewListOpts(opts.ValidateEnv),
 	}
 
 	cmd := &cobra.Command{
@@ -56,7 +53,7 @@ func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVarP(&opt.description, flagDescription, "d", "", `Rule description`)
 	flags.StringVarP(&opt.ruleAction, flagRuleAction, "a", "add", "Rule action (add|remove)")
 	flags.StringVarP(&opt.operator, flagOperator, "o", "==", "Comparison operator (!|=|==|in|!=|notin|exists|gt|lt)")
-	flags.Var(&opt.selectors, flagSelector, "Rule selector (key==value)")
+	flags.StringVarP(&opt.selector, flagSelector, "s", "", "Rule selector (key==value)")
 	flags.IntVarP(&opt.weight, flagWeight, "w", 5, "Rule weight determines processing order (0-10)")
 	flags.BoolVar(&opt.active, flagActive, true, "Enable or disable the pool")
 	flags.Var(&opt.labels, flagLabelAdd, "Add or update a label (key=value)")
