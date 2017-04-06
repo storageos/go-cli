@@ -9,7 +9,7 @@ import (
 
 const (
 	defaultRuleQuietFormat = "{{.Name}}"
-	defaultRuleTableFormat = "table {{.Name}}\t{{.Operator}}\t{{.Selector}}\t{{.RuleAction}}\t{{.Labels}}"
+	defaultRuleTableFormat = "table {{.Name}}\t{{.Selector}}\t{{.RuleAction}}\t{{.Labels}}"
 
 	ruleNameHeader     = "NAMESPACE/NAME"
 	ruleSelectorHeader = "SELECTOR"
@@ -31,7 +31,7 @@ func NewRuleFormat(source string, quiet bool) Format {
 		if quiet {
 			return `name: {{.Name}}`
 		}
-		return `name: {{.Name}}\nselectors: {{.Selector}}\noperator: {{.Operator}}\naction: {{.RuleAction}}\nlabels: {{.Labels}}\n`
+		return `name: {{.Name}}\nselector: {{.Selector}}\noperator: {{.Operator}}\naction: {{.RuleAction}}\nlabels: {{.Labels}}\n`
 	}
 	return Format(source)
 }

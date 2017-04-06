@@ -17,7 +17,6 @@ type createOptions struct {
 	description string
 	active      bool
 	weight      int
-	operator    string
 	ruleAction  string
 	selector    string
 	labels      opts.ListOpts
@@ -50,7 +49,6 @@ storageos rule create --namespace default --selector env==prod --action add --la
 	flags.Lookup("name").Hidden = true
 	flags.StringVarP(&opt.description, "description", "d", "", "Rule description")
 	flags.StringVarP(&opt.ruleAction, "action", "a", "add", "Rule action (add|remove)")
-	flags.StringVarP(&opt.operator, "operator", "o", "==", "Comparison operator (!|=|==|in|!=|notin|exists|<|>)")
 	flags.StringVarP(&opt.selector, "selector", "s", "", "selectors to trigger rule, i.e. 'environment = production' (operators !|=|==|in|!=|notin|exists|<|>")
 	flags.IntVarP(&opt.weight, "weight", "w", 5, "Rule weight determines processing order (0-10)")
 	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Volume namespace")
@@ -62,9 +60,6 @@ storageos rule create --namespace default --selector env==prod --action add --la
 }
 
 func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
-	if _, err := opts.ValidateOperator(opt.operator); err != nil {
-		return err
-	}
 	if _, err := opts.ValidateRuleAction(opt.ruleAction); err != nil {
 		return err
 	}
@@ -76,7 +71,6 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 		Namespace:   opt.namespace,
 		Description: opt.description,
 		RuleAction:  opt.ruleAction,
-		Operator:    opt.operator,
 		Selector:    opt.selector,
 		Active:      opt.active,
 		Weight:      opt.weight,
