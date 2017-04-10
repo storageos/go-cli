@@ -72,7 +72,7 @@ func (commonOpts *CommonOptions) InstallFlags(flags *pflag.FlagSet) {
 	flags.Var(opts.NewQuotedString(&tlsOptions.KeyFile), "tlskey", "Path to TLS key file")
 
 	hostOpt := opts.NewNamedListOptsRef("hosts", &commonOpts.Hosts, opts.ValidateHost)
-	flags.VarP(hostOpt, "host", "H", "Node endpoint(s) to connect to")
+	flags.VarP(hostOpt, "host", "H", fmt.Sprintf("Node endpoint(s) to connect to (will override %s env variable value)", cliconfig.EnvStorageOSHost))
 
 	flags.StringVarP(&commonOpts.Username, "username", "u", "", `API username`)
 	flags.StringVarP(&commonOpts.Password, "password", "p", "", `API password`)

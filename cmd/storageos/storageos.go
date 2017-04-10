@@ -21,11 +21,11 @@ import (
 	"github.com/storageos/go-cli/version"
 )
 
-var shortDesc = `Converged storage for containers. 
+var shortDesc = fmt.Sprintf(`Converged storage for containers. 
 To start using CLI - set required environment variables:
-STORAGEOS_HOST=<node ip>
-STORAGEOS_USERNAME=<storageos username>
-STORAGEOS_PASSWORD=<storageos password>`
+%s=<node ip>
+%s=<storageos username>
+%s=<storageos password>`, cliconfig.EnvStorageOSHost, cliconfig.EnvStorageosUsername, cliconfig.EnvStorageosPassword)
 
 func newStorageOSCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opts := cliflags.NewClientOptions()
