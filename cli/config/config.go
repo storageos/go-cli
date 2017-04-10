@@ -29,6 +29,10 @@ var (
 	configDir = os.Getenv("STORAGEOS_CONFIG")
 )
 
+// DeviceRootPath defines the directory in which the raw StorageOS volumes are
+// created.
+const DeviceRootPath = "/var/lib/storageos/volumes"
+
 func init() {
 	if configDir == "" {
 		configDir = filepath.Join(homedir.Get(), configFileDir)
