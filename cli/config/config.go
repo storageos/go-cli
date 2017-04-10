@@ -17,6 +17,14 @@ const (
 	configFileDir  = ".storageos"
 )
 
+// env vars
+const (
+	EnvStorageOSHost       = "STORAGEOS_HOST"
+	EnvStorageosUsername   = "STORAGEOS_USERNAME"
+	EnvStorageosPassword   = "STORAGEOS_PASSWORD"
+	EnvStorageosAPIVersion = "STORAGEOS_API_VERSION"
+)
+
 var (
 	configDir = os.Getenv("STORAGEOS_CONFIG")
 )
