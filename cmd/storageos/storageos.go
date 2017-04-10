@@ -21,14 +21,21 @@ import (
 	"github.com/storageos/go-cli/version"
 )
 
+var shortDesc = `Converged storage for containers. 
+
+By using this product, you are agreeing to the terms of the the StorageOS Ltd. End User Subscription Agreement (EUSA) found at: http://storageos.com/legal/#eusa
+
+WARNING: This is the beta version of StorageOS and should not be used in production.
+To be notified about stable releases and latest features, sign up at my.storageos.com.
+`
+
 func newStorageOSCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opts := cliflags.NewClientOptions()
 	var flags *pflag.FlagSet
 
 	cmd := &cobra.Command{
 		Use:              "storageos [OPTIONS] COMMAND [ARG...]",
-		Short:            "Converged storage for containers",
-		Long:             legalDisclaimer + betaWarning,
+		Short:            shortDesc,
 		SilenceUsage:     true,
 		SilenceErrors:    true,
 		TraverseChildren: true,
@@ -295,12 +302,3 @@ func hasTags(cmd *cobra.Command) bool {
 
 	return false
 }
-
-var legalDisclaimer = `
-By using this product, you are agreeing to the terms of the the StorageOS Ltd. End User Subscription Agreement (EUSA) found at: http://storageos.com/legal/#eusa
-`
-
-var betaWarning = `
-WARNING: This is the beta version of StorageOS and may stop functioning with no notice.
-To be notified about stable releases and latest features, sign up at my.storageos.com.
-`

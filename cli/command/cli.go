@@ -151,7 +151,7 @@ func NewAPIClientFromFlags(opt *cliflags.CommonOptions) (*api.Client, error) {
 	}
 
 	verStr := api.DefaultVersionStr
-	if tmpStr := os.Getenv("STORAGEOS_API_VERSION"); tmpStr != "" {
+	if tmpStr := os.Getenv(cliconfig.EnvStorageosAPIVersion); tmpStr != "" {
 		verStr = tmpStr
 	}
 
@@ -172,7 +172,7 @@ func NewAPIClientFromFlags(opt *cliflags.CommonOptions) (*api.Client, error) {
 func getServerHost(hosts []string, tlsOptions *tlsconfig.Options) (host string, err error) {
 	switch len(hosts) {
 	case 0:
-		host = os.Getenv("STORAGEOS_HOST")
+		host = os.Getenv(cliconfig.EnvStorageOSHost)
 	case 1:
 		host = hosts[0]
 	default:
@@ -185,14 +185,14 @@ func getServerHost(hosts []string, tlsOptions *tlsconfig.Options) (host string, 
 
 func getUsername(username string) string {
 	if len(username) == 0 {
-		return os.Getenv("STORAGEOS_USERNAME")
+		return os.Getenv(cliconfig.EnvStorageosUsername)
 	}
 	return username
 }
 
 func getPassword(password string) string {
 	if len(password) == 0 {
-		return os.Getenv("STORAGEOS_PASSWORD")
+		return os.Getenv(cliconfig.EnvStorageosPassword)
 	}
 	return password
 }

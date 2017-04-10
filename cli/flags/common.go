@@ -3,7 +3,7 @@ package flags
 import (
 	"fmt"
 	"os"
-	"path/filepath"
+	// "path/filepath"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/go-connections/tlsconfig"
@@ -56,26 +56,26 @@ func (commonOpts *CommonOptions) InstallFlags(flags *pflag.FlagSet) {
 
 	flags.BoolVarP(&commonOpts.Debug, "debug", "D", false, "Enable debug mode")
 	flags.StringVarP(&commonOpts.LogLevel, "log-level", "l", "info", `Set the logging level ("debug"|"info"|"warn"|"error"|"fatal")`)
-	flags.BoolVar(&commonOpts.TLS, "tls", false, "Use TLS; implied by --tlsverify")
-	flags.BoolVar(&commonOpts.TLSVerify, FlagTLSVerify, storageosTLSVerify, "Use TLS and verify the remote")
+	// flags.BoolVar(&commonOpts.TLS, "tls", false, "Use TLS; implied by --tlsverify")
+	// flags.BoolVar(&commonOpts.TLSVerify, FlagTLSVerify, storageosTLSVerify, "Use TLS and verify the remote")
 
-	// TODO use flag flags.String("identity"}, "i", "", "Path to libtrust key file")
+	// // TODO use flag flags.String("identity"}, "i"	, "", "Path to libtrust key file")
 
-	commonOpts.TLSOptions = &tlsconfig.Options{
-		CAFile:   filepath.Join(storageosCertPath, DefaultCaFile),
-		CertFile: filepath.Join(storageosCertPath, DefaultCertFile),
-		KeyFile:  filepath.Join(storageosCertPath, DefaultKeyFile),
-	}
-	tlsOptions := commonOpts.TLSOptions
-	flags.Var(opts.NewQuotedString(&tlsOptions.CAFile), "tlscacert", "Trust certs signed only by this CA")
-	flags.Var(opts.NewQuotedString(&tlsOptions.CertFile), "tlscert", "Path to TLS certificate file")
-	flags.Var(opts.NewQuotedString(&tlsOptions.KeyFile), "tlskey", "Path to TLS key file")
+	// commonOpts.TLSOptions = &tlsconfig.Options{
+	// 	CAFile:   filepath.Join(storageosCertPath, DefaultCaFile),
+	// 	CertFile: filepath.Join(storageosCertPath, DefaultCertFile),
+	// 	KeyFile:  filepath.Join(storageosCertPath, DefaultKeyFile),
+	// }
+	// tlsOptions := commonOpts.TLSOptions
+	// flags.Var(opts.NewQuotedString(&tlsOptions.CAFile), "tlscacert", "Trust certs signed only by this CA")
+	// flags.Var(opts.NewQuotedString(&tlsOptions.CertFile), "tlscert", "Path to TLS certificate file")
+	// flags.Var(opts.NewQuotedString(&tlsOptions.KeyFile), "tlskey", "Path to TLS key file")
 
 	hostOpt := opts.NewNamedListOptsRef("hosts", &commonOpts.Hosts, opts.ValidateHost)
-	flags.VarP(hostOpt, "host", "H", "Daemon socket(s) to connect to")
+	flags.VarP(hostOpt, "host", "H", fmt.Sprintf("Node endpoint(s) to connect to (will override %s env variable value)", cliconfig.EnvStorageOSHost))
 
-	flags.StringVarP(&commonOpts.Username, "username", "u", "", `API username`)
-	flags.StringVarP(&commonOpts.Password, "password", "p", "", `API password`)
+	flags.StringVarP(&commonOpts.Username, "username", "u", "", fmt.Sprintf(`API username (will override %s env variable value)`, cliconfig.EnvStorageosUsername))
+	flags.StringVarP(&commonOpts.Password, "password", "p", "", fmt.Sprintf(`API password (will override %s env variable value)`, cliconfig.EnvStorageosPassword))
 }
 
 // SetDefaultOptions sets default values for options after flag parsing is
