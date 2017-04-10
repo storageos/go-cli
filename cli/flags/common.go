@@ -59,7 +59,7 @@ func (commonOpts *CommonOptions) InstallFlags(flags *pflag.FlagSet) {
 	// flags.BoolVar(&commonOpts.TLS, "tls", false, "Use TLS; implied by --tlsverify")
 	// flags.BoolVar(&commonOpts.TLSVerify, FlagTLSVerify, storageosTLSVerify, "Use TLS and verify the remote")
 
-	// // TODO use flag flags.String("identity"}, "i", "", "Path to libtrust key file")
+	// // TODO use flag flags.String("identity"}, "i"	, "", "Path to libtrust key file")
 
 	// commonOpts.TLSOptions = &tlsconfig.Options{
 	// 	CAFile:   filepath.Join(storageosCertPath, DefaultCaFile),
@@ -74,8 +74,8 @@ func (commonOpts *CommonOptions) InstallFlags(flags *pflag.FlagSet) {
 	hostOpt := opts.NewNamedListOptsRef("hosts", &commonOpts.Hosts, opts.ValidateHost)
 	flags.VarP(hostOpt, "host", "H", fmt.Sprintf("Node endpoint(s) to connect to (will override %s env variable value)", cliconfig.EnvStorageOSHost))
 
-	flags.StringVarP(&commonOpts.Username, "username", "u", "", `API username`)
-	flags.StringVarP(&commonOpts.Password, "password", "p", "", `API password`)
+	flags.StringVarP(&commonOpts.Username, "username", "u", "", fmt.Sprintf(`API username (will override %s env variable value)`, cliconfig.EnvStorageosUsername))
+	flags.StringVarP(&commonOpts.Password, "password", "p", "", fmt.Sprintf(`API password (will override %s env variable value)`, cliconfig.EnvStorageosPassword))
 }
 
 // SetDefaultOptions sets default values for options after flag parsing is
