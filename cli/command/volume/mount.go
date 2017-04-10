@@ -2,6 +2,7 @@ package volume
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/dnephin/cobra"
 	storageos "github.com/storageos/go-api"
@@ -43,18 +44,38 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 		return fmt.Errorf("device root path '%s' not found, check whether StorageOS is running", cliconfig.DeviceRootPath)
 	}
 
-	fmt.Println("mounting volume ", opt.ref, opt.mountpoint)
+	fmt.Println("checking volume ", opt.ref, opt.mountpoint)
 
-	client := storageosCli.Client()
-
-	_ = func(ref string) (interface{}, []byte, error) {
-		namespace, name, err := storageos.ParseRef(ref)
-		if err != nil {
-			return nil, nil, err
-		}
-		i, err := client.Volume(namespace, name)
-		return i, nil, err
+	errs := isVolumeReady(storageosCli, opt.ref)
+	if len(errs) > 0 {
+		return fmt.Errorf("cannot mount volume: %s", strings.Join(errs, ", "))
 	}
 
+	fmt.Println("volume is ready for mount, mounting..")
+
 	return nil
+}
+
+// isVolumeReady - mount only unmounted and active volume
+func isVolumeReady(storageosCli *command.StorageOSCli, ref string) (errs []string) {
+	client := storageosCli.Client()
+
+	namespace, name, err := storageos.ParseRef(ref)
+	if err != nil {
+		return []string{err.Error()}
+	}
+	vol, err := client.Volume(namespace, name)
+	if err != nil {
+		return []string{err.Error()}
+	}
+
+	if vol.Status != "active" {
+		errs = append(errs, fmt.Sprintf("can only mount active volumes, current status: '%s'", vol.Status))
+	}
+
+	if vol.Mounted {
+		errs = append(errs, "volume is mounted, unmount it before mounting it again")
+	}
+
+	return errs
 }
