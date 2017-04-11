@@ -22,6 +22,7 @@ func NewVolumeCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		newUpdateCommand(storageosCli),
 		newRemoveCommand(storageosCli),
 		newMountCommand(storageosCli),
+		newUnmountCommand(storageosCli),
 	)
 	return cmd
 }
