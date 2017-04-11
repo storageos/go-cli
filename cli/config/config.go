@@ -33,6 +33,9 @@ var (
 // created.
 const DeviceRootPath = "/var/lib/storageos/volumes"
 
+// DefaultFSType is the default filesystem we'll use if creating filesystems.
+const DefaultFSType = "ext4"
+
 func init() {
 	if configDir == "" {
 		configDir = filepath.Join(homedir.Get(), configFileDir)
