@@ -42,7 +42,7 @@ func newMountCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVarP(&opt.fsType, "fsType", "m", cliconfig.DefaultFSType, `Volume mountpoint`)
+	flags.StringVarP(&opt.fsType, "fsType", "m", cliconfig.DefaultFSType, `Volume fs type`)
 
 	return cmd
 }
@@ -69,11 +69,6 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 		return err
 	}
 
-	log.WithFields(log.Fields{
-		"namespace":  namespace,
-		"volumeName": name,
-	}).Info("parsed volume ref")
-
 	vol, err := client.Volume(namespace, name)
 	if err != nil {
 		return err
@@ -93,8 +88,13 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 		hostname = "unknown"
 	}
 
-	fmt.Println("volume is ready for mount, mounting..")
-	err = client.VolumeMount(types.VolumeMountOptions{ID: vol.ID, Namespace: namespace, Client: hostname})
+	log.WithFields(log.Fields{
+		"namespace":  namespace,
+		"volumeName": name,
+		"hostname":   hostname,
+	}).Info("parsed volume ref")
+
+	err = client.VolumeMount(types.VolumeMountOptions{ID: vol.ID, Namespace: namespace, Client: hostname, Mountpoint: opt.mountpoint})
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 		return err
 	}
 
-	fmt.Println("volume mounted")
+	fmt.Printf("volume %s mounted\n", vol.Name)
 
 	return nil
 }
