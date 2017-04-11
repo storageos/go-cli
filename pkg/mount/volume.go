@@ -14,31 +14,28 @@ import (
 // defaultTimeOut is the maximum time to wait for async volume operations.
 const defaultTimeOut = 45
 
-// defaultFSType is the default filesystem we'll use for Docker volumes.
-const defaultFSType = "ext4"
-
 // initRawVolume makes sure there is a raw volume at the path provided, and that
 // it's ready for use by Docker.  This includes creating a filesystem if there's
 // not one already present.
-func initRawVolume(ctx context.Context, path string) error {
+func initRawVolume(ctx context.Context, path string, fsType string) error {
 
 	if err := waitForVolume(path); err != nil {
 		return err
 	}
 	log.Debugf("volume found: %s", path)
 
-	fstype, err := getVolumeFSType(ctx, path)
-	log.Infof("volume %s has fs type: %s", path, fstype)
+	ft, err := getVolumeFSType(ctx, path)
+	log.Infof("volume %s has fs type: %s", path, ft)
 	if err != nil {
 		return err
 	}
 
-	if fstype == "raw" {
-		_, err := createFilesystem(ctx, defaultFSType, path, "")
+	if ft == "raw" {
+		_, err := createFilesystem(ctx, fsType, path, "")
 		if err != nil {
 			return err
 		}
-		log.Infof("%s filesystem created on volume %s", defaultFSType, path)
+		log.Infof("%s filesystem created on volume %s", fsType, path)
 	}
 
 	return nil
@@ -125,19 +122,37 @@ func createFilesystem(ctx context.Context, fstype string, path string, options s
 	var out string
 	var err error
 
+	// Run mkfs
 	switch fstype {
+	case "ext2":
+		out, err = runCmd(ctx, mkfsExt2, path)
+		if err != nil {
+			log.Warnf("mkfs output: %s", err.Error())
+		}
+	case "ext3":
+		out, err = runCmd(ctx, mkfsExt3, path)
+		if err != nil {
+			log.Warnf("mkfs output: %s", err.Error())
+		}
 	case "ext4":
 		// Get the volume id from the path
 		id := getVolumeIDFromPath(path)
-
-		// Run mkfs.  Use the volume id as the filesystem UUID, because we can.
-		// We need to force as mkfs will complain about "... is not a block
-		// special device." and ask for confirmation.
-		out, err = runMkfsExt4(ctx, "-t", "ext4", "-F", "-U", id, "-b", "4096", "-E", "lazy_itable_init=1,lazy_journal_init=1", path)
+		out, err = runCmd(ctx, mkfsExt4, "-F", "-U", id, "-b", "4096", "-E", "lazy_itable_init=1,lazy_journal_init=1", path)
 		if err != nil {
-			log.Debugf("ignoring error from mkfs: %s", err.Error())
-			// return out, err
+			log.Warnf("mkfs output: %s", err.Error())
 		}
+	case "xfs":
+		out, err = runCmd(ctx, mkfsXfs, path)
+		if err != nil {
+			log.Warnf("mkfs output: %s", err.Error())
+		}
+	case "btrfs":
+		out, err = runCmd(ctx, mkfsBtrfs, path)
+		if err != nil {
+			log.Warnf("mkfs output: %s", err.Error())
+		}
+	case "":
+		return "", fmt.Errorf("filesystem not specified")
 	default:
 		return "", fmt.Errorf("unsupported filesystem: %s", fstype)
 	}

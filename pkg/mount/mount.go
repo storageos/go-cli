@@ -9,7 +9,7 @@ import (
 
 // Driver - generic mount driver interface
 type Driver interface {
-	MountVolume(ctx context.Context, id, mountpoint string) error
+	MountVolume(ctx context.Context, id, mountpoint, fsType string) error
 	UnmountVolume(ctx context.Context, mountpoint string) error
 }
 
@@ -26,8 +26,8 @@ func New(deviceRootPath string) *DefaultDriver {
 }
 
 // MountVolume - mounts specified volume
-func (d *DefaultDriver) MountVolume(ctx context.Context, id, mountpoint string) error {
-	return mountVolume(ctx, d.deviceRootPath, id, mountpoint)
+func (d *DefaultDriver) MountVolume(ctx context.Context, id, mountpoint, fsType string) error {
+	return mountVolume(ctx, d.deviceRootPath, id, mountpoint, fsType)
 }
 
 // UnmountVolume - unmounts specified mountpoint
@@ -47,12 +47,12 @@ const mountpointPerms os.FileMode = 0700
 // It checks the volume first, waiting 30 seconds for it to be created, and
 // creates an ext4 filesystem on it if there isn't already a filesystem.  The
 // mount will fail if the mount command can't determine the fstype.
-func mountVolume(ctx context.Context, deviceRootPath string, id string, mp string) error {
-
-	if err := initRawVolume(ctx, deviceRootPath+"/"+id); err != nil {
+func mountVolume(ctx context.Context, deviceRootPath string, id string, mp string, fsType string) error {
+	if err := initRawVolume(ctx, deviceRootPath+"/"+id, fsType); err != nil {
 		log.WithFields(log.Fields{
-			"id":  id,
-			"err": err.Error(),
+			"id":      id,
+			"fs_type": fsType,
+			"err":     err.Error(),
 		}).Error("volume init error")
 		return err
 	}
@@ -68,9 +68,9 @@ func mountVolume(ctx context.Context, deviceRootPath string, id string, mp strin
 		log.WithFields(log.Fields{
 			"path":        deviceRootPath + "/" + id,
 			"mount_point": mp,
+			"fs_type":     fsType,
 			"error":       err,
 		}).Error("Mount failed")
-		// log.Errorf("Mount failed: %s %s (%s)", deviceRootPath+"/"+id, mp, err)
 		return err
 	}
 	log.Infof("Mounted volume: %s %s", deviceRootPath+"/"+id, mp)
