@@ -88,13 +88,12 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 		hostname = "unknown"
 	}
 
-	log.WithFields(log.Fields{
-		"namespace":  namespace,
-		"volumeName": name,
-		"hostname":   hostname,
-	}).Info("parsed volume ref")
-
-	err = client.VolumeMount(types.VolumeMountOptions{ID: vol.ID, Namespace: namespace, Client: hostname, Mountpoint: opt.mountpoint})
+	err = client.VolumeMount(types.VolumeMountOptions{
+		ID: vol.ID, Namespace: namespace,
+		Client:     hostname,
+		Mountpoint: opt.mountpoint,
+		FsType:     opt.fsType,
+	})
 	if err != nil {
 		return err
 	}
@@ -118,7 +117,7 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 		return err
 	}
 
-	fmt.Printf("volume %s mounted\n", vol.Name)
+	fmt.Printf("volume %s mounted: %s\n", vol.Name, opt.mountpoint)
 
 	return nil
 }
