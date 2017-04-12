@@ -60,11 +60,6 @@ func runUnmount(storageosCli *command.StorageOSCli, opt unmountOptions, mountDri
 		return err
 	}
 
-	log.WithFields(log.Fields{
-		"namespace":  namespace,
-		"volumeName": name,
-	}).Info("parsed volume ref")
-
 	vol, err := client.Volume(namespace, name)
 	if err != nil {
 		return err
@@ -98,5 +93,6 @@ func runUnmount(storageosCli *command.StorageOSCli, opt unmountOptions, mountDri
 		return fmt.Errorf("unable to unmount volume, error: %s", err)
 	}
 
-	return err
+	fmt.Printf("volume %s unmounted: %s\n", vol.Name, vol.Mountpoint)
+	return nil
 }
