@@ -2,19 +2,23 @@ package formatter
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	units "github.com/docker/go-units"
 	"github.com/storageos/go-api/types"
+	cliconfig "github.com/storageos/go-cli/cli/config"
 )
 
 const (
 	defaultVolumeQuietFormat = "{{.Name}}"
-	defaultVolumeTableFormat = "table {{.Name}}\t{{.Size}}\t{{.MountedBy}}\t{{.Status}}"
+	defaultVolumeTableFormat = "table {{.Name}}\t{{.Size}}\t{{.MountedBy}}\t{{.Mountpoint}}\t{{.Status}}\t{{.Replicas}}"
 
-	volumeNameHeader      = "NAMESPACE/NAME"
-	volumeMountedByHeader = "MOUNTED BY"
-	volumeStatusHeader    = "STATUS"
+	volumeNameHeader       = "NAMESPACE/NAME"
+	volumeMountedByHeader  = "MOUNTED BY"
+	volumeMountpointHeader = "MOUNTPOINT"
+	volumeStatusHeader     = "STATUS"
+	volumeReplicasHeader   = "REPLICAS"
 )
 
 // NewVolumeFormat returns a format for use with a volume Context
@@ -93,7 +97,15 @@ func (c *volumeContext) MountedBy() string {
 	if c.v.MountedBy == "" {
 		return ""
 	}
-	return fmt.Sprintf("%d", c.v.MountedBy)
+	return fmt.Sprintf("%s", c.v.MountedBy)
+}
+
+func (c *volumeContext) Mountpoint() string {
+	c.AddHeader(volumeMountpointHeader)
+	if c.v.Mountpoint == "" {
+		return ""
+	}
+	return fmt.Sprintf("%s", c.v.Mountpoint)
 }
 
 func (c *volumeContext) Size() string {
@@ -104,4 +116,44 @@ func (c *volumeContext) Size() string {
 func (c *volumeContext) Status() string {
 	c.AddHeader(volumeStatusHeader)
 	return c.v.Status
+}
+
+func (c *volumeContext) Replicas() string {
+	c.AddHeader(volumeReplicasHeader)
+
+	// desired
+	desired := getDesiredReplicas(&c.v)
+	activeReplicas := activeReplicas(&c.v)
+
+	return fmt.Sprintf("%d/%d", activeReplicas, desired)
+}
+
+func activeReplicas(volume *types.Volume) int {
+	found := 0
+	for _, replica := range volume.Replicas {
+		// looking for active replicas
+		if replica.Status == "active" && replica.Health == "healthy" {
+			found++
+		}
+	}
+
+	return found
+}
+
+// GetDesiredReplicas - get desired replicas.
+// If the value is invalid (i.e. storageos.feature.replicas="hi") - desired
+// replicas will be set to 0. Only valid values will be tolerated.
+func getDesiredReplicas(volume *types.Volume) int {
+	r, ok := volume.Labels[cliconfig.FeatureReplicas]
+	// if replication label is missing - do nothing
+	if !ok {
+		return 0
+	}
+
+	desiredReplicas, err := strconv.Atoi(r)
+	if err != nil {
+		return 0
+	}
+
+	return desiredReplicas
 }
