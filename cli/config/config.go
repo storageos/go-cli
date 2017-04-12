@@ -29,6 +29,11 @@ var (
 	configDir = os.Getenv("STORAGEOS_CONFIG")
 )
 
+// default features
+const (
+	FeatureReplicas = "storageos.feature.replicas"
+)
+
 // DeviceRootPath defines the directory in which the raw StorageOS volumes are
 // created.
 const DeviceRootPath = "/var/lib/storageos/volumes"
