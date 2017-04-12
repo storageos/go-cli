@@ -73,7 +73,7 @@ func mountVolume(ctx context.Context, deviceRootPath string, id string, mp strin
 		}).Error("Mount failed")
 		return err
 	}
-	log.Infof("Mounted volume: %s %s", deviceRootPath+"/"+id, mp)
+	log.Debugf("Mounted volume: %s %s", deviceRootPath+"/"+id, mp)
 
 	return nil
 }
@@ -87,7 +87,7 @@ func unmountVolume(ctx context.Context, mp string) error {
 		log.Errorf("Unmount failed: %s (%s)", mp, err)
 		return err
 	}
-	log.Infof("Unmounted volume: %s", mp)
+	log.Debugf("Unmounted volume: %s", mp)
 
 	if err := deleteMountPoint(mp); err != nil {
 		return err

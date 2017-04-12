@@ -25,7 +25,7 @@ func initRawVolume(ctx context.Context, path string, fsType string) error {
 	log.Debugf("volume found: %s", path)
 
 	ft, err := getVolumeFSType(ctx, path)
-	log.Infof("volume %s has fs type: %s", path, ft)
+	log.Debugf("volume %s has fs type: %s", path, ft)
 	if err != nil {
 		return err
 	}
