@@ -55,8 +55,6 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 		return fmt.Errorf("device root path '%s' not found, check whether StorageOS is running", cliconfig.DeviceRootPath)
 	}
 
-	// fmt.Println("checking volume ", opt.ref, opt.mountpoint)
-
 	// validating fsType
 	err = validation.IsValidFSType(opt.fsType)
 	if err != nil {
