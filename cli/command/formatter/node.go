@@ -4,19 +4,25 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/docker/go-units"
 	"github.com/storageos/go-api/types"
 )
 
 const (
 	defaultNodeQuietFormat = "{{.Name}}"
-	defaultNodeTableFormat = "table {{.Name}}\t{{.Address}}\t{{.Health}}\t{{.Scheduler}}\t{{.Labels}}"
+	defaultNodeTableFormat = "table {{.Name}}\t{{.Address}}\t{{.Health}}\t{{.Scheduler}}\t{{.Volumes}}\t{{.Capacity}}\t{{.CapacityUsed}}\t{{.Version}}\t{{.Labels}}"
 
-	nodeNameHeader      = "NAME"
-	nodeAddressHeader   = "ADDRESS"
-	nodeHealthHeader    = "HEALTH"
-	nodeSchedulerHeader = "SCHEDULER"
-	nodeLabelHeader     = "LABEL"
+	nodeNameHeader         = "NAME"
+	nodeAddressHeader      = "ADDRESS"
+	nodeHealthHeader       = "HEALTH"
+	nodeSchedulerHeader    = "SCHEDULER"
+	nodeVolumesHeader      = "VOLUMES"
+	nodeCapacityHeader     = "CAPACITY"
+	nodeCapacityUsedHeader = "USED"
+	nodeVersionUsedHeader  = "VERSION"
+	nodeLabelHeader        = "LABEL"
 )
 
 // NewNodeFormat returns a format for use with a node Context
@@ -31,7 +37,7 @@ func NewNodeFormat(source string, quiet bool) Format {
 		if quiet {
 			return `name: {{.Name}}`
 		}
-		return `name: {{.Name}}\naddress: {{.Address}}\nhealth: {{.Health}}\nscheduler: {{.Scheduler}}\nlabels: {{.Labels}}\n`
+		return `name: {{.Name}}\naddress: {{.Address}}\nhealth: {{.Health}}\nscheduler: {{.Scheduler}}\nvolumes: {{.Volumes}}\ncapacity: {{.Capacity}}\ncapacityUsed: {{.CapacityUsed}}\nversion: {{.Version}}\nlabels: {{.Labels}}\n`
 	}
 	return Format(source)
 }
@@ -70,11 +76,33 @@ func (c *nodeContext) Address() string {
 
 func (c *nodeContext) Health() string {
 	c.AddHeader(nodeHealthHeader)
-	return c.v.Health
+
+	return fmt.Sprintf("%s %s", strings.Title(c.v.Health), units.HumanDuration(time.Since(c.v.HealthUpdatedAt)))
 }
+
 func (c *nodeContext) Scheduler() string {
 	c.AddHeader(nodeSchedulerHeader)
 	return strconv.FormatBool(c.v.Scheduler)
+}
+
+func (c *nodeContext) Volumes() string {
+	c.AddHeader(nodeVolumesHeader)
+	return fmt.Sprintf("M: %d, R: %d", c.v.VolumeStats.MasterVolumeCount, c.v.VolumeStats.ReplicaVolumeCount)
+}
+
+func (c *nodeContext) Capacity() string {
+	c.AddHeader(nodeCapacityHeader)
+	return units.BytesSize(float64(c.v.CapacityStats.TotalCapacityBytes))
+}
+
+func (c *nodeContext) CapacityUsed() string {
+	c.AddHeader(nodeCapacityUsedHeader)
+	return fmt.Sprintf("%.2f%%", float64(c.v.CapacityStats.TotalCapacityBytes-c.v.CapacityStats.AvailableCapacityBytes)*100/float64(c.v.CapacityStats.TotalCapacityBytes))
+}
+
+func (c *nodeContext) Version() string {
+	c.AddHeader(nodeVersionUsedHeader)
+	return fmt.Sprintf("%s (%s rev)", c.v.VersionInfo["storageos"].Version, c.v.VersionInfo["storageos"].Revision)
 }
 
 func (c *nodeContext) Labels() string {
