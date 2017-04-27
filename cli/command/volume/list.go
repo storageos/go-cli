@@ -61,6 +61,11 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 		return err
 	}
 
+	nodes, err := client.ControllerList(params)
+	if err != nil {
+		return err
+	}
+
 	format := opt.format
 	if len(format) == 0 {
 		if len(storageosCli.ConfigFile().VolumesFormat) > 0 && !opt.quiet {
@@ -76,5 +81,5 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 		Output: storageosCli.Out(),
 		Format: formatter.NewVolumeFormat(format, opt.quiet),
 	}
-	return formatter.VolumeWrite(volumeCtx, volumes)
+	return formatter.VolumeWrite(volumeCtx, volumes, nodes)
 }
