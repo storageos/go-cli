@@ -12,13 +12,14 @@ import (
 
 const (
 	defaultVolumeQuietFormat = "{{.Name}}"
-	defaultVolumeTableFormat = "table {{.Name}}\t{{.Size}}\t{{.MountedBy}}\t{{.Mountpoint}}\t{{.Status}}\t{{.Replicas}}"
+	defaultVolumeTableFormat = "table {{.Name}}\t{{.Size}}\t{{.MountedBy}}\t{{.Mountpoint}}\t{{.Status}}\t{{.Replicas}}\t{{.Location}}"
 
 	volumeNameHeader       = "NAMESPACE/NAME"
 	volumeMountedByHeader  = "MOUNTED BY"
 	volumeMountpointHeader = "MOUNTPOINT"
 	volumeStatusHeader     = "STATUS"
 	volumeReplicasHeader   = "REPLICAS"
+	volumeLocationHeader   = "LOCATION"
 )
 
 // NewVolumeFormat returns a format for use with a volume Context
@@ -39,10 +40,10 @@ func NewVolumeFormat(source string, quiet bool) Format {
 }
 
 // VolumeWrite writes formatted volumes using the Context
-func VolumeWrite(ctx Context, volumes []*types.Volume) error {
+func VolumeWrite(ctx Context, volumes []*types.Volume, nodes []*types.Controller) error {
 	render := func(format func(subContext subContext) error) error {
 		for _, volume := range volumes {
-			if err := format(&volumeContext{v: *volume}); err != nil {
+			if err := format(&volumeContext{v: *volume, nodes: nodes}); err != nil {
 				return err
 			}
 		}
@@ -53,7 +54,8 @@ func VolumeWrite(ctx Context, volumes []*types.Volume) error {
 
 type volumeContext struct {
 	HeaderContext
-	v types.Volume
+	v     types.Volume
+	nodes []*types.Controller
 }
 
 func (c *volumeContext) MarshalJSON() ([]byte, error) {
@@ -126,6 +128,25 @@ func (c *volumeContext) Replicas() string {
 	activeReplicas := activeReplicas(&c.v)
 
 	return fmt.Sprintf("%d/%d", activeReplicas, desired)
+}
+
+func (c *volumeContext) Location() string {
+	c.AddHeader(volumeLocationHeader)
+	master, err := c.nodeByID(c.v.Master.Controller)
+	if err != nil {
+		return "-"
+	}
+
+	return fmt.Sprintf("%s (%s)", master.Name, master.Health)
+}
+
+func (c *volumeContext) nodeByID(id string) (*types.Controller, error) {
+	for _, node := range c.nodes {
+		if node.ID == id {
+			return node, nil
+		}
+	}
+	return nil, fmt.Errorf("node not found")
 }
 
 func activeReplicas(volume *types.Volume) int {
