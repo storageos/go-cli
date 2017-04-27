@@ -14,15 +14,15 @@ const (
 	defaultNodeQuietFormat = "{{.Name}}"
 	defaultNodeTableFormat = "table {{.Name}}\t{{.Address}}\t{{.Health}}\t{{.Scheduler}}\t{{.Volumes}}\t{{.Capacity}}\t{{.CapacityUsed}}\t{{.Version}}\t{{.Labels}}"
 
-	nodeNameHeader         = "NAME"
-	nodeAddressHeader      = "ADDRESS"
-	nodeHealthHeader       = "HEALTH"
-	nodeSchedulerHeader    = "SCHEDULER"
-	nodeVolumesHeader      = "VOLUMES"
-	nodeCapacityHeader     = "CAPACITY"
-	nodeCapacityUsedHeader = "USED"
-	nodeVersionUsedHeader  = "VERSION"
-	nodeLabelHeader        = "LABEL"
+	nodeNameHeader          = "NAME"
+	nodeAddressHeader       = "ADDRESS"
+	nodeHealthHeader        = "HEALTH"
+	nodeSchedulerHeader     = "SCHEDULER"
+	nodeVolumesHeader       = "VOLUMES"
+	nodeTotalCapacityHeader = "TOTAL"
+	nodeCapacityUsedHeader  = "USED"
+	nodeVersionUsedHeader   = "VERSION"
+	nodeLabelHeader         = "LABEL"
 )
 
 // NewNodeFormat returns a format for use with a node Context
@@ -77,6 +77,10 @@ func (c *nodeContext) Address() string {
 func (c *nodeContext) Health() string {
 	c.AddHeader(nodeHealthHeader)
 
+	if c.v.HealthUpdatedAt.IsZero() {
+		return strings.Title(c.v.Health)
+	}
+
 	return fmt.Sprintf("%s %s", strings.Title(c.v.Health), units.HumanDuration(time.Since(c.v.HealthUpdatedAt)))
 }
 
@@ -91,12 +95,19 @@ func (c *nodeContext) Volumes() string {
 }
 
 func (c *nodeContext) Capacity() string {
-	c.AddHeader(nodeCapacityHeader)
+	c.AddHeader(nodeTotalCapacityHeader)
+	if c.v.CapacityStats.TotalCapacityBytes == 0 {
+		return "-"
+	}
+
 	return units.BytesSize(float64(c.v.CapacityStats.TotalCapacityBytes))
 }
 
 func (c *nodeContext) CapacityUsed() string {
 	c.AddHeader(nodeCapacityUsedHeader)
+	if c.v.CapacityStats.TotalCapacityBytes == 0 {
+		return "-"
+	}
 	return fmt.Sprintf("%.2f%%", float64(c.v.CapacityStats.TotalCapacityBytes-c.v.CapacityStats.AvailableCapacityBytes)*100/float64(c.v.CapacityStats.TotalCapacityBytes))
 }
 

@@ -10,14 +10,14 @@ import (
 
 const (
 	defaultPoolQuietFormat = "{{.Name}}"
-	defaultPoolTableFormat = "table {{.Name}}\t{{.Drivers}}\t{{.Controllers}}\t{{.Available}}\t{{.Total}}\t{{.Active}}"
+	defaultPoolTableFormat = "table {{.Name}}\t{{.Drivers}}\t{{.Nodes}}\t{{.Total}}\t{{.CapacityUsed}}\t{{.Active}}"
 
-	poolNameHeader        = "POOL NAME"
-	poolDriversHeader     = "DRIVERS"
-	poolControllersHeader = "CONTROLLERS"
-	poolAvailHeader       = "AVAIL"
-	poolTotalHeader       = "TOTAL"
-	poolActiveHeader      = "STATUS"
+	poolNameHeader         = "NAME"
+	poolDriversHeader      = "DRIVERS"
+	poolNodesHeader        = "NODES"
+	poolCapacityUsedHeader = "USED"
+	poolTotalHeader        = "TOTAL"
+	poolActiveHeader       = "STATUS"
 )
 
 // NewPoolFormat returns a format for use with a pool Context
@@ -69,14 +69,17 @@ func (c *poolContext) Drivers() string {
 	return strings.Join(c.v.DriverNames, ", ")
 }
 
-func (c *poolContext) Controllers() string {
-	c.AddHeader(poolControllersHeader)
+func (c *poolContext) Nodes() string {
+	c.AddHeader(poolNodesHeader)
 	return strings.Join(c.v.ControllerNames, ", ")
 }
 
-func (c *poolContext) Available() string {
-	c.AddHeader(poolAvailHeader)
-	return units.HumanSize(float64(c.v.CapacityStats.AvailableCapacityBytes))
+func (c *poolContext) CapacityUsed() string {
+	c.AddHeader(poolCapacityUsedHeader)
+	if c.v.CapacityStats.TotalCapacityBytes == 0 {
+		return "-"
+	}
+	return fmt.Sprintf("%.2f%%", float64(c.v.CapacityStats.TotalCapacityBytes-c.v.CapacityStats.AvailableCapacityBytes)*100/float64(c.v.CapacityStats.TotalCapacityBytes))
 }
 
 func (c *poolContext) Total() string {
