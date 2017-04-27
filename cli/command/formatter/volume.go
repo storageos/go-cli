@@ -132,12 +132,16 @@ func (c *volumeContext) Replicas() string {
 
 func (c *volumeContext) Location() string {
 	c.AddHeader(volumeLocationHeader)
-	master, err := c.nodeByID(c.v.Master.Controller)
-	if err != nil {
-		return "-"
+	if c.v.Master != nil {
+		master, err := c.nodeByID(c.v.Master.Controller)
+		if err != nil {
+			return "-"
+		}
+
+		return fmt.Sprintf("%s (%s)", master.Name, master.Health)
 	}
 
-	return fmt.Sprintf("%s (%s)", master.Name, master.Health)
+	return "-"
 }
 
 func (c *volumeContext) nodeByID(id string) (*types.Controller, error) {
