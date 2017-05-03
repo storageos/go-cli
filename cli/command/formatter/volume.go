@@ -93,7 +93,7 @@ func (c *volumeContext) MountedBy() string {
 	if c.v.MountedBy == "" {
 		return ""
 	}
-	return fmt.Sprintf("%d", c.v.MountedBy)
+	return fmt.Sprintf("%s", c.v.MountedBy)
 }
 
 func (c *volumeContext) Size() string {
