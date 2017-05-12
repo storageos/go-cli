@@ -31,5 +31,5 @@ $ go get github.com/mitchellh/gox
 $ go get
 $ make build
 
-you release binaries will be in `cmd/storageos/release`
+The freshly built release binaries will be in `cmd/storageos/release`
 ```
