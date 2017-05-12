@@ -24,9 +24,12 @@ STORAGEOS_PASSWORD=<your password>
 ```
 
 
-## How to build
+## How to build release binaries
 
 ```
+$ go get github.com/mitchellh/gox
 $ go get
-$ make
+$ make build
+
+you release binaries will be in `cmd/storageos/release`
 ```

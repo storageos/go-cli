@@ -7,22 +7,8 @@ LDFLAGS		+= -X github.com/storageos/go-cli/version.Revision=$(GIT_REVISION)
 LDFLAGS		+= -X github.com/storageos/go-cli/version.BuildDate=$(JOBDATE)
 # LDFLAGS		+= -linkmode external -extldflags -static
 
-CLIENT_BINARY	= "storageos"
-
-all: $(CLIENT_BINARY)
-
-$(CLIENT_BINARY):
+build:
 	@echo "++ Building storageos binary"
-	go build $(GO_BUILDFLAGS) -tags netgo -installsuffix netgo \
-		-ldflags "$(LDFLAGS)" \
-		-i \
-		-o ./storageos \
-		cmd/storageos/storageos.go
+	cd cmd/storageos && gox -verbose -output="release/{{.Dir}}_{{.OS}}_{{.Arch}}" \
+		-ldflags "$(LDFLAGS)"
 
-storageos.exe:
-	@echo "++ Building storageos Windows binary"
-	GOOS=windows GOARCH=amd64 go build \
-		-ldflags "$(LDFLAGS)" \
-		-i \
-		-o ./storageos.exe \
-		cmd/storageos/storageos.go
