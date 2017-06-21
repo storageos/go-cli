@@ -16,9 +16,9 @@ func NewSystemCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		RunE:  storageosCli.ShowHelp,
 	}
 	cmd.AddCommand(
-		NewEventsCommand(storageosCli),
-		// NewInfoCommand(storageosCli),
-		// NewDiskUsageCommand(storageosCli),
+	// NewEventsCommand(storageosCli),
+	// NewInfoCommand(storageosCli),
+	// NewDiskUsageCommand(storageosCli),
 	)
 
 	return cmd

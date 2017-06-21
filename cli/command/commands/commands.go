@@ -21,7 +21,7 @@ func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 		node.NewNodeCommand(storageosCli),
 
 		// system
-		system.NewSystemCommand(storageosCli),
+		// system.NewSystemCommand(storageosCli),
 		system.NewVersionCommand(storageosCli),
 	)
 }
