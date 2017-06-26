@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-cli/cli/command"
+	"github.com/storageos/go-cli/cli/command/cluster"
 	"github.com/storageos/go-cli/cli/command/namespace"
 	"github.com/storageos/go-cli/cli/command/node"
 	"github.com/storageos/go-cli/cli/command/pool"
@@ -23,5 +24,8 @@ func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 		// system
 		system.NewSystemCommand(storageosCli),
 		system.NewVersionCommand(storageosCli),
+
+		// clustering
+		cluster.NewClusterCommand(storageosCli),
 	)
 }
