@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/docker/docker/pkg/testutil/assert"
 	"github.com/spf13/pflag"
 	cliconfig "github.com/storageos/go-cli/cli/config"
+	"github.com/storageos/go-cli/pkg/testutil/assert"
 )
 
 func _TestCommonOptionsInstallFlags(t *testing.T) {

@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/docker/docker/pkg/testutil/assert"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/debug"
+	"github.com/storageos/go-cli/pkg/testutil/assert"
 )
 
 func TestClientDebugEnabled(t *testing.T) {

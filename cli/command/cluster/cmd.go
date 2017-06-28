@@ -17,6 +17,8 @@ func NewClusterCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	}
 	cmd.AddCommand(
 		newCreateCommand(storageosCli),
+		newInspectCommand(storageosCli),
+		newRemoveCommand(storageosCli),
 	)
 	return cmd
 }

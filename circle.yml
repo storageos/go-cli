@@ -1,0 +1,21 @@
+machine:
+  environment:
+    # GOROOT is not set by default
+    GOROOT: ""
+    GOPATH: "${HOME}/.go_project"
+    PATH: "${GOPATH}/bin:${PATH}"
+    BUILD_PATH: "${GOPATH}/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+
+dependencies:      
+  override:
+    - mkdir -p ~/.go_project/src/github.com/${CIRCLE_PROJECT_USERNAME}
+    - ln -s ${HOME}/${CIRCLE_PROJECT_REPONAME} ${BUILD_PATH}
+
+deployment:
+  release:
+    tag: /[0-9]+(\.[0-9]+)*/    
+    commands:
+      - go get github.com/mitchellh/gox
+      - go get github.com/tcnksm/ghr      
+      - cd $BUILD_PATH && make build
+      - cd $BUILD_PATH && ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` cmd/storageos/release/

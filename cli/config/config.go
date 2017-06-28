@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/docker/docker/pkg/homedir"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli/config/configfile"
+	"github.com/storageos/go-cli/pkg/homedir"
 )
 
 const (

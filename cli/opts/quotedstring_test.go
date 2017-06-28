@@ -3,7 +3,7 @@ package opts
 import (
 	"testing"
 
-	"github.com/docker/docker/pkg/testutil/assert"
+	"github.com/storageos/go-cli/pkg/testutil/assert"
 )
 
 func TestQuotedStringSetWithQuotes(t *testing.T) {
