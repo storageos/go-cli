@@ -33,9 +33,9 @@ type Cluster struct {
 }
 
 type Node struct {
-	ID          string `json:"id,omitempty"` // node/controller UUID
-	Name        string `json:"name,omitempty"`
-	AdvertiseIP string `json:"advertiseIP,omitempty"`
+	ID               string `json:"id,omitempty"` // node/controller UUID
+	Name             string `json:"name,omitempty"`
+	AdvertiseAddress string `json:"advertiseAddress,omitempty"`
 
 	CreatedAt time.Time `json:"createdAt,omitempty"`
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
