@@ -173,3 +173,23 @@ func (c *Client) ClusterStatus(id string) (*types.Cluster, error) {
 
 	return &cluster, nil
 }
+
+// ClusterDelete - delete specified cluster
+func (c *Client) ClusterDelete(id string) error {
+	req, err := http.NewRequest("DELETE", c.endpoint+"/clusters/"+id, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code from discovery service: %d", resp.StatusCode)
+	}
+
+	return nil
+}
