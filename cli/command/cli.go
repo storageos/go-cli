@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/dnephin/cobra"
-	"github.com/docker/go-connections/tlsconfig"
+
 	api "github.com/storageos/go-api"
 	cliconfig "github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/cli/config/configfile"
@@ -145,7 +145,7 @@ func LoadDefaultConfigFile(err io.Writer) *configfile.ConfigFile {
 // NewAPIClientFromFlags creates a new APIClient from command line flags
 // func NewAPIClientFromFlags(opts *cliflags.CommonOptions, configFile *configfile.ConfigFile) (client.APIClient, error) {
 func NewAPIClientFromFlags(opt *cliflags.CommonOptions) (*api.Client, error) {
-	host, err := getServerHost(opt.Hosts, opt.TLSOptions)
+	host, err := getServerHost(opt.Hosts, opt.TLS)
 	if err != nil {
 		return &api.Client{}, err
 	}
@@ -169,7 +169,7 @@ func NewAPIClientFromFlags(opt *cliflags.CommonOptions) (*api.Client, error) {
 	return client, nil
 }
 
-func getServerHost(hosts []string, tlsOptions *tlsconfig.Options) (host string, err error) {
+func getServerHost(hosts []string, tls bool) (host string, err error) {
 	switch len(hosts) {
 	case 0:
 		host = os.Getenv(cliconfig.EnvStorageOSHost)
@@ -179,7 +179,7 @@ func getServerHost(hosts []string, tlsOptions *tlsconfig.Options) (host string, 
 		return "", errors.New("Please specify only one -H")
 	}
 
-	host, err = opts.ParseHost(tlsOptions != nil, host)
+	host, err = opts.ParseHost(tls, host)
 	return
 }
 
