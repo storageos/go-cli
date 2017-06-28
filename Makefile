@@ -13,5 +13,4 @@ build:
 release:
 	@echo "++ Building relay binaries"
 	cd cmd/storageos && gox -verbose -output="release/{{.Dir}}_{{.OS}}_{{.Arch}}" \
-		-ldflags "$(LDFLAGS)" -osarch="linux/amd64 darwin/amd64 windows/amd64"
-
+		-ldflags "$(LDFLAGS)" -osarch="linux/amd64 darwin/amd64"
