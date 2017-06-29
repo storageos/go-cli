@@ -118,6 +118,7 @@ func (c *Client) ClusterCreate(clusterName string, size int) (token string, err 
 	path := c.endpoint + "/clusters"
 	vals := url.Values{}
 	vals.Set("size", fmt.Sprintf("%d", size))
+	vals.Set("name", clusterName)
 	path = fmt.Sprintf("%s?%s", path, vals.Encode())
 	req, err := http.NewRequest("POST", path, nil)
 	if err != nil {
