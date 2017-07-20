@@ -9,6 +9,7 @@ import (
 	"github.com/storageos/go-cli/cli/command/pool"
 	"github.com/storageos/go-cli/cli/command/rule"
 	"github.com/storageos/go-cli/cli/command/system"
+	"github.com/storageos/go-cli/cli/command/user"
 	"github.com/storageos/go-cli/cli/command/volume"
 )
 
@@ -18,6 +19,7 @@ func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 		namespace.NewNamespaceCommand(storageosCli),
 		pool.NewPoolCommand(storageosCli),
 		rule.NewRuleCommand(storageosCli),
+		user.NewUserCommand(storageosCli),
 		volume.NewVolumeCommand(storageosCli),
 		node.NewNodeCommand(storageosCli),
 
