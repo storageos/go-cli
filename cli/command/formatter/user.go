@@ -15,7 +15,7 @@ const (
 	userRoleHeader     = "Role"
 )
 
-func NewUserFormat(source string, quiet, adminOnly, usersOnly bool) Format {
+func NewUserFormat(source string, quiet bool) Format {
 	switch source {
 	case TableFormatKey:
 		if quiet {
@@ -54,7 +54,7 @@ func (c *userContext) MarshalJSON() ([]byte, error) {
 
 func (c *userContext) UUID() string {
 	c.AddHeader(userUUIDHeader)
-	return c.v.Username
+	return c.v.UUID
 }
 
 func (c *userContext) Username() string {
