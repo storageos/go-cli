@@ -20,6 +20,18 @@ func (r byUserName) Less(i, j int) bool {
 	return r[i].Username < r[j].Username
 }
 
+func filter(users []*types.User, by func(*types.User) bool) []*types.User {
+	rtn := make([]*types.User, 0)
+
+	for _, v := range users {
+		if by(v) {
+			rtn = append(rtn, v)
+		}
+	}
+
+	return rtn
+}
+
 type listOptions struct {
 	quiet  bool
 	format string
@@ -48,8 +60,8 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display usernames")
 	flags.StringVar(&opt.format, "format", "", "Pretty-print rules using a Go template")
-	flags.BoolVar(&opt.admins, "adminOnly", false, "Only return the admin users")
-	flags.BoolVar(&opt.users, "userOnly", false, "Only return the non-admin users")
+	flags.BoolVar(&opt.admins, "admin-only", false, "Only return the admin users")
+	flags.BoolVar(&opt.users, "user-only", false, "Only return the non-admin users")
 
 	return cmd
 }
@@ -74,10 +86,16 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 	}
 
 	sort.Sort(byUserName(users))
+	if opt.admins {
+		users = filter(users, func(u *types.User) bool { return u.Role == "admin" })
+	}
+	if opt.users {
+		users = filter(users, func(u *types.User) bool { return u.Role == "user" })
+	}
 
 	userCtx := formatter.Context{
 		Output: storageosCli.Out(),
-		Format: formatter.NewUserFormat(format, opt.quiet, opt.admins, opt.users),
+		Format: formatter.NewUserFormat(format, opt.quiet),
 	}
 	return formatter.UserWrite(userCtx, users)
 }
