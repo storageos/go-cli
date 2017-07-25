@@ -31,7 +31,7 @@ var (
 	ErrInvalidVersion = errors.New("invalid version")
 
 	// DefaultHost is the default API host
-	DefaultHost = "http://discovery.storageos.cloud"
+	DefaultHost = "https://discovery.storageos.cloud"
 )
 
 // APIVersion is an internal representation of a version of the Remote API.
