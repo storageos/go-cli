@@ -42,11 +42,9 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := createOptions{}
 
 	cmd := &cobra.Command{
-		Use: "create [OPTIONS] [USERNAME]",
-		Short: `Creates a user. To create a user that has the username "alice" and the password "verySecret", run:
-"storageos user create --password alice" (You will be promted for a password interactively)
-		`,
-		Args: cli.RequiresMaxArgs(1),
+		Use:   "create [OPTIONS] [USERNAME]",
+		Short: `Create a new User, E.g. "storageos user create --password alice" (interactive password prompt)`,
+		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 1 {
 				if opt.username != "" {

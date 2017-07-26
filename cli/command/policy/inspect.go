@@ -1,4 +1,4 @@
-package user
+package policy
 
 import (
 	"github.com/dnephin/cobra"
@@ -9,19 +9,19 @@ import (
 )
 
 type inspectOptions struct {
-	format string
-	users  []string
+	format   string
+	policies []string
 }
 
 func newInspectCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	var opt inspectOptions
 
 	cmd := &cobra.Command{
-		Use:   "inspect [OPTIONS] USER [USER...]",
-		Short: "Display detailed information on one or more user(s)",
+		Use:   "inspect [OPTIONS] POLICY [POLICY...]",
+		Short: "Display detailed information on one or more polic(y|ies)",
 		Args:  cli.RequiresMinArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			opt.users = args
+			opt.policies = args
 			return runInspect(storageosCli, opt)
 		},
 	}
@@ -35,9 +35,9 @@ func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	client := storageosCli.Client()
 
 	getFunc := func(ref string) (interface{}, []byte, error) {
-		i, err := client.User(ref)
+		i, err := client.Policy(ref)
 		return i, nil, err
 	}
 
-	return inspect.Inspect(storageosCli.Out(), opt.users, opt.format, getFunc)
+	return inspect.Inspect(storageosCli.Out(), opt.policies, opt.format, getFunc)
 }

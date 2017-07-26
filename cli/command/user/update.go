@@ -61,7 +61,7 @@ func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "update [OPTIONS] USER",
-		Short: "Update a rule",
+		Short: "Update select fields in a user account",
 		Args:  cli.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opt.sourceAccount = args[0]
