@@ -21,6 +21,7 @@ type ConfigFile struct {
 	NamespacesFormat string `json:"namespacesFormat,omitempty"`
 	RulesFormat      string `json:"rulesFormat,omitempty"`
 	UsersFormat      string `json:"usersFormat,omitempty"`
+	PoliciesFormat   string `json:"policiesFormat,omitempty"`
 	TemplatesFormat  string `json:"templatesFormat,omitempty"`
 	// DetachKeys           string                      `json:"detachKeys,omitempty"`
 	// CredentialsStore     string                      `json:"credsStore,omitempty"`
