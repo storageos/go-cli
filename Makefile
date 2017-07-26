@@ -7,10 +7,10 @@ LDFLAGS		+= -X github.com/storageos/go-cli/version.Revision=$(GIT_REVISION)
 LDFLAGS		+= -X github.com/storageos/go-cli/version.BuildDate=$(JOBDATE)
 
 build:
-	@echo "++ Building relay binary"
-	cd cmd/storageos && go build -ldflags "$(LDFLAGS)"
+	@echo "++ Building storageos binary"
+	cd cmd/storageos && CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)"
 
 release:
-	@echo "++ Building relay binaries"
+	@echo "++ Building storageos release binaries"
 	cd cmd/storageos && gox -verbose -output="release/{{.Dir}}_{{.OS}}_{{.Arch}}" \
 		-ldflags "$(LDFLAGS)" -osarch="linux/amd64 darwin/amd64"
