@@ -13,4 +13,4 @@ build:
 release:
 	@echo "++ Building storageos release binaries"
 	cd cmd/storageos && gox -verbose -output="release/{{.Dir}}_{{.OS}}_{{.Arch}}" \
-		-ldflags "$(LDFLAGS)" -osarch="linux/amd64 darwin/amd64"
+		-ldflags "$(LDFLAGS)" -osarch="linux/amd64 darwin/amd64 windows/amd64"
