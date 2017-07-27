@@ -11,7 +11,6 @@ import (
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
-	//"github.com/storageos/go-cli/cli/opts"
 )
 
 type stringSlice []string

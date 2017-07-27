@@ -25,8 +25,7 @@ var (
 func (c *Client) ControllerList(opts types.ListOptions) ([]*types.Controller, error) {
 	listOpts := doOptions{
 		fieldSelector: opts.FieldSelector,
-		labelSelector: opts.LabelSelector,
-		namespace:     opts.Namespace,
+		labelSelector: opts.LabelSelector,		
 		context:       opts.Context,
 	}
 
