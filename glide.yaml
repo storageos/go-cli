@@ -27,3 +27,6 @@ import:
 - package: golang.org/x/sys
   subpackages:
   - windows
+- package: golang.org/x/crypto
+  subpackages:
+  - ssh

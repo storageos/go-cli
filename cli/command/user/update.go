@@ -87,7 +87,7 @@ func verifyGroupLogic(opt updateOptions) error {
 }
 
 func verifyUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
-	if !verifyUsername(opt.username) {
+	if !(opt.username == "" || verifyUsername(opt.username)) {
 		return fmt.Errorf(`Username doesn't follow format "[a-zA-Z0-9]+"`)
 	}
 
@@ -103,7 +103,7 @@ func verifyUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
 		return fmt.Errorf(`remove-group element %d doesn't follow format "[a-zA-Z0-9]+"`, i)
 	}
 
-	if !verifyRole(opt.role) {
+	if !(opt.role == "" || verifyRole(opt.role)) {
 		return fmt.Errorf(`Role must me "user" or "admin", not %s`, opt.role)
 	}
 

@@ -12,7 +12,6 @@ import (
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
-	//"github.com/storageos/go-cli/cli/opts"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -94,13 +93,8 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 		Context:  context.Background(),
 	}
 
-	user, err := client.UserCreate(params)
-	if err != nil {
-		return err
-	}
-
-	fmt.Fprintf(storageosCli.Out(), "NewUser %s/%s\n", user.UUID, user.Username)
-	return nil
+	err := client.UserCreate(params)
+	return err
 }
 
 func getPassword(storageosCli *command.StorageOSCli) (string, error) {
