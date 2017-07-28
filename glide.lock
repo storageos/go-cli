@@ -1,5 +1,5 @@
 hash: ecd0713d1ed125ef6eab523210aa38ef2630f05db7ad27499f22960a17b1c0db
-updated: 2017-07-27T12:21:18.505104805+01:00
+updated: 2017-07-28T12:33:39.371672425+01:00
 imports:
 - name: github.com/Azure/go-ansiterm
   version: 19f72df4d05d31cbe1c56bfc8045c96babff6c7e
@@ -24,18 +24,18 @@ imports:
 - name: github.com/Microsoft/go-winio
   version: 7ff89941bcb93df2e962467fb073c6e997b13cf0
 - name: github.com/sirupsen/logrus
-  version: c2f40cf57934a1f046302d34079c6c3ce49e9bd6
+  version: 181d419aa9e2223811b824e8f0b4af96f9ba9302
 - name: github.com/Sirupsen/logrus
   version: a3f95b5c423586578a4e099b11a46c2479628cac
 - name: github.com/spf13/pflag
   version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/storageos/go-api
-  version: 62a315601c138bfc0e8d313d2ed6623e6063bf7d
+  version: 584064217d9911890042c647f7bc68d038e6acab
   subpackages:
   - types
   - types/versions
 - name: golang.org/x/crypto
-  version: 2faea1465de239e4babd8f5905cc25b781712442
+  version: 27b9897dfcda296fc086003b6e46fca80a29512d
   subpackages:
   - ssh
   - ssh/terminal

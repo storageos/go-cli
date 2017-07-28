@@ -18,7 +18,7 @@ type Policy struct {
 
 // PolicyWithId is used as an internal type to render table formated versions of the json response
 type PolicyWithID struct {
-	*Policy
+	Policy
 	ID string
 }
 
@@ -29,7 +29,7 @@ func (p *PolicyWithID) MarshalJSON() ([]byte, error) {
 }
 
 // PolicySet is a representation of the data structure returned from the REST API
-type PolicySet map[string]*Policy
+type PolicySet map[string]Policy
 
 func (p PolicySet) GetPoliciesWithID() []*PolicyWithID {
 	rtn := make([]*PolicyWithID, 0, len(p))
