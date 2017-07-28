@@ -11,6 +11,12 @@ dependencies:
     - mkdir -p ~/.go_project/src/github.com/${CIRCLE_PROJECT_USERNAME}
     - ln -s ${HOME}/${CIRCLE_PROJECT_REPONAME} ${BUILD_PATH}
 
+test:
+  pre:
+    - cd $BUILD_PATH && go vet $(go list ./... | grep -v /vendor/)
+  override:
+    - cd $BUILD_PATH && go test -v -race $(go list ./... | grep -v /vendor/)
+
 deployment:
   release:
     tag: /[0-9]+(\.[0-9]+)*/    
