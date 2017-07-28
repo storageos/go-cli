@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 )
@@ -24,6 +25,11 @@ func prepareTempFile(t *testing.T) (string, string) {
 
 // TestChtimes tests Chtimes on a tempfile. Test only mTime, because aTime is OS dependent
 func TestChtimes(t *testing.T) {
+
+	// Don't fail on Mac
+	if runtime.GOOS != "linux" {
+		t.SkipNow()
+	}
 	file, dir := prepareTempFile(t)
 	defer os.RemoveAll(dir)
 

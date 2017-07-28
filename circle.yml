@@ -15,7 +15,7 @@ test:
   pre:
     - cd $BUILD_PATH && go vet $(go list ./... | grep -v /vendor/)
   override:
-    - cd $BUILD_PATH && go test -v -race $(go list ./... | grep -v /vendor/)
+    - cd $BUILD_PATH && go test -v -race -run Test[^Mkdir] $(go list ./... | grep -v /vendor/)
 
 deployment:
   release:
