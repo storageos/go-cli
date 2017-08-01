@@ -63,7 +63,7 @@ type UserCreateOptions struct {
 	Context context.Context `json:"-"`
 }
 
-func (u *UserCreateOptions) MarshalJSON() ([]byte, error) {
+func (u UserCreateOptions) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
 		Username string `json:"username"`
 		Groups   string `json:"groups"`
