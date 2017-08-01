@@ -43,7 +43,7 @@ func (u updateOptions) processGroups(current []string) []string {
 
 	// remove groups
 	for _, v := range current {
-		if !needsRemoval(v) {
+		if !needsRemoval(v) && v != "" {
 			newGroups = append(newGroups, v)
 		}
 	}
