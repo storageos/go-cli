@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	defaultPolicyTableFormat = "table {{.ID}}\t{{.User}}\t{{.Group}}\t{{.Readonly}}\t{{.APIGroup}}\t{{.Resource}}\t{{.Namespace}}\t{{.NonResourcePath}}"
+	defaultPolicyTableFormat = "table {{.ID}}\t{{.User}}\t{{.Group}}\t{{.Namespace}}"
 
 	policyIDHeader              = "ID"
 	policyUserHeader            = "User"
@@ -22,7 +22,7 @@ func NewPolicyFormat(source string) Format {
 	case TableFormatKey:
 		return defaultPolicyTableFormat
 	case RawFormatKey:
-		return "id: {{.ID}}\nuser: {{.User}}\ngroup: {{.Group}}\nreadonly: {{.Readonly}}\napiGroup: {{.APIGroup}}\nresource: {{.Resource}}\nnamespace: {{.Namespace}}\nnonResourcePath: {{.NonResourcePath}}"
+		return "id: {{.ID}}\nuser: {{.User}}\ngroup: {{.Group}}\nnamespace: {{.Namespace}}"
 	}
 	return Format(source)
 }
