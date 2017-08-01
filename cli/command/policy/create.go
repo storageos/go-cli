@@ -45,7 +45,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Short: `Create a new policy, Either provide the set of policy files, set with options or write to stdin.
 		E.g. "storageos policy create --user awesomeUser --namespace testing"
 		E.g. "storageos policy create --policies='rules1.jsonl,rules2.jsonl'"
-		E.g. "echo '{"spec": {"group": "devs", "namespace": "develop"}}' | storageos policy create --stdin`,
+		E.g. "echo '{"spec": {"group": "devs", "namespace": "develop"}}' | storageos policy create --stdin"`,
 		Args: cli.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runCreate(cmd, storageosCli, opt)
