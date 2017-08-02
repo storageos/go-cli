@@ -9,6 +9,7 @@ import (
 
 	"context"
 	"github.com/dnephin/cobra"
+	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 )
@@ -29,50 +30,61 @@ func (s *stringSlice) Set(val string) error {
 }
 
 type createOptions struct {
-	policies stringSlice
-	stdin    bool
-	args     []string
+	user      string
+	group     string
+	namespace string
+	policies  stringSlice
+	stdin     bool
 }
 
 func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := createOptions{}
 
 	cmd := &cobra.Command{
-		Use: "create [jsonPolicy | jsonPolicyList]...",
-		Short: `Create a new policy, Either provide the set of policy files, provide json input or write to stdin.
-		E.g. "storageos policy create --policies='rules1.jsonl,rules2.jsonl'"`,
-		Args: cli.RequiresMaxArgs(1),
+		Use: "create [OPTIONS]",
+		Short: `Create a new policy, Either provide the set of policy files, set with options or write to stdin.
+		E.g. "storageos policy create --user awesomeUser --namespace testing"
+		E.g. "storageos policy create --policies='rules1.jsonl,rules2.jsonl'"
+		E.g. "echo '{"spec": {"group": "devs", "namespace": "develop"}}' | storageos policy create --stdin"`,
+		Args: cli.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			opt.args = args
-			return runCreate(storageosCli, opt)
+			return runCreate(cmd, storageosCli, opt)
 		},
 	}
 
 	flags := cmd.Flags()
+	flags.StringVar(&opt.user, "user", "", "User field for a policy entry")
+	flags.StringVar(&opt.group, "group", "", "Group field for a policy entry")
+	flags.StringVar(&opt.namespace, "namespace", "", "Namespace field for a policy entry")
 	flags.Var(&opt.policies, "policies", "Provide a new (comma seperated) list of policy files in json line format.")
 	flags.BoolVar(&opt.stdin, "stdin", false, "Read policy input from stdin")
 	return cmd
 }
 
-func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
+func runCreate(cmd *cobra.Command, storageosCli *command.StorageOSCli, opt createOptions) error {
 	switch {
 	case opt.stdin:
-		if len(opt.policies)+len(opt.args) > 0 {
+		if len(opt.policies) > 0 {
 			return fmt.Errorf("Please provide stdin or use other methods. (Not both)")
 		}
 		return runCreateFromStdin(storageosCli, opt)
 
-	case len(opt.policies) > 0 && len(opt.args) > 0:
-		return fmt.Errorf("Provide either a policy file, or a positional arg. (Not both)")
+	case len(opt.policies) > 0 && (opt.user+opt.group+opt.namespace) != "":
+		return fmt.Errorf("Provide either policy file(s), or use the user/group/namespace flags. (Not both)")
 
 	case len(opt.policies) > 0:
 		return runCreateFromFiles(storageosCli, opt)
 
-	case len(opt.args) > 0:
-		return runCreateFromArg(storageosCli, opt)
+	case (opt.user + opt.group + opt.namespace) != "":
+		return runCreateFromFlags(storageosCli, opt)
 
 	default:
-		return fmt.Errorf("Please provide input files, positional args or the stdin flag")
+		return fmt.Errorf(
+			"Please provide input files, use the user/group/namespace flags or set the stdin flag\nSee '%s --help'.\n\nUsage:  %s\n\n%s",
+			cmd.CommandPath(),
+			cmd.UseLine(),
+			cmd.Short,
+		)
 	}
 }
 
@@ -142,22 +154,18 @@ func runCreateFromFiles(storageosCli *command.StorageOSCli, opt createOptions) e
 	return sendJSONL(storageosCli, bytes.Join(jsonlFiles, []byte("\n")))
 }
 
-func runCreateFromArg(storageosCli *command.StorageOSCli, opt createOptions) error {
-	type jsonList []*json.RawMessage
-	type jsonObject *json.RawMessage
+func runCreateFromFlags(storageosCli *command.StorageOSCli, opt createOptions) error {
+	pol := types.Policy{}
+	pol.Spec.User = opt.user
+	pol.Spec.Group = opt.group
+	pol.Spec.Namespace = opt.namespace
 
-	var jsonlArgs [][]byte
-
-	for i, policy := range opt.args {
-		buf, err := jsonlParse([]byte(policy))
-		if err != nil {
-			return fmt.Errorf("error parsing positional arg %d: %s", i, err)
-		}
-
-		jsonlArgs = append(jsonlArgs, buf)
+	data, err := json.Marshal(&pol)
+	if err != nil {
+		return err
 	}
 
-	return sendJSONL(storageosCli, bytes.Join(jsonlArgs, []byte("\n")))
+	return sendJSONL(storageosCli, append(data, '\n'))
 }
 
 func runCreateFromStdin(storageosCli *command.StorageOSCli, opt createOptions) error {

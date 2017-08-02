@@ -45,6 +45,16 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Short: `Create a new User, E.g. "storageos user create --password alice" (interactive password prompt)`,
 		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 && opt.username == "" {
+				return fmt.Errorf(
+					"\"%s\" requires a username argument.\nSee '%s --help'.\n\nUsage:  %s\n\n%s",
+					cmd.CommandPath(),
+					cmd.CommandPath(),
+					cmd.UseLine(),
+					cmd.Short,
+				)
+			}
+
 			if len(args) == 1 {
 				if opt.username != "" {
 					fmt.Fprint(storageosCli.Err(), "Conflicting options: either specify --username or provide positional arg, not both\n")
