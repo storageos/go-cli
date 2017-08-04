@@ -1,5 +1,5 @@
-hash: ecd0713d1ed125ef6eab523210aa38ef2630f05db7ad27499f22960a17b1c0db
-updated: 2017-08-01T15:11:18.478964361+01:00
+hash: 0d9d99619eee5f5905d352d3177e375dca188b43c96b77df95d139ce32e4e265
+updated: 2017-08-02T17:14:45.753815809+01:00
 imports:
 - name: github.com/Azure/go-ansiterm
   version: 19f72df4d05d31cbe1c56bfc8045c96babff6c7e
@@ -23,14 +23,15 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/Microsoft/go-winio
   version: 7ff89941bcb93df2e962467fb073c6e997b13cf0
-- name: github.com/sirupsen/logrus
-  version: 181d419aa9e2223811b824e8f0b4af96f9ba9302
 - name: github.com/Sirupsen/logrus
+  version: 10f801ebc38b33738c9d17d50860f484a0988ff5
+  repo: https://github.com/sirupsen/logrus.git
+- name: github.com/sirupsen/logrus
   version: a3f95b5c423586578a4e099b11a46c2479628cac
 - name: github.com/spf13/pflag
   version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/storageos/go-api
-  version: c7d11f85f6e1e708f7db1813756156ce3d48f0b8
+  version: 13c329ee614e7fddc73c6e3e4c0e7e7a47250b26
   subpackages:
   - types
   - types/versions
@@ -40,7 +41,7 @@ imports:
   - ssh
   - ssh/terminal
 - name: golang.org/x/sys
-  version: f7928cfef4d09d1b080aa2b6fd3ca9ba1567c733
+  version: e312636bdaa2fac4f0acde9d17ab9fbad2b4ad10
   subpackages:
   - unix
   - windows

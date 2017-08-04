@@ -12,14 +12,14 @@ import (
 
 const (
 	defaultVolumeQuietFormat = "{{.Name}}"
-	defaultVolumeTableFormat = "table {{.Name}}\t{{.Size}}\t{{.MountedBy}}\t{{.Mountpoint}}\t{{.Status}}\t{{.Replicas}}\t{{.Location}}"
+	defaultVolumeTableFormat = "table {{.Name}}\t{{.Size}}\t{{.MountedBy}}\t{{.NodeSelector}}\t{{.Status}}\t{{.Replicas}}\t{{.Location}}"
 
-	volumeNameHeader       = "NAMESPACE/NAME"
-	volumeMountedByHeader  = "MOUNTED BY"
-	volumeMountpointHeader = "MOUNTPOINT"
-	volumeStatusHeader     = "STATUS"
-	volumeReplicasHeader   = "REPLICAS"
-	volumeLocationHeader   = "LOCATION"
+	volumeNameHeader         = "NAMESPACE/NAME"
+	volumeMountedByHeader    = "MOUNTED BY"
+	volumeNodeSelectorHeader = "NODE SELECTOR"
+	volumeStatusHeader       = "STATUS"
+	volumeReplicasHeader     = "REPLICAS"
+	volumeLocationHeader     = "LOCATION"
 )
 
 // NewVolumeFormat returns a format for use with a volume Context
@@ -102,12 +102,12 @@ func (c *volumeContext) MountedBy() string {
 	return fmt.Sprintf("%s", c.v.MountedBy)
 }
 
-func (c *volumeContext) Mountpoint() string {
-	c.AddHeader(volumeMountpointHeader)
-	if c.v.Mountpoint == "" {
+func (c *volumeContext) NodeSelector() string {
+	c.AddHeader(volumeNodeSelectorHeader)
+	if c.v.NodeSelector == "" {
 		return ""
 	}
-	return fmt.Sprintf("%s", c.v.Mountpoint)
+	return fmt.Sprintf("%s", c.v.NodeSelector)
 }
 
 func (c *volumeContext) Size() string {
