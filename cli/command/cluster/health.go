@@ -16,8 +16,8 @@ import (
 
 func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "health [cp|dp] [CLUSTER]",
-		Short: `Displays the cluster's health information`,
+		Use:   "health cp|dp CLUSTER_TOKEN",
+		Short: `Displays the cluster's health information from a cluster token (as given by cluster create)`,
 		Args:  cli.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runHealth(storageosCli, args[1], args[0])
