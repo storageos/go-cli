@@ -134,5 +134,10 @@ func runHealthFromENV(storageosCli *command.StorageOSCli, opt *healthOptions) er
 		return err
 	}
 
-	return runHealthFromAddr(storageosCli, node.Address, opt)
+	// runHealthFromAddr runs url.Parse on the given url, this means that the url
+	// must have a scheme to be valid. The only field used from the url is
+	// hostname and the scheme is ignored. For this reason the scheme "scheme"
+	// has been used here, to make it more obvious that this scheme doesn't
+	// change behaviour at all.
+	return runHealthFromAddr(storageosCli, "scheme://"+node.Address, opt)
 }
