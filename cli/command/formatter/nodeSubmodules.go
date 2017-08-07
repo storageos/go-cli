@@ -5,12 +5,13 @@ import (
 )
 
 const (
-	defaultNodeSubmodulesTableFormat = "table {{.Name}}\t{{.Status}}\t{{.UpdatedAt}}\t{{.ChangedAt}}"
+	defaultNodeSubmodulesTableFormat = "table {{.Name}}\t{{.Status}}\t{{.UpdatedAt}}\t{{.ChangedAt}}\t{{.Message}}"
 
 	nodeSubmodulesNameHeader      = "SUBMODULE"
 	nodeSubmodulesStatusHeader    = "STATUS"
 	nodeSubmodulesUpdatedAtHeader = "UPDATED_AT"
 	nodeSubmodulesChangedAtHeader = "CHANGED_AT"
+	nodeSubmodulesMessageHeader   = "MESSAGE"
 )
 
 // NewNodeSubmodulesFormat returns a format for use with a nodeSubmodules Context
@@ -19,7 +20,7 @@ func NewNodeHealthFormat(source string) Format {
 	case TableFormatKey:
 		return defaultNodeSubmodulesTableFormat
 	case RawFormatKey:
-		return `submodule: {{.Submodule}}\nstatus: {{.Status}}\nupdated_at: {{.UpdatedAt}}\nchanged_at: {{.ChangedAt}}\n`
+		return `submodule: {{.Submodule}}\nstatus: {{.Status}}\nupdated_at: {{.UpdatedAt}}\nchanged_at: {{.ChangedAt}}\nmessage: {{.Message}}\n`
 	}
 	return Format(source)
 }
@@ -64,4 +65,9 @@ func (n *nodeHealthContext) UpdatedAt() string {
 func (n *nodeHealthContext) ChangedAt() string {
 	n.AddHeader(nodeSubmodulesChangedAtHeader)
 	return n.v.ChangedAt
+}
+
+func (n *nodeHealthContext) Message() string {
+	n.AddHeader(nodeSubmodulesMessageHeader)
+	return n.v.Message
 }
