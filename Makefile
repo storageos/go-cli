@@ -8,7 +8,7 @@ LDFLAGS		+= -X github.com/storageos/go-cli/version.BuildDate=$(JOBDATE)
 
 build:
 	@echo "++ Building storageos binary"
-	cd cmd/storageos && CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)"
+	cd cmd/storageos && CGO_ENABLED=1 go build -ldflags "$(LDFLAGS)"
 
 release:
 	@echo "++ Building storageos release binaries"
