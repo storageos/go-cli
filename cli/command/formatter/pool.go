@@ -2,6 +2,7 @@ package formatter
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	units "github.com/docker/go-units"
@@ -71,7 +72,7 @@ func (c *poolContext) Drivers() string {
 
 func (c *poolContext) Nodes() string {
 	c.AddHeader(poolNodesHeader)
-	return strings.Join(c.v.ControllerNames, ", ")
+	return strconv.Itoa(len(c.v.ControllerNames))
 }
 
 func (c *poolContext) CapacityUsed() string {
