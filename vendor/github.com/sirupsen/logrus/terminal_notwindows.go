@@ -3,7 +3,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build windows,!appengine
+// +build linux darwin freebsd openbsd netbsd dragonfly
+// +build !appengine
 
 package logrus
 
@@ -14,19 +15,13 @@ import (
 	"unsafe"
 )
 
-var kernel32 = syscall.NewLazyDLL("kernel32.dll")
-
-var (
-	procGetConsoleMode = kernel32.NewProc("GetConsoleMode")
-)
-
 // IsTerminal returns true if stderr's file descriptor is a terminal.
 func IsTerminal(f io.Writer) bool {
+	var termios Termios
 	switch v := f.(type) {
 	case *os.File:
-		var st uint32
-		r, _, e := syscall.Syscall(procGetConsoleMode.Addr(), 2, uintptr(v.Fd()), uintptr(unsafe.Pointer(&st)), 0)
-		return r != 0 && e == 0
+		_, _, err := syscall.Syscall6(syscall.SYS_IOCTL, uintptr(v.Fd()), ioctlReadTermios, uintptr(unsafe.Pointer(&termios)), 0, 0, 0)
+		return err == 0
 	default:
 		return false
 	}

@@ -3,22 +3,23 @@ package volume
 import (
 	"fmt"
 
+	"context"
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/opts"
-	"context"
 )
 
 type createOptions struct {
-	name        string
-	description string
-	size        int
-	pool        string
-	fsType      string
-	namespace   string
-	labels      opts.ListOpts
+	name         string
+	description  string
+	size         int
+	pool         string
+	fsType       string
+	namespace    string
+	nodeSelector string
+	labels       opts.ListOpts
 }
 
 func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
@@ -49,6 +50,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVarP(&opt.pool, "pool", "p", "default", "Volume capacity pool")
 	flags.StringVarP(&opt.fsType, "fstype", "f", "", "Requested filesystem type")
 	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Volume namespace")
+	flags.StringVar(&opt.nodeSelector, "nodeSelector", "", "Node selector")
 	flags.Var(&opt.labels, "label", "Set metadata (key=value pairs) on the volume")
 
 	return cmd
@@ -58,14 +60,15 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 	client := storageosCli.Client()
 
 	params := types.VolumeCreateOptions{
-		Name:        opt.name,
-		Description: opt.description,
-		Size:        opt.size,
-		Pool:        opt.pool,
-		FSType:      opt.fsType,
-		Namespace:   opt.namespace,
-		Labels:      opts.ConvertKVStringsToMap(opt.labels.GetAll()),
-		Context:     context.Background(),
+		Name:         opt.name,
+		Description:  opt.description,
+		Size:         opt.size,
+		Pool:         opt.pool,
+		FSType:       opt.fsType,
+		Namespace:    opt.namespace,
+		NodeSelector: opt.nodeSelector,
+		Labels:       opts.ConvertKVStringsToMap(opt.labels.GetAll()),
+		Context:      context.Background(),
 	}
 
 	vol, err := client.VolumeCreate(params)
