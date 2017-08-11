@@ -553,9 +553,9 @@ func (e *Error) Error() string {
 	}
 
 	if niceStatus != "" {
-		return fmt.Sprintf("API error (%d): %s", niceStatus, e.Message)
+		return fmt.Sprintf("API error (%s): %s", niceStatus, e.Message)
 	}
-	return fmt.Sprintf("API error (%d): %s", http.StatusText(e.Status), e.Message)
+	return fmt.Sprintf("API error (%s): %s", http.StatusText(e.Status), e.Message)
 }
 
 func parseEndpoint(endpoint string, tls bool) (*url.URL, error) {
