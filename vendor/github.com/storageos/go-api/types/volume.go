@@ -43,6 +43,9 @@ type Volume struct {
 	// Namespace is the object name and authentication scope, such as for teams and projects.
 	Namespace string `json:"namespace"`
 
+	// node selector (where volumes should land)
+	NodeSelector string `json:"nodeSelector"`
+
 	// Volume deployment information for the master volume.
 	// Read Only: true
 	Master *Deployment `json:"master,omitempty"`
