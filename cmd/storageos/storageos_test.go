@@ -5,7 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
+
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/debug"
 	"github.com/storageos/go-cli/pkg/testutil/assert"

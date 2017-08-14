@@ -7,7 +7,7 @@ import (
 	"io"
 	"text/template"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/pkg/templates"
 )

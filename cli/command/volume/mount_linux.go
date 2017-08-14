@@ -20,7 +20,7 @@ import (
 
 	"github.com/storageos/go-api/types"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type mountOptions struct {

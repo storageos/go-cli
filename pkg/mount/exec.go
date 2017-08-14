@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // OS utilities must be in path, which shouldn't be a problem as they need to

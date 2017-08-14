@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // Driver - generic mount driver interface

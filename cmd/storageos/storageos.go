@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/dnephin/cobra"
-
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 
 	"github.com/storageos/go-api/types/versions"

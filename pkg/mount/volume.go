@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // defaultTimeOut is the maximum time to wait for async volume operations.
