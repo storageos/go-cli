@@ -32,7 +32,7 @@ func (s *stringSlice) Set(val string) error {
 
 type createOptions struct {
 	username string
-	password bool
+	password string
 	groups   stringSlice
 	role     string
 }
@@ -42,7 +42,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "create [OPTIONS] [USERNAME]",
-		Short: `Create a new User, E.g. "storageos user create --password alice" (interactive password prompt)`,
+		Short: `Create a new User, E.g. "storageos user create alice" (interactive password prompt)`,
 		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 && opt.username == "" {
@@ -68,7 +68,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags := cmd.Flags()
 	flags.StringVar(&opt.username, "username", "", "Username")
 	flags.Lookup("username").Hidden = true
-	flags.BoolVar(&opt.password, "password", false, "Prompt for password (interactive)")
+	flags.StringVar(&opt.password, "password", "", "Provide password as an argument, rather than interactive input")
 	flags.StringVar(&opt.role, "role", "user", "Role")
 	flags.Var(&opt.groups, "groups", "Groups")
 
@@ -76,11 +76,11 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 }
 
 func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
-	var password string
+	password := opt.password
 
-	if opt.password {
+	// If no password was provided, get it interactively
+	if password == "" {
 		var err error
-
 		password, err = getPassword(storageosCli)
 		if err != nil {
 			return err
@@ -126,6 +126,12 @@ retry:
 		goto retry
 	}
 
+	if len(passBytes1) < 8 {
+		fmt.Fprintln(storageosCli.Err(), "\nPassword too short (<8 chars), please retry...")
+		goto retry
+	}
+
+	fmt.Fprint(storageosCli.Out(), "\n")
 	return string(passBytes1), nil
 }
 
