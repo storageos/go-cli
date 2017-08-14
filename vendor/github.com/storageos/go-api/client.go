@@ -539,7 +539,23 @@ func newError(resp *http.Response) *Error {
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("API error (%d): %s", e.Status, e.Message)
+	var niceStatus string
+
+	switch e.Status {
+	case 400, 500:
+		niceStatus = "Server failed to process your request. Was the data correct?"
+	case 401:
+		niceStatus = "Unauthenticated access of secure endpoint, please retry after authentication"
+	case 403:
+		niceStatus = "Forbidden request. Your user cannot perform this action"
+	case 404:
+		niceStatus = "Requested object not found. Does this item exist?"
+	}
+
+	if niceStatus != "" {
+		return fmt.Sprintf("API error (%s): %s", niceStatus, e.Message)
+	}
+	return fmt.Sprintf("API error (%s): %s", http.StatusText(e.Status), e.Message)
 }
 
 func parseEndpoint(endpoint string, tls bool) (*url.URL, error) {
