@@ -49,10 +49,8 @@ func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 }
 
 func runCPHealth(storageosCli *command.StorageOSCli, nodes []*cliTypes.Node) error {
-	clusterHealth := &apiTypes.ClusterHealthCP{}
 
 	for _, node := range nodes {
-		fmt.Printf("node: %#v\n", node)
 		u, err := url.Parse(node.AdvertiseAddress)
 		if err != nil {
 			return err
@@ -62,18 +60,16 @@ func runCPHealth(storageosCli *command.StorageOSCli, nodes []*cliTypes.Node) err
 		if err != nil {
 			return err
 		}
-
-		clusterHealth.Add(node.ID, status)
+		node.Health.CP = status
 	}
 
 	return formatter.ClusterHealthCPWrite(formatter.Context{
 		Output: storageosCli.Out(),
 		Format: formatter.NewHealthCPFormat(formatter.TableFormatKey),
-	}, clusterHealth)
+	}, nodes)
 }
 
 func runDPHealth(storageosCli *command.StorageOSCli, nodes []*cliTypes.Node) error {
-	clusterHealth := &apiTypes.ClusterHealthDP{}
 
 	for _, node := range nodes {
 		u, err := url.Parse(node.AdvertiseAddress)
@@ -86,13 +82,13 @@ func runDPHealth(storageosCli *command.StorageOSCli, nodes []*cliTypes.Node) err
 			return err
 		}
 
-		clusterHealth.Add(node.ID, status)
+		node.Health.DP = status
 	}
 
 	return formatter.ClusterHealthDPWrite(formatter.Context{
 		Output: storageosCli.Out(),
 		Format: formatter.NewHealthDPFormat(formatter.TableFormatKey),
-	}, clusterHealth)
+	}, nodes)
 }
 
 func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
