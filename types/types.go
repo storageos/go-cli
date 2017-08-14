@@ -2,6 +2,8 @@ package types
 
 import (
 	"time"
+
+	apiTypes "github.com/storageos/go-api/types"
 )
 
 // ClusterCreateOps - optional fields when creating cluster
@@ -39,4 +41,9 @@ type Node struct {
 
 	CreatedAt time.Time `json:"createdAt,omitempty"`
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+
+	Health struct {
+		CP *apiTypes.CPHealthStatus
+		DP *apiTypes.DPHealthStatus
+	}
 }

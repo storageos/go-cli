@@ -1,7 +1,9 @@
 package formatter
 
 import (
-	"github.com/storageos/go-api/types"
+	"fmt"
+
+	"github.com/storageos/go-cli/types"
 )
 
 const (
@@ -28,10 +30,13 @@ func NewHealthDPFormat(source string) Format {
 }
 
 // ClusterHealthDPWrite writes formatted ClusterHealthDP elements using the Context
-func ClusterHealthDPWrite(ctx Context, clusterHealth *types.ClusterHealthDP) error {
+func ClusterHealthDPWrite(ctx Context, nodes []*types.Node) error {
+	if len(nodes) == 0 {
+		return fmt.Errorf("No cluster nodes found")
+	}
 	render := func(format func(subContext subContext) error) error {
-		for _, status := range *clusterHealth {
-			if err := format(&dpHealthContext{v: status}); err != nil {
+		for _, node := range nodes {
+			if err := format(&dpHealthContext{v: node}); err != nil {
 				return err
 			}
 		}
@@ -42,7 +47,7 @@ func ClusterHealthDPWrite(ctx Context, clusterHealth *types.ClusterHealthDP) err
 
 type dpHealthContext struct {
 	HeaderContext
-	v types.DPHealthStatusWithID
+	v *types.Node
 }
 
 func (d *dpHealthContext) MarshalJSON() ([]byte, error) {
@@ -51,11 +56,15 @@ func (d *dpHealthContext) MarshalJSON() ([]byte, error) {
 
 func (d *dpHealthContext) Node() string {
 	d.AddHeader(clusterHealthDPNodeHeader)
-	return d.v.ID
+	return d.v.Name
 }
 
 func (d *dpHealthContext) healthy() bool {
-	return d.v.DirectFSClient.Status+d.v.DirectFSServer.Status+d.v.Director.Status+d.v.FSDriver.Status+d.v.FS.Status == "alivealivealivealivealive"
+	return d.v.Health.DP.DirectFSClient.Status+
+		d.v.Health.DP.DirectFSServer.Status+
+		d.v.Health.DP.Director.Status+
+		d.v.Health.DP.FSDriver.Status+
+		d.v.Health.DP.FS.Status == "alivealivealivealivealive"
 }
 
 func (d *dpHealthContext) Status() string {
@@ -68,25 +77,25 @@ func (d *dpHealthContext) Status() string {
 
 func (d *dpHealthContext) DirectFSClient() string {
 	d.AddHeader(clusterHealthDPDirectFSClientHeader)
-	return d.v.DirectFSClient.Status
+	return d.v.Health.DP.DirectFSClient.Status
 }
 
 func (d *dpHealthContext) DirectFSServer() string {
 	d.AddHeader(clusterHealthDPDirectFSServerHeader)
-	return d.v.DirectFSServer.Status
+	return d.v.Health.DP.DirectFSServer.Status
 }
 
 func (d *dpHealthContext) Director() string {
 	d.AddHeader(clusterHealthDPDirectorHeader)
-	return d.v.Director.Status
+	return d.v.Health.DP.Director.Status
 }
 
 func (d *dpHealthContext) FSDriver() string {
 	d.AddHeader(clusterHealthDPFSDriverHeader)
-	return d.v.FSDriver.Status
+	return d.v.Health.DP.FSDriver.Status
 }
 
 func (d *dpHealthContext) FS() string {
 	d.AddHeader(clusterHealthDPFSHeader)
-	return d.v.FS.Status
+	return d.v.Health.DP.FS.Status
 }
