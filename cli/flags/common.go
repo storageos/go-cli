@@ -3,11 +3,11 @@ package flags
 import (
 	"fmt"
 	"os"
-	// "path/filepath"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/docker/go-connections/tlsconfig"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
+
 	cliconfig "github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/cli/opts"
 )

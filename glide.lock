@@ -1,5 +1,5 @@
-hash: 0d9d99619eee5f5905d352d3177e375dca188b43c96b77df95d139ce32e4e265
-updated: 2017-08-11T15:50:37.051663614+01:00
+hash: a7afcd04d7b7a60a2a47b262b608b98e64b5733b9aa5dc10912cc151d6959424
+updated: 2017-08-14T20:01:45.381103266+01:00
 imports:
 - name: github.com/Azure/go-ansiterm
   version: 19f72df4d05d31cbe1c56bfc8045c96babff6c7e
@@ -12,7 +12,7 @@ imports:
 - name: github.com/dnephin/cobra
   version: 0e9ca70a23585bdaab4beba1e7c4c23a1adfa857
 - name: github.com/docker/go-connections
-  version: 990a1a1a70b0da4c4cb70e117971a4f0babfbf1a
+  version: 3ede32e2033de7505e6500d6c868c2b9ed9f169d
   subpackages:
   - tlsconfig
 - name: github.com/docker/go-units
@@ -23,9 +23,8 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/Microsoft/go-winio
   version: 78439966b38d69bf38227fbf57ac8a6fee70f69a
-- name: github.com/Sirupsen/logrus
-  version: 10f801ebc38b33738c9d17d50860f484a0988ff5
-  repo: https://github.com/sirupsen/logrus.git
+- name: github.com/pkg/errors
+  version: c605e284fe17294bda444b34710735b29d1a9d90
 - name: github.com/sirupsen/logrus
   version: a3f95b5c423586578a4e099b11a46c2479628cac
 - name: github.com/spf13/pflag
@@ -41,7 +40,7 @@ imports:
   - ssh
   - ssh/terminal
 - name: golang.org/x/sys
-  version: f7928cfef4d09d1b080aa2b6fd3ca9ba1567c733
+  version: c84c1ab9fd18cdd4c23dd021c10f5f46dea95e46
   subpackages:
   - unix
   - windows
