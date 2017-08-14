@@ -104,7 +104,7 @@ func verifyUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
 	}
 
 	if !(opt.role == "" || verifyRole(opt.role)) {
-		return fmt.Errorf(`Role must me "user" or "admin", not %s`, opt.role)
+		return fmt.Errorf(`Role must be either "user" or "admin", not %s`, opt.role)
 	}
 
 	return nil
