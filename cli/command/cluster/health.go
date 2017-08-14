@@ -7,7 +7,6 @@ import (
 	"github.com/dnephin/cobra"
 
 	apiTypes "github.com/storageos/go-api/types"
-	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
 	"github.com/storageos/go-cli/discovery"
@@ -32,11 +31,12 @@ func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := &healthOpt{}
 
 	cmd := &cobra.Command{
-		Use:   "health [--cp | --dp] CLUSTER_TOKEN",
-		Short: `Displays the cluster's health information from a cluster token (as given by cluster create)`,
-		Args:  cli.ExactArgs(1),
+		Use:   "health [--cp | --dp] [CLUSTER_ID]",
+		Short: `Displays the cluster's health.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			opt.cluster = args[0]
+			if len(args) == 1 {
+				opt.cluster = args[0]
+			}
 			return runHealth(storageosCli, opt)
 		},
 	}
@@ -48,10 +48,11 @@ func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	return cmd
 }
 
-func runCPHealth(storageosCli *command.StorageOSCli, cluster *cliTypes.Cluster) error {
+func runCPHealth(storageosCli *command.StorageOSCli, nodes []*cliTypes.Node) error {
 	clusterHealth := &apiTypes.ClusterHealthCP{}
 
-	for _, node := range cluster.Nodes {
+	for _, node := range nodes {
+		fmt.Printf("node: %#v\n", node)
 		u, err := url.Parse(node.AdvertiseAddress)
 		if err != nil {
 			return err
@@ -71,10 +72,10 @@ func runCPHealth(storageosCli *command.StorageOSCli, cluster *cliTypes.Cluster) 
 	}, clusterHealth)
 }
 
-func runDPHealth(storageosCli *command.StorageOSCli, cluster *cliTypes.Cluster) error {
+func runDPHealth(storageosCli *command.StorageOSCli, nodes []*cliTypes.Node) error {
 	clusterHealth := &apiTypes.ClusterHealthDP{}
 
-	for _, node := range cluster.Nodes {
+	for _, node := range nodes {
 		u, err := url.Parse(node.AdvertiseAddress)
 		if err != nil {
 			return err
@@ -95,12 +96,8 @@ func runDPHealth(storageosCli *command.StorageOSCli, cluster *cliTypes.Cluster) 
 }
 
 func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
-	client, err := discovery.NewClient("", "", "")
-	if err != nil {
-		return err
-	}
 
-	cluster, err := client.ClusterStatus(opt.cluster)
+	nodes, err := getNodes(storageosCli, opt)
 	if err != nil {
 		return err
 	}
@@ -108,17 +105,61 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 	switch {
 	case opt.cp() && opt.dp():
 		fmt.Fprintln(storageosCli.Out(), "Controlplane:")
-		if err := runCPHealth(storageosCli, cluster); err != nil {
+		if err := runCPHealth(storageosCli, nodes); err != nil {
 			return err
 		}
 
 		fmt.Fprintln(storageosCli.Out(), "\nDataplane:")
-		return runDPHealth(storageosCli, cluster)
+		return runDPHealth(storageosCli, nodes)
 
 	case opt.cp():
-		return runCPHealth(storageosCli, cluster)
+		return runCPHealth(storageosCli, nodes)
 
 	default:
-		return runDPHealth(storageosCli, cluster)
+		return runDPHealth(storageosCli, nodes)
 	}
+	return nil
+}
+
+func getNodes(storageosCli *command.StorageOSCli, opt *healthOpt) ([]*cliTypes.Node, error) {
+
+	if opt.cluster != "" {
+		return getDiscoveryNodes(opt.cluster)
+	}
+	return getAPINodes(storageosCli)
+}
+
+func getDiscoveryNodes(clusterID string) ([]*cliTypes.Node, error) {
+
+	client, err := discovery.NewClient("", "", "")
+	if err != nil {
+		return nil, err
+	}
+
+	cluster, err := client.ClusterStatus(clusterID)
+	if err != nil {
+		return nil, err
+	}
+
+	return cluster.Nodes, nil
+
+}
+
+func getAPINodes(storageosCli *command.StorageOSCli) ([]*cliTypes.Node, error) {
+
+	apiNodes, err := storageosCli.Client().ControllerList(apiTypes.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	var nodes []*cliTypes.Node
+	for _, n := range apiNodes {
+		node := &cliTypes.Node{
+			ID:               n.ID,
+			Name:             n.Name,
+			AdvertiseAddress: "http://" + n.Address,
+		}
+		nodes = append(nodes, node)
+	}
+	return nodes, nil
 }
