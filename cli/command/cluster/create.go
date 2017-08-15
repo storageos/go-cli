@@ -54,6 +54,6 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 		return err
 	}
 
-	fmt.Fprintf(storageosCli.Out(), "cluster token: %s\n", token)
+	fmt.Fprintf(storageosCli.Out(), "%s\n", token)
 	return nil
 }
