@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"context"
+
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
@@ -30,7 +31,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "create [OPTIONS] [RULE]",
 		Short: `Creates a rule. To create a rule that configures 2 replicas for volumes with the label env=prod, run:
-storageos rule create --namespace default --selector env==prod --action add --label storageos.feature.replicas=2 replicator
+storageos rule create --selector env==prod --action add --label storageos.feature.replicas=2 replicator
 		`,
 		Args: cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -51,7 +52,7 @@ storageos rule create --namespace default --selector env==prod --action add --la
 	flags.StringVarP(&opt.ruleAction, "action", "a", "add", "Rule action (add|remove)")
 	flags.StringVarP(&opt.selector, "selector", "s", "", "selectors to trigger rule, i.e. 'environment = production' (operators !|=|==|in|!=|notin|exists|<|>")
 	flags.IntVarP(&opt.weight, "weight", "w", 5, "Rule weight determines processing order (0-10)")
-	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Volume namespace")
+	flags.StringVarP(&opt.namespace, "namespace", "n", "default", "Rule namespace")
 	flags.BoolVar(&opt.active, "active", true, "Enable or disable the rule")
 
 	flags.Var(&opt.labels, "label", "Labels to apply when rule is triggered")
