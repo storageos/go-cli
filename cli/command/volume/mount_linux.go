@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/dnephin/cobra"
@@ -54,7 +55,12 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	// checking whether we are on storageos node
 	_, err := system.Stat(cliconfig.DeviceRootPath)
 	if err != nil {
-		return fmt.Errorf("device root path '%s' not found, check whether StorageOS is running", cliconfig.DeviceRootPath)
+		return fmt.Errorf("device root path %q not found, check whether StorageOS is running", cliconfig.DeviceRootPath)
+	}
+
+	// must be root
+	if euid := syscall.Geteuid(); euid != 0 {
+		return fmt.Errorf("volume mount requires root permission - try prefixing command with `sudo`")
 	}
 
 	// validating fsType
