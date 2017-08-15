@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"context"
+
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
@@ -49,7 +50,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.IntVarP(&opt.size, "size", "s", 5, "Volume size in GB")
 	flags.StringVarP(&opt.pool, "pool", "p", "default", "Volume capacity pool")
 	flags.StringVarP(&opt.fsType, "fstype", "f", "", "Requested filesystem type")
-	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Volume namespace")
+	flags.StringVarP(&opt.namespace, "namespace", "n", "default", "Volume namespace")
 	flags.StringVar(&opt.nodeSelector, "nodeSelector", "", "Node selector")
 	flags.Var(&opt.labels, "label", "Set metadata (key=value pairs) on the volume")
 
