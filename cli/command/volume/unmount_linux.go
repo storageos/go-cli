@@ -5,6 +5,7 @@ package volume
 import (
 	"context"
 	"fmt"
+	"syscall"
 	// "strings"
 	"time"
 
@@ -54,6 +55,11 @@ func runUnmount(storageosCli *command.StorageOSCli, opt unmountOptions, mountDri
 	_, err := system.Stat(cliconfig.DeviceRootPath)
 	if err != nil {
 		return fmt.Errorf("device root path '%s' not found, check whether StorageOS is running", cliconfig.DeviceRootPath)
+	}
+
+	// must be root
+	if euid := syscall.Geteuid(); euid != 0 {
+		return fmt.Errorf("volume unmount must be run as root user - try prefixing command with `sudo`")
 	}
 
 	client := storageosCli.Client()
