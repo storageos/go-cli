@@ -13,9 +13,11 @@ import (
 
 // Format keys used to specify certain kinds of output formats
 const (
-	TableFormatKey  = "table"
-	RawFormatKey    = "raw"
-	PrettyFormatKey = "pretty"
+	TableFormatKey         = "table"
+	RawFormatKey           = "raw"
+	PrettyFormatKey        = "pretty"
+	CPHealthTableFormatKey = "cp"
+	DPHealthTableFormatKey = "dp"
 
 	defaultQuietFormat = "{{.ID}}"
 )
