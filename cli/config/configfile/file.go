@@ -16,13 +16,14 @@ import (
 type ConfigFile struct {
 	AuthConfigs map[string]types.AuthConfig `json:"auths"`
 	// HTTPHeaders          map[string]string           `json:"HttpHeaders,omitempty"`
-	VolumesFormat    string `json:"volumesFormat,omitempty"`
-	PoolsFormat      string `json:"poolsFormat,omitempty"`
-	NamespacesFormat string `json:"namespacesFormat,omitempty"`
-	RulesFormat      string `json:"rulesFormat,omitempty"`
-	UsersFormat      string `json:"usersFormat,omitempty"`
-	PoliciesFormat   string `json:"policiesFormat,omitempty"`
-	TemplatesFormat  string `json:"templatesFormat,omitempty"`
+	VolumesFormat       string `json:"volumesFormat,omitempty"`
+	PoolsFormat         string `json:"poolsFormat,omitempty"`
+	NamespacesFormat    string `json:"namespacesFormat,omitempty"`
+	RulesFormat         string `json:"rulesFormat,omitempty"`
+	UsersFormat         string `json:"usersFormat,omitempty"`
+	PoliciesFormat      string `json:"policiesFormat,omitempty"`
+	TemplatesFormat     string `json:"templatesFormat,omitempty"`
+	ClusterHealthFormat string `json:"clusterHealthFormat,omitempty"`
 	// DetachKeys           string                      `json:"detachKeys,omitempty"`
 	// CredentialsStore     string                      `json:"credsStore,omitempty"`
 	// CredentialHelpers    map[string]string           `json:"credHelpers,omitempty"`

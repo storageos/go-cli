@@ -14,7 +14,7 @@ const (
 	nodeSubmodulesMessageHeader   = "MESSAGE"
 )
 
-// NewNodeSubmodulesFormat returns a format for use with a nodeSubmodules Context
+// NewNodeHealthFormat returns a format for use with a node health Context
 func NewNodeHealthFormat(source string) Format {
 	switch source {
 	case TableFormatKey:

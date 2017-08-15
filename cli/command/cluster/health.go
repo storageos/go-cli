@@ -1,7 +1,6 @@
 package cluster
 
 import (
-	"fmt"
 	"net/url"
 
 	"github.com/dnephin/cobra"
@@ -14,25 +13,18 @@ import (
 )
 
 type healthOpt struct {
-	cpHealth bool
-	dpHealth bool
 	cluster  string
-}
-
-func (h healthOpt) cp() bool {
-	return h.cpHealth || !(h.cpHealth || h.dpHealth)
-}
-
-func (h healthOpt) dp() bool {
-	return h.dpHealth || !(h.dpHealth || h.cpHealth)
+	quiet    bool
+	format   string
+	selector string
 }
 
 func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := &healthOpt{}
 
 	cmd := &cobra.Command{
-		Use:   "health [--cp | --dp] [CLUSTER_ID]",
-		Short: `Displays the cluster's health.`,
+		Use:   "health [CLUSTER_ID]",
+		Short: `Displays the cluster's health.  When a cluster id is provided, uses the discovery service to discover nodes.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 1 {
 				opt.cluster = args[0]
@@ -41,54 +33,12 @@ func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		},
 	}
 
-	flag := cmd.Flags()
-	flag.BoolVar(&opt.cpHealth, "cp", false, "Display the output from the control plane only")
-	flag.BoolVar(&opt.dpHealth, "dp", false, "Display the output from the data plane only")
+	flags := cmd.Flags()
+	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Display minimal cluster health info.  Can be used with format.")
+	flags.StringVar(&opt.format, "format", "", "Pretty-print health with formats: table (default), cp, dp or raw.")
+	// flags.StringVarP(&opt.selector, "selector", "s", "", "Provide selector (e.g. to list all nodes with label region=eu ' --selector=region=eu')")
 
 	return cmd
-}
-
-func runCPHealth(storageosCli *command.StorageOSCli, nodes []*cliTypes.Node) error {
-
-	for _, node := range nodes {
-		u, err := url.Parse(node.AdvertiseAddress)
-		if err != nil {
-			return err
-		}
-
-		status, err := storageosCli.Client().CPHealth(u.Hostname())
-		if err != nil {
-			return err
-		}
-		node.Health.CP = status
-	}
-
-	return formatter.ClusterHealthCPWrite(formatter.Context{
-		Output: storageosCli.Out(),
-		Format: formatter.NewHealthCPFormat(formatter.TableFormatKey),
-	}, nodes)
-}
-
-func runDPHealth(storageosCli *command.StorageOSCli, nodes []*cliTypes.Node) error {
-
-	for _, node := range nodes {
-		u, err := url.Parse(node.AdvertiseAddress)
-		if err != nil {
-			return err
-		}
-
-		status, err := storageosCli.Client().DPHealth(u.Hostname())
-		if err != nil {
-			return err
-		}
-
-		node.Health.DP = status
-	}
-
-	return formatter.ClusterHealthDPWrite(formatter.Context{
-		Output: storageosCli.Out(),
-		Format: formatter.NewHealthDPFormat(formatter.TableFormatKey),
-	}, nodes)
 }
 
 func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
@@ -98,23 +48,41 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 		return err
 	}
 
-	switch {
-	case opt.cp() && opt.dp():
-		fmt.Fprintln(storageosCli.Out(), "Controlplane:")
-		if err := runCPHealth(storageosCli, nodes); err != nil {
+	format := opt.format
+	if len(format) == 0 {
+		if len(storageosCli.ConfigFile().PoolsFormat) > 0 && !opt.quiet {
+			format = storageosCli.ConfigFile().ClusterHealthFormat
+		} else {
+			format = formatter.TableFormatKey
+		}
+	}
+
+	for _, node := range nodes {
+		u, err := url.Parse(node.AdvertiseAddress)
+		if err != nil {
 			return err
 		}
 
-		fmt.Fprintln(storageosCli.Out(), "\nDataplane:")
-		return runDPHealth(storageosCli, nodes)
+		cpHealth, err := storageosCli.Client().CPHealth(u.Hostname())
+		if err != nil {
+			// Don't exit if we can't collect health for a node
+			continue
+		}
+		node.Health.CP = cpHealth
 
-	case opt.cp():
-		return runCPHealth(storageosCli, nodes)
-
-	default:
-		return runDPHealth(storageosCli, nodes)
+		dpHealth, err := storageosCli.Client().DPHealth(u.Hostname())
+		if err != nil {
+			// Don't exit if we can't collect health for a node
+			continue
+		}
+		node.Health.DP = dpHealth
 	}
-	return nil
+
+	clusterHealthCtx := formatter.Context{
+		Output: storageosCli.Out(),
+		Format: formatter.NewClusterHealthFormat(format, opt.quiet),
+	}
+	return formatter.ClusterHealthWrite(clusterHealthCtx, nodes)
 }
 
 func getNodes(storageosCli *command.StorageOSCli, opt *healthOpt) ([]*cliTypes.Node, error) {
