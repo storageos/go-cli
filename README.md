@@ -15,13 +15,7 @@ export STORAGEOS_USERNAME=<your username>
 export STORAGEOS_PASSWORD=<your password>
 ```
 
-## Docker
-
-We recommend that you create a bash alias for the docker run command:
-
-```bash
-alias storageos=='docker run --rm -e STORAGEOS_HOST -e STORAGEOS_USERNAME -e STORAGEOS_PASSWORD storageos/cli'
-```
+Choose either the binary or Docker installation methods.  Once installed, usage should be the same. 
 
 ## Binary Installation (Mac + Linux)
 
@@ -30,6 +24,14 @@ sudo -i
 curl -sSL https://github.com/storageos/go-cli/releases/download/0.0.11/storageos_linux_amd64 > /usr/local/bin/storageos
 chmod +x /usr/local/bin/storageos
 exit
+```
+
+## Docker
+
+We recommend that you create a bash alias for the docker run command:
+
+```bash
+alias storageos=='docker run --rm -e STORAGEOS_HOST -e STORAGEOS_USERNAME -e STORAGEOS_PASSWORD storageos/cli'
 ```
 
 ## Usage
