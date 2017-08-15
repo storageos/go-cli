@@ -7,6 +7,7 @@ import (
 
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
+	"github.com/storageos/go-cli/cli/opts"
 
 	"github.com/storageos/go-cli/discovery"
 )
@@ -38,11 +39,15 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVar(&opt.name, "name", "", "Cluster name")
 	flags.Lookup("name").Hidden = true
 
-	flags.IntVarP(&opt.size, "size", "s", 3, "Cluster size (3-7)")
+	flags.IntVarP(&opt.size, "size", "s", 3, "Cluster consensus size: 1, 3, 5, or 7 (minimum 3 for production)")
 	return cmd
 }
 
 func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
+
+	if _, err := opts.ValidateClusterSize(opt.size); err != nil {
+		return err
+	}
 
 	client, err := discovery.NewClient("", "", "")
 	if err != nil {
