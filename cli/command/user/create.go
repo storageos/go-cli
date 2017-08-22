@@ -153,6 +153,11 @@ func verify(storageosCli *command.StorageOSCli, opt createOptions) (verifies boo
 		fmt.Fprintf(storageosCli.Err(), `Role must me "user" or "admin", not %s\n`, opt.role)
 	}
 
+	if len(opt.password) < 8 {
+		verifies = false
+		fmt.Fprintln(storageosCli.Err(), "\nPassword too short (<8 chars)")
+	}
+
 	return
 }
 
