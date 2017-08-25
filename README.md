@@ -17,11 +17,20 @@ export STORAGEOS_PASSWORD=<your password>
 
 Choose either the binary or Docker installation methods.  Once installed, usage should be the same. 
 
-## Binary Installation (Mac + Linux)
+## Binary Installation (Linux)
 
 ```bash
 sudo -i
-curl -sSL https://github.com/storageos/go-cli/releases/download/0.0.11/storageos_linux_amd64 > /usr/local/bin/storageos
+curl -sSL https://github.com/storageos/go-cli/releases/download/0.0.12/storageos_linux_amd64 > /usr/local/bin/storageos
+chmod +x /usr/local/bin/storageos
+exit
+```
+
+## Binary Installation (Mac)
+
+```bash
+sudo -i
+curl -sSL https://github.com/storageos/go-cli/releases/download/0.0.12/storageos_darwin_amd64 > /usr/local/bin/storageos
 chmod +x /usr/local/bin/storageos
 exit
 ```
