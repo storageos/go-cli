@@ -530,12 +530,24 @@ type Error struct {
 }
 
 func newError(resp *http.Response) *Error {
+	type jsonError struct {
+		Message string `json:"message"`
+	}
+
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return &Error{Status: resp.StatusCode, Message: fmt.Sprintf("cannot read body, err: %v", err)}
 	}
-	return &Error{Status: resp.StatusCode, Message: string(data)}
+
+	// attempt to unmarshal the error if in json format
+	jerr := &jsonError{}
+	err = json.Unmarshal(data, jerr)
+	if err != nil {
+		return &Error{Status: resp.StatusCode, Message: string(data)} // Failed, just return string
+	}
+
+	return &Error{Status: resp.StatusCode, Message: jerr.Message}
 }
 
 func (e *Error) Error() string {

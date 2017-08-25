@@ -1,5 +1,5 @@
 hash: a7afcd04d7b7a60a2a47b262b608b98e64b5733b9aa5dc10912cc151d6959424
-updated: 2017-08-14T20:01:45.381103266+01:00
+updated: 2017-08-23T11:45:12.849500416+01:00
 imports:
 - name: github.com/Azure/go-ansiterm
   version: 19f72df4d05d31cbe1c56bfc8045c96babff6c7e
@@ -30,7 +30,7 @@ imports:
 - name: github.com/spf13/pflag
   version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/storageos/go-api
-  version: 143777bbe9b481cbfce9e53244fd7d89ec802655
+  version: 823afe49bd5d0b09b8d29dc45db3ce827a07a557
   subpackages:
   - types
   - types/versions
@@ -40,7 +40,7 @@ imports:
   - ssh
   - ssh/terminal
 - name: golang.org/x/sys
-  version: c84c1ab9fd18cdd4c23dd021c10f5f46dea95e46
+  version: f7928cfef4d09d1b080aa2b6fd3ca9ba1567c733
   subpackages:
   - unix
   - windows
