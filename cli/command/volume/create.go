@@ -6,6 +6,7 @@ import (
 	"context"
 
 	"github.com/dnephin/cobra"
+	"github.com/storageos/go-api"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
@@ -29,16 +30,33 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:   "create [OPTIONS] [VOLUME]",
+		Use:   "create [OPTIONS] [NAMESPACE]/[VOLUME]",
 		Short: "Create a volume",
 		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 1 {
-				if opt.name != "" {
-					fmt.Fprint(storageosCli.Err(), "Conflicting options: either specify --name or provide positional arg, not both\n")
+				switch {
+				case opt.name != "" && opt.namespace != "":
+					fmt.Fprint(storageosCli.Err(), "Conflicting options: (--namespace, --name and positional NAMESPACE/VOLUME formats used) These are mutualy exclusive\n")
 					return cli.StatusError{StatusCode: 1}
+
+				case opt.name != "":
+					fmt.Fprint(storageosCli.Err(), "Conflicting options: (--name and positional NAMESPACE/VOLUME formats used) These are mutualy exclusive\n")
+					return cli.StatusError{StatusCode: 1}
+
+				case opt.namespace != "":
+					fmt.Fprint(storageosCli.Err(), "Conflicting options: (--namespace and positional NAMESPACE/VOLUME formats used) These are mutualy exclusive\n")
+					return cli.StatusError{StatusCode: 1}
+
+				default:
+					// Parse the user input to get namespace and volume name
+					namespace, name, err := storageos.ParseRef(args[0])
+					if err != nil {
+						return err
+					}
+					opt.name = name
+					opt.namespace = namespace
 				}
-				opt.name = args[0]
 			}
 			return runCreate(storageosCli, opt)
 		},
@@ -50,7 +68,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.IntVarP(&opt.size, "size", "s", 5, "Volume size in GB")
 	flags.StringVarP(&opt.pool, "pool", "p", "default", "Volume capacity pool")
 	flags.StringVarP(&opt.fsType, "fstype", "f", "", "Requested filesystem type")
-	flags.StringVarP(&opt.namespace, "namespace", "n", "default", "Volume namespace")
+	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Volume namespace")
 	flags.StringVar(&opt.nodeSelector, "nodeSelector", "", "Node selector")
 	flags.Var(&opt.labels, "label", "Set metadata (key=value pairs) on the volume")
 
