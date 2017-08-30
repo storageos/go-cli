@@ -89,11 +89,6 @@ func unmountVolume(ctx context.Context, mp string) error {
 	}
 	log.Debugf("Unmounted volume: %s", mp)
 
-	if err := deleteMountPoint(mp); err != nil {
-		return err
-	}
-	log.Debugf("Mountpoint deleted: %s ", mp)
-
 	return nil
 }
 
@@ -101,10 +96,4 @@ func unmountVolume(ctx context.Context, mp string) error {
 // path.
 func createMountPoint(path string) error {
 	return os.MkdirAll(path, mountpointPerms)
-}
-
-// deleteMountPoint removes the target mountpoint on the filesystem given the
-// path.
-func deleteMountPoint(path string) error {
-	return os.Remove(path)
 }
