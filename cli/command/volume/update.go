@@ -6,7 +6,6 @@ import (
 
 	"github.com/dnephin/cobra"
 	"github.com/spf13/pflag"
-	storageos "github.com/storageos/go-api"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
@@ -69,7 +68,7 @@ func updateVolumes(storageosCli *command.StorageOSCli, refs []string, mergeVolum
 
 	for _, ref := range refs {
 
-		namespace, name, err := storageos.ParseRef(ref)
+		namespace, name, err := parseRefWithDefault(ref)
 		if err != nil {
 			return err
 		}

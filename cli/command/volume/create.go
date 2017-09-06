@@ -1,7 +1,9 @@
 package volume
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 
 	"context"
 
@@ -33,16 +35,21 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Short: "Create a volume",
 		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 1 {
-				if opt.name != "" {
-					fmt.Fprint(storageosCli.Err(), "Conflicting options: either specify --name or provide positional arg, not both\n")
-					return cli.StatusError{StatusCode: 1}
-				}
-				opt.name = args[0]
+			var posarg string
+			if len(args) > 0 {
+				posarg = args[0]
 			}
+
+			var err error
+			opt.namespace, opt.name, err = parseNamespaceVolume(opt.namespace, opt.name, posarg)
+			if err != nil {
+				return err
+			}
+
 			return runCreate(storageosCli, opt)
 		},
 	}
+
 	flags := cmd.Flags()
 	flags.StringVar(&opt.name, "name", "", "Volume name")
 	flags.Lookup("name").Hidden = true
@@ -50,7 +57,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.IntVarP(&opt.size, "size", "s", 5, "Volume size in GB")
 	flags.StringVarP(&opt.pool, "pool", "p", "default", "Volume capacity pool")
 	flags.StringVarP(&opt.fsType, "fstype", "f", "", "Requested filesystem type")
-	flags.StringVarP(&opt.namespace, "namespace", "n", "default", "Volume namespace")
+	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Volume namespace")
 	flags.StringVar(&opt.nodeSelector, "nodeSelector", "", "Node selector")
 	flags.Var(&opt.labels, "label", "Set metadata (key=value pairs) on the volume")
 
@@ -79,4 +86,37 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 
 	fmt.Fprintf(storageosCli.Out(), "%s/%s\n", vol.Namespace, vol.Name)
 	return nil
+}
+
+func parseNamespaceVolume(nsflag, vnflag, posarg string) (namespace string, volume string, err error) {
+	switch {
+	case posarg != "" && vnflag != "":
+		return "", "", errors.New("Conflicting options: either specify --name or provide positional arg, not both\n")
+
+	case posarg != "":
+		split := strings.Split(posarg, "/")
+
+		switch {
+		case len(split) > 1 && nsflag != "":
+			return "", "", errors.New("Conflicting options: either specify --namespace or use 'namespace/volumename' positional arg, not both\n")
+
+		case len(split) > 1:
+			return split[0], split[1], nil
+
+		case nsflag != "":
+			return nsflag, posarg, nil
+
+		default:
+			return "default", posarg, nil
+		}
+
+	case vnflag != "" && nsflag != "":
+		return nsflag, vnflag, nil
+
+	case vnflag != "":
+		return "default", vnflag, nil
+
+	default:
+		return "", "", errors.New("Please provide a volume name\n")
+	}
 }
