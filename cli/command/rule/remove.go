@@ -9,6 +9,7 @@ import (
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
+	"github.com/storageos/go-cli/pkg/validation"
 )
 
 type removeOptions struct {
@@ -42,7 +43,7 @@ func runRemove(storageosCli *command.StorageOSCli, opt *removeOptions) error {
 	status := 0
 
 	for _, ref := range opt.rules {
-		namespace, name, err := parseRefWithDefault(ref)
+		namespace, name, err := validation.ParseRefWithDefault(ref)
 		if err != nil {
 			fmt.Fprintf(storageosCli.Err(), "%s\n", err)
 			status = 1

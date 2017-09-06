@@ -10,6 +10,7 @@ import (
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/opts"
+	"github.com/storageos/go-cli/pkg/validation"
 
 	"context"
 )
@@ -68,7 +69,7 @@ func updateVolumes(storageosCli *command.StorageOSCli, refs []string, mergeVolum
 
 	for _, ref := range refs {
 
-		namespace, name, err := parseRefWithDefault(ref)
+		namespace, name, err := validation.ParseRefWithDefault(ref)
 		if err != nil {
 			return err
 		}

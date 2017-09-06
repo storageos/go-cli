@@ -11,6 +11,7 @@ import (
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/opts"
+	"github.com/storageos/go-cli/pkg/validation"
 )
 
 const (
@@ -75,7 +76,7 @@ func updateRules(storageosCli *command.StorageOSCli, refs []string, mergeRule fu
 
 	for _, ref := range refs {
 
-		namespace, name, err := parseRefWithDefault(ref)
+		namespace, name, err := validation.ParseRefWithDefault(ref)
 		if err != nil {
 			return err
 		}

@@ -69,7 +69,7 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	}
 
 	client := storageosCli.Client()
-	namespace, name, err := parseRefWithDefault(opt.ref)
+	namespace, name, err := validation.ParseRefWithDefault(opt.ref)
 	if err != nil {
 		return err
 	}

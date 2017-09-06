@@ -16,7 +16,7 @@ import (
 	// "github.com/storageos/go-cli/pkg/host"
 	"github.com/storageos/go-cli/pkg/mount"
 	"github.com/storageos/go-cli/pkg/system"
-	// "github.com/storageos/go-cli/pkg/validation"
+	"github.com/storageos/go-cli/pkg/validation"
 
 	"github.com/storageos/go-api/types"
 
@@ -62,7 +62,7 @@ func runUnmount(storageosCli *command.StorageOSCli, opt unmountOptions, mountDri
 	}
 
 	client := storageosCli.Client()
-	namespace, name, err := parseRefWithDefault(opt.ref)
+	namespace, name, err := validation.ParseRefWithDefault(opt.ref)
 	if err != nil {
 		return err
 	}
