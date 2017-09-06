@@ -35,7 +35,7 @@ func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	client := storageosCli.Client()
 
 	getFunc := func(ref string) (interface{}, []byte, error) {
-		namespace, name, err := storageos.ParseRef(ref)
+		namespace, name, err := parseRefWithDefault(ref)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -44,4 +44,13 @@ func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	}
 
 	return inspect.Inspect(storageosCli.Out(), opt.names, opt.format, getFunc)
+}
+
+// The same as the normal parse ref function, but adds default if the namespace is not defined
+func parseRefWithDefault(ref string) (string, string, error) {
+	namespace, name, err := storageos.ParseRef(ref)
+	if err != nil {
+		return storageos.ParseRef("default/" + ref)
+	}
+	return namespace, name, err
 }

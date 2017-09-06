@@ -6,7 +6,6 @@ import (
 	"context"
 
 	"github.com/dnephin/cobra"
-	"github.com/storageos/go-api"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
@@ -43,7 +42,7 @@ func runRemove(storageosCli *command.StorageOSCli, opt *removeOptions) error {
 	status := 0
 
 	for _, ref := range opt.rules {
-		namespace, name, err := storageos.ParseRef(ref)
+		namespace, name, err := parseRefWithDefault(ref)
 		if err != nil {
 			fmt.Fprintf(storageosCli.Err(), "%s\n", err)
 			status = 1
