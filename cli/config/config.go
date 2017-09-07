@@ -81,7 +81,8 @@ func Load(configDir string) (*configfile.ConfigFile, error) {
 	}
 
 	configFile := configfile.ConfigFile{
-		Filename: filepath.Join(configDir, ConfigFileName),
+		Filename:         filepath.Join(configDir, ConfigFileName),
+		CredentialsStore: make(configfile.CredStore),
 	}
 
 	// Try happy path first - latest config file

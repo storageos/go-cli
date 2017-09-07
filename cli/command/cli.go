@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 
 	"github.com/dnephin/cobra"
@@ -160,10 +161,19 @@ func NewAPIClientFromFlags(opt *cliflags.CommonOptions, configFile *configfile.C
 		return &api.Client{}, err
 	}
 
-	username, password, err := configFile.CredentialsStore.GetCredetials(host)
+	var username string
+	var password string
+
+	p, err := url.Parse(host)
 	if err != nil {
 		username = os.Getenv(cliconfig.EnvStorageosUsername)
 		password = os.Getenv(cliconfig.EnvStorageosPassword)
+	} else {
+		username, password, err = configFile.CredentialsStore.GetCredetials(p.Hostname())
+		if err != nil {
+			username = os.Getenv(cliconfig.EnvStorageosUsername)
+			password = os.Getenv(cliconfig.EnvStorageosPassword)
+		}
 	}
 
 	if opt.Username != "" {
