@@ -37,7 +37,7 @@ func NewLoginCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.Lookup("host").Hidden = true
 	flags.StringVar(&opt.username, "username", "", "The username to use for this host")
 	flags.StringVar(&opt.password, "password", "", "The username to use for this host")
-	flags.BoolVar(&opt.delete, "d", false, "Delete entry for this host")
+	flags.BoolVarP(&opt.delete, "delete", "d", false, "Delete entry for this host")
 
 	return cmd
 }
@@ -104,7 +104,7 @@ func runDelete(storageosCli *command.StorageOSCli, opt loginOptions, args []stri
 
 	default:
 		storageosCli.ConfigFile().CredentialsStore.DeleteCredetials(host)
-		return nil
+		return storageosCli.ConfigFile().Save()
 	}
 
 }

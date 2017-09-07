@@ -10,9 +10,9 @@ import (
 )
 
 type credentials struct {
-	Username    string          `json:"username"`
-	Password    encodedPassword `json:"password,omitempty"`
-	UseKeychain bool            `json:"useKeychain,omitempty"`
+	Username    string           `json:"username"`
+	Password    *encodedPassword `json:"password,omitempty"`
+	UseKeychain bool             `json:"useKeychain,omitempty"`
 }
 
 func (c credentials) saveToKeychain(host string) error {
@@ -24,7 +24,7 @@ func (c credentials) saveToKeychain(host string) error {
 		"/usr/bin/security", "add-generic-password",
 		"-s", "storageos_cli",
 		"-a", host,
-		"-w", string(c.Password),
+		"-w", string(*c.Password),
 		"-U",
 	).Run()
 }

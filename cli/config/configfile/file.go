@@ -11,7 +11,6 @@ import (
 // ConfigFile ~/.storageos/config.json file info
 type ConfigFile struct {
 	// HTTPHeaders          map[string]string           `json:"HttpHeaders,omitempty"`
-<<<<<<< HEAD
 	VolumesFormat       string `json:"volumesFormat,omitempty"`
 	PoolsFormat         string `json:"poolsFormat,omitempty"`
 	NamespacesFormat    string `json:"namespacesFormat,omitempty"`
@@ -21,21 +20,7 @@ type ConfigFile struct {
 	TemplatesFormat     string `json:"templatesFormat,omitempty"`
 	ClusterHealthFormat string `json:"clusterHealthFormat,omitempty"`
 	NodeHealthFormat    string `json:"nodeHealthFormat,omitempty"`
-	// DetachKeys           string                      `json:"detachKeys,omitempty"`
-	// CredentialsStore     string                      `json:"credsStore,omitempty"`
-	// CredentialHelpers    map[string]string           `json:"credHelpers,omitempty"`
-	Filename string `json:"-"` // Note: for internal use only
-=======
-	CredentialsStore credStore `json:"knownHosts,omitempty"`
-	VolumesFormat    string    `json:"volumesFormat,omitempty"`
-	PoolsFormat      string    `json:"poolsFormat,omitempty"`
-	NamespacesFormat string    `json:"namespacesFormat,omitempty"`
-	RulesFormat      string    `json:"rulesFormat,omitempty"`
-	UsersFormat      string    `json:"usersFormat,omitempty"`
-	PoliciesFormat   string    `json:"policiesFormat,omitempty"`
-	TemplatesFormat  string    `json:"templatesFormat,omitempty"`
-	Filename         string    `json:"-"` // Note: for internal use only
->>>>>>> Add credentials support to config file
+	Filename            string `json:"-"` // Note: for internal use only
 }
 
 // LoadFromReader reads the configuration data given and sets up the auth config
