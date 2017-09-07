@@ -4,6 +4,7 @@ import (
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/cluster"
+	"github.com/storageos/go-cli/cli/command/login"
 	"github.com/storageos/go-cli/cli/command/namespace"
 	"github.com/storageos/go-cli/cli/command/node"
 	"github.com/storageos/go-cli/cli/command/policy"
@@ -24,6 +25,7 @@ func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 		policy.NewPolicyCommand(storageosCli),
 		volume.NewVolumeCommand(storageosCli),
 		node.NewNodeCommand(storageosCli),
+		login.NewLoginCommand(storageosCli),
 
 		// system
 		// system.NewSystemCommand(storageosCli),
