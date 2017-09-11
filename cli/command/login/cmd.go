@@ -14,7 +14,6 @@ type loginOptions struct {
 	host     string
 	username string
 	password string
-	delete   bool
 }
 
 func NewLoginCommand(storageosCli *command.StorageOSCli) *cobra.Command {
@@ -25,9 +24,6 @@ func NewLoginCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Short: "Store login credentials for a given storageos host",
 		Args:  cli.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if opt.delete {
-				return runDelete(storageosCli, opt)
-			}
 			return runLogin(storageosCli, opt)
 		},
 	}
@@ -36,7 +32,6 @@ func NewLoginCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVar(&opt.host, "host", "", "The host to store the credentials for")
 	flags.StringVar(&opt.username, "username", "", "The username to use for this host")
 	flags.StringVar(&opt.password, "password", "", "The password to use for this host")
-	flags.BoolVarP(&opt.delete, "delete", "d", false, "Delete entry for this host")
 
 	return cmd
 }
@@ -76,24 +71,4 @@ func runLogin(storageosCli *command.StorageOSCli, opt loginOptions) error {
 
 		return conf.Save()
 	}
-}
-
-func runDelete(storageosCli *command.StorageOSCli, opt loginOptions) error {
-	host, err := getHost(opt)
-	if err != nil {
-		return err
-	}
-
-	switch {
-	case opt.username != "":
-		return errors.New("Do not provide --username when deleting credentials")
-
-	case opt.password != "":
-		return errors.New("Do not provide --password when deleting credentials")
-
-	default:
-		storageosCli.ConfigFile().CredentialsStore.DeleteCredentials(host)
-		return storageosCli.ConfigFile().Save()
-	}
-
 }

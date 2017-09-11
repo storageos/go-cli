@@ -5,6 +5,7 @@ import (
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/cluster"
 	"github.com/storageos/go-cli/cli/command/login"
+	"github.com/storageos/go-cli/cli/command/logout"
 	"github.com/storageos/go-cli/cli/command/namespace"
 	"github.com/storageos/go-cli/cli/command/node"
 	"github.com/storageos/go-cli/cli/command/policy"
@@ -26,6 +27,7 @@ func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 		volume.NewVolumeCommand(storageosCli),
 		node.NewNodeCommand(storageosCli),
 		login.NewLoginCommand(storageosCli),
+		logout.NewLogoutCommand(storageosCli),
 
 		// system
 		// system.NewSystemCommand(storageosCli),
