@@ -6,12 +6,12 @@ import (
 
 type CredStore map[string]credentials
 
-func (c CredStore) HasCredetials(host string) bool {
+func (c CredStore) HasCredentials(host string) bool {
 	_, ok := c[host]
 	return ok
 }
 
-func (c CredStore) GetCredetials(host string) (username string, password string, err error) {
+func (c CredStore) GetCredentials(host string) (username string, password string, err error) {
 	creds, ok := c[host]
 	if !ok {
 		return "", "", ErrUnknownHost
@@ -27,7 +27,7 @@ func (c CredStore) GetCredetials(host string) (username string, password string,
 	return
 }
 
-func (c CredStore) SetCredetials(host string, username string, password string) error {
+func (c CredStore) SetCredentials(host string, username string, password string) error {
 	pass := encodedPassword(password)
 
 	creds := credentials{
@@ -43,6 +43,6 @@ func (c CredStore) SetCredetials(host string, username string, password string) 
 	return nil
 }
 
-func (c CredStore) DeleteCredetials(host string) {
+func (c CredStore) DeleteCredentials(host string) {
 	delete(c, host)
 }
