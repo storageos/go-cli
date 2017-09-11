@@ -18,34 +18,47 @@ func NewLogoutCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := logoutOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "logout",
+		Use:   "logout [HOST]",
 		Short: "Delete stored login credentials for a given storageos host",
-		Args:  cli.NoArgs,
+		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDelete(storageosCli, opt)
+			return runDelete(storageosCli, opt, args)
 		},
 	}
 
 	flags := cmd.Flags()
 	flags.StringVar(&opt.host, "host", "", "The host to remove the credentials for")
+	flags.Lookup("host").Hidden = true
 
 	return cmd
 }
 
-func getHost(opt logoutOptions) (string, error) {
-	if opt.host != "" {
-		return opt.host, nil
+func getHost(opt logoutOptions, args []string) (string, error) {
+	var host string
+
+	switch {
+	case len(args) == 1:
+		if opt.host != "" {
+			return "", errors.New("Conflicting options: either specify --host or provide positional arg, not both")
+		}
+		host = args[0]
+
+	case opt.host != "":
+		host = opt.host
+
+	default:
+		host = os.Getenv(config.EnvStorageOSHost)
+		if host == "" {
+			return "", errors.New("No setting found for host")
+		}
+
 	}
 
-	if host := os.Getenv(config.EnvStorageOSHost); host != "" {
-		return host, nil
-	}
-
-	return "", errors.New("No setting found for host")
+	return host, nil
 }
 
-func runDelete(storageosCli *command.StorageOSCli, opt logoutOptions) error {
-	host, err := getHost(opt)
+func runDelete(storageosCli *command.StorageOSCli, opt logoutOptions, args []string) error {
+	host, err := getHost(opt, args)
 	if err != nil {
 		return err
 	}
