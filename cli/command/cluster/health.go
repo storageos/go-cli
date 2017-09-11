@@ -1,7 +1,9 @@
 package cluster
 
 import (
+	"context"
 	"net/url"
+	"time"
 
 	"github.com/dnephin/cobra"
 
@@ -17,6 +19,7 @@ type healthOpt struct {
 	quiet    bool
 	format   string
 	selector string
+	timeout  int
 }
 
 func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
@@ -35,6 +38,7 @@ func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Display minimal cluster health info.  Can be used with format.")
+	flags.IntVarP(&opt.timeout, "timeout", "t", 2, "Timeout in seconds.")
 	flags.StringVar(&opt.format, "format", "", "Pretty-print health with formats: table (default), cp, dp or raw.")
 	// flags.StringVarP(&opt.selector, "selector", "s", "", "Provide selector (e.g. to list all nodes with label region=eu ' --selector=region=eu')")
 
@@ -90,7 +94,7 @@ func getNodes(storageosCli *command.StorageOSCli, opt *healthOpt) ([]*cliTypes.N
 	if opt.cluster != "" {
 		return getDiscoveryNodes(opt.cluster)
 	}
-	return getAPINodes(storageosCli)
+	return getAPINodes(storageosCli, opt.timeout)
 }
 
 func getDiscoveryNodes(clusterID string) ([]*cliTypes.Node, error) {
@@ -109,9 +113,13 @@ func getDiscoveryNodes(clusterID string) ([]*cliTypes.Node, error) {
 
 }
 
-func getAPINodes(storageosCli *command.StorageOSCli) ([]*cliTypes.Node, error) {
+func getAPINodes(storageosCli *command.StorageOSCli, timeout int) ([]*cliTypes.Node, error) {
 
-	apiNodes, err := storageosCli.Client().ControllerList(apiTypes.ListOptions{})
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*time.Duration(timeout))
+	listOptions := apiTypes.ListOptions{
+		Context: ctx,
+	}
+	apiNodes, err := storageosCli.Client().ControllerList(listOptions)
 	if err != nil {
 		return nil, err
 	}
