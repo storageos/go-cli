@@ -76,15 +76,15 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 }
 
 func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
-	password := opt.password
-
 	// If no password was provided, get it interactively
-	if password == "" {
+	if opt.password == "" {
 		var err error
-		password, err = getPassword(storageosCli)
+		opt.password, err = getPassword(storageosCli)
 		if err != nil {
 			return err
 		}
+	} else if len(opt.password) < 8 {
+		return errors.New("Password too short (<8 chars)")
 	}
 
 	opt.role = strings.ToLower(opt.role)
@@ -97,7 +97,7 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 
 	params := types.UserCreateOptions{
 		Username: opt.username,
-		Password: password,
+		Password: opt.password,
 		Groups:   opt.groups,
 		Role:     opt.role,
 		Context:  context.Background(),
@@ -151,11 +151,6 @@ func verify(storageosCli *command.StorageOSCli, opt createOptions) (verifies boo
 	if !verifyRole(opt.role) {
 		verifies = false
 		fmt.Fprintf(storageosCli.Err(), `Role must me "user" or "admin", not %s\n`, opt.role)
-	}
-
-	if len(opt.password) < 8 {
-		verifies = false
-		fmt.Fprintln(storageosCli.Err(), "\nPassword too short (<8 chars)")
 	}
 
 	return
