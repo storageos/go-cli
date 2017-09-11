@@ -80,7 +80,7 @@ func runLogin(storageosCli *command.StorageOSCli, opt loginOptions, args []strin
 		return errors.New("Please provide a --password")
 
 	default:
-		err := storageosCli.ConfigFile().CredentialsStore.SetCredetials(host, opt.username, opt.password)
+		err := storageosCli.ConfigFile().CredentialsStore.SetCredentials(host, opt.username, opt.password)
 		if err != nil {
 			return err
 		}
@@ -103,7 +103,7 @@ func runDelete(storageosCli *command.StorageOSCli, opt loginOptions, args []stri
 		return errors.New("Do not provide --password when deleting credentials")
 
 	default:
-		storageosCli.ConfigFile().CredentialsStore.DeleteCredetials(host)
+		storageosCli.ConfigFile().CredentialsStore.DeleteCredentials(host)
 		return storageosCli.ConfigFile().Save()
 	}
 

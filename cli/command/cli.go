@@ -169,7 +169,7 @@ func NewAPIClientFromFlags(opt *cliflags.CommonOptions, configFile *configfile.C
 		username = os.Getenv(cliconfig.EnvStorageosUsername)
 		password = os.Getenv(cliconfig.EnvStorageosPassword)
 	} else {
-		username, password, err = configFile.CredentialsStore.GetCredetials(p.Hostname())
+		username, password, err = configFile.CredentialsStore.GetCredentials(p.Hostname())
 		if err != nil {
 			username = os.Getenv(cliconfig.EnvStorageosUsername)
 			password = os.Getenv(cliconfig.EnvStorageosPassword)
