@@ -21,53 +21,40 @@ func NewLoginCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := loginOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "login [HOST]",
+		Use:   "login",
 		Short: "Store login credentials for a given storageos host",
-		Args:  cli.RequiresMaxArgs(1),
+		Args:  cli.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if opt.delete {
-				return runDelete(storageosCli, opt, args)
+				return runDelete(storageosCli, opt)
 			}
-			return runLogin(storageosCli, opt, args)
+			return runLogin(storageosCli, opt)
 		},
 	}
 
 	flags := cmd.Flags()
 	flags.StringVar(&opt.host, "host", "", "The host to store the credentials for")
-	flags.Lookup("host").Hidden = true
 	flags.StringVar(&opt.username, "username", "", "The username to use for this host")
-	flags.StringVar(&opt.password, "password", "", "The username to use for this host")
+	flags.StringVar(&opt.password, "password", "", "The password to use for this host")
 	flags.BoolVarP(&opt.delete, "delete", "d", false, "Delete entry for this host")
 
 	return cmd
 }
 
-func getHost(opt loginOptions, args []string) (string, error) {
-	var host string
-
-	switch {
-	case len(args) == 1:
-		if opt.host != "" {
-			return "", errors.New("Conflicting options: either specify --host or provide positional arg, not both")
-		}
-		host = args[0]
-
-	case opt.host != "":
-		host = opt.host
-
-	default:
-		host = os.Getenv(config.EnvStorageOSHost)
-		if host == "" {
-			return "", errors.New("No setting found for host")
-		}
-
+func getHost(opt loginOptions) (string, error) {
+	if opt.host != "" {
+		return opt.host, nil
 	}
 
-	return host, nil
+	if host := os.Getenv(config.EnvStorageOSHost); host != "" {
+		return host, nil
+	}
+
+	return "", errors.New("No setting found for host")
 }
 
-func runLogin(storageosCli *command.StorageOSCli, opt loginOptions, args []string) error {
-	host, err := getHost(opt, args)
+func runLogin(storageosCli *command.StorageOSCli, opt loginOptions) error {
+	host, err := getHost(opt)
 	if err != nil {
 		return err
 	}
@@ -80,17 +67,19 @@ func runLogin(storageosCli *command.StorageOSCli, opt loginOptions, args []strin
 		return errors.New("Please provide a --password")
 
 	default:
-		err := storageosCli.ConfigFile().CredentialsStore.SetCredentials(host, opt.username, opt.password)
+		conf := storageosCli.ConfigFile()
+
+		err := conf.CredentialsStore.SetCredentials(host, opt.username, opt.password)
 		if err != nil {
 			return err
 		}
 
-		return storageosCli.ConfigFile().Save()
+		return conf.Save()
 	}
 }
 
-func runDelete(storageosCli *command.StorageOSCli, opt loginOptions, args []string) error {
-	host, err := getHost(opt, args)
+func runDelete(storageosCli *command.StorageOSCli, opt loginOptions) error {
+	host, err := getHost(opt)
 	if err != nil {
 		return err
 	}
