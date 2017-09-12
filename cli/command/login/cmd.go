@@ -2,9 +2,12 @@ package login
 
 import (
 	"errors"
+	"fmt"
 	"github.com/dnephin/cobra"
+	"net/url"
 	"os"
 
+	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/config"
@@ -58,7 +61,17 @@ func getHost(opt loginOptions, args []string) (string, error) {
 
 	}
 
-	return host, nil
+	u, err := url.Parse(host)
+	if err != nil {
+		return "", err
+	}
+
+	port := u.Port()
+	if port == "" {
+		port = api.DefaultPort
+	}
+
+	return fmt.Sprintf("%s:%s", u.Hostname(), port), nil
 }
 
 func runLogin(storageosCli *command.StorageOSCli, opt loginOptions, args []string) error {
