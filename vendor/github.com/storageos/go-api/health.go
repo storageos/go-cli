@@ -3,11 +3,9 @@ package storageos
 import (
 	"context"
 	"encoding/json"
-	//"errors"
-	//"fmt"
-	"github.com/storageos/go-api/types"
 	"net/http"
-	//"net/url"
+
+	"github.com/storageos/go-api/types"
 )
 
 var (
@@ -16,7 +14,7 @@ var (
 )
 
 // CPHealth returns the health of the control plane server at a given url.
-func (c *Client) CPHealth(hostname string) (*types.CPHealthStatus, error) {
+func (c *Client) CPHealth(ctx context.Context, hostname string) (*types.CPHealthStatus, error) {
 
 	req, err := http.NewRequest("GET", "http://"+hostname+":5705/v1/"+HealthAPIPrefix, nil)
 	if err != nil {
@@ -28,7 +26,7 @@ func (c *Client) CPHealth(hostname string) (*types.CPHealthStatus, error) {
 		req.SetBasicAuth(c.username, c.secret)
 	}
 
-	resp, err := c.HTTPClient.Do(req.WithContext(context.Background()))
+	resp, err := c.HTTPClient.Do(req.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +41,7 @@ func (c *Client) CPHealth(hostname string) (*types.CPHealthStatus, error) {
 }
 
 // DPHealth returns the health of the data plane server at a given url.
-func (c *Client) DPHealth(hostname string) (*types.DPHealthStatus, error) {
+func (c *Client) DPHealth(ctx context.Context, hostname string) (*types.DPHealthStatus, error) {
 
 	req, err := http.NewRequest("GET", "http://"+hostname+":8001/v1/"+HealthAPIPrefix, nil)
 	if err != nil {
@@ -55,7 +53,7 @@ func (c *Client) DPHealth(hostname string) (*types.DPHealthStatus, error) {
 		req.SetBasicAuth(c.username, c.secret)
 	}
 
-	resp, err := c.HTTPClient.Do(req.WithContext(context.Background()))
+	resp, err := c.HTTPClient.Do(req.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
