@@ -90,13 +90,21 @@ func (c *Context) postFormat(tmpl *template.Template, subContext subContext) {
 }
 
 func (c *Context) contextFormat(tmpl *template.Template, subContext subContext) error {
+
+	origLen := c.buffer.Len()
+
 	if err := tmpl.Execute(c.buffer, subContext); err != nil {
 		return fmt.Errorf("Template parsing error: %v\n", err)
 	}
 	if c.Format.IsTable() && len(c.header) == 0 {
 		c.header = subContext.FullHeader()
 	}
-	c.buffer.WriteString("\n")
+
+	// Append newline only if there was output for this entry to avoid blank lines
+	if c.buffer.Len() > origLen {
+		c.buffer.WriteString("\n")
+	}
+
 	return nil
 }
 

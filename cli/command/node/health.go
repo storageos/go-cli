@@ -1,143 +1,80 @@
 package node
 
 import (
-	"fmt"
+	"context"
+	"time"
+
 	"github.com/dnephin/cobra"
-	"net/url"
-	// storageos "github.com/storageos/go-api"
+
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
-	"github.com/storageos/go-cli/discovery"
+	cliTypes "github.com/storageos/go-cli/types"
 )
 
 type healthOptions struct {
-	cpHealth  bool
-	dpHealth  bool
-	clusterID string
-	nodeID    string
-}
-
-func (h healthOptions) cp() bool {
-	return h.cpHealth || !(h.cpHealth || h.dpHealth)
-}
-
-func (h healthOptions) dp() bool {
-	return h.dpHealth || !(h.dpHealth || h.cpHealth)
+	name    string
+	quiet   bool
+	format  string
+	timeout int
 }
 
 func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := &healthOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "health cp|dp NODE_ID ",
+		Use:   "health [OPTIONS] NODE",
 		Short: "Display detailed information on a given node",
 		Args:  cli.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			opt.nodeID = args[0]
-
-			if opt.clusterID != "" {
-				return runHealthFromClusterID(storageosCli, opt)
-			}
-
-			return runHealthFromENV(storageosCli, opt)
+			opt.name = args[0]
+			return runHealth(storageosCli, opt)
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.BoolVar(&opt.cpHealth, "cp", false, "Display the output from the control plane only")
-	flags.BoolVar(&opt.dpHealth, "dp", false, "Display the output from the data plane only")
-	flags.StringVar(&opt.clusterID, "cluster", "", "Find the node's IP address from a cluster token")
+	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Display minimal node health info.  Can be used with format.")
+	flags.StringVar(&opt.format, "format", "", "Pretty-print health with formats: table (default), cp, dp or raw.")
+	flags.IntVarP(&opt.timeout, "timeout", "t", 1, "Timeout in seconds.")
 
 	return cmd
 }
 
-func runHealthFromAddr(storageosCli *command.StorageOSCli, addr string, opt *healthOptions) error {
-	u, err := url.Parse(addr)
+func runHealth(storageosCli *command.StorageOSCli, opt *healthOptions) error {
+
+	c, err := storageosCli.Client().Controller(opt.name)
 	if err != nil {
 		return err
 	}
 
-	switch {
-	case opt.cp() && opt.dp():
-		cphealth, err := storageosCli.Client().CPHealth(u.Hostname())
-		if err != nil {
-			return err
-		}
-
-		fmt.Fprintln(storageosCli.Out(), "Controlplane:")
-		if err := formatter.NodeHealthWrite(formatter.Context{
-			Output: storageosCli.Out(),
-			Format: formatter.NewNodeHealthFormat(formatter.TableFormatKey),
-		}, cphealth.ToNamedSubmodules()); err != nil {
-			return err
-		}
-
-		fmt.Fprintln(storageosCli.Out(), "\nDataplane:")
-		dphealth, err := storageosCli.Client().DPHealth(u.Hostname())
-		if err != nil {
-			return err
-		}
-
-		return formatter.NodeHealthWrite(formatter.Context{
-			Output: storageosCli.Out(),
-			Format: formatter.NewNodeHealthFormat(formatter.TableFormatKey),
-		}, dphealth.ToNamedSubmodules())
-
-	case opt.cp():
-		health, err := storageosCli.Client().CPHealth(u.Hostname())
-		if err != nil {
-			return err
-		}
-
-		return formatter.NodeHealthWrite(formatter.Context{
-			Output: storageosCli.Out(),
-			Format: formatter.NewNodeHealthFormat(formatter.TableFormatKey),
-		}, health.ToNamedSubmodules())
-
-	default:
-		health, err := storageosCli.Client().DPHealth(u.Hostname())
-		if err != nil {
-			return err
-		}
-
-		return formatter.NodeHealthWrite(formatter.Context{
-			Output: storageosCli.Out(),
-			Format: formatter.NewNodeHealthFormat(formatter.TableFormatKey),
-		}, health.ToNamedSubmodules())
-	}
-}
-
-func runHealthFromClusterID(storageosCli *command.StorageOSCli, opt *healthOptions) error {
-	client, err := discovery.NewClient("", "", "")
-	if err != nil {
-		return err
+	node := &cliTypes.Node{
+		ID:               c.ID,
+		Name:             c.Name,
+		AdvertiseAddress: c.Address,
 	}
 
-	cluster, err := client.ClusterStatus(opt.clusterID)
-	if err != nil {
-		return err
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(opt.timeout))
+	defer cancel()
 
-	for _, node := range cluster.Nodes {
-		if node.ID == opt.nodeID {
-			return runHealthFromAddr(storageosCli, node.AdvertiseAddress, opt)
+	// Ignore errors and carry on
+	cpHealth, _ := storageosCli.Client().CPHealth(ctx, node.AdvertiseAddress)
+	node.Health.CP = cpHealth
+
+	dpHealth, err := storageosCli.Client().DPHealth(ctx, node.AdvertiseAddress)
+	node.Health.DP = dpHealth
+
+	format := opt.format
+	if len(format) == 0 {
+		if len(storageosCli.ConfigFile().NodeHealthFormat) > 0 && !opt.quiet {
+			format = storageosCli.ConfigFile().NodeHealthFormat
+		} else {
+			format = formatter.TableFormatKey
 		}
 	}
 
-	return fmt.Errorf("Failed to find node (%s) in cluster (%s)", opt.nodeID, opt.clusterID)
-}
-
-func runHealthFromENV(storageosCli *command.StorageOSCli, opt *healthOptions) error {
-	node, err := storageosCli.Client().Controller(opt.nodeID)
-	if err != nil {
-		return err
+	nodeHealthCtx := formatter.Context{
+		Output: storageosCli.Out(),
+		Format: formatter.NewNodeHealthFormat(format, opt.quiet),
 	}
-
-	// runHealthFromAddr runs url.Parse on the given url, this means that the url
-	// must have a scheme to be valid. The only field used from the url is
-	// hostname and the scheme is ignored. For this reason the scheme "scheme"
-	// has been used here, to make it more obvious that this scheme doesn't
-	// change behaviour at all.
-	return runHealthFromAddr(storageosCli, "scheme://"+node.Address, opt)
+	return formatter.NodeHealthWrite(nodeHealthCtx, node)
 }

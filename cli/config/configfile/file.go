@@ -24,6 +24,7 @@ type ConfigFile struct {
 	PoliciesFormat      string `json:"policiesFormat,omitempty"`
 	TemplatesFormat     string `json:"templatesFormat,omitempty"`
 	ClusterHealthFormat string `json:"clusterHealthFormat,omitempty"`
+	NodeHealthFormat    string `json:"nodeHealthFormat,omitempty"`
 	// DetachKeys           string                      `json:"detachKeys,omitempty"`
 	// CredentialsStore     string                      `json:"credsStore,omitempty"`
 	// CredentialHelpers    map[string]string           `json:"credHelpers,omitempty"`
