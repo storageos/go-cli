@@ -3,6 +3,7 @@ package mount
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,7 +18,7 @@ const defaultTimeOut = 45
 // initRawVolume makes sure there is a raw volume at the path provided, and that
 // it's ready for use by Docker.  This includes creating a filesystem if there's
 // not one already present.
-func initRawVolume(ctx context.Context, path string, fsType string) error {
+func initRawVolume(stderr io.Writer, ctx context.Context, path string, fsType string) error {
 
 	if err := waitForVolume(path); err != nil {
 		return err
@@ -31,11 +32,11 @@ func initRawVolume(ctx context.Context, path string, fsType string) error {
 	}
 
 	if ft == "raw" {
-		_, err := createFilesystem(ctx, fsType, path, "")
+		_, err := createFilesystem(stderr, ctx, fsType, path, "")
 		if err != nil {
 			return err
 		}
-		log.Infof("%s filesystem created on volume %s", fsType, path)
+		log.Debugf("%s filesystem created on volume %s", fsType, path)
 	}
 
 	return nil
@@ -55,9 +56,9 @@ func waitForVolume(path string) error {
 				// volume ready, exit
 				return nil
 			}
-			log.Infof("waiting for volume to come online: %s, retrying in %v", path, timeOff)
+			log.Debugf("waiting for volume to come online: %s, retrying in %v", path, timeOff)
 		} else {
-			log.Infof("waiting for volume: %s, retrying in %v", path, timeOff)
+			log.Debugf("waiting for volume: %s, retrying in %v", path, timeOff)
 		}
 
 		if abort(start, timeOff) {
@@ -117,7 +118,7 @@ func parseFileOutput(path string, out string) (string, error) {
 	return "", fmt.Errorf("unknown fs type: %s", out)
 }
 
-func createFilesystem(ctx context.Context, fstype string, path string, options string) (string, error) {
+func createFilesystem(stderr io.Writer, ctx context.Context, fstype string, path string, options string) (string, error) {
 
 	var out string
 	var err error
@@ -127,29 +128,29 @@ func createFilesystem(ctx context.Context, fstype string, path string, options s
 	case "ext2":
 		out, err = runCmd(ctx, mkfsExt2, path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			fmt.Fprintln(stderr, "mkfs output: %s", err.Error())
 		}
 	case "ext3":
 		out, err = runCmd(ctx, mkfsExt3, path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			fmt.Fprintln(stderr, "mkfs output: %s", err.Error())
 		}
 	case "ext4":
 		// Get the volume id from the path
 		id := getVolumeIDFromPath(path)
 		out, err = runCmd(ctx, mkfsExt4, "-F", "-U", id, "-b", "4096", "-E", "lazy_itable_init=1,lazy_journal_init=1", path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			fmt.Fprintln(stderr, "mkfs output: %s", err.Error())
 		}
 	case "xfs":
 		out, err = runCmd(ctx, mkfsXfs, path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			fmt.Fprintln(stderr, "mkfs output: %s", err.Error())
 		}
 	case "btrfs":
 		out, err = runCmd(ctx, mkfsBtrfs, path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			fmt.Fprintln(stderr, "mkfs output: %s", err.Error())
 		}
 	case "":
 		return "", fmt.Errorf("filesystem not specified")

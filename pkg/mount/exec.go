@@ -39,20 +39,24 @@ func runCmd(ctx context.Context, cmd string, args ...string) (string, error) {
 	out, err := command.Output()
 
 	if ctx.Err() == context.DeadlineExceeded {
-		log.WithFields(log.Fields{
-			"cmd":   cmd,
-			"args":  args,
-			"error": err,
-		}).Error("fail to execute command, timeout exceeded")
+		if log.StandardLogger().Level == log.DebugLevel {
+			log.WithFields(log.Fields{
+				"cmd":   cmd,
+				"args":  args,
+				"error": err,
+			}).Error("fail to execute command, timeout exceeded")
+		}
 		return "", fmt.Errorf("timeout exceeded")
 	}
 
 	if err != nil {
-		log.WithFields(log.Fields{
-			"cmd":   cmd,
-			"args":  args,
-			"error": err,
-		}).Error("fail to get output from command")
+		if log.StandardLogger().Level == log.DebugLevel {
+			log.WithFields(log.Fields{
+				"cmd":   cmd,
+				"args":  args,
+				"error": err,
+			}).Error("fail to get output from command")
+		}
 		return strings.TrimSpace(string(out)), err
 	}
 	return strings.TrimSpace(string(out)), nil
