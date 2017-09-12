@@ -20,7 +20,6 @@ import (
 
 	"github.com/storageos/go-api/types"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/storageos/go-cli/pkg/host"
 )
 
@@ -92,12 +91,7 @@ func runUnmount(storageosCli *command.StorageOSCli, opt unmountOptions, mountDri
 
 	err = client.VolumeUnmount(types.VolumeUnmountOptions{ID: vol.ID, Namespace: namespace})
 	if err != nil {
-		log.WithFields(log.Fields{
-			"volumeId":  vol.ID,
-			"namespace": namespace,
-			"err":       err,
-		}).Error("failed to unmount volume")
-		return fmt.Errorf("unable to unmount volume, error: %s", err)
+		return fmt.Errorf("Failed to unmount %s/%s (id: %s): %v", vol.Namespace, vol.Name, vol.ID, err)
 	}
 
 	fmt.Printf("volume %s unmounted: %s\n", vol.Name, vol.Mountpoint)
