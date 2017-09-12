@@ -323,7 +323,7 @@ func TestError(t *testing.T) {
 	if !reflect.DeepEqual(expected, *err) {
 		t.Errorf("Wrong error type. Want %#v. Got %#v.", expected, *err)
 	}
-	message := "API error (400): bad parameter"
+	message := "API error (Server failed to process your request. Was the data correct?): bad parameter"
 	if err.Error() != message {
 		t.Errorf("Wrong error message. Want %q. Got %q.", message, err.Error())
 	}
@@ -415,7 +415,7 @@ func TestPingFailing(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected non nil error, got nil")
 	}
-	expectedErrMsg := "API error (500): "
+	expectedErrMsg := "API error (Server failed to process your request. Was the data correct?): "
 	if err.Error() != expectedErrMsg {
 		t.Fatalf("Expected error to be %q, got: %q", expectedErrMsg, err.Error())
 	}
@@ -428,7 +428,7 @@ func TestPingFailingWrongStatus(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected non nil error, got nil")
 	}
-	expectedErrMsg := "API error (202): "
+	expectedErrMsg := "API error (Accepted): "
 	if err.Error() != expectedErrMsg {
 		t.Fatalf("Expected error to be %q, got: %q", expectedErrMsg, err.Error())
 	}
