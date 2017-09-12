@@ -10,14 +10,13 @@ import (
 	"time"
 
 	"github.com/dnephin/cobra"
-	storageos "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	cliconfig "github.com/storageos/go-cli/cli/config"
 	// "github.com/storageos/go-cli/pkg/host"
 	"github.com/storageos/go-cli/pkg/mount"
 	"github.com/storageos/go-cli/pkg/system"
-	// "github.com/storageos/go-cli/pkg/validation"
+	"github.com/storageos/go-cli/pkg/validation"
 
 	"github.com/storageos/go-api/types"
 
@@ -63,7 +62,7 @@ func runUnmount(storageosCli *command.StorageOSCli, opt unmountOptions, mountDri
 	}
 
 	client := storageosCli.Client()
-	namespace, name, err := storageos.ParseRef(opt.ref)
+	namespace, name, err := validation.ParseRefWithDefault(opt.ref)
 	if err != nil {
 		return err
 	}

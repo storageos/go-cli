@@ -2,10 +2,10 @@ package volume
 
 import (
 	"github.com/dnephin/cobra"
-	storageos "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/inspect"
+	"github.com/storageos/go-cli/pkg/validation"
 )
 
 type inspectOptions struct {
@@ -35,7 +35,7 @@ func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	client := storageosCli.Client()
 
 	getFunc := func(ref string) (interface{}, []byte, error) {
-		namespace, name, err := storageos.ParseRef(ref)
+		namespace, name, err := validation.ParseRefWithDefault(ref)
 		if err != nil {
 			return nil, nil, err
 		}

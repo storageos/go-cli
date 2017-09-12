@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/dnephin/cobra"
-	storageos "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	cliconfig "github.com/storageos/go-cli/cli/config"
@@ -70,7 +69,7 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	}
 
 	client := storageosCli.Client()
-	namespace, name, err := storageos.ParseRef(opt.ref)
+	namespace, name, err := validation.ParseRefWithDefault(opt.ref)
 	if err != nil {
 		return err
 	}
