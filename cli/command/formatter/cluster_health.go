@@ -89,10 +89,10 @@ func (c *clusterHealthContext) Node() string {
 func (c *clusterHealthContext) Address() string {
 	c.AddHeader(clusterHealthAddressHeader)
 	u, err := url.Parse(c.v.AdvertiseAddress)
-	if err != nil {
-		return c.v.AdvertiseAddress
+	if err == nil && u.Host != "" {
+		return u.Host
 	}
-	return u.Hostname()
+	return c.v.AdvertiseAddress
 }
 
 func (c *clusterHealthContext) healthy() bool {
