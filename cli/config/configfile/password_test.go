@@ -30,3 +30,45 @@ func TestPasswordEncoding(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestCredentialMarshal(t *testing.T) {
+	pass := encodedPassword("bar")
+
+	buf, err := json.Marshal(&credentials{
+		Username:    "foo",
+		Password:    &pass,
+		UseKeychain: false,
+	})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Expect password to be marshaled as the keychain is not used
+	expect := `{"username":"foo","password":"YmFy"}`
+	if string(buf) != expect {
+		t.Log(string(buf) + " != " + expect)
+		t.Fail()
+	}
+}
+
+func TestCredentialMarshalKeychain(t *testing.T) {
+	pass := encodedPassword("bar")
+
+	buf, err := json.Marshal(&credentials{
+		Username:    "foo",
+		Password:    &pass,
+		UseKeychain: true,
+	})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Expect password not to be marshaled as the keychain is used
+	expect := `{"username":"foo","useKeychain":true}`
+	if string(buf) != expect {
+		t.Log(string(buf) + " != " + expect)
+		t.Fail()
+	}
+}

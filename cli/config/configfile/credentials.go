@@ -15,6 +15,20 @@ type credentials struct {
 	UseKeychain bool             `json:"useKeychain,omitempty"`
 }
 
+func (c credentials) MarshalJSON() ([]byte, error) {
+	internal := struct {
+		Username    string           `json:"username"`
+		Password    *encodedPassword `json:"password,omitempty"`
+		UseKeychain bool             `json:"useKeychain,omitempty"`
+	}{c.Username, c.Password, c.UseKeychain}
+
+	if internal.UseKeychain {
+		internal.Password = nil
+	}
+
+	return json.Marshal(&internal)
+}
+
 func (c credentials) saveToKeychain(host string) error {
 	if runtime.GOOS != "darwin" {
 		return ErrNotDarwin
