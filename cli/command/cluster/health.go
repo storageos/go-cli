@@ -128,7 +128,9 @@ func getDiscoveryNodes(clusterID string) ([]*cliTypes.Node, error) {
 
 func getAPINodes(storageosCli *command.StorageOSCli, timeout int) ([]*cliTypes.Node, error) {
 
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*time.Duration(timeout))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(timeout))
+	defer cancel()
+
 	listOptions := apiTypes.ListOptions{
 		Context: ctx,
 	}
