@@ -42,8 +42,11 @@ var (
 	// ErrInvalidVersion is returned when a versioned client was requested but no version specified.
 	ErrInvalidVersion = errors.New("invalid version")
 
+	// DefaultPort is the default API port
+	DefaultPort = "5705"
+
 	// DefaultHost is the default API host
-	DefaultHost = "tcp://localhost:5705"
+	DefaultHost = "tcp://localhost:" + DefaultPort
 )
 
 // APIVersion is an internal representation of a version of the Remote API.
