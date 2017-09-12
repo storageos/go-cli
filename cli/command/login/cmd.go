@@ -6,12 +6,14 @@ import (
 	"github.com/dnephin/cobra"
 	"net/url"
 	"os"
+	"syscall"
 
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/cli/opts"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 type loginOptions struct {
@@ -94,31 +96,62 @@ func getHost(opt loginOptions, args []string) (string, error) {
 	return fmt.Sprintf("%s:%s", u.Hostname(), port), nil
 }
 
+func getUsername(storageosCli *command.StorageOSCli, opt loginOptions) (string, error) {
+	if opt.username != "" {
+		return opt.username, nil
+	}
+
+	buf := make([]byte, 1024)
+	fmt.Fprint(storageosCli.Out(), "Username: ")
+	i, err := storageosCli.In().Read(buf)
+	if err != nil {
+		return "", err
+	}
+
+	return string(buf[:i-1]), nil // i-1 strips newline
+}
+
+func getPassword(storageosCli *command.StorageOSCli, opt loginOptions) (string, error) {
+	if opt.password != "" {
+		return opt.password, nil
+	}
+
+	fmt.Fprint(storageosCli.Out(), "Password: ")
+	p, err := terminal.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Fprint(storageosCli.Out(), "\n")
+	return string(p), nil
+}
+
 func runLogin(storageosCli *command.StorageOSCli, opt loginOptions, args []string) error {
 	host, err := getHost(opt, args)
 	if err != nil {
 		return err
 	}
 
-	switch {
-	case opt.username == "":
-		return errors.New("Please provide a --username")
-
-	case opt.password == "":
-		return errors.New("Please provide a --password")
-
-	default:
-		if verr := verifyCredsWithServer(opt.username, opt.password, host); verr != nil {
-			return verr
-		}
-
-		fmt.Fprintln(storageosCli.Out(), "Credentials verified")
-
-		err := storageosCli.ConfigFile().CredentialsStore.SetCredentials(host, opt.username, opt.password)
-		if err != nil {
-			return err
-		}
-
-		return storageosCli.ConfigFile().Save()
+	username, err := getUsername(storageosCli, opt)
+	if err != nil {
+		return err
 	}
+
+	password, err := getPassword(storageosCli, opt)
+	if err != nil {
+		return err
+	}
+
+	if verr := verifyCredsWithServer(username, password, host); verr != nil {
+		return verr
+	}
+
+	fmt.Fprintln(storageosCli.Out(), "Credentials verified")
+
+	err = storageosCli.ConfigFile().CredentialsStore.SetCredentials(host, username, password)
+	if err != nil {
+		return err
+	}
+
+	return storageosCli.ConfigFile().Save()
 }
