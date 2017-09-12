@@ -11,6 +11,7 @@ import (
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/config"
+	"github.com/storageos/go-cli/cli/opts"
 )
 
 type loginOptions struct {
@@ -38,6 +39,25 @@ func NewLoginCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVar(&opt.password, "password", "", "The password to use for this host")
 
 	return cmd
+}
+
+func verifyCredsWithServer(username, password, host string) error {
+	h, err := opts.ParseHost(true, host)
+	if err != nil {
+		return fmt.Errorf("Failed to verify credentials (%v)", err)
+	}
+
+	client, err := api.NewVersionedClient(h, api.DefaultVersionStr)
+	if err != nil {
+		return fmt.Errorf("Failed to verify credentials (%v)", err)
+	}
+	client.SetAuth(username, password)
+
+	_, err = client.Login()
+	if err != nil {
+		return fmt.Errorf("Failed to verify credentials (%v)", err)
+	}
+	return nil
 }
 
 func getHost(opt loginOptions, args []string) (string, error) {
@@ -88,6 +108,12 @@ func runLogin(storageosCli *command.StorageOSCli, opt loginOptions, args []strin
 		return errors.New("Please provide a --password")
 
 	default:
+		if verr := verifyCredsWithServer(opt.username, opt.password, host); verr != nil {
+			return verr
+		}
+
+		fmt.Fprintln(storageosCli.Out(), "Credentials verified")
+
 		err := storageosCli.ConfigFile().CredentialsStore.SetCredentials(host, opt.username, opt.password)
 		if err != nil {
 			return err
