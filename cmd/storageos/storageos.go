@@ -28,6 +28,21 @@ WARNING: This is the beta version of StorageOS and should not be used in product
 To be notified about stable releases and latest features, sign up at my.storageos.com.
 `
 
+// ------------------------------------------------------------------------------------------------
+// Stub out logrus logging, comment out for debugging ---------------------------------------------
+// ------------------------------------------------------------------------------------------------
+type nullFormat struct{}
+
+func (n *nullFormat) Format(entry *logrus.Entry) ([]byte, error) {
+	return nil, nil
+}
+
+func init() {
+	logrus.SetFormatter(&nullFormat{})
+}
+
+// ------------------------------------------------------------------------------------------------
+
 func newStorageOSCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opts := cliflags.NewClientOptions()
 	var flags *pflag.FlagSet
