@@ -100,6 +100,6 @@ func ParseHostPort(host string, defaultPort string) (string, error) {
 
 	// Unrecognised format
 	default:
-		return "", fmt.Errorf("Invalid value for host (%v)\nValue must be in the format 'HOST' or 'HOST:PORT'\n\teg. 'localhost'\n\teg. '10.1.5.249:5705'", host)
+		return "", fmt.Errorf("Invalid value: '%s'", host)
 	}
 }
