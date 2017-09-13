@@ -133,7 +133,7 @@ RETRY:
 	// Perform the mount
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-	err := driver.MountVolume(storageosCli.Err(), ctx, volume.ID, mountpoint, fsType)
+	err := driver.MountVolume(ctx, volume.ID, mountpoint, fsType)
 	if err != nil {
 		fmt.Fprintf(storageosCli.Err(),
 			"Failed to mount %s/%s (id:%s) at %s: %v\n",
