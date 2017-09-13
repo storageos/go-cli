@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dnephin/cobra"
-	"net/url"
+	"net"
 	"os"
+	"regexp"
+	"strings"
 
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
@@ -36,6 +38,32 @@ func NewLogoutCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	return cmd
 }
 
+func formatHost(host string) (string, error) {
+	validHostname := regexp.MustCompile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
+
+	switch strings.Count(host, ":") {
+	// Add the default port if missing then continue
+	case 0:
+		host += ":" + api.DefaultPort
+		fallthrough
+
+	// Validate the host section
+	case 1:
+		s := strings.Split(host, ":")
+
+		// if not an ip and not a hostname, return error
+		if net.ParseIP(s[0]) == nil && !validHostname.MatchString(s[0]) {
+			return "", fmt.Errorf("Invalid value for host (%v)\nValue must be in the format 'HOST' or 'HOST:PORT'\n\teg. 'localhost'\n\teg. '10.1.5.249:5705'", host)
+		}
+
+		return host, nil
+
+	// Unrecognised format
+	default:
+		return "", fmt.Errorf("Invalid value for host (%v)\nValue must be in the format 'HOST' or 'HOST:PORT'\n\teg. 'localhost'\n\teg. '10.1.5.249:5705'", host)
+	}
+}
+
 func getHost(opt logoutOptions, args []string) (string, error) {
 	var host string
 
@@ -57,17 +85,7 @@ func getHost(opt logoutOptions, args []string) (string, error) {
 
 	}
 
-	u, err := url.Parse(host)
-	if err != nil {
-		return "", err
-	}
-
-	port := u.Port()
-	if port == "" {
-		port = api.DefaultPort
-	}
-
-	return fmt.Sprintf("%s:%s", u.Hostname(), port), nil
+	return formatHost(host)
 }
 
 func runDelete(storageosCli *command.StorageOSCli, opt logoutOptions, args []string) error {
