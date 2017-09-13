@@ -43,7 +43,7 @@ func ParseHostPort(host string, defaultPort string) (string, error) {
 	// No port number found
 	case 0:
 		if defaultPort == "" {
-			return "", fmt.Errorf("Invalid value: '%v' dosn't have a port number", host)
+			return "", fmt.Errorf("invalid value: '%v' dosn't have a port number", host)
 		}
 
 		host += ":" + defaultPort
@@ -56,22 +56,22 @@ func ParseHostPort(host string, defaultPort string) (string, error) {
 			h := strings.TrimPrefix(s[1], "//")
 
 			if net.ParseIP(h) == nil && !validHostname.MatchString(h) {
-				return "", fmt.Errorf("Invalid value: '%v' is not a valid hostname or IP address", h)
+				return "", fmt.Errorf("invalid value: '%v' is not a valid hostname or IP address", h)
 			}
 
 			if defaultPort == "" {
-				return "", fmt.Errorf("Invalid value: '%v' dosn't have a port number", host)
+				return "", fmt.Errorf("invalid value: '%v' doesn't have a port number", host)
 			}
 
 			return h + ":" + defaultPort, nil
 		}
 
 		if i, err := strconv.Atoi(s[1]); err != nil || i > 0xFFFF {
-			return "", fmt.Errorf("Invalid value: '%v' is not a valid port number", s[1])
+			return "", fmt.Errorf("invalid value: '%v' is not a valid port number", s[1])
 		}
 
 		if net.ParseIP(s[0]) == nil && !validHostname.MatchString(s[0]) {
-			return "", fmt.Errorf("Invalid value: '%v' is not a valid hostname or IP address", s[0])
+			return "", fmt.Errorf("invalid value: '%v' is not a valid hostname or IP address", s[0])
 		}
 
 		return host, nil
@@ -79,18 +79,18 @@ func ParseHostPort(host string, defaultPort string) (string, error) {
 	case 2:
 		u, err := url.Parse(host)
 		if err != nil {
-			return "", fmt.Errorf("Invalid value: %v", err)
+			return "", fmt.Errorf("invalid value: %v", err)
 		}
 
 		h, p := u.Hostname(), u.Port()
 
 		if h == "" {
-			return "", fmt.Errorf("Invalid value: '%s' is not a valid hostname", h)
+			return "", fmt.Errorf("invalid value: '%s' is not a valid hostname", h)
 		}
 
 		if p == "" {
 			if defaultPort == "" {
-				return "", fmt.Errorf("Invalid value: '%s' is not a valid port", p)
+				return "", fmt.Errorf("invalid value: '%s' is not a valid port", p)
 			}
 
 			p = defaultPort
@@ -100,6 +100,6 @@ func ParseHostPort(host string, defaultPort string) (string, error) {
 
 	// Unrecognised format
 	default:
-		return "", fmt.Errorf("Invalid value: '%s'", host)
+		return "", fmt.Errorf("invalid value: '%s'", host)
 	}
 }
