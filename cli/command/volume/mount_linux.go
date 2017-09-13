@@ -19,6 +19,8 @@ import (
 	"github.com/storageos/go-cli/pkg/validation"
 
 	"github.com/storageos/go-api/types"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type mountOptions struct {
@@ -101,16 +103,20 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 		return err
 	}
 
-	err = retryableMount(storageosCli, vol, opt.mountpoint, opt.fsType)
+	err = retryableMount(vol, opt.mountpoint, opt.fsType)
 	if err != nil {
-		fmt.Fprintf(storageosCli.Err(), "Error mounting %s/%s: %v\n", namespace, name, err)
+		log.WithFields(log.Fields{
+			"namespace":  namespace,
+			"volumeName": name,
+			"error":      err,
+		}).Error("error while mounting volume")
 		// should unmount volume in the CP if we failed here
 		newErr := client.VolumeUnmount(types.VolumeUnmountOptions{ID: vol.ID, Namespace: namespace})
 		if newErr != nil {
-			fmt.Fprintf(storageosCli.Err(),
-				"Failed to mark %s/%s (id: %s) as unmounted: %v\n",
-				namespace, name, vol.ID, newErr,
-			)
+			log.WithFields(log.Fields{
+				"volumeId": vol.ID,
+				"err":      newErr,
+			}).Error("failed to unmount volume")
 		}
 
 		return err
@@ -121,7 +127,7 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	return nil
 }
 
-func retryableMount(storageosCli *command.StorageOSCli, volume *types.Volume, mountpoint, fsType string) error {
+func retryableMount(volume *types.Volume, mountpoint, fsType string) error {
 
 	driver := mount.New(cliconfig.DeviceRootPath)
 
@@ -135,10 +141,11 @@ RETRY:
 	defer cancel()
 	err := driver.MountVolume(ctx, volume.ID, mountpoint, fsType)
 	if err != nil {
-		fmt.Fprintf(storageosCli.Err(),
-			"Failed to mount %s/%s (id:%s) at %s: %v\n",
-			volume.Namespace, volume.Name, volume.ID, mountpoint, err,
-		)
+		log.WithFields(log.Fields{
+			"volume_id":  volume.ID,
+			"mountpoint": mountpoint,
+			"err":        err.Error(),
+		}).Error(" failed to mount volume")
 
 		if retries < maxRetries {
 			time.Sleep(250 * time.Millisecond)
