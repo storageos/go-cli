@@ -89,6 +89,12 @@ func TestParseHostPort(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:    "IP with invalid port",
+			args:    args{host: "1.1.1.1:50X00", defaultPort: "80"},
+			want:    "",
+			wantErr: true,
+		},
+		{
 			name:    "http scheme with IP",
 			args:    args{host: "http://1.1.1.1"},
 			want:    "",
@@ -114,6 +120,12 @@ func TestParseHostPort(t *testing.T) {
 		},
 		{
 			name:    "just hostname",
+			args:    args{host: "foo"},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name:    "just hostname - with domain",
 			args:    args{host: "foo.bar"},
 			want:    "",
 			wantErr: true,
@@ -153,6 +165,18 @@ func TestParseHostPort(t *testing.T) {
 			args:    args{host: "http://foo.bar:6000/", defaultPort: "80"},
 			want:    "foo.bar:6000",
 			wantErr: false,
+		},
+		{
+			name:    "http scheme with hostname and port - invalid hostname",
+			args:    args{host: "http://fo$o.bar:6000/", defaultPort: "80"},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name:    "http scheme with hostname and port - port too big",
+			args:    args{host: "http://foo.bar:99999/", defaultPort: "80"},
+			want:    "",
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
