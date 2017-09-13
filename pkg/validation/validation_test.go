@@ -107,6 +107,12 @@ func TestParseHostPort(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:    "http scheme with IP and port - trailing slash",
+			args:    args{host: "http://1.1.1.1:6000/", defaultPort: "80"},
+			want:    "1.1.1.1:6000",
+			wantErr: false,
+		},
+		{
 			name:    "just hostname",
 			args:    args{host: "foo.bar"},
 			want:    "",
@@ -139,6 +145,12 @@ func TestParseHostPort(t *testing.T) {
 		{
 			name:    "http scheme with hostname and port",
 			args:    args{host: "http://foo.bar:6000", defaultPort: "80"},
+			want:    "foo.bar:6000",
+			wantErr: false,
+		},
+		{
+			name:    "http scheme with hostname and port - trailing slash",
+			args:    args{host: "http://foo.bar:6000/", defaultPort: "80"},
 			want:    "foo.bar:6000",
 			wantErr: false,
 		},

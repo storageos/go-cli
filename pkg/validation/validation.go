@@ -35,6 +35,8 @@ func ParseRefWithDefault(ref string) (string, string, error) {
 }
 
 func ParseHostPort(host string, defaultPort string) (string, error) {
+	host = strings.TrimSuffix(host, "/")
+
 	validHostname := regexp.MustCompile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
 
 	switch strings.Count(host, ":") {
