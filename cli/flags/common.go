@@ -55,7 +55,7 @@ func (commonOpts *CommonOptions) InstallFlags(flags *pflag.FlagSet) {
 	}
 
 	flags.BoolVarP(&commonOpts.Debug, "debug", "D", false, "Enable debug mode")
-	flags.StringVarP(&commonOpts.LogLevel, "log-level", "l", "info", `Set the logging level ("debug"|"info"|"warn"|"error"|"fatal")`)
+	// flags.StringVarP(&commonOpts.LogLevel, "log-level", "l", "info", `Set the logging level ("debug"|"info"|"warn"|"error"|"fatal")`)
 	// flags.BoolVar(&commonOpts.TLS, "tls", false, "Use TLS; implied by --tlsverify")
 	// flags.BoolVar(&commonOpts.TLSVerify, FlagTLSVerify, storageosTLSVerify, "Use TLS and verify the remote")
 
