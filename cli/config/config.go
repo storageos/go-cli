@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli/config/configfile"
 	"github.com/storageos/go-cli/pkg/homedir"
 )
@@ -60,7 +59,6 @@ func SetDir(dir string) {
 // NewConfigFile initializes an empty configuration file for the given filename 'fn'
 func NewConfigFile(fn string) *configfile.ConfigFile {
 	return &configfile.ConfigFile{
-		AuthConfigs: make(map[string]types.AuthConfig),
 		// HTTPHeaders: make(map[string]string),
 		Filename: fn,
 	}
@@ -69,9 +67,7 @@ func NewConfigFile(fn string) *configfile.ConfigFile {
 // LoadFromReader is a convenience function that creates a ConfigFile object from
 // a reader
 func LoadFromReader(configData io.Reader) (*configfile.ConfigFile, error) {
-	configFile := configfile.ConfigFile{
-		AuthConfigs: make(map[string]types.AuthConfig),
-	}
+	configFile := configfile.ConfigFile{}
 	err := configFile.LoadFromReader(configData)
 	return &configFile, err
 }
@@ -85,8 +81,8 @@ func Load(configDir string) (*configfile.ConfigFile, error) {
 	}
 
 	configFile := configfile.ConfigFile{
-		AuthConfigs: make(map[string]types.AuthConfig),
-		Filename:    filepath.Join(configDir, ConfigFileName),
+		Filename:         filepath.Join(configDir, ConfigFileName),
+		CredentialsStore: make(configfile.CredStore),
 	}
 
 	// Try happy path first - latest config file

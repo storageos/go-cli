@@ -1,9 +1,13 @@
 package cluster
 
 import (
+	"context"
+	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/dnephin/cobra"
+	log "github.com/sirupsen/logrus"
 
 	apiTypes "github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli/command"
@@ -13,10 +17,10 @@ import (
 )
 
 type healthOpt struct {
-	cluster  string
-	quiet    bool
-	format   string
-	selector string
+	cluster string
+	quiet   bool
+	format  string
+	timeout int
 }
 
 func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
@@ -35,8 +39,8 @@ func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Display minimal cluster health info.  Can be used with format.")
+	flags.IntVarP(&opt.timeout, "timeout", "t", 1, "Timeout in seconds.")
 	flags.StringVar(&opt.format, "format", "", "Pretty-print health with formats: table (default), cp, dp or raw.")
-	// flags.StringVarP(&opt.selector, "selector", "s", "", "Provide selector (e.g. to list all nodes with label region=eu ' --selector=region=eu')")
 
 	return cmd
 }
@@ -50,7 +54,7 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 
 	format := opt.format
 	if len(format) == 0 {
-		if len(storageosCli.ConfigFile().PoolsFormat) > 0 && !opt.quiet {
+		if len(storageosCli.ConfigFile().ClusterHealthFormat) > 0 && !opt.quiet {
 			format = storageosCli.ConfigFile().ClusterHealthFormat
 		} else {
 			format = formatter.TableFormatKey
@@ -58,24 +62,9 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 	}
 
 	for _, node := range nodes {
-		u, err := url.Parse(node.AdvertiseAddress)
-		if err != nil {
+		if err := runNodeHealth(storageosCli, node, opt.timeout); err != nil {
 			return err
 		}
-
-		cpHealth, err := storageosCli.Client().CPHealth(u.Hostname())
-		if err != nil {
-			// Don't exit if we can't collect health for a node
-			continue
-		}
-		node.Health.CP = cpHealth
-
-		dpHealth, err := storageosCli.Client().DPHealth(u.Hostname())
-		if err != nil {
-			// Don't exit if we can't collect health for a node
-			continue
-		}
-		node.Health.DP = dpHealth
 	}
 
 	clusterHealthCtx := formatter.Context{
@@ -85,12 +74,40 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 	return formatter.ClusterHealthWrite(clusterHealthCtx, nodes)
 }
 
+func runNodeHealth(storageosCli *command.StorageOSCli, node *cliTypes.Node, timeout int) error {
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(timeout))
+	defer cancel()
+
+	addr := node.AdvertiseAddress
+
+	u, err := url.Parse(node.AdvertiseAddress)
+	if err == nil && u.Host != "" {
+		addr = u.Host
+	}
+
+	// Ignore errors and carry on
+	cpHealth, err := storageosCli.Client().CPHealth(ctx, addr)
+	if err != nil {
+		log.Debugf("error updating cp health: %v", err)
+	}
+	node.Health.CP = cpHealth
+
+	dpHealth, err := storageosCli.Client().DPHealth(ctx, addr)
+	if err != nil {
+		log.Debugf("error updating dp health: %v", err)
+	}
+	node.Health.DP = dpHealth
+
+	return nil
+}
+
 func getNodes(storageosCli *command.StorageOSCli, opt *healthOpt) ([]*cliTypes.Node, error) {
 
 	if opt.cluster != "" {
 		return getDiscoveryNodes(opt.cluster)
 	}
-	return getAPINodes(storageosCli)
+	return getAPINodes(storageosCli, opt.timeout)
 }
 
 func getDiscoveryNodes(clusterID string) ([]*cliTypes.Node, error) {
@@ -109,11 +126,17 @@ func getDiscoveryNodes(clusterID string) ([]*cliTypes.Node, error) {
 
 }
 
-func getAPINodes(storageosCli *command.StorageOSCli) ([]*cliTypes.Node, error) {
+func getAPINodes(storageosCli *command.StorageOSCli, timeout int) ([]*cliTypes.Node, error) {
 
-	apiNodes, err := storageosCli.Client().ControllerList(apiTypes.ListOptions{})
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(timeout))
+	defer cancel()
+
+	listOptions := apiTypes.ListOptions{
+		Context: ctx,
+	}
+	apiNodes, err := storageosCli.Client().ControllerList(listOptions)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("API not responding to list nodes: %v", err)
 	}
 
 	var nodes []*cliTypes.Node
@@ -121,7 +144,7 @@ func getAPINodes(storageosCli *command.StorageOSCli) ([]*cliTypes.Node, error) {
 		node := &cliTypes.Node{
 			ID:               n.ID,
 			Name:             n.Name,
-			AdvertiseAddress: "http://" + n.Address,
+			AdvertiseAddress: n.Address,
 		}
 		nodes = append(nodes, node)
 	}

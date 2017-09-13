@@ -1,36 +1,70 @@
 package formatter
 
 import (
-	"github.com/storageos/go-api/types"
+	"time"
+
+	units "github.com/docker/go-units"
+
+	apiTypes "github.com/storageos/go-api/types"
+	cliTypes "github.com/storageos/go-cli/types"
 )
 
 const (
-	defaultNodeSubmodulesTableFormat = "table {{.Name}}\t{{.Status}}\t{{.UpdatedAt}}\t{{.ChangedAt}}\t{{.Message}}"
+	defaultNodeSubmodulesQuietFormat = "{{.Status}}"
+	defaultNodeSubmodulesTableFormat = "table {{.Name}}\t{{.Type}}\t{{.Status}}\t{{.ChangedAt}}\t{{.UpdatedAt}}"
+	cpNodeSubmodulesTableFormat      = "table {{if eq .T \"controlplane\"}}{{.Name}}\t{{.Type}}\t{{.Status}}\t{{.ChangedAt}}\t{{.UpdatedAt}}{{end}}"
+	dpNodeSubmodulesTableFormat      = "table {{if eq .T \"dataplane\"}}{{.Name}}\t{{.Type}}\t{{.Status}}\t{{.ChangedAt}}\t{{.UpdatedAt}}{{end}}"
+	cpNodeSubmodulesQuietFormat      = "{{if eq .T \"controlplane\"}}{{.Status}}{{end}}"
+	dpNodeSubmodulesQuietFormat      = "{{if eq .T \"dataplane\"}}{{.Status}}{{end}}"
+	defaultNodeRawFormat             = "submodule: {{.Name}}\ntype: {{.Type}}\nstatus: {{.Status}}\nupdated_at: {{.UpdatedAt}}\nchanged_at: {{.ChangedAt}}\n"
 
 	nodeSubmodulesNameHeader      = "SUBMODULE"
+	nodeSubmodulesTypeHeader      = "TYPE"
 	nodeSubmodulesStatusHeader    = "STATUS"
-	nodeSubmodulesUpdatedAtHeader = "UPDATED_AT"
-	nodeSubmodulesChangedAtHeader = "CHANGED_AT"
+	nodeSubmodulesUpdatedAtHeader = "UPDATED"
+	nodeSubmodulesChangedAtHeader = "CHANGED"
 	nodeSubmodulesMessageHeader   = "MESSAGE"
 )
 
 // NewNodeHealthFormat returns a format for use with a node health Context
-func NewNodeHealthFormat(source string) Format {
+func NewNodeHealthFormat(source string, quiet bool) Format {
 	switch source {
 	case TableFormatKey:
+		if quiet {
+			return defaultClusterHealthQuietFormat
+		}
 		return defaultNodeSubmodulesTableFormat
+	case CPHealthTableFormatKey:
+		if quiet {
+			return cpNodeSubmodulesQuietFormat
+		}
+		return cpNodeSubmodulesTableFormat
+	case DPHealthTableFormatKey:
+		if quiet {
+			return dpNodeSubmodulesQuietFormat
+		}
+		return dpNodeSubmodulesTableFormat
 	case RawFormatKey:
-		return `submodule: {{.Submodule}}\nstatus: {{.Status}}\nupdated_at: {{.UpdatedAt}}\nchanged_at: {{.ChangedAt}}\nmessage: {{.Message}}\n`
+		return defaultNodeRawFormat
 	}
 	return Format(source)
 }
 
 // NodeHealthWrite writes formatted NamedSubModuleStatus elements using the Context
-func NodeHealthWrite(ctx Context, nodesHealth []types.NamedSubModuleStatus) error {
+func NodeHealthWrite(ctx Context, node *cliTypes.Node) error {
 	render := func(format func(subContext subContext) error) error {
-		for _, status := range nodesHealth {
-			if err := format(&nodeHealthContext{v: status}); err != nil {
-				return err
+		if node.Health.CP != nil {
+			for _, submodule := range node.Health.CP.ToNamedSubmodules() {
+				if err := format(&nodeHealthContext{t: "controlplane", v: submodule}); err != nil {
+					return err
+				}
+			}
+		}
+		if node.Health.DP != nil {
+			for _, submodule := range node.Health.DP.ToNamedSubmodules() {
+				if err := format(&nodeHealthContext{t: "dataplane", v: submodule}); err != nil {
+					return err
+				}
 			}
 		}
 		return nil
@@ -40,11 +74,22 @@ func NodeHealthWrite(ctx Context, nodesHealth []types.NamedSubModuleStatus) erro
 
 type nodeHealthContext struct {
 	HeaderContext
-	v types.NamedSubModuleStatus
+	t string
+	v apiTypes.NamedSubModuleStatus
 }
 
 func (n *nodeHealthContext) MarshalJSON() ([]byte, error) {
 	return marshalJSON(n)
+}
+
+// T only returns the submodule type and avoids adding an output header
+func (n *nodeHealthContext) T() string {
+	return n.t
+}
+
+func (n *nodeHealthContext) Type() string {
+	n.AddHeader(nodeSubmodulesTypeHeader)
+	return n.t
 }
 
 func (n *nodeHealthContext) Name() string {
@@ -59,12 +104,20 @@ func (n *nodeHealthContext) Status() string {
 
 func (n *nodeHealthContext) UpdatedAt() string {
 	n.AddHeader(nodeSubmodulesUpdatedAtHeader)
-	return n.v.UpdatedAt
+	updatedTime, err := time.Parse(time.RFC3339, n.v.UpdatedAt)
+	if err != nil {
+		return n.v.UpdatedAt
+	}
+	return units.HumanDuration(time.Now().UTC().Sub(updatedTime)) + " ago"
 }
 
 func (n *nodeHealthContext) ChangedAt() string {
 	n.AddHeader(nodeSubmodulesChangedAtHeader)
-	return n.v.ChangedAt
+	changedTime, err := time.Parse(time.RFC3339, n.v.ChangedAt)
+	if err != nil {
+		return n.v.ChangedAt
+	}
+	return units.HumanDuration(time.Now().UTC().Sub(changedTime)) + " ago"
 }
 
 func (n *nodeHealthContext) Message() string {

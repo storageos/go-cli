@@ -1,6 +1,7 @@
 package storageos
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"reflect"
@@ -45,7 +46,7 @@ func TestCPHealth(t *testing.T) {
 	}
 
 	client := newTestClient(&FakeRoundTripper{message: data, status: http.StatusOK})
-	cpHealth, err := client.CPHealth("someHostname")
+	cpHealth, err := client.CPHealth(context.Background(), "someHostname")
 	if err != nil {
 		t.Error(err)
 	}
@@ -96,7 +97,7 @@ func TestDPHealth(t *testing.T) {
 	}
 
 	client := newTestClient(&FakeRoundTripper{message: data, status: http.StatusOK})
-	dpHealth, err := client.DPHealth("someHostname")
+	dpHealth, err := client.DPHealth(context.Background(), "someHostname")
 	if err != nil {
 		t.Error(err)
 	}

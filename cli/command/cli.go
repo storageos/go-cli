@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 
 	"github.com/dnephin/cobra"
@@ -95,7 +96,7 @@ func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 
 	var err error
 	// cli.client, err = NewAPIClientFromFlags(opts.Common, cli.configFile)
-	cli.client, err = NewAPIClientFromFlags(opt.Common)
+	cli.client, err = NewAPIClientFromFlags(opt.Common, cli.configFile)
 	if err != nil {
 		return err
 	}
@@ -144,7 +145,7 @@ func LoadDefaultConfigFile(err io.Writer) *configfile.ConfigFile {
 
 // NewAPIClientFromFlags creates a new APIClient from command line flags
 // func NewAPIClientFromFlags(opts *cliflags.CommonOptions, configFile *configfile.ConfigFile) (client.APIClient, error) {
-func NewAPIClientFromFlags(opt *cliflags.CommonOptions) (*api.Client, error) {
+func NewAPIClientFromFlags(opt *cliflags.CommonOptions, configFile *configfile.ConfigFile) (*api.Client, error) {
 	host, err := getServerHost(opt.Hosts, opt.TLS)
 	if err != nil {
 		return &api.Client{}, err
@@ -160,8 +161,34 @@ func NewAPIClientFromFlags(opt *cliflags.CommonOptions) (*api.Client, error) {
 		return &api.Client{}, err
 	}
 
-	username := getUsername(opt.Username)
-	password := getPassword(opt.Password)
+	var username string
+	var password string
+
+	p, err := url.Parse(host)
+	if err != nil {
+		username = os.Getenv(cliconfig.EnvStorageosUsername)
+		password = os.Getenv(cliconfig.EnvStorageosPassword)
+	} else {
+		port := p.Port()
+		if port == "" {
+			port = api.DefaultPort
+		}
+
+		credHost := fmt.Sprintf("%s:%s", p.Hostname(), port)
+		username, password, err = configFile.CredentialsStore.GetCredentials(credHost)
+		if err != nil {
+			username = os.Getenv(cliconfig.EnvStorageosUsername)
+			password = os.Getenv(cliconfig.EnvStorageosPassword)
+		}
+	}
+
+	if opt.Username != "" {
+		username = opt.Username
+	}
+	if opt.Password != "" {
+		password = opt.Password
+	}
+
 	if username != "" && password != "" {
 		client.SetAuth(username, password)
 	}
@@ -181,18 +208,4 @@ func getServerHost(hosts []string, tls bool) (host string, err error) {
 
 	host, err = opts.ParseHost(tls, host)
 	return
-}
-
-func getUsername(username string) string {
-	if len(username) == 0 {
-		return os.Getenv(cliconfig.EnvStorageosUsername)
-	}
-	return username
-}
-
-func getPassword(password string) string {
-	if len(password) == 0 {
-		return os.Getenv(cliconfig.EnvStorageosPassword)
-	}
-	return password
 }

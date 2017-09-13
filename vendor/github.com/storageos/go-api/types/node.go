@@ -25,10 +25,10 @@ type CPHealthStatus struct {
 
 func (c *CPHealthStatus) ToNamedSubmodules() []NamedSubModuleStatus {
 	return []NamedSubModuleStatus{
-		{Name: "NATS", SubModuleStatus: c.NATS},
-		{Name: "KV", SubModuleStatus: c.KV},
-		{Name: "KV_WRITE", SubModuleStatus: c.KVWrite},
-		{Name: "SCHEDULER", SubModuleStatus: c.Scheduler},
+		{Name: "nats", SubModuleStatus: c.NATS},
+		{Name: "kv", SubModuleStatus: c.KV},
+		{Name: "kv_write", SubModuleStatus: c.KVWrite},
+		{Name: "scheduler", SubModuleStatus: c.Scheduler},
 	}
 }
 
@@ -64,11 +64,11 @@ type DPHealthStatus struct {
 
 func (d *DPHealthStatus) ToNamedSubmodules() []NamedSubModuleStatus {
 	return []NamedSubModuleStatus{
-		{Name: "DFS_CLIENT", SubModuleStatus: d.DirectFSClient},
-		{Name: "DFS_SERVER", SubModuleStatus: d.DirectFSServer},
-		{Name: "DIRECTOR", SubModuleStatus: d.Director},
-		{Name: "FS_DRIVER", SubModuleStatus: d.FSDriver},
-		{Name: "FS", SubModuleStatus: d.FS},
+		{Name: "dfs_client", SubModuleStatus: d.DirectFSClient},
+		{Name: "dfs_server", SubModuleStatus: d.DirectFSServer},
+		{Name: "director", SubModuleStatus: d.Director},
+		{Name: "fs_driver", SubModuleStatus: d.FSDriver},
+		{Name: "fs", SubModuleStatus: d.FS},
 	}
 }
 
