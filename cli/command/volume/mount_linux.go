@@ -119,7 +119,7 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 			}).Error("failed to unmount volume")
 		}
 
-		return err
+		return fmt.Errorf("Failed to mount: %v", err)
 	}
 
 	fmt.Printf("volume %s mounted: %s\n", vol.Name, opt.mountpoint)
