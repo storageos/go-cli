@@ -11,6 +11,10 @@ import (
 	storageos "github.com/storageos/go-api"
 )
 
+const hostnameFmt string = `^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`
+
+var hostnameRegexp = regexp.MustCompile(hostnameFmt)
+
 // ValidFSTypes lists the filesystem types that may be supported.
 var ValidFSTypes = []string{"ext2", "ext3", "ext4", "xfs", "btrfs"}
 
@@ -34,72 +38,52 @@ func ParseRefWithDefault(ref string) (string, string, error) {
 	return namespace, name, err
 }
 
-func ParseHostPort(host string, defaultPort string) (string, error) {
-	host = strings.TrimSuffix(host, "/")
+// ParseHostPort returns a host:port string if the endpoint input is valid.
+func ParseHostPort(endpoint string, defaultPort string) (string, error) {
 
-	validHostname := regexp.MustCompile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
-
-	switch strings.Count(host, ":") {
-	// No port number found
-	case 0:
-		if defaultPort == "" {
-			return "", fmt.Errorf("invalid value: '%v' dosn't have a port number", host)
-		}
-
-		host += ":" + defaultPort
-		fallthrough
-
-	case 1:
-		s := strings.Split(host, ":")
-
-		if strings.HasPrefix(s[1], "//") {
-			h := strings.TrimPrefix(s[1], "//")
-
-			if net.ParseIP(h) == nil && !validHostname.MatchString(h) {
-				return "", fmt.Errorf("invalid value: '%v' is not a valid hostname or IP address", h)
-			}
-
-			if defaultPort == "" {
-				return "", fmt.Errorf("invalid value: '%v' doesn't have a port number", host)
-			}
-
-			return h + ":" + defaultPort, nil
-		}
-
-		if i, err := strconv.Atoi(s[1]); err != nil || i > 0xFFFF {
-			return "", fmt.Errorf("invalid value: '%v' is not a valid port number", s[1])
-		}
-
-		if net.ParseIP(s[0]) == nil && !validHostname.MatchString(s[0]) {
-			return "", fmt.Errorf("invalid value: '%v' is not a valid hostname or IP address", s[0])
-		}
-
-		return host, nil
-
-	case 2:
-		u, err := url.Parse(host)
-		if err != nil {
-			return "", fmt.Errorf("invalid value: %v", err)
-		}
-
-		h, p := u.Hostname(), u.Port()
-
-		if h == "" {
-			return "", fmt.Errorf("invalid value: '%s' is not a valid hostname", h)
-		}
-
-		if p == "" {
-			if defaultPort == "" {
-				return "", fmt.Errorf("invalid value: '%s' is not a valid port", p)
-			}
-
-			p = defaultPort
-		}
-
-		return fmt.Sprintf("%s:%s", h, p), nil
-
-	// Unrecognised format
-	default:
-		return "", fmt.Errorf("invalid value: '%s'", host)
+	// plain IP address
+	ip := net.ParseIP(endpoint)
+	if ip != nil {
+		return hostport(ip.String(), defaultPort)
 	}
+
+	// http, https or tcp endpoint
+	if strings.HasPrefix(endpoint, "http://") || strings.HasPrefix(endpoint, "https://") || strings.HasPrefix(endpoint, "tcp://") {
+		u, err := url.Parse(endpoint)
+		if err != nil {
+			return "", err
+		}
+		parts := strings.Split(u.Host, ":")
+		if len(parts) == 2 {
+			return hostport(parts[0], u.Port())
+		}
+		return hostport(parts[0], defaultPort)
+	}
+
+	// hostname:port
+	host, port, err := net.SplitHostPort(endpoint)
+	if err == nil {
+		return hostport(host, port)
+	}
+
+	// hostname or invalid input
+	return hostport(endpoint, defaultPort)
+}
+
+// hostport validates host and port input and returns host:port
+func hostport(host, port string) (string, error) {
+	if host == "" || port == "" {
+		return "", fmt.Errorf("invalid endpoint")
+	}
+	if !hostnameRegexp.MatchString(host) {
+		return "", fmt.Errorf("invalid hostname format")
+	}
+	p, err := strconv.Atoi(port)
+	if err != nil {
+		return "", err
+	}
+	if p < 1 || p > 65535 {
+		return "", fmt.Errorf("invalid port")
+	}
+	return fmt.Sprintf("%s:%s", host, port), nil
 }
