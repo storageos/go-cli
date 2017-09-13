@@ -84,7 +84,7 @@ func runUnmount(storageosCli *command.StorageOSCli, opt unmountOptions, mountDri
 	// unmounting it
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 	defer cancel()
-	err = mountDriver.UnmountVolume(ctx, vol.Mountpoint, storageosCli.Err())
+	err = mountDriver.UnmountVolume(storageosCli.Err(), ctx, vol.Mountpoint)
 	if err != nil && !opt.force {
 		return fmt.Errorf("unable to unmount volume (must be forced), error: %s", err)
 	}

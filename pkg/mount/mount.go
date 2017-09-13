@@ -11,8 +11,8 @@ import (
 
 // Driver - generic mount driver interface
 type Driver interface {
-	MountVolume(ctx context.Context, id, mountpoint, fsType string, errWriter io.Writer) error
-	UnmountVolume(ctx context.Context, mountpoint string, errWriter io.Writer) error
+	MountVolume(stderr io.Writer, ctx context.Context, id, mountpoint, fsType string) error
+	UnmountVolume(stderr io.Writer, ctx context.Context, mountpoint string) error
 }
 
 // DefaultDriver - default mount driver
@@ -28,13 +28,13 @@ func New(deviceRootPath string) *DefaultDriver {
 }
 
 // MountVolume - mounts specified volume
-func (d *DefaultDriver) MountVolume(ctx context.Context, id, mountpoint, fsType string, errWriter io.Writer) error {
-	return mountVolume(ctx, d.deviceRootPath, id, mountpoint, fsType, errWriter)
+func (d *DefaultDriver) MountVolume(stderr io.Writer, ctx context.Context, id, mountpoint, fsType string) error {
+	return mountVolume(stderr, ctx, d.deviceRootPath, id, mountpoint, fsType)
 }
 
 // UnmountVolume - unmounts specified mountpoint
-func (d *DefaultDriver) UnmountVolume(ctx context.Context, mountpoint string, errWriter io.Writer) error {
-	return unmountVolume(ctx, mountpoint, errWriter)
+func (d *DefaultDriver) UnmountVolume(stderr io.Writer, ctx context.Context, mountpoint string) error {
+	return unmountVolume(stderr, ctx, mountpoint)
 }
 
 // deviceRootPath is the location of the StorageOS raw volumes.
@@ -49,8 +49,8 @@ const mountpointPerms os.FileMode = 0700
 // It checks the volume first, waiting 30 seconds for it to be created, and
 // creates an ext4 filesystem on it if there isn't already a filesystem.  The
 // mount will fail if the mount command can't determine the fstype.
-func mountVolume(ctx context.Context, deviceRootPath string, id string, mp string, fsType string, errWriter io.Writer) error {
-	if err := initRawVolume(ctx, deviceRootPath+"/"+id, fsType, errWriter); err != nil {
+func mountVolume(stderr io.Writer, ctx context.Context, deviceRootPath string, id string, mp string, fsType string) error {
+	if err := initRawVolume(stderr, ctx, deviceRootPath+"/"+id, fsType); err != nil {
 		log.WithFields(log.Fields{
 			"id":      id,
 			"fs_type": fsType,
@@ -82,11 +82,11 @@ func mountVolume(ctx context.Context, deviceRootPath string, id string, mp strin
 
 // unmountVolume unmounts a StorageOS-based filesystem and removes the
 // mountpoint.
-func unmountVolume(ctx context.Context, mp string, errWriter io.Writer) error {
+func unmountVolume(stderr io.Writer, ctx context.Context, mp string) error {
 
 	_, err := runUmount(ctx, mp)
 	if err != nil {
-		fmt.Fprintf(errWriter, "Unmount failed: %s (%s)\n", mp, err)
+		fmt.Fprintf(stderr, "Unmount failed: %s (%s)\n", mp, err)
 		return err
 	}
 	log.Debugf("Unmounted volume: %s", mp)
