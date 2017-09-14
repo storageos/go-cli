@@ -9,27 +9,27 @@ import (
 	"strings"
 )
 
-type cordonOptions struct {
+type uncordonOptions struct {
 	nodes []string
 }
 
-func newCordonCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	var opt cordonOptions
+func newUncordonCommand(storageosCli *command.StorageOSCli) *cobra.Command {
+	var opt uncordonOptions
 
 	cmd := &cobra.Command{
-		Use:   "cordon NODE [NODE...]",
-		Short: "Put one or more nodes into an unschedulable state",
+		Use:   "uncordon NODE [NODE...]",
+		Short: "Restore one or more nodes from an unschedulable state",
 		Args:  cli.RequiresMinArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opt.nodes = args
-			return runCordon(storageosCli, opt)
+			return runUncordon(storageosCli, opt)
 		},
 	}
 
 	return cmd
 }
 
-func runCordon(storageosCli *command.StorageOSCli, opt cordonOptions) error {
+func runUncordon(storageosCli *command.StorageOSCli, opt uncordonOptions) error {
 	client := storageosCli.Client()
 	failed := make([]string, 0, len(opt.nodes))
 
@@ -40,17 +40,13 @@ func runCordon(storageosCli *command.StorageOSCli, opt cordonOptions) error {
 			continue
 		}
 
-		if n.Labels == nil {
-			n.Labels = make(map[string]string)
-		}
-
-		n.Labels["cordon"] = "true"
+		delete(n.Labels, "cordon")
 		_, err = client.ControllerUpdate(types.ControllerUpdateOptions{
 			ID:          n.ID,
 			Name:        n.Name,
 			Description: n.Description,
 			Labels:      n.Labels,
-			Cordon:      true,
+			Cordon:      false,
 		})
 		if err != nil {
 			failed = append(failed, nodeID)
@@ -61,7 +57,7 @@ func runCordon(storageosCli *command.StorageOSCli, opt cordonOptions) error {
 	}
 
 	if len(failed) > 0 {
-		return fmt.Errorf("Failed to cordon: %s", strings.Join(failed, ", "))
+		return fmt.Errorf("Failed to uncordon: %s", strings.Join(failed, ", "))
 	}
 	return nil
 }
