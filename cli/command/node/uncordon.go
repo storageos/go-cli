@@ -40,7 +40,6 @@ func runUncordon(storageosCli *command.StorageOSCli, opt uncordonOptions) error 
 			continue
 		}
 
-		delete(n.Labels, "cordon")
 		_, err = client.ControllerUpdate(types.ControllerUpdateOptions{
 			ID:          n.ID,
 			Name:        n.Name,

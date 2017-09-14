@@ -40,11 +40,6 @@ func runCordon(storageosCli *command.StorageOSCli, opt cordonOptions) error {
 			continue
 		}
 
-		if n.Labels == nil {
-			n.Labels = make(map[string]string)
-		}
-
-		n.Labels["cordon"] = "true"
 		_, err = client.ControllerUpdate(types.ControllerUpdateOptions{
 			ID:          n.ID,
 			Name:        n.Name,
