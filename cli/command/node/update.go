@@ -27,7 +27,7 @@ func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "update [OPTIONS] NODE",
-		Short: "Update a volume",
+		Short: "Update a node",
 		Args:  cli.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runUpdate(storageosCli, opt, args[0])
