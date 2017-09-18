@@ -33,7 +33,7 @@ func TestLoginBadCreds(t *testing.T) {
 	}
 
 	if token != "" {
-		t.Error("token (%v) incorrectly returned", token)
+		t.Errorf("token (%v) incorrectly returned", token)
 	}
 }
 
