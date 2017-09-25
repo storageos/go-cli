@@ -189,6 +189,14 @@ func NewAPIClientFromFlags(opt *cliflags.CommonOptions, configFile *configfile.C
 		password = opt.Password
 	}
 
+	// If after everything is tried, we still don't have any creds, just try the defaults
+	if username == "" {
+		username = api.DefaultUsername
+	}
+	if password == "" {
+		password = api.DefaultUsername
+	}
+
 	if username != "" && password != "" {
 		client.SetAuth(username, password)
 	}
