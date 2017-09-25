@@ -4,8 +4,8 @@ package volume
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"syscall"
 	"time"
 
@@ -80,9 +80,8 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	}
 
 	// checking readiness
-	errs := isVolumeReady(vol, name)
-	if len(errs) > 0 {
-		return fmt.Errorf("cannot mount volume: %s", strings.Join(errs, ", "))
+	if err := isVolumeReady(vol, name); err != nil {
+		return fmt.Errorf("cannot mount volume: %v", err)
 	}
 
 	var hostname string
@@ -160,15 +159,15 @@ RETRY:
 }
 
 // isVolumeReady - mount only unmounted and active volume
-func isVolumeReady(vol *types.Volume, ref string) (errs []string) {
+func isVolumeReady(vol *types.Volume, ref string) error {
 
 	if vol.Status != "active" {
-		errs = append(errs, fmt.Sprintf("can only mount active volumes, current status: '%s'", vol.Status))
+		return fmt.Errorf("can only mount active volumes, current status: '%s'", vol.Status)
 	}
 
 	if vol.Mounted {
-		errs = append(errs, "volume is mounted, unmount it before mounting it again")
+		return errors.New("volume is mounted, unmount it before mounting it again")
 	}
 
-	return errs
+	return nil
 }
