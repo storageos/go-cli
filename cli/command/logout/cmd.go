@@ -51,7 +51,7 @@ func getHost(opt logoutOptions, args []string) (string, error) {
 	default:
 		host = os.Getenv(config.EnvStorageOSHost)
 		if host == "" {
-			return "", errors.New("No setting found for host")
+			return validation.ParseHostPort(api.DefaultHost, api.DefaultPort)
 		}
 
 	}
