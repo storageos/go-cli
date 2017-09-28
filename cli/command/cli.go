@@ -95,7 +95,6 @@ func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 	cli.configFile = LoadDefaultConfigFile(cli.err)
 
 	var err error
-	// cli.client, err = NewAPIClientFromFlags(opts.Common, cli.configFile)
 	cli.client, err = NewAPIClientFromFlags(opt.Common, cli.configFile)
 	if err != nil {
 		return err
@@ -187,14 +186,6 @@ func NewAPIClientFromFlags(opt *cliflags.CommonOptions, configFile *configfile.C
 	}
 	if opt.Password != "" {
 		password = opt.Password
-	}
-
-	// If after everything is tried, we still don't have any creds, just try the defaults
-	if username == "" {
-		username = api.DefaultUsername
-	}
-	if password == "" {
-		password = api.DefaultUsername
 	}
 
 	if username != "" && password != "" {
