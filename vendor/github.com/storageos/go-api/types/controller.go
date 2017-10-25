@@ -59,6 +59,9 @@ type Controller struct {
 	VersionInfo     map[string]VersionInfo `json:"versionInfo"`
 	Version         string                 `json:"version"`
 
+	// Cordon true if in an unschedulable state
+	Cordon bool `json:"unschedulable"`
+
 	// high level stats that combine info from all driver instances
 	CapacityStats CapacityStats `json:"capacityStats"`
 }
