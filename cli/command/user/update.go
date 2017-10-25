@@ -4,12 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/url"
-	"strings"
 
 	"github.com/dnephin/cobra"
 
-	storageos "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 )
@@ -110,15 +107,6 @@ func verifyUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
 	return nil
 }
 
-func getCurrentState(client *storageos.Client, user string) (groups []string, role string, err error) {
-	u, err := client.User(user)
-	if err != nil {
-		return nil, "", err
-	}
-
-	return u.Groups, u.Role, nil
-}
-
 func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
 	var password string
 
@@ -141,26 +129,23 @@ func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
 
 	client := storageosCli.Client()
 
-	currentGroups, currentRole, err := getCurrentState(client, opt.sourceAccount)
+	currentState, err := client.User(opt.sourceAccount)
 	if err != nil {
 		return fmt.Errorf("Failed to get user (%s): %s", opt.sourceAccount, err)
 	}
-	newGroups := opt.processGroups(currentGroups)
-
-	form := url.Values{}
-	form.Add("groups", strings.Join(newGroups, ","))
+	currentState.Groups = opt.processGroups(currentState.Groups)
 
 	if opt.username != "" {
-		form.Add("username", opt.username)
+		currentState.Username = opt.username
 	}
 
 	if opt.password {
-		form.Add("password", password)
+		currentState.Password = password
 	}
 
-	if opt.role != "" && currentRole != opt.role {
-		form.Add("role", opt.role)
+	if opt.role != "" {
+		currentState.Role = opt.role
 	}
 
-	return client.UserUpdate(opt.sourceAccount, form, context.Background())
+	return client.UserUpdate(currentState, context.Background())
 }

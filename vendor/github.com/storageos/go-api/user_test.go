@@ -13,29 +13,24 @@ import (
 )
 
 func TestUserList(t *testing.T) {
-	userData := `{
-	"status": "success",
-	"data": [
-		{
-			"id": "0d01ce98-c0d7-0538-3f98-9cb86a0c6ff0",
-			"username": "alice",
-			"groups": "foo,bar",
-			"email": "alice@very-alice.io",
-			"role": "admin"
-		},
-		{
-			"id": "7087ebc8-aa47-3f54-fbcd-74db102a1253",
-			"username": "bob",
-			"groups": "",
-			"email": "bob@much-bob.sh",
-			"role": "user"
-		}
-	]
-}`
-
-	var expected struct {
-		Data []*types.User `json:"data"`
+	userData := `[
+	{
+		"id": "0d01ce98-c0d7-0538-3f98-9cb86a0c6ff0",
+		"username": "alice",
+		"groups": "foo,bar",
+		"email": "alice@very-alice.io",
+		"role": "admin"
+	},
+	{
+		"id": "7087ebc8-aa47-3f54-fbcd-74db102a1253",
+		"username": "bob",
+		"groups": "",
+		"email": "bob@much-bob.sh",
+		"role": "user"
 	}
+]`
+
+	var expected []*types.User
 	if err := json.Unmarshal([]byte(userData), &expected); err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +40,7 @@ func TestUserList(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if !reflect.DeepEqual(users, expected.Data) {
+	if !reflect.DeepEqual(users, expected) {
 		t.Errorf("Users: Wrong return value. Want %#v. Got %#v.", expected, users)
 	}
 }
@@ -85,15 +80,11 @@ func TestUser(t *testing.T) {
 	"role": "admin"
 }`
 
-	wrapedBody := fmt.Sprintf(`{
-		"data": %s
-	}`, body)
-
 	var expected types.User
 	if err := json.Unmarshal([]byte(body), &expected); err != nil {
 		t.Fatal(err)
 	}
-	fakeRT := &FakeRoundTripper{message: wrapedBody, status: http.StatusOK}
+	fakeRT := &FakeRoundTripper{message: body, status: http.StatusOK}
 	client := newTestClient(fakeRT)
 	name := "0d01ce98-c0d7-0538-3f98-9cb86a0c6ff0"
 	user, err := client.User(name)
