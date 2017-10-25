@@ -41,13 +41,11 @@ func (c *Client) UserList(opts types.ListOptions) ([]*types.User, error) {
 	}
 	defer resp.Body.Close()
 
-	var users struct {
-		Users []*types.User `json:"data"`
-	}
+	users := make([]*types.User, 0)
 	if err := json.NewDecoder(resp.Body).Decode(&users); err != nil {
 		return nil, err
 	}
-	return users.Users, nil
+	return users, nil
 }
 
 // User returns a user by its username/id.
@@ -62,13 +60,11 @@ func (c *Client) User(username string) (*types.User, error) {
 	}
 	defer resp.Body.Close()
 
-	var user struct {
-		User *types.User `json:"data"`
-	}
+	var user *types.User
 	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
 		return nil, err
 	}
-	return user.User, nil
+	return user, nil
 }
 
 // UserCreate creates a user on the server.
@@ -81,10 +77,20 @@ func (c *Client) UserCreate(opts types.UserCreateOptions) error {
 }
 
 // UserUpdate updates a user on the server.
-func (c *Client) UserUpdate(username string, form url.Values, ctx context.Context) error {
-	path := fmt.Sprintf("%s/%s", UserAPIPrefix, username)
+func (c *Client) UserUpdate(user *types.User, ctx context.Context) error {
+	var ref string
+	switch {
+	case user.UUID != "":
+		ref = user.UUID
+	case user.Username != "":
+		ref = user.Username
+	default:
+		return ErrNoSuchUser
+	}
+
+	path := fmt.Sprintf("%s/%s", UserAPIPrefix, ref)
 	resp, err := c.do("POST", path, doOptions{
-		values:  form,
+		data:    user,
 		context: ctx,
 	})
 	if err != nil {
