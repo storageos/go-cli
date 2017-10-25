@@ -45,6 +45,9 @@ var (
 	// DefaultPort is the default API port
 	DefaultPort = "5705"
 
+	// DataplaneHealthPort is the the port used by the dataplane health-check service
+	DataplaneHealthPort = "5704"
+
 	// DefaultHost is the default API host
 	DefaultHost = "tcp://localhost:" + DefaultPort
 )
