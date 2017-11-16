@@ -3,9 +3,10 @@ package login
 import (
 	"errors"
 	"fmt"
-	"github.com/dnephin/cobra"
 	"os"
 	"syscall"
+
+	"github.com/dnephin/cobra"
 
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
@@ -30,15 +31,27 @@ func NewLoginCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Short: "Store login credentials for a given storageos host",
 		Args:  cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			parentCmd := cmd.Parent()
+
+			if parentCmd != nil {
+				parentFlags := parentCmd.Flags()
+				if username, err := parentFlags.GetString("username"); err == nil && opt.username == "" {
+					opt.username = username
+				}
+				if password, err := parentFlags.GetString("password"); err == nil && opt.password == "" {
+					opt.password = password
+				}
+			}
+
 			return runLogin(storageosCli, opt, args)
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&opt.host, "host", "", "The host to store the credentials for")
+	flags.StringVarP(&opt.host, "host", "H", "", "The host to store the credentials for")
 	flags.Lookup("host").Hidden = true
-	flags.StringVar(&opt.username, "username", "", "The username to use for this host")
-	flags.StringVar(&opt.password, "password", "", "The password to use for this host")
+	flags.StringVarP(&opt.username, "username", "u", "", fmt.Sprintf("The username to use for this host (will override value of %v env variable value and global option --username)", config.EnvStorageosUsername))
+	flags.StringVarP(&opt.password, "password", "p", "", fmt.Sprintf("The password to use for this host (will override value of %v env variable value and global option --password)", config.EnvStorageosPassword))
 
 	return cmd
 }
@@ -91,6 +104,10 @@ func getUsername(storageosCli *command.StorageOSCli, opt loginOptions) (string, 
 		return opt.username, nil
 	}
 
+	if envUsername := os.Getenv(config.EnvStorageosUsername); envUsername != "" {
+		return envUsername, nil
+	}
+
 	buf := make([]byte, 1024)
 	fmt.Fprint(storageosCli.Out(), "Username: ")
 	i, err := storageosCli.In().Read(buf)
@@ -104,6 +121,10 @@ func getUsername(storageosCli *command.StorageOSCli, opt loginOptions) (string, 
 func getPassword(storageosCli *command.StorageOSCli, opt loginOptions) (string, error) {
 	if opt.password != "" {
 		return opt.password, nil
+	}
+
+	if envPassword := os.Getenv(config.EnvStorageosPassword); envPassword != "" {
+		return envPassword, nil
 	}
 
 	fmt.Fprint(storageosCli.Out(), "Password: ")
