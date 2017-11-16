@@ -24,7 +24,9 @@ import:
   - types
   - types/versions
 - package: golang.org/x/sys
+  version: 07c182904dbd53199946ba614a412c61d3c548f5
   subpackages:
+  - unix
   - windows
 - package: golang.org/x/crypto
   subpackages:
