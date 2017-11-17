@@ -137,7 +137,7 @@ func createFilesystem(ctx context.Context, fstype string, path string, options s
 	case "ext4":
 		// Get the volume id from the path
 		id := getVolumeIDFromPath(path)
-		out, err = runCmd(ctx, mkfsExt4, "-F", "-U", id, "-b", "4096", "-E", "lazy_itable_init=1,lazy_journal_init=1", path)
+		out, err = runCmd(ctx, mkfsExt4, "-F", "-U", id, "-b", "4096", "-E", "lazy_itable_init=0,lazy_journal_init=0", path)
 		if err != nil {
 			log.Warnf("mkfs output: %s", err.Error())
 		}
