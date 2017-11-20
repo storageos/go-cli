@@ -81,6 +81,10 @@ type Volume struct {
 	// Read Only: true
 	StatusMessage string `json:"statusMessage"`
 
+	// mkfs performed on new volumes
+	MkfsDone   bool      `json:"mkfsDone"`
+	MkfsDoneAt time.Time `json:"mkfsDoneAt"`
+
 	// When the volume was created.
 	// Read Only: true
 	CreatedAt time.Time `json:"createdAt"`
