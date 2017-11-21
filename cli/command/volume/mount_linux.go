@@ -138,7 +138,7 @@ RETRY:
 	// Perform the mount
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-	err := driver.MountVolume(ctx, volume.ID, mountpoint, fsType)
+	err := driver.MountVolume(ctx, volume.ID, mountpoint, fsType, volume.MkfsDoneAt.IsZero() && !volume.MkfsDone)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"volume_id":  volume.ID,
