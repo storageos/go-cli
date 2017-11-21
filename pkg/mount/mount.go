@@ -59,11 +59,6 @@ func mountVolume(ctx context.Context, deviceRootPath string, id string, mp strin
 			}).Error("volume init error")
 			return err
 		}
-		log.WithFields(log.Fields{
-			"fsType":     fsType,
-			"id":         id,
-			"mountpoint": mp,
-		}).Info("volume initialised")
 	}
 	log.Debugf("StorageOS volume ready: %s ", mp)
 
