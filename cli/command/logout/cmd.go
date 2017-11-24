@@ -49,10 +49,7 @@ func getHost(opt logoutOptions, args []string) (string, error) {
 		host = opt.host
 
 	default:
-		host = os.Getenv(config.EnvStorageOSHost)
-		if host == "" {
-			return validation.ParseHostPort(api.DefaultHost, api.DefaultPort)
-		}
+		return validation.ParseHostPort(api.DefaultHost, api.DefaultPort)
 
 	}
 
