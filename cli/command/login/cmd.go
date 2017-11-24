@@ -74,7 +74,6 @@ func verifyCredsWithServer(username, password, host string) error {
 }
 
 func getHost(opt loginOptions, args []string) (string, error) {
-
 	if opt.host != "" {
 		if len(args) > 0 {
 			return "", errors.New("Conflicting options: either specify --host or provide positional arg, not both")
@@ -87,7 +86,7 @@ func getHost(opt loginOptions, args []string) (string, error) {
 		return validation.ParseHostPort(args[0], api.DefaultPort)
 	}
 
-	return "", errors.New("Please provide a host value, either as a flag or positional arg")
+	return validation.ParseHostPort(api.DefaultHost, api.DefaultPort)
 }
 
 func promptUsername(storageosCli *command.StorageOSCli) (string, error) {
