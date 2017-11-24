@@ -3,12 +3,10 @@ package logout
 import (
 	"errors"
 	"github.com/dnephin/cobra"
-	"os"
 
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
-	"github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/pkg/validation"
 )
 
