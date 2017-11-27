@@ -1,8 +1,8 @@
 hash: c3028d9aa5b48078d5f5e28345fd90deeec6a5d950ce3d34060de2dd147fc78b
-updated: 2017-11-20T15:39:20.07525561Z
+updated: 2017-11-27T11:03:52.286477043Z
 imports:
 - name: github.com/Azure/go-ansiterm
-  version: d6e3b3328b783f23731bc4d058875b0371ff8109
+  version: 19f72df4d05d31cbe1c56bfc8045c96babff6c7e
   subpackages:
   - winterm
 - name: github.com/davecgh/go-spew
@@ -18,24 +18,24 @@ imports:
 - name: github.com/docker/go-units
   version: 0dadbb0345b35ec7ef35e228dabb8de89a65bf52
 - name: github.com/gorilla/websocket
-  version: aa5ed01c91270a67ce417d1810afc31ec14779a9
+  version: a69d9f6de432e2c6b296a947d8a5ee88f68522cf
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/Microsoft/go-winio
   version: 78439966b38d69bf38227fbf57ac8a6fee70f69a
 - name: github.com/pkg/errors
-  version: 645ef00459ed84a119197bfb8d8205042c6df63d
+  version: f15c970de5b76fac0b59abb32d62c17cc7bed265
 - name: github.com/sirupsen/logrus
-  version: 95cd2b9c79aa5e72ab0bc69b7ccc2be15bf850f6
+  version: a3f95b5c423586578a4e099b11a46c2479628cac
 - name: github.com/spf13/pflag
-  version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
+  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/storageos/go-api
   version: 1a9f7c9560d02b577b351717aed0faffe041f96d
   subpackages:
   - types
   - types/versions
 - name: golang.org/x/crypto
-  version: 9f005a07e0d31d45e6656d241bb5c0f2efd4bc94
+  version: b176d7def5d71bdd214203491f89843ed217f420
   subpackages:
   - ssh
   - ssh/terminal
