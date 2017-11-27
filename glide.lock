@@ -1,5 +1,5 @@
-hash: d676b1f98d06e93a2dac1233a754f8e2e6a1e2718298b3f8157b4e8dab481ef1
-updated: 2017-09-18T12:17:32.862917092+01:00
+hash: c3028d9aa5b48078d5f5e28345fd90deeec6a5d950ce3d34060de2dd147fc78b
+updated: 2017-11-27T11:03:52.286477043Z
 imports:
 - name: github.com/Azure/go-ansiterm
   version: 19f72df4d05d31cbe1c56bfc8045c96babff6c7e
@@ -24,13 +24,13 @@ imports:
 - name: github.com/Microsoft/go-winio
   version: 78439966b38d69bf38227fbf57ac8a6fee70f69a
 - name: github.com/pkg/errors
-  version: 2b3a18b5f0fb6b4f9190549597d3f962c02bc5eb
+  version: f15c970de5b76fac0b59abb32d62c17cc7bed265
 - name: github.com/sirupsen/logrus
   version: a3f95b5c423586578a4e099b11a46c2479628cac
 - name: github.com/spf13/pflag
   version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/storageos/go-api
-  version: 5d7bd5dad1bc07cee1be2d029d2a10983624a010
+  version: 1a9f7c9560d02b577b351717aed0faffe041f96d
   subpackages:
   - types
   - types/versions
@@ -40,7 +40,7 @@ imports:
   - ssh
   - ssh/terminal
 - name: golang.org/x/sys
-  version: f7928cfef4d09d1b080aa2b6fd3ca9ba1567c733
+  version: 07c182904dbd53199946ba614a412c61d3c548f5
   subpackages:
   - unix
   - windows

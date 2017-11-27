@@ -3,12 +3,10 @@ package logout
 import (
 	"errors"
 	"github.com/dnephin/cobra"
-	"os"
 
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
-	"github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/pkg/validation"
 )
 
@@ -49,10 +47,7 @@ func getHost(opt logoutOptions, args []string) (string, error) {
 		host = opt.host
 
 	default:
-		host = os.Getenv(config.EnvStorageOSHost)
-		if host == "" {
-			return "", errors.New("No setting found for host")
-		}
+		return validation.ParseHostPort(api.DefaultHost, api.DefaultPort)
 
 	}
 

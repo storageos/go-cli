@@ -19,12 +19,14 @@ import:
   version: ^0.3.1
 - package: github.com/spf13/pflag
 - package: github.com/storageos/go-api
-  version: ^0.1.7
+  version: ^0.2.1
   subpackages:
   - types
   - types/versions
 - package: golang.org/x/sys
+  version: 07c182904dbd53199946ba614a412c61d3c548f5
   subpackages:
+  - unix
   - windows
 - package: golang.org/x/crypto
   subpackages:

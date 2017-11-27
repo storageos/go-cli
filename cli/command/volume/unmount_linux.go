@@ -78,6 +78,10 @@ func runUnmount(storageosCli *command.StorageOSCli, opt unmountOptions, mountDri
 		return fmt.Errorf("failed to get current node hostname, unable to unmount volume (must be forced), error: %s", err)
 	}
 
+	if vol.MountedBy == "" && !opt.force {
+		return fmt.Errorf("volume '%s' not mounted", vol.Name)
+	}
+
 	if hostname != vol.MountedBy && !opt.force {
 		return fmt.Errorf("current hostname '%s' doesn't match volume's hostname '%s', unable to unmount volume (must be forced)", hostname, vol.MountedBy)
 	}

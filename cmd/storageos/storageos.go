@@ -22,26 +22,18 @@ import (
 
 var shortDesc = `Converged storage for containers. 
 
-By using this product, you are agreeing to the terms of the the StorageOS Ltd. End User Subscription Agreement (EUSA) found at: http://storageos.com/legal/#eusa
+By using this product, you are agreeing to the terms of the the StorageOS Ltd. End
+User Subscription Agreement (EUSA) found at: https://storageos.com/legal/#eusa
 
 WARNING: This is the beta version of StorageOS and should not be used in production.
-To be notified about stable releases and latest features, sign up at my.storageos.com.
+To be notified about stable releases and latest features, sign up at https://my.storageos.com.
 `
 
-// ------------------------------------------------------------------------------------------------
-// Stub out logrus logging, comment out for debugging ---------------------------------------------
-// ------------------------------------------------------------------------------------------------
-type nullFormat struct{}
-
-func (n *nullFormat) Format(entry *logrus.Entry) ([]byte, error) {
-	return nil, nil
-}
-
+// Disable degugging (logging to stdout) until enabled.  In normal use we don't
+// want logrus messages going to stdout/stderr.
 func init() {
-	logrus.SetFormatter(&nullFormat{})
+	debug.Disable()
 }
-
-// ------------------------------------------------------------------------------------------------
 
 func newStorageOSCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opts := cliflags.NewClientOptions()
@@ -62,10 +54,6 @@ func newStorageOSCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 			return storageosCli.ShowHelp(cmd, args)
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			// daemon command is special, we redirect directly to another binary
-			// if cmd.Name() == "daemon" {
-			// 	return nil
-			// }
 			// flags must be the top-level command flags, not cmd.Flags()
 			opts.Common.SetDefaultOptions(flags)
 			preRun(opts)
@@ -87,7 +75,7 @@ func newStorageOSCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	// setHelpFunc(storageosCli, cmd, flags, opts)
 
 	cmd.SetOutput(storageosCli.Out())
-	// cmd.AddCommand(newDaemonCommand())
+
 	commands.AddCommands(cmd, storageosCli)
 
 	setValidateArgs(storageosCli, cmd, flags, opts)
@@ -96,7 +84,7 @@ func newStorageOSCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 }
 
 func setFlagErrorFunc(storageosCli *command.StorageOSCli, cmd *cobra.Command, flags *pflag.FlagSet, opts *cliflags.ClientOptions) {
-	// When invoking `docker stack --nonsense`, we need to make sure FlagErrorFunc return appropriate
+	// When invoking `storageos volume --nonsense`, we need to make sure FlagErrorFunc return appropriate
 	// output if the feature is not supported.
 	// As above cli.SetupRootCommand(cmd) have already setup the FlagErrorFunc, we will add a pre-check before the FlagErrorFunc
 	// is called.
@@ -257,7 +245,7 @@ func hideUnsupportedFeatures(cmd *cobra.Command, clientVersion string, hasExperi
 }
 
 func isSupported(cmd *cobra.Command, clientVersion string, hasExperimental bool) error {
-	// We check recursively so that, e.g., `docker stack ls` will return the same output as `docker stack`
+	// We check recursively so that, e.g., `storageos volume ls` will return the same output as `storageos volume`
 	if !hasExperimental {
 		for curr := cmd; curr != nil; curr = curr.Parent() {
 			if _, ok := curr.Tags["experimental"]; ok {

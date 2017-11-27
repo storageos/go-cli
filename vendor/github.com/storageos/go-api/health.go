@@ -3,6 +3,7 @@ package storageos
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/storageos/go-api/types"
@@ -16,7 +17,8 @@ var (
 // CPHealth returns the health of the control plane server at a given url.
 func (c *Client) CPHealth(ctx context.Context, hostname string) (*types.CPHealthStatus, error) {
 
-	req, err := http.NewRequest("GET", "http://"+hostname+":5705/v1/"+HealthAPIPrefix, nil)
+	url := fmt.Sprintf("http://%s:%s/v1/%s", hostname, DefaultPort, HealthAPIPrefix)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +45,8 @@ func (c *Client) CPHealth(ctx context.Context, hostname string) (*types.CPHealth
 // DPHealth returns the health of the data plane server at a given url.
 func (c *Client) DPHealth(ctx context.Context, hostname string) (*types.DPHealthStatus, error) {
 
-	req, err := http.NewRequest("GET", "http://"+hostname+":8001/v1/"+HealthAPIPrefix, nil)
+	url := fmt.Sprintf("http://%s:%s/v1/%s", hostname, DataplaneHealthPort, HealthAPIPrefix)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
