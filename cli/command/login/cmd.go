@@ -3,7 +3,6 @@ package login
 import (
 	"errors"
 	"fmt"
-	"os"
 	"syscall"
 
 	"github.com/dnephin/cobra"
@@ -11,7 +10,6 @@ import (
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
-	"github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/cli/opts"
 	"github.com/storageos/go-cli/pkg/validation"
 	"golang.org/x/crypto/ssh/terminal"
@@ -50,8 +48,8 @@ func NewLoginCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags := cmd.Flags()
 	flags.StringVarP(&opt.host, "host", "H", "", "The host to store the credentials for")
 	flags.Lookup("host").Hidden = true
-	flags.StringVarP(&opt.username, "username", "u", "", fmt.Sprintf("The username to use for this host (will override value of %v env variable value and global option --username)", config.EnvStorageosUsername))
-	flags.StringVarP(&opt.password, "password", "p", "", fmt.Sprintf("The password to use for this host (will override value of %v env variable value and global option --password)", config.EnvStorageosPassword))
+	flags.StringVarP(&opt.username, "username", "u", "", "The username to use for this host (will override value of the global option --username)")
+	flags.StringVarP(&opt.password, "password", "p", "", "The password to use for this host (will override value of the global option --password)")
 
 	return cmd
 }
@@ -76,38 +74,22 @@ func verifyCredsWithServer(username, password, host string) error {
 }
 
 func getHost(opt loginOptions, args []string) (string, error) {
-	var host string
-
-	switch {
-	case len(args) == 1:
-		if opt.host != "" {
+	if opt.host != "" {
+		if len(args) > 0 {
 			return "", errors.New("Conflicting options: either specify --host or provide positional arg, not both")
 		}
-		host = args[0]
 
-	case opt.host != "":
-		host = opt.host
-
-	default:
-		host = os.Getenv(config.EnvStorageOSHost)
-		if host == "" {
-			return validation.ParseHostPort(api.DefaultHost, api.DefaultPort)
-		}
-
+		return validation.ParseHostPort(opt.host, api.DefaultPort)
 	}
 
-	return validation.ParseHostPort(host, api.DefaultPort)
+	if len(args) > 0 {
+		return validation.ParseHostPort(args[0], api.DefaultPort)
+	}
+
+	return validation.ParseHostPort(api.DefaultHost, api.DefaultPort)
 }
 
-func getUsername(storageosCli *command.StorageOSCli, opt loginOptions) (string, error) {
-	if opt.username != "" {
-		return opt.username, nil
-	}
-
-	if envUsername := os.Getenv(config.EnvStorageosUsername); envUsername != "" {
-		return envUsername, nil
-	}
-
+func promptUsername(storageosCli *command.StorageOSCli) (string, error) {
 	buf := make([]byte, 1024)
 	fmt.Fprint(storageosCli.Out(), "Username: ")
 	i, err := storageosCli.In().Read(buf)
@@ -118,15 +100,7 @@ func getUsername(storageosCli *command.StorageOSCli, opt loginOptions) (string, 
 	return string(buf[:i-1]), nil // i-1 strips newline
 }
 
-func getPassword(storageosCli *command.StorageOSCli, opt loginOptions) (string, error) {
-	if opt.password != "" {
-		return opt.password, nil
-	}
-
-	if envPassword := os.Getenv(config.EnvStorageosPassword); envPassword != "" {
-		return envPassword, nil
-	}
-
+func promptPassword(storageosCli *command.StorageOSCli) (string, error) {
 	fmt.Fprint(storageosCli.Out(), "Password: ")
 	p, err := terminal.ReadPassword(int(syscall.Stdin))
 	if err != nil {
@@ -137,29 +111,33 @@ func getPassword(storageosCli *command.StorageOSCli, opt loginOptions) (string, 
 	return string(p), nil
 }
 
-func runLogin(storageosCli *command.StorageOSCli, opt loginOptions, args []string) error {
-	host, err := getHost(opt, args)
+func runLogin(storageosCli *command.StorageOSCli, opt loginOptions, args []string) (err error) {
+	opt.host, err = getHost(opt, args)
 	if err != nil {
 		return err
 	}
 
-	username, err := getUsername(storageosCli, opt)
-	if err != nil {
-		return err
+	if opt.username == "" {
+		opt.username, err = promptUsername(storageosCli)
+		if err != nil {
+			return err
+		}
 	}
 
-	password, err := getPassword(storageosCli, opt)
-	if err != nil {
-		return err
+	if opt.password == "" {
+		opt.password, err = promptPassword(storageosCli)
+		if err != nil {
+			return err
+		}
 	}
 
-	if verr := verifyCredsWithServer(username, password, host); verr != nil {
+	if verr := verifyCredsWithServer(opt.username, opt.password, opt.host); verr != nil {
 		return verr
 	}
 
 	fmt.Fprintln(storageosCli.Out(), "Credentials verified")
 
-	err = storageosCli.ConfigFile().CredentialsStore.SetCredentials(host, username, password)
+	err = storageosCli.ConfigFile().CredentialsStore.SetCredentials(opt.host, opt.username, opt.password)
 	if err != nil {
 		return err
 	}
