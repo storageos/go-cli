@@ -22,11 +22,11 @@ func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 	cmd.AddCommand(
 		command.WithAlias(namespace.NewNamespaceCommand(storageosCli), "ns"),
 		pool.NewPoolCommand(storageosCli),
-		command.WithAlias(rule.NewRuleCommand(storageosCli), "ru"),
-		command.WithAlias(user.NewUserCommand(storageosCli), "us", "usr"),
-		command.WithAlias(policy.NewPolicyCommand(storageosCli), "po", "pol"),
-		command.WithAlias(volume.NewVolumeCommand(storageosCli), "v", "vo", "vol"),
-		command.WithAlias(node.NewNodeCommand(storageosCli), "no"),
+		rule.NewRuleCommand(storageosCli),
+		command.WithAlias(user.NewUserCommand(storageosCli), "u"),
+		command.WithAlias(policy.NewPolicyCommand(storageosCli), "pol"),
+		command.WithAlias(volume.NewVolumeCommand(storageosCli), "v", "vol"),
+		command.WithAlias(node.NewNodeCommand(storageosCli), "n"),
 		login.NewLoginCommand(storageosCli),
 		logout.NewLogoutCommand(storageosCli),
 
@@ -35,7 +35,7 @@ func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 		system.NewVersionCommand(storageosCli),
 
 		// clustering
-		command.WithAlias(cluster.NewClusterCommand(storageosCli), "c", "cl", "clust"),
+		command.WithAlias(cluster.NewClusterCommand(storageosCli), "c"),
 
 		NewBashGenerationFunction(storageosCli),
 	)

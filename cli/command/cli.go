@@ -211,12 +211,12 @@ func getServerHost(hosts []string, tls bool) (host string, err error) {
 
 // Standard alias definitions
 var (
-	CreateAliases  = []string{"c", "cr", "cre"}
-	InspectAliases = []string{"i", "in", "ins", "insp"}
-	ListAliases    = []string{"list", "l", "li"}
-	UpdateAliases  = []string{"u", "up", "upd"}
-	RemoveAliases  = []string{"remove", "delete", "del", "d", "r"}
-	HealthAliases  = []string{"h", "he", "hel"}
+	CreateAliases  = []string{"c"}
+	InspectAliases = []string{"i"}
+	ListAliases    = []string{"list"}
+	UpdateAliases  = []string{"u"}
+	RemoveAliases  = []string{"remove"}
+	HealthAliases  = []string{"h"}
 )
 
 func WithAlias(c *cobra.Command, aliases ...string) *cobra.Command {

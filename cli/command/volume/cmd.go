@@ -21,8 +21,8 @@ func NewVolumeCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		command.WithAlias(newListCommand(storageosCli), command.ListAliases...),
 		command.WithAlias(newUpdateCommand(storageosCli), command.UpdateAliases...),
 		command.WithAlias(newRemoveCommand(storageosCli), command.RemoveAliases...),
-		command.WithAlias(newMountCommand(storageosCli), "m", "mn", "mnt", "mo"),
-		command.WithAlias(newUnmountCommand(storageosCli), "u", "un", "um", "umount"),
+		command.WithAlias(newMountCommand(storageosCli), "m"),
+		command.WithAlias(newUnmountCommand(storageosCli), "um", "umount"),
 	)
 	return cmd
 }
