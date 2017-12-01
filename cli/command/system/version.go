@@ -57,7 +57,8 @@ func NewVersionCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 }
 
 func runVersion(storageosCli *command.StorageOSCli, opts *versionOptions) error {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
 
 	templateFormat := versionTemplate
 	if opts.format != "" {
