@@ -16,12 +16,12 @@ func NewNodeCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		RunE:  storageosCli.ShowHelp,
 	}
 	cmd.AddCommand(
-		newListCommand(storageosCli),
-		newInspectCommand(storageosCli),
-		newHealthCommand(storageosCli),
+		command.WithAlias(newListCommand(storageosCli), command.ListAliases...),
+		command.WithAlias(newInspectCommand(storageosCli), command.InspectAliases...),
+		command.WithAlias(newHealthCommand(storageosCli), command.HealthAliases...),
 		newCordonCommand(storageosCli),
 		newUncordonCommand(storageosCli),
-		newUpdateCommand(storageosCli),
+		command.WithAlias(newUpdateCommand(storageosCli), command.UpdateAliases...),
 	)
 	return cmd
 }

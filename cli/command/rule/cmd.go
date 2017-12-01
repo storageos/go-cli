@@ -16,11 +16,11 @@ func NewRuleCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		RunE:  storageosCli.ShowHelp,
 	}
 	cmd.AddCommand(
-		newCreateCommand(storageosCli),
-		newInspectCommand(storageosCli),
-		newListCommand(storageosCli),
-		newUpdateCommand(storageosCli),
-		newRemoveCommand(storageosCli),
+		command.WithAlias(newCreateCommand(storageosCli), command.CreateAliases...),
+		command.WithAlias(newInspectCommand(storageosCli), command.InspectAliases...),
+		command.WithAlias(newListCommand(storageosCli), command.ListAliases...),
+		command.WithAlias(newUpdateCommand(storageosCli), command.UpdateAliases...),
+		command.WithAlias(newRemoveCommand(storageosCli), command.RemoveAliases...),
 	)
 	return cmd
 }
