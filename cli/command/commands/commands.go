@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/cluster"
@@ -35,5 +36,45 @@ func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 
 		// clustering
 		command.WithAlias(cluster.NewClusterCommand(storageosCli), "c", "cl", "clust"),
+
+		NewBashGenerationFunction(storageosCli),
 	)
+}
+
+func NewBashGenerationFunction(storageosCli *command.StorageOSCli) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:    "install-bash-completion",
+		Short:  "Install the bash completion for the storageos command",
+		Hidden: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			const bashdir = "/etc/bash_completion.d/storageos"
+
+			// ensure user wants to perform this action
+			buf := make([]byte, 1024)
+			fmt.Fprintf(storageosCli.Out(), "will write bash completion to %s, continue? [y/N] ", bashdir)
+			i, err := storageosCli.In().Read(buf)
+			if err != nil {
+				return err
+			}
+
+			switch string(buf[:i-1]) {
+			case "y":
+				break // just continue
+
+			case "", "n", "N":
+				return nil
+
+			default:
+				return fmt.Errorf("unknown response (%s) aborting", string(buf[:i-1]))
+			}
+
+			if err := cmd.Parent().GenBashCompletionFile(bashdir); err != nil {
+				return err
+			}
+
+			fmt.Fprintln(storageosCli.Out(), "saved bash completions, please reload your terminal")
+			return nil
+		},
+	}
+	return cmd
 }
