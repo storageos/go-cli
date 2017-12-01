@@ -15,6 +15,7 @@ import (
 	"github.com/storageos/go-cli/cli/command/system"
 	"github.com/storageos/go-cli/cli/command/user"
 	"github.com/storageos/go-cli/cli/command/volume"
+	"runtime"
 )
 
 // AddCommands adds all the commands from cli/command to the root command
@@ -42,12 +43,24 @@ func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 }
 
 func NewBashGenerationFunction(storageosCli *command.StorageOSCli) *cobra.Command {
+	var dump bool
+
 	cmd := &cobra.Command{
 		Use:    "install-bash-completion",
 		Short:  "Install the bash completion for the storageos command",
 		Hidden: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			const bashdir = "/etc/bash_completion.d/storageos"
+
+			// Just dump to stdout if requested
+			if dump {
+				return cmd.Parent().GenBashCompletion(cmd.Out())
+			}
+
+			// if we are not on linux or darwin, we dont know how to install
+			if runtime.GOOS != "linux" && runtime.GOOS != "darwin" {
+				return fmt.Errorf("cannot install for OS: %v, try manualy with the --stdout flag", runtime.GOOS)
+			}
 
 			// ensure user wants to perform this action
 			buf := make([]byte, 1024)
@@ -76,5 +89,9 @@ func NewBashGenerationFunction(storageosCli *command.StorageOSCli) *cobra.Comman
 			return nil
 		},
 	}
+
+	flags := cmd.Flags()
+	flags.BoolVar(&dump, "stdout", false, "Dump the bash completion to stdout rather than installing")
+
 	return cmd
 }
