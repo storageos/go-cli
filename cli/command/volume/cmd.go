@@ -16,13 +16,13 @@ func NewVolumeCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		RunE:  storageosCli.ShowHelp,
 	}
 	cmd.AddCommand(
-		newCreateCommand(storageosCli),
-		newInspectCommand(storageosCli),
-		newListCommand(storageosCli),
-		newUpdateCommand(storageosCli),
-		newRemoveCommand(storageosCli),
-		newMountCommand(storageosCli),
-		newUnmountCommand(storageosCli),
+		command.WithAlias(newCreateCommand(storageosCli), command.CreateAliases...),
+		command.WithAlias(newInspectCommand(storageosCli), command.InspectAliases...),
+		command.WithAlias(newListCommand(storageosCli), command.ListAliases...),
+		command.WithAlias(newUpdateCommand(storageosCli), command.UpdateAliases...),
+		command.WithAlias(newRemoveCommand(storageosCli), command.RemoveAliases...),
+		command.WithAlias(newMountCommand(storageosCli), "m", "mn", "mnt", "mo"),
+		command.WithAlias(newUnmountCommand(storageosCli), "u", "un", "um", "umount"),
 	)
 	return cmd
 }

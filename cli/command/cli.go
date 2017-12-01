@@ -208,3 +208,18 @@ func getServerHost(hosts []string, tls bool) (host string, err error) {
 	host, err = opts.ParseHost(tls, host)
 	return
 }
+
+// Standard alias definitions
+var (
+	CreateAliases  = []string{"c", "cr", "cre"}
+	InspectAliases = []string{"i", "in", "ins", "insp"}
+	ListAliases    = []string{"list", "l", "li"}
+	UpdateAliases  = []string{"u", "up", "upd"}
+	RemoveAliases  = []string{"remove", "delete", "del", "d", "r"}
+	HealthAliases  = []string{"h", "he", "hel"}
+)
+
+func WithAlias(c *cobra.Command, aliases ...string) *cobra.Command {
+	c.Aliases = append(c.Aliases, aliases...)
+	return c
+}

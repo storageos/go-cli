@@ -19,13 +19,13 @@ import (
 // AddCommands adds all the commands from cli/command to the root command
 func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 	cmd.AddCommand(
-		namespace.NewNamespaceCommand(storageosCli),
+		command.WithAlias(namespace.NewNamespaceCommand(storageosCli), "ns"),
 		pool.NewPoolCommand(storageosCli),
-		rule.NewRuleCommand(storageosCli),
-		user.NewUserCommand(storageosCli),
-		policy.NewPolicyCommand(storageosCli),
-		volume.NewVolumeCommand(storageosCli),
-		node.NewNodeCommand(storageosCli),
+		command.WithAlias(rule.NewRuleCommand(storageosCli), "ru"),
+		command.WithAlias(user.NewUserCommand(storageosCli), "us", "usr"),
+		command.WithAlias(policy.NewPolicyCommand(storageosCli), "po", "pol"),
+		command.WithAlias(volume.NewVolumeCommand(storageosCli), "v", "vo", "vol"),
+		command.WithAlias(node.NewNodeCommand(storageosCli), "no"),
 		login.NewLoginCommand(storageosCli),
 		logout.NewLogoutCommand(storageosCli),
 
@@ -34,6 +34,6 @@ func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 		system.NewVersionCommand(storageosCli),
 
 		// clustering
-		cluster.NewClusterCommand(storageosCli),
+		command.WithAlias(cluster.NewClusterCommand(storageosCli), "c", "cl", "clust"),
 	)
 }

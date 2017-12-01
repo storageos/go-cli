@@ -16,10 +16,10 @@ func NewClusterCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		RunE:  storageosCli.ShowHelp,
 	}
 	cmd.AddCommand(
-		newCreateCommand(storageosCli),
-		newInspectCommand(storageosCli),
-		newRemoveCommand(storageosCli),
-		newHealthCommand(storageosCli),
+		command.WithAlias(newCreateCommand(storageosCli), command.CreateAliases...),
+		command.WithAlias(newInspectCommand(storageosCli), command.InspectAliases...),
+		command.WithAlias(newRemoveCommand(storageosCli), command.RemoveAliases...),
+		command.WithAlias(newHealthCommand(storageosCli), command.HealthAliases...),
 	)
 	return cmd
 }
