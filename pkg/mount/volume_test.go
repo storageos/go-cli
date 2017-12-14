@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"code.storageos.net/scm/storageos/control/testutil"
+	"github.com/storageos/go-cli/pkg/testutil/assert"
 )
 
 func TestParseFSType(t *testing.T) {
@@ -42,11 +42,11 @@ func TestParseFSType(t *testing.T) {
 	for path, d := range input {
 		fstype, err := parseFileOutput(path, d.out)
 		if d.err == nil {
-			testutil.Expect(t, err, nil)
+			assert.Equal(t, err, nil)
 		} else {
-			testutil.Refute(t, err, nil)
+			assert.NotNil(t, err)
 		}
-		testutil.Expect(t, fstype, d.expected)
+		assert.Equal(t, fstype, d.expected)
 	}
 
 }
