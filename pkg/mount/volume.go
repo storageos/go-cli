@@ -31,8 +31,8 @@ func initRawVolume(ctx context.Context, path string, fsType string) error {
 	}
 
 	if ft == "raw" {
-		_, err := createFilesystem(ctx, fsType, path, "")
-		if err != nil {
+		log.Debugf("creating %s filesystem on volume %s", fsType, path)
+		if err := createFilesystem(ctx, fsType, path, ""); err != nil {
 			return err
 		}
 		log.Infof("%s filesystem created on volume %s", fsType, path)
@@ -123,7 +123,40 @@ func parseFileOutput(path string, out string) (string, error) {
 	return "", fmt.Errorf("unknown fs type: %s", out)
 }
 
-func createFilesystem(ctx context.Context, fstype string, path string, options string) (string, error) {
+func createFilesystem(ctx context.Context, fstype string, path string, options string) error {
+
+	var retries int
+	start := time.Now()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("deadline exceeded while trying to create filesystem")
+		default:
+			timeOff := backoff(retries)
+			err := runMkfs(ctx, fstype, path, options)
+			if err == nil {
+				// filesystem created, exit
+				return nil
+			}
+
+			log.WithFields(log.Fields{
+				"fstype": fstype,
+				"path":   path,
+				"err":    err.Error(),
+			}).Warnf("create filesystem failed, retrying in %v", timeOff)
+
+			if abort(start, timeOff) {
+				return fmt.Errorf("failed to create filesystem")
+			}
+
+			retries++
+			time.Sleep(timeOff)
+		}
+	}
+}
+
+func runMkfs(ctx context.Context, fstype string, path string, options string) error {
 
 	var out string
 	var err error
