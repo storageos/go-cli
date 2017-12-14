@@ -59,9 +59,9 @@ func waitForVolume(ctx context.Context, path string) error {
 					// volume ready, exit
 					return nil
 				}
-				log.Infof("waiting for volume to come online: %s, retrying in %v", path, timeOff)
+				log.Debugf("waiting for volume to come online: %s, retrying in %v", path, timeOff)
 			} else {
-				log.Infof("waiting for volume: %s, retrying in %v", path, timeOff)
+				log.Debugf("waiting for volume: %s, retrying in %v", path, timeOff)
 			}
 
 			if abort(start, timeOff) {
