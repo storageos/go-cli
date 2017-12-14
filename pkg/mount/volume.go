@@ -19,7 +19,7 @@ const defaultTimeOut = 45
 // not one already present.
 func initRawVolume(ctx context.Context, path string, fsType string) error {
 
-	if err := waitForVolume(path); err != nil {
+	if err := waitForVolume(ctx, path); err != nil {
 		return err
 	}
 	log.Debugf("volume found: %s", path)
@@ -43,29 +43,34 @@ func initRawVolume(ctx context.Context, path string, fsType string) error {
 
 // waitForVolume waits for the StorageOS raw volume to be created.  The retry
 // timeout doubles on every invocation.
-func waitForVolume(path string) error {
+func waitForVolume(ctx context.Context, path string) error {
 
 	var retries int
 	start := time.Now()
 
 	for {
-		timeOff := backoff(retries)
-		if volumeExists(path) {
-			if volumeWritable(path) {
-				// volume ready, exit
-				return nil
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("deadline exceeded while waiting for volume")
+		default:
+			timeOff := backoff(retries)
+			if volumeExists(path) {
+				if volumeWritable(path) {
+					// volume ready, exit
+					return nil
+				}
+				log.Infof("waiting for volume to come online: %s, retrying in %v", path, timeOff)
+			} else {
+				log.Infof("waiting for volume: %s, retrying in %v", path, timeOff)
 			}
-			log.Infof("waiting for volume to come online: %s, retrying in %v", path, timeOff)
-		} else {
-			log.Infof("waiting for volume: %s, retrying in %v", path, timeOff)
-		}
 
-		if abort(start, timeOff) {
-			return fmt.Errorf("timed out waiting for volume to be ready")
-		}
+			if abort(start, timeOff) {
+				return fmt.Errorf("timed out waiting for volume to be ready")
+			}
 
-		retries++
-		time.Sleep(timeOff)
+			retries++
+			time.Sleep(timeOff)
+		}
 	}
 }
 
