@@ -89,10 +89,11 @@ func getVolumeFSType(ctx context.Context, path string) (string, error) {
 // "raw" and can be formatted safely.
 func parseFileOutput(path string, out string) (string, error) {
 	switch {
-	case out == path+": data":
+	case out == path+": data", out == path+": empty":
 		// At least on Ubuntu, file will report "/path/to/file: data" for a raw
 		// volume without a filesystem.  If this matches, we expect to be able to
-		// reformat.
+		// reformat. There seems to be a similar case for empty, we make the same
+		// assumptions for this too.
 		return "raw", nil
 	case strings.HasPrefix(out, path+": block special"):
 		// block special devices are reported on block devices when `file -s` is not
