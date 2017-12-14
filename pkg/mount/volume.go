@@ -133,36 +133,43 @@ func createFilesystem(ctx context.Context, fstype string, path string, options s
 	case "ext2":
 		out, err = runCmd(ctx, mkfsExt2, path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			return err
 		}
 	case "ext3":
 		out, err = runCmd(ctx, mkfsExt3, path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			return err
 		}
 	case "ext4":
 		// Get the volume id from the path
 		id := getVolumeIDFromPath(path)
 		out, err = runCmd(ctx, mkfsExt4, "-F", "-U", id, "-b", "4096", "-E", "lazy_itable_init=0,lazy_journal_init=0", path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			return err
 		}
 	case "xfs":
 		out, err = runCmd(ctx, mkfsXfs, path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			return err
 		}
 	case "btrfs":
 		out, err = runCmd(ctx, mkfsBtrfs, path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			return err
 		}
 	case "":
-		return "", fmt.Errorf("filesystem not specified")
+		return fmt.Errorf("filesystem not specified")
 	default:
-		return "", fmt.Errorf("unsupported filesystem: %s", fstype)
+		return fmt.Errorf("unsupported filesystem: %s", fstype)
 	}
-	return out, nil
+
+	log.WithFields(log.Fields{
+		"fstype": fstype,
+		"path":   path,
+		"output": out,
+	}).Debug("created filesystem")
+
+	return nil
 }
 
 // getVolumeIDFromPath returns the volume id from the path name.
