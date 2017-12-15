@@ -19,7 +19,7 @@ const defaultTimeOut = 45
 // not one already present.
 func initRawVolume(ctx context.Context, path string, fsType string) error {
 
-	if err := waitForVolume(path); err != nil {
+	if err := waitForVolume(ctx, path); err != nil {
 		return err
 	}
 	log.Debugf("volume found: %s", path)
@@ -31,8 +31,8 @@ func initRawVolume(ctx context.Context, path string, fsType string) error {
 	}
 
 	if ft == "raw" {
-		_, err := createFilesystem(ctx, fsType, path, "")
-		if err != nil {
+		log.Debugf("creating %s filesystem on volume %s", fsType, path)
+		if err := createFilesystem(ctx, fsType, path, ""); err != nil {
 			return err
 		}
 		log.Infof("%s filesystem created on volume %s", fsType, path)
@@ -43,29 +43,34 @@ func initRawVolume(ctx context.Context, path string, fsType string) error {
 
 // waitForVolume waits for the StorageOS raw volume to be created.  The retry
 // timeout doubles on every invocation.
-func waitForVolume(path string) error {
+func waitForVolume(ctx context.Context, path string) error {
 
 	var retries int
 	start := time.Now()
 
 	for {
-		timeOff := backoff(retries)
-		if volumeExists(path) {
-			if volumeWritable(path) {
-				// volume ready, exit
-				return nil
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("deadline exceeded while waiting for volume")
+		default:
+			timeOff := backoff(retries)
+			if volumeExists(path) {
+				if volumeWritable(path) {
+					// volume ready, exit
+					return nil
+				}
+				log.Debugf("waiting for volume to come online: %s, retrying in %v", path, timeOff)
+			} else {
+				log.Debugf("waiting for volume: %s, retrying in %v", path, timeOff)
 			}
-			log.Infof("waiting for volume to come online: %s, retrying in %v", path, timeOff)
-		} else {
-			log.Infof("waiting for volume: %s, retrying in %v", path, timeOff)
-		}
 
-		if abort(start, timeOff) {
-			return fmt.Errorf("timed out waiting for volume to be ready")
-		}
+			if abort(start, timeOff) {
+				return fmt.Errorf("timed out waiting for volume to be ready")
+			}
 
-		retries++
-		time.Sleep(timeOff)
+			retries++
+			time.Sleep(timeOff)
+		}
 	}
 }
 
@@ -89,10 +94,11 @@ func getVolumeFSType(ctx context.Context, path string) (string, error) {
 // "raw" and can be formatted safely.
 func parseFileOutput(path string, out string) (string, error) {
 	switch {
-	case out == path+": data":
+	case out == path+": data", out == path+": empty":
 		// At least on Ubuntu, file will report "/path/to/file: data" for a raw
 		// volume without a filesystem.  If this matches, we expect to be able to
-		// reformat.
+		// reformat. There seems to be a similar case for empty, we make the same
+		// assumptions for this too.
 		return "raw", nil
 	case strings.HasPrefix(out, path+": block special"):
 		// block special devices are reported on block devices when `file -s` is not
@@ -117,7 +123,40 @@ func parseFileOutput(path string, out string) (string, error) {
 	return "", fmt.Errorf("unknown fs type: %s", out)
 }
 
-func createFilesystem(ctx context.Context, fstype string, path string, options string) (string, error) {
+func createFilesystem(ctx context.Context, fstype string, path string, options string) error {
+
+	var retries int
+	start := time.Now()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("deadline exceeded while trying to create filesystem")
+		default:
+			timeOff := backoff(retries)
+			err := runMkfs(ctx, fstype, path, options)
+			if err == nil {
+				// filesystem created, exit
+				return nil
+			}
+
+			log.WithFields(log.Fields{
+				"fstype": fstype,
+				"path":   path,
+				"err":    err.Error(),
+			}).Warnf("create filesystem failed, retrying in %v", timeOff)
+
+			if abort(start, timeOff) {
+				return fmt.Errorf("failed to create filesystem")
+			}
+
+			retries++
+			time.Sleep(timeOff)
+		}
+	}
+}
+
+func runMkfs(ctx context.Context, fstype string, path string, options string) error {
 
 	var out string
 	var err error
@@ -127,36 +166,43 @@ func createFilesystem(ctx context.Context, fstype string, path string, options s
 	case "ext2":
 		out, err = runCmd(ctx, mkfsExt2, path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			return err
 		}
 	case "ext3":
 		out, err = runCmd(ctx, mkfsExt3, path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			return err
 		}
 	case "ext4":
 		// Get the volume id from the path
 		id := getVolumeIDFromPath(path)
 		out, err = runCmd(ctx, mkfsExt4, "-F", "-U", id, "-b", "4096", "-E", "lazy_itable_init=0,lazy_journal_init=0", path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			return err
 		}
 	case "xfs":
 		out, err = runCmd(ctx, mkfsXfs, path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			return err
 		}
 	case "btrfs":
 		out, err = runCmd(ctx, mkfsBtrfs, path)
 		if err != nil {
-			log.Warnf("mkfs output: %s", err.Error())
+			return err
 		}
 	case "":
-		return "", fmt.Errorf("filesystem not specified")
+		return fmt.Errorf("filesystem not specified")
 	default:
-		return "", fmt.Errorf("unsupported filesystem: %s", fstype)
+		return fmt.Errorf("unsupported filesystem: %s", fstype)
 	}
-	return out, nil
+
+	log.WithFields(log.Fields{
+		"fstype": fstype,
+		"path":   path,
+		"output": out,
+	}).Debug("created filesystem")
+
+	return nil
 }
 
 // getVolumeIDFromPath returns the volume id from the path name.
