@@ -15,7 +15,7 @@ export STORAGEOS_USERNAME=<your username>
 export STORAGEOS_PASSWORD=<your password>
 ```
 
-Choose either the binary or Docker installation methods.  Once installed, usage should be the same. 
+Choose either the binary or Docker installation methods.  Once installed, usage should be the same.
 
 ## Binary Installation (Linux)
 
@@ -60,7 +60,7 @@ The binary will be in `cmd/storageos/storageos`
 ```bash
 go get github.com/mitchellh/gox
 go get
-make build
+make release
 ```
 
 Release binaries for Linux, Mac and Windows will be in `cmd/storageos/release`
