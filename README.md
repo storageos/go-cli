@@ -55,19 +55,13 @@ Checkout `go-cli` into your `GOPATH`.  Consult https://github.com/golang/go/wiki
 `GOPATH`'s work.  If `GOPATH` is not set, it defaults to `$HOME/go`.
 
 ```bash
-go get github.com/storageos/go-cli
-```
-
-### Download dependencies
-
-```bash
-cd $GOPATH/src/github.com/storageos/go-cli
-go get
+go get -d github.com/storageos/go-cli/...
 ```
 
 ### Building local binary
 
 ```bash
+cd $GOPATH/src/github.com/storageos/go-cli
 make build
 ```
 
@@ -76,7 +70,7 @@ The binary will be in `cmd/storageos/storageos`
 ## Building release binaries
 
 ```bash
-go get github.com/mitchellh/gox
+cd $GOPATH/src/github.com/storageos/go-cli
 make release
 ```
 
