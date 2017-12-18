@@ -47,7 +47,25 @@ alias storageos=='docker run --rm -e STORAGEOS_HOST -e STORAGEOS_USERNAME -e STO
 
 Run `storageos` to get usage information.
 
-## Building local binary
+## Building from source
+
+### Download source
+
+Checkout `go-cli` into your `GOPATH`.  Consult https://github.com/golang/go/wiki/GOPATH if you are unfamiliar with how
+`GOPATH`'s work.  If `GOPATH` is not set, it defaults to `$HOME/go`.
+
+```bash
+go get github.com/storageos/go-cli
+```
+
+### Download dependencies
+
+```bash
+cd $GOPATH/src/github.com/storageos/go-cli
+go get
+```
+
+### Building local binary
 
 ```bash
 make build
@@ -59,7 +77,6 @@ The binary will be in `cmd/storageos/storageos`
 
 ```bash
 go get github.com/mitchellh/gox
-go get
 make release
 ```
 
