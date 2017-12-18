@@ -12,5 +12,6 @@ build:
 
 release:
 	@echo "++ Building storageos release binaries"
+	go get github.com/mitchellh/gox
 	cd cmd/storageos && gox -verbose -output="release/{{.Dir}}_{{.OS}}_{{.Arch}}" \
 		-ldflags "$(LDFLAGS)" -osarch="linux/amd64 darwin/amd64 windows/amd64"
