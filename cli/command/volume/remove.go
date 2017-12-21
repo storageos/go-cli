@@ -6,6 +6,7 @@ import (
 	"context"
 
 	"github.com/dnephin/cobra"
+	api "github.com/storageos/go-api"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
@@ -61,7 +62,12 @@ func runRemove(storageosCli *command.StorageOSCli, opt *removeOptions) error {
 			status = 1
 			continue
 		}
-		fmt.Fprintf(storageosCli.Out(), "%s/%s\n", namespace, name)
+
+		if api.IsUUID(name) {
+			fmt.Fprintf(storageosCli.Out(), "%s\n", name)
+		} else {
+			fmt.Fprintf(storageosCli.Out(), "%s/%s\n", namespace, name)
+		}
 	}
 
 	if status != 0 {
