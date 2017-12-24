@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"sort"
 	"time"
 
 	"github.com/dnephin/cobra"
@@ -61,6 +62,7 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 		}
 	}
 
+	sort.Sort(cliTypes.NodeByName(nodes))
 	for _, node := range nodes {
 		if err := runNodeHealth(storageosCli, node, opt.timeout); err != nil {
 			return err

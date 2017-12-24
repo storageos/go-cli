@@ -47,3 +47,10 @@ type Node struct {
 		DP *apiTypes.DPHealthStatus
 	}
 }
+
+// NodeByName sorts node list by hostname
+type NodeByName []*Node
+
+func (n NodeByName) Len() int           { return len(n) }
+func (n NodeByName) Swap(i, j int)      { n[i], n[j] = n[j], n[i] }
+func (n NodeByName) Less(i, j int) bool { return n[i].Name < n[j].Name }
