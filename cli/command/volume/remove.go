@@ -57,7 +57,7 @@ func runRemove(storageosCli *command.StorageOSCli, opt *removeOptions) error {
 		}
 
 		if err := client.VolumeDelete(params); err != nil {
-			fmt.Fprintf(storageosCli.Err(), "%s\n", err)
+			fmt.Fprintf(storageosCli.Err(), "%s '%s'\n", err, ref)
 			status = 1
 			continue
 		}
