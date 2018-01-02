@@ -15,3 +15,7 @@ release:
 	go get github.com/mitchellh/gox
 	cd cmd/storageos && gox -verbose -output="release/{{.Dir}}_{{.OS}}_{{.Arch}}" \
 		-ldflags "$(LDFLAGS)" -osarch="linux/amd64 darwin/amd64 windows/amd64"
+	@rm -f cmd/storageos/release/*.sha256
+	@for filename in cmd/storageos/release/*; do \
+		shasum -a 256 $$filename > $$filename.sha256; \
+	done;
