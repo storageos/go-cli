@@ -161,6 +161,17 @@ func (c *Client) ClusterStatus(id string) (*types.Cluster, error) {
 	}
 	defer resp.Body.Close()
 
+	switch resp.StatusCode {
+	case http.StatusOK:
+		break // just continue normally
+
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("unknown cluster key (%v)", id)
+
+	default:
+		return nil, fmt.Errorf("API error, unknown status (%v)", resp.Status)
+	}
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
