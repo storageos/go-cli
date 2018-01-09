@@ -1,8 +1,9 @@
 package cluster
 
 import (
+	"fmt"
 	"github.com/dnephin/cobra"
-	// storageos "github.com/storageos/go-api"
+	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/inspect"
@@ -42,6 +43,10 @@ func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	}
 
 	getFunc := func(ref string) (interface{}, []byte, error) {
+		if !api.IsUUID(ref) {
+			return nil, nil, fmt.Errorf("invalid cluster token (%v)", ref)
+		}
+
 		i, err := client.ClusterStatus(ref)
 		return i, nil, err
 	}
