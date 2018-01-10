@@ -67,9 +67,13 @@ func mountVolume(ctx context.Context, deviceRootPath string, id string, mp strin
 	}
 	log.Debugf("Mountpoint created: %s ", mp)
 
-	bin, args := fsType.MountCommand(deviceRootPath+"/"+id, mp)
+	bin, args, err := fsType.MountCommand(deviceRootPath+"/"+id, mp)
+	if err == nil {
+		_, err = runCmd(ctx, bin, args...)
+	}
 
-	if _, err := runCmd(ctx, bin, args...); err != nil {
+	// If either the command generation, or the mount command execution failed
+	if err != nil {
 		log.WithFields(log.Fields{
 			"path":        deviceRootPath + "/" + id,
 			"mount_point": mp,
@@ -86,9 +90,13 @@ func mountVolume(ctx context.Context, deviceRootPath string, id string, mp strin
 // unmountVolume unmounts a StorageOS-based filesystem and removes the
 // mountpoint.
 func unmountVolume(ctx context.Context, fsType FSType, mp string) error {
-	bin, args := fsType.UnmountCommand(mp)
+	bin, args, err := fsType.UnmountCommand(mp)
+	if err == nil {
+		_, err = runCmd(ctx, bin, args...)
+	}
 
-	if _, err := runCmd(ctx, bin, args...); err != nil {
+	// If either the command generation, or the unmount command execution failed
+	if err != nil {
 		log.Errorf("Unmount failed: %s (%s)", mp, err)
 		return err
 	}

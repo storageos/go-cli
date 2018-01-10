@@ -140,6 +140,11 @@ func createFilesystem(ctx context.Context, fstype FSType, path string) error {
 				return nil
 			}
 
+			// Bail early if this is a fatal error
+			if mountErr, ok := err.(*MountError); ok && mountErr.Fatal {
+				return err
+			}
+
 			log.WithFields(log.Fields{
 				"fstype": fstype,
 				"path":   path,

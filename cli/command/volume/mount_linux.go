@@ -141,6 +141,11 @@ RETRY:
 			"err":        err.Error(),
 		}).Error(" failed to mount volume")
 
+		// If this is a permanent error, stop retrying
+		if mountErr, ok := err.(*mount.MountError); ok && mountErr.Fatal {
+			return err
+		}
+
 		if retries < maxRetries {
 			time.Sleep(250 * time.Millisecond)
 			retries++
