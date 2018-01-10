@@ -9,28 +9,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// OS utilities must be in path, which shouldn't be a problem as they need to
-// run as root.
-const (
-	mount     = "/bin/mount"
-	umount    = "/bin/umount"
-	file      = "/usr/bin/file"
-	mkfsExt2  = "/sbin/mkfs.ext2"
-	mkfsExt3  = "/sbin/mkfs.ext3"
-	mkfsExt4  = "/sbin/mkfs.ext4"
-	mkfsXfs   = "/sbin/mkfs.xfs"
-	mkfsBtrfs = "/bin/mkfs.btrfs"
-)
-
-func runMount(ctx context.Context, args ...string) (string, error) {
-	return runCmd(ctx, mount, args...)
-}
-
-func runUmount(ctx context.Context, args ...string) (string, error) {
-	return runCmd(ctx, umount, args...)
-}
-
 func runFile(ctx context.Context, args ...string) (string, error) {
+	const file = "/usr/bin/file"
 	return runCmd(ctx, file, args...)
 }
 
