@@ -61,7 +61,7 @@ func verfyHostPlatform() error {
 	// coreOS should not run user-land programs, and we will not work there (outside a container)
 	if coreos, err := isCoreOS(); err == nil && coreos {
 
-		// If we can tell this is a container, fail and warn the user
+		// If we dont think we are in a container, fail and warn the user
 		if inContainer, err := isInContainer(); err == nil && !inContainer {
 			return errors.New("do not run user-land utilities directly on coreOS, please use the CLI container")
 		}
