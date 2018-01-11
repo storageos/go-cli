@@ -28,10 +28,10 @@ func NewLogsCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Short: "View and manage node logs",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opt.nodes = args
-			if opt.follow && opt.level == "" && opt.filter == "" {
+			if opt.follow && opt.level == "" && opt.filter == "" && !opt.clearFilter {
 				return runFollow(storageosCli, opt)
 			}
-			if !opt.follow && (opt.level != "" || opt.filter != "") {
+			if !opt.follow && (opt.level != "" || opt.filter != "" || opt.clearFilter) {
 				return runUpdate(storageosCli, opt)
 			}
 			return storageosCli.ShowHelp(cmd, args)
