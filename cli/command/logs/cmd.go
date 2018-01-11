@@ -46,7 +46,7 @@ func NewLogsCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVar(&opt.filter, "filter", "", "Set the logging filter")
 	flags.BoolVarP(&opt.clearFilter, "clear-filter", "", false, "Clears the filter")
 	flags.BoolVarP(&opt.follow, "follow", "f", false, "Tail the logs for the given node, or all nodes if not specified")
-	flags.IntVarP(&opt.timeout, "timeout", "t", 1, "Timeout in seconds.")
+	flags.IntVarP(&opt.timeout, "timeout", "t", 5, "Timeout in seconds.")
 
 	return cmd
 }
