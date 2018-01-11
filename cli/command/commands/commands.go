@@ -2,6 +2,8 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"runtime"
 
 	"github.com/dnephin/cobra"
@@ -49,25 +51,42 @@ func NewBashGenerationFunction(storageosCli *command.StorageOSCli) *cobra.Comman
 	var dump bool
 
 	cmd := &cobra.Command{
-		Use:    "install-bash-completion",
-		Short:  "Install the bash completion for the storageos command",
-		Hidden: true,
+		Use:   "install-bash-completion",
+		Short: "Install bash completion for the storageos cli",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			const bashdir = "/etc/bash_completion.d/storageos"
 
 			// Just dump to stdout if requested
 			if dump {
 				return cmd.Parent().GenBashCompletion(cmd.Out())
 			}
 
-			// if we are not on linux or darwin, we dont know how to install
+			// If we are not on linux or darwin, we don't know how to install
 			if runtime.GOOS != "linux" && runtime.GOOS != "darwin" {
-				return fmt.Errorf("cannot install for OS: %v, try manualy with the --stdout flag", runtime.GOOS)
+				return fmt.Errorf("cannot install on %s, try manualy with the --stdout flag", runtime.GOOS)
 			}
 
-			// ensure user wants to perform this action
+			dirs := []string{
+				"/etc/bash_completion.d",
+				"/usr/local/etc/bash_completion.d",
+			}
+			var base string
+			for _, dir := range dirs {
+				if fi, err := os.Stat(dir); err == nil && fi.IsDir() {
+					base = dir
+					break
+				}
+			}
+
+			// Extra help for MacOS users
+			if base == "" && runtime.GOOS == "darwin" {
+				return fmt.Errorf("please run 'brew install bash-completion' first")
+			}
+
+			target := filepath.Join(base, "storageos")
+
+			// Ensure user wants to perform this action
 			buf := make([]byte, 1024)
-			fmt.Fprintf(storageosCli.Out(), "will write bash completion to %s, continue? [y/N] ", bashdir)
+			fmt.Fprintf(storageosCli.Out(), "writing bash completion to %s, continue? [y/N] ", target)
 			i, err := storageosCli.In().Read(buf)
 			if err != nil {
 				return err
@@ -84,11 +103,11 @@ func NewBashGenerationFunction(storageosCli *command.StorageOSCli) *cobra.Comman
 				return fmt.Errorf("unknown response (%s) aborting", string(buf[:i-1]))
 			}
 
-			if err := cmd.Parent().GenBashCompletionFile(bashdir); err != nil {
+			if err := cmd.Parent().GenBashCompletionFile(target); err != nil {
 				return err
 			}
 
-			fmt.Fprintln(storageosCli.Out(), "saved bash completions, please reload your terminal")
+			fmt.Fprintln(storageosCli.Out(), "configured bash completion, please reload your terminal")
 			return nil
 		},
 	}
