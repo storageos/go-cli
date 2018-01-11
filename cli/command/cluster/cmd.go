@@ -7,7 +7,7 @@ import (
 	"github.com/storageos/go-cli/cli/command"
 )
 
-// NewClusterCommand returns a cobra command for `rule` subcommands
+// NewClusterCommand returns a cobra command for `cluster` subcommands
 func NewClusterCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "cluster",
