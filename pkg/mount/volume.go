@@ -17,7 +17,7 @@ const defaultTimeOut = 45
 // initRawVolume makes sure there is a raw volume at the path provided, and that
 // it's ready for use by Docker.  This includes creating a filesystem if there's
 // not one already present.
-func initRawVolume(ctx context.Context, path string, fsType string) error {
+func initRawVolume(ctx context.Context, path string, fsType FSType) error {
 
 	if err := waitForVolume(ctx, path); err != nil {
 		return err
@@ -32,7 +32,7 @@ func initRawVolume(ctx context.Context, path string, fsType string) error {
 
 	if ft == "raw" {
 		log.Debugf("creating %s filesystem on volume %s", fsType, path)
-		if err := createFilesystem(ctx, fsType, path, ""); err != nil {
+		if err := createFilesystem(ctx, fsType, path); err != nil {
 			return err
 		}
 		log.Infof("%s filesystem created on volume %s", fsType, path)
@@ -123,7 +123,7 @@ func parseFileOutput(path string, out string) (string, error) {
 	return "", fmt.Errorf("unknown fs type: %s", out)
 }
 
-func createFilesystem(ctx context.Context, fstype string, path string, options string) error {
+func createFilesystem(ctx context.Context, fstype FSType, path string) error {
 
 	var retries int
 	start := time.Now()
@@ -134,10 +134,15 @@ func createFilesystem(ctx context.Context, fstype string, path string, options s
 			return fmt.Errorf("deadline exceeded while trying to create filesystem")
 		default:
 			timeOff := backoff(retries)
-			err := runMkfs(ctx, fstype, path, options)
+			err := runMkfs(ctx, fstype, path)
 			if err == nil {
 				// filesystem created, exit
 				return nil
+			}
+
+			// Bail early if this is a fatal error
+			if mountErr, ok := err.(*MountError); ok && mountErr.Fatal {
+				return err
 			}
 
 			log.WithFields(log.Fields{
@@ -156,44 +161,15 @@ func createFilesystem(ctx context.Context, fstype string, path string, options s
 	}
 }
 
-func runMkfs(ctx context.Context, fstype string, path string, options string) error {
+func runMkfs(ctx context.Context, fstype FSType, path string) error {
+	bin, args, err := fstype.MkfsCommand(path)
+	if err != nil {
+		return err
+	}
 
-	var out string
-	var err error
-
-	// Run mkfs
-	switch fstype {
-	case "ext2":
-		out, err = runCmd(ctx, mkfsExt2, path)
-		if err != nil {
-			return err
-		}
-	case "ext3":
-		out, err = runCmd(ctx, mkfsExt3, path)
-		if err != nil {
-			return err
-		}
-	case "ext4":
-		// Get the volume id from the path
-		id := getVolumeIDFromPath(path)
-		out, err = runCmd(ctx, mkfsExt4, "-F", "-U", id, "-b", "4096", "-E", "lazy_itable_init=0,lazy_journal_init=0", path)
-		if err != nil {
-			return err
-		}
-	case "xfs":
-		out, err = runCmd(ctx, mkfsXfs, path)
-		if err != nil {
-			return err
-		}
-	case "btrfs":
-		out, err = runCmd(ctx, mkfsBtrfs, path)
-		if err != nil {
-			return err
-		}
-	case "":
-		return fmt.Errorf("filesystem not specified")
-	default:
-		return fmt.Errorf("unsupported filesystem: %s", fstype)
+	out, err := runCmd(ctx, bin, args...)
+	if err != nil {
+		return err
 	}
 
 	log.WithFields(log.Fields{

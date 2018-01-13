@@ -26,7 +26,6 @@ import (
 type mountOptions struct {
 	ref        string
 	mountpoint string // mountpoint
-	fsType     string
 }
 
 func newMountCommand(storageosCli *command.StorageOSCli) *cobra.Command {
@@ -43,9 +42,6 @@ func newMountCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		},
 	}
 
-	flags := cmd.Flags()
-	flags.StringVarP(&opt.fsType, "fsType", "m", cliconfig.DefaultFSType, `Volume fs type`)
-
 	return cmd
 }
 
@@ -60,12 +56,6 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	// must be root
 	if euid := syscall.Geteuid(); euid != 0 {
 		return fmt.Errorf("volume mount requires root permission - try prefixing command with `sudo`")
-	}
-
-	// validating fsType
-	err = validation.IsValidFSType(opt.fsType)
-	if err != nil {
-		return err
 	}
 
 	client := storageosCli.Client()
@@ -96,13 +86,18 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 		ID: vol.ID, Namespace: namespace,
 		Client:     hostname,
 		Mountpoint: opt.mountpoint,
-		FsType:     opt.fsType,
+		FsType:     vol.FSType,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = retryableMount(vol, opt.mountpoint, opt.fsType)
+	fst, err := mount.ParseFSType(vol.FSType)
+	if err != nil {
+		return err
+	}
+
+	err = retryableMount(vol, opt.mountpoint, fst)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"namespace":  namespace,
@@ -126,7 +121,7 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	return nil
 }
 
-func retryableMount(volume *types.Volume, mountpoint, fsType string) error {
+func retryableMount(volume *types.Volume, mountpoint string, fsType mount.FSType) error {
 
 	driver := mount.New(cliconfig.DeviceRootPath)
 
@@ -145,6 +140,11 @@ RETRY:
 			"mountpoint": mountpoint,
 			"err":        err.Error(),
 		}).Error(" failed to mount volume")
+
+		// If this is a permanent error, stop retrying
+		if mountErr, ok := err.(*mount.MountError); ok && mountErr.Fatal {
+			return err
+		}
 
 		if retries < maxRetries {
 			time.Sleep(250 * time.Millisecond)
