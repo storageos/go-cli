@@ -53,10 +53,10 @@ func runView(storageosCli *command.StorageOSCli, opt logOptions) error {
 		format = formatter.TableFormatKey
 	}
 
-	nodeCtx := formatter.Context{
+	fmtCtx := formatter.Context{
 		Output: storageosCli.Out(),
 		Format: formatter.NewLoggerFormat(format, opt.quiet),
 	}
 
-	return formatter.LoggerWrite(nodeCtx, configs)
+	return formatter.LoggerWrite(fmtCtx, configs)
 }
