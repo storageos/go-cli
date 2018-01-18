@@ -54,6 +54,9 @@ type Volume struct {
 	// Read Only: true
 	Mounted bool `json:"mounted"`
 
+	// MountDevice, where the device is located
+	MountDevice string `json:"mountDevice"`
+
 	// Mountpoint, where the volume is mounted
 	Mountpoint string `json:"mountpoint"`
 
