@@ -2,7 +2,6 @@ package system
 
 import (
 	"fmt"
-	"runtime"
 	"time"
 
 	"context"
@@ -77,16 +76,7 @@ func runVersion(storageosCli *command.StorageOSCli, opts *versionOptions) error 
 	}
 
 	vd := types.VersionResponse{
-		Client: &types.VersionInfo{
-			Name:       version.ProductName,
-			Revision:   version.Revision,
-			BuildDate:  version.BuildDate,
-			Version:    version.Version,
-			APIVersion: version.APIVersion,
-			GoVersion:  runtime.Version(),
-			OS:         runtime.GOOS,
-			Arch:       runtime.GOARCH,
-		},
+		Client: version.GetStorageOSVersion(),
 	}
 
 	serverVersion, err := storageosCli.Client().ServerVersion(ctx)
