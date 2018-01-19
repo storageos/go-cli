@@ -41,6 +41,7 @@ type Controller struct {
 	Scheduler        bool                   `json:"scheduler"`
 	Name             string                 `json:"name"`
 	Address          string                 `json:"address"`
+	DeviceDir        string                 `json:"deviceDir"`
 	APIPort          int                    `json:"apiPort"`
 	NatsPort         int                    `json:"natsPort"`
 	NatsClusterPort  int                    `json:"natsClusterPort"`
