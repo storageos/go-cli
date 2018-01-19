@@ -42,8 +42,14 @@ var (
 	// ErrInvalidVersion is returned when a versioned client was requested but no version specified.
 	ErrInvalidVersion = errors.New("invalid version")
 
+	// DefaultPort is the default API port
+	DefaultPort = "5705"
+
+	// DataplaneHealthPort is the the port used by the dataplane health-check service
+	DataplaneHealthPort = "5704"
+
 	// DefaultHost is the default API host
-	DefaultHost = "tcp://localhost:5705"
+	DefaultHost = "tcp://localhost:" + DefaultPort
 )
 
 // APIVersion is an internal representation of a version of the Remote API.
@@ -530,16 +536,44 @@ type Error struct {
 }
 
 func newError(resp *http.Response) *Error {
+	type jsonError struct {
+		Message string `json:"message"`
+	}
+
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return &Error{Status: resp.StatusCode, Message: fmt.Sprintf("cannot read body, err: %v", err)}
 	}
-	return &Error{Status: resp.StatusCode, Message: string(data)}
+
+	// attempt to unmarshal the error if in json format
+	jerr := &jsonError{}
+	err = json.Unmarshal(data, jerr)
+	if err != nil {
+		return &Error{Status: resp.StatusCode, Message: string(data)} // Failed, just return string
+	}
+
+	return &Error{Status: resp.StatusCode, Message: jerr.Message}
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("API error (%d): %s", e.Status, e.Message)
+	var niceStatus string
+
+	switch e.Status {
+	case 400, 500:
+		niceStatus = "Server failed to process your request. Was the data correct?"
+	case 401:
+		niceStatus = "Unauthenticated access of secure endpoint, please retry after authentication"
+	case 403:
+		niceStatus = "Forbidden request. Your user cannot perform this action"
+	case 404:
+		niceStatus = "Requested object not found. Does this item exist?"
+	}
+
+	if niceStatus != "" {
+		return fmt.Sprintf("API error (%s): %s", niceStatus, e.Message)
+	}
+	return fmt.Sprintf("API error (%s): %s", http.StatusText(e.Status), e.Message)
 }
 
 func parseEndpoint(endpoint string, tls bool) (*url.URL, error) {
