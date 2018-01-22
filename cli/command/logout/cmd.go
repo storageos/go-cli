@@ -2,12 +2,13 @@ package logout
 
 import (
 	"errors"
+	"fmt"
 	"github.com/dnephin/cobra"
 
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
-	"github.com/storageos/go-cli/pkg/validation"
+	"github.com/storageos/go-cli/pkg/jointools"
 )
 
 type logoutOptions struct {
@@ -34,24 +35,27 @@ func NewLogoutCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 }
 
 func getHost(opt logoutOptions, args []string) (string, error) {
-	var host string
+	var join string
 
 	switch {
+	case len(args) == 1 && opt.host != "":
+		return "", errors.New("Conflicting options: either specify --host or provide positional arg, not both")
+
 	case len(args) == 1:
-		if opt.host != "" {
-			return "", errors.New("Conflicting options: either specify --host or provide positional arg, not both")
-		}
-		host = args[0]
+		join = args[0]
 
 	case opt.host != "":
-		host = opt.host
+		join = opt.host
 
 	default:
-		return validation.ParseHostPort(api.DefaultHost, api.DefaultPort)
-
+		join = api.DefaultHost
 	}
 
-	return validation.ParseHostPort(host, api.DefaultPort)
+	if errs := jointools.VerifyJOIN(join); errs != nil {
+		return "", fmt.Errorf("error: %+v", errs)
+	}
+	return jointools.ExpandJOIN(join), nil
+
 }
 
 func runDelete(storageosCli *command.StorageOSCli, opt logoutOptions, args []string) error {
