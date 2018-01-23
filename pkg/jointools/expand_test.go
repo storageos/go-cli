@@ -12,22 +12,22 @@ func TestExpandJOINFragment(t *testing.T) {
 		output string
 	}{
 		// FQDN w/wo host & port
-		{"google-public-dns-a.google.com", "http://8.8.8.8:5705"},
-		{"http://google-public-dns-a.google.com", "http://8.8.8.8:5705"},
-		{"http://google-public-dns-a.google.com:5705", "http://8.8.8.8:5705"},
-		{"google-public-dns-a.google.com:5705", "http://8.8.8.8:5705"},
+		{"google-public-dns-a.google.com", "tcp://8.8.8.8:5705"},
+		{"http://google-public-dns-a.google.com", "tcp://8.8.8.8:5705"},
+		{"http://google-public-dns-a.google.com:5705", "tcp://8.8.8.8:5705"},
+		{"google-public-dns-a.google.com:5705", "tcp://8.8.8.8:5705"},
 
 		// IP addr w/wo host & port
-		{"8.8.8.8", "http://8.8.8.8:5705"},
+		{"8.8.8.8", "tcp://8.8.8.8:5705"},
 		{"tcp://8.8.8.8:5705", "tcp://8.8.8.8:5705"},
-		{"8.8.8.8:5705", "http://8.8.8.8:5705"},
+		{"8.8.8.8:5705", "tcp://8.8.8.8:5705"},
 		{"tcp://8.8.8.8", "tcp://8.8.8.8:5705"},
 
 		// local domain name w/wo host&port
-		{"localhost", "http://127.0.0.1:5705"},
-		{"http://localhost", "http://127.0.0.1:5705"},
-		{"http://localhost:5705", "http://127.0.0.1:5705"},
-		{"localhost:5705", "http://127.0.0.1:5705"},
+		{"localhost", "tcp://127.0.0.1:5705"},
+		{"http://localhost", "tcp://127.0.0.1:5705"},
+		{"http://localhost:5705", "tcp://127.0.0.1:5705"},
+		{"localhost:5705", "tcp://127.0.0.1:5705"},
 	}
 
 	for _, f := range fixtures {
@@ -48,22 +48,22 @@ func TestExpandJOINSingleHost(t *testing.T) {
 		output string
 	}{
 		// FQDN w/wo host & port
-		{"google-public-dns-a.google.com", "http://8.8.8.8:5705"},
-		{"http://google-public-dns-a.google.com", "http://8.8.8.8:5705"},
-		{"http://google-public-dns-a.google.com:5705", "http://8.8.8.8:5705"},
-		{"google-public-dns-a.google.com:5705", "http://8.8.8.8:5705"},
+		{"google-public-dns-a.google.com", "tcp://8.8.8.8:5705"},
+		{"http://google-public-dns-a.google.com", "tcp://8.8.8.8:5705"},
+		{"http://google-public-dns-a.google.com:5705", "tcp://8.8.8.8:5705"},
+		{"google-public-dns-a.google.com:5705", "tcp://8.8.8.8:5705"},
 
 		// IP addr w/wo host & port
-		{"8.8.8.8", "http://8.8.8.8:5705"},
+		{"8.8.8.8", "tcp://8.8.8.8:5705"},
 		{"tcp://8.8.8.8:5705", "tcp://8.8.8.8:5705"},
-		{"8.8.8.8:5705", "http://8.8.8.8:5705"},
+		{"8.8.8.8:5705", "tcp://8.8.8.8:5705"},
 		{"tcp://8.8.8.8", "tcp://8.8.8.8:5705"},
 
 		// local domain name w/wo host&port
-		{"localhost", "http://127.0.0.1:5705"},
-		{"http://localhost", "http://127.0.0.1:5705"},
-		{"http://localhost:5705", "http://127.0.0.1:5705"},
-		{"localhost:5705", "http://127.0.0.1:5705"},
+		{"localhost", "tcp://127.0.0.1:5705"},
+		{"http://localhost", "tcp://127.0.0.1:5705"},
+		{"http://localhost:5705", "tcp://127.0.0.1:5705"},
+		{"localhost:5705", "tcp://127.0.0.1:5705"},
 	}
 
 	for _, f := range fixtures {
@@ -79,26 +79,26 @@ func TestExpandJOINMultiHost(t *testing.T) {
 		input  string
 		output string
 	}{
-		{"8.8.8.8,8.8.4.4", "http://8.8.8.8:5705,http://8.8.4.4:5705"},
-		{"8.8.8.8:5705,8.8.4.4:5705", "http://8.8.8.8:5705,http://8.8.4.4:5705"},
+		{"8.8.8.8,8.8.4.4", "tcp://8.8.8.8:5705,tcp://8.8.4.4:5705"},
+		{"8.8.8.8:5705,8.8.4.4:5705", "tcp://8.8.8.8:5705,tcp://8.8.4.4:5705"},
 		{"tcp://8.8.8.8:5705,tcp://8.8.4.4:5705", "tcp://8.8.8.8:5705,tcp://8.8.4.4:5705"},
 		{"tcp://8.8.8.8,tcp://8.8.4.4", "tcp://8.8.8.8:5705,tcp://8.8.4.4:5705"},
-		{"tcp://8.8.8.8:5705,8.8.4.4", "tcp://8.8.8.8:5705,http://8.8.4.4:5705"},
-		{"8.8.8.8:5705,8.8.4.4:5705", "http://8.8.8.8:5705,http://8.8.4.4:5705"},
+		{"tcp://8.8.8.8:5705,8.8.4.4", "tcp://8.8.8.8:5705,tcp://8.8.4.4:5705"},
+		{"8.8.8.8:5705,8.8.4.4:5705", "tcp://8.8.8.8:5705,tcp://8.8.4.4:5705"},
 
-		{"google-public-dns-a.google.com,google-public-dns-b.google.com", "http://8.8.8.8:5705,http://8.8.4.4:5705"},
-		{"google-public-dns-a.google.com,8.8.4.4", "http://8.8.8.8:5705,http://8.8.4.4:5705"},
-		{"8.8.8.8,google-public-dns-b.google.com", "http://8.8.8.8:5705,http://8.8.4.4:5705"},
+		{"google-public-dns-a.google.com,google-public-dns-b.google.com", "tcp://8.8.8.8:5705,tcp://8.8.4.4:5705"},
+		{"google-public-dns-a.google.com,8.8.4.4", "tcp://8.8.8.8:5705,tcp://8.8.4.4:5705"},
+		{"8.8.8.8,google-public-dns-b.google.com", "tcp://8.8.8.8:5705,tcp://8.8.4.4:5705"},
 
-		{"http://google-public-dns-a.google.com:5705,http://google-public-dns-b.google.com:5705", "http://8.8.8.8:5705,http://8.8.4.4:5705"},
-		{"http://google-public-dns-a.google.com:5705,http://8.8.4.4:5705", "http://8.8.8.8:5705,http://8.8.4.4:5705"},
-		{"http://google-public-dns-a.google.com,google-public-dns-b.google.com:5705", "http://8.8.8.8:5705,http://8.8.4.4:5705"},
-		{"http://google-public-dns-a.google.com,8.8.4.4:5705", "http://8.8.8.8:5705,http://8.8.4.4:5705"},
+		{"http://google-public-dns-a.google.com:5705,http://google-public-dns-b.google.com:5705", "tcp://8.8.8.8:5705,tcp://8.8.4.4:5705"},
+		{"http://google-public-dns-a.google.com:5705,http://8.8.4.4:5705", "tcp://8.8.8.8:5705,tcp://8.8.4.4:5705"},
+		{"http://google-public-dns-a.google.com,google-public-dns-b.google.com:5705", "tcp://8.8.8.8:5705,tcp://8.8.4.4:5705"},
+		{"http://google-public-dns-a.google.com,8.8.4.4:5705", "tcp://8.8.8.8:5705,tcp://8.8.4.4:5705"},
 
-		{"google-public-dns-a.google.com,localhost", "http://8.8.8.8:5705,http://127.0.0.1:5705"},
-		{"localhost,google-public-dns-a.google.com", "http://127.0.0.1:5705,http://8.8.8.8:5705"},
-		{"8.8.8.8,localhost", "http://8.8.8.8:5705,http://127.0.0.1:5705"},
-		{"localhost,8.8.8.8", "http://127.0.0.1:5705,http://8.8.8.8:5705"},
+		{"google-public-dns-a.google.com,localhost", "tcp://8.8.8.8:5705,tcp://127.0.0.1:5705"},
+		{"localhost,google-public-dns-a.google.com", "tcp://127.0.0.1:5705,tcp://8.8.8.8:5705"},
+		{"8.8.8.8,localhost", "tcp://8.8.8.8:5705,tcp://127.0.0.1:5705"},
+		{"localhost,8.8.8.8", "tcp://127.0.0.1:5705,tcp://8.8.8.8:5705"},
 	}
 
 	for _, f := range fixtures {

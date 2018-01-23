@@ -25,12 +25,9 @@ func ExpandJOINFragment(joinfragment string) []string {
 		return ExpandClusterToken(joinfragment)
 	}
 
-	scheme := "http"
 	port := "5705"
-
 	switch split := strings.Split(joinfragment, "://"); len(split) {
 	case 2:
-		scheme = split[0]
 		split = split[1:len(split)]
 		fallthrough
 
@@ -43,7 +40,7 @@ func ExpandJOINFragment(joinfragment string) []string {
 		case 1:
 			addrs := ExpandHost(hostPort[0])
 			for i, addr := range addrs {
-				addrs[i] = fmt.Sprintf("%s://%s:%s", scheme, addr, port)
+				addrs[i] = fmt.Sprintf("tcp://%s:%s", addr, port)
 			}
 			return addrs
 		}
