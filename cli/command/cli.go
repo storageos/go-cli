@@ -1,11 +1,10 @@
 package command
 
 import (
-	"errors"
 	"fmt"
 	"io"
-	"net/url"
 	"os"
+	"strings"
 
 	"github.com/dnephin/cobra"
 
@@ -13,7 +12,7 @@ import (
 	cliconfig "github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/cli/config/configfile"
 	cliflags "github.com/storageos/go-cli/cli/flags"
-	"github.com/storageos/go-cli/cli/opts"
+	"github.com/storageos/go-cli/pkg/jointools"
 )
 
 // Streams is an interface which exposes the standard input and output streams
@@ -101,26 +100,6 @@ func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 	}
 
 	cli.defaultVersion = cli.client.ClientVersion()
-
-	// if opts.Common.TrustKey == "" {
-	// 	cli.keyFile = filepath.Join(cliconfig.Dir(), cliflags.DefaultTrustKeyFile)
-	// } else {
-	// 	cli.keyFile = opts.Common.TrustKey
-	// }
-	//
-	// if ping, err := cli.client.Ping(context.Background()); err == nil {
-	// 	cli.hasExperimental = ping.Experimental
-	//
-	// 	// since the new header was added in 1.25, assume server is 1.24 if header is not present.
-	// 	if ping.APIVersion == "" {
-	// 		ping.APIVersion = "1.24"
-	// 	}
-	//
-	// 	// if server version is lower than the current cli, downgrade
-	// 	if versions.LessThan(ping.APIVersion, cli.client.ClientVersion()) {
-	// 		cli.client.UpdateClientVersion(ping.APIVersion)
-	// 	}
-	// }
 	return nil
 }
 
@@ -136,9 +115,6 @@ func LoadDefaultConfigFile(err io.Writer) *configfile.ConfigFile {
 	if e != nil {
 		fmt.Fprintf(err, "WARNING: Error loading config file:%v\n", e)
 	}
-	// if !configFile.ContainsAuth() {
-	// 	credentials.DetectDefaultStore(configFile)
-	// }
 	return configFile
 }
 
@@ -160,27 +136,28 @@ func NewAPIClientFromFlags(opt *cliflags.CommonOptions, configFile *configfile.C
 		return &api.Client{}, err
 	}
 
+	initClientAuth(host, opt, configFile, client)
+	return client, nil
+}
+
+func initClientAuth(join string, opt *cliflags.CommonOptions, configFile *configfile.ConfigFile, client *api.Client) {
 	var username string
 	var password string
 
-	p, err := url.Parse(host)
-	if err != nil {
-		username = os.Getenv(cliconfig.EnvStorageosUsername)
-		password = os.Getenv(cliconfig.EnvStorageosPassword)
-	} else {
-		port := p.Port()
-		if port == "" {
-			port = api.DefaultPort
-		}
+	// Env vars bind weakest to this value
+	username = os.Getenv(cliconfig.EnvStorageosUsername)
+	password = os.Getenv(cliconfig.EnvStorageosPassword)
 
-		credHost := fmt.Sprintf("%s:%s", p.Hostname(), port)
-		username, password, err = configFile.CredentialsStore.GetCredentials(credHost)
-		if err != nil {
-			username = os.Getenv(cliconfig.EnvStorageosUsername)
-			password = os.Getenv(cliconfig.EnvStorageosPassword)
+	// For each host we know about, check to see if we have a stored password
+	joinFragments := strings.Split(join, ",")
+	for _, host := range joinFragments {
+		if u, p, err := configFile.CredentialsStore.GetCredentials(host); err == nil {
+			username, password = u, p
+			break // don't check any more hosts, we have what we need
 		}
 	}
 
+	// cli options overide the env vars and login methods
 	if opt.Username != "" {
 		username = opt.Username
 	}
@@ -188,25 +165,27 @@ func NewAPIClientFromFlags(opt *cliflags.CommonOptions, configFile *configfile.C
 		password = opt.Password
 	}
 
+	// setup auth only if we have a password
 	if username != "" && password != "" {
 		client.SetAuth(username, password)
 	}
-
-	return client, nil
 }
 
-func getServerHost(hosts []string, tls bool) (host string, err error) {
-	switch len(hosts) {
-	case 0:
-		host = os.Getenv(cliconfig.EnvStorageOSHost)
-	case 1:
-		host = hosts[0]
-	default:
-		return "", errors.New("Please specify only one -H")
+func getServerHost(hosts string, tls bool) (host string, err error) {
+	host = os.Getenv(cliconfig.EnvStorageOSHost)
+	if hosts != "" {
+		host = hosts
 	}
 
-	host, err = opts.ParseHost(tls, host)
-	return
+	if host == "" {
+		host = api.DefaultHost
+	}
+
+	// Verify and expand the join value in the host var
+	if errs := jointools.VerifyJOIN(host); errs != nil {
+		return "", fmt.Errorf("error: %+v", errs)
+	}
+	return jointools.ExpandJOIN(host), nil
 }
 
 // Standard alias definitions

@@ -10,7 +10,6 @@ import (
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
-	"github.com/storageos/go-cli/cli/opts"
 	"github.com/storageos/go-cli/pkg/jointools"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -55,12 +54,7 @@ func NewLoginCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 }
 
 func verifyCredsWithServer(username, password, host string) error {
-	h, err := opts.ParseHost(true, host)
-	if err != nil {
-		return fmt.Errorf("Failed to verify credentials (%v)", err)
-	}
-
-	client, err := api.NewVersionedClient(h, api.DefaultVersionStr)
+	client, err := api.NewVersionedClient(host, api.DefaultVersionStr)
 	if err != nil {
 		return fmt.Errorf("Failed to verify credentials (%v)", err)
 	}
