@@ -58,6 +58,15 @@ Checkout `go-cli` into your `GOPATH`.  Consult https://github.com/golang/go/wiki
 go get -d github.com/storageos/go-cli/...
 ```
 
+### Build & install local binary into $GOPATH/bin
+
+```bash
+cd $GOPATH/src/github.com/storageos/go-cli
+make install
+```
+
+The binary will be in `$GOPATH/bin/storageos`
+
 ### Building local binary
 
 ```bash
