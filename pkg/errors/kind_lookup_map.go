@@ -12,7 +12,7 @@ func init() {
 	kindLookupMap = make(map[string]StorageOSErrorKind)
 
 	// Populate the lookup map with all the known constants
-	for i := StorageOSErrorKind(0); !strings.HasPrefix(i.String(), "StorageosErrorKind("); i++ {
+	for i := StorageOSErrorKind(0); !strings.HasPrefix(i.String(), "StorageOSErrorKind("); i++ {
 		kindLookupMap[i.String()] = i
 	}
 }

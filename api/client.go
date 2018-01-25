@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/storageos/go-cli/api/netutil"
+	sosErr "github.com/storageos/go-cli/pkg/errors"
 	"io"
 	"io/ioutil"
 	"net"
@@ -274,6 +275,11 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 
 	resp, err := httpClient.Do(req.WithContext(ctx))
 	if err != nil {
+		// If it is a custom error, return it. It probably knows more than us
+		if sosErr.IsStorageOSError(err) {
+			return nil, err
+		}
+
 		if strings.Contains(err.Error(), "connection refused") {
 			return nil, ErrConnectionRefused
 		}

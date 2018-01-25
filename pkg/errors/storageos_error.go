@@ -27,3 +27,8 @@ func ErrorKind(err error) StorageOSErrorKind {
 	}
 	return UnknownError
 }
+
+func IsStorageOSError(err error) bool {
+	_, ok := err.(StorageOSError)
+	return ok
+}
