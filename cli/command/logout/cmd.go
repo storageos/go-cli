@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/dnephin/cobra"
 
-	api "github.com/storageos/go-api"
+	api "github.com/storageos/go-cli/api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/pkg/validation"

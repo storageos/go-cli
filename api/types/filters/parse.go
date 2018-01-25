@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/storageos/go-api/types/versions"
+	"github.com/storageos/go-cli/api/types/versions"
 )
 
 // Args stores filter arguments as map key:{map key: bool}.

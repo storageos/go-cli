@@ -10,7 +10,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"github.com/storageos/go-api/types"
+	"github.com/storageos/go-cli/api/types"
 )
 
 var (

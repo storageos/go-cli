@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/storageos/go-api/types"
+	"github.com/storageos/go-cli/api/types"
 )
 
 // ServerVersion returns the server's version and runtime info.

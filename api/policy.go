@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/storageos/go-api/types"
+	"github.com/storageos/go-cli/api/types"
 	"net/http"
 	"net/url"
 )

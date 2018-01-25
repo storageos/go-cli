@@ -7,7 +7,7 @@ import (
 
 	"github.com/dnephin/cobra"
 	"github.com/spf13/pflag"
-	"github.com/storageos/go-api/types"
+	"github.com/storageos/go-cli/api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/opts"

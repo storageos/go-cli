@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/storageos/go-api/types"
+	"github.com/storageos/go-cli/api/types"
 )
 
 var (

@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/storageos/go-api/types"
+	"github.com/storageos/go-cli/api/types"
 )
 
 func TestControllerList(t *testing.T) {

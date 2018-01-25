@@ -3,7 +3,7 @@ package types
 import (
 	"time"
 
-	apiTypes "github.com/storageos/go-api/types"
+	apiTypes "github.com/storageos/go-cli/api/types"
 )
 
 // ClusterCreateOps - optional fields when creating cluster

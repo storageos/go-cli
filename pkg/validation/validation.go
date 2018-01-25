@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	storageos "github.com/storageos/go-api"
+	storageos "github.com/storageos/go-cli/api"
 )
 
 const hostnameFmt string = `^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`
@@ -28,7 +28,7 @@ func IsValidFSType(value string) error {
 	return fmt.Errorf("fs type not valid, available types: %s", strings.Join(ValidFSTypes, ", "))
 }
 
-// ParseRefWithDefault wraps a call to the go-api's ParseRef
+// ParseRefWithDefault wraps a call to the go-cli/api's ParseRef
 // function, but adds default if the namespace is not defined.
 func ParseRefWithDefault(ref string) (string, string, error) {
 	namespace, name, err := storageos.ParseRef(ref)

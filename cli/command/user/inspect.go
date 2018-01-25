@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/dnephin/cobra"
-	//storageos "github.com/storageos/go-api"
+	//storageos "github.com/storageos/go-cli/api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/inspect"

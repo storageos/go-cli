@@ -5,7 +5,7 @@ import (
 
 	units "github.com/docker/go-units"
 
-	apiTypes "github.com/storageos/go-api/types"
+	apiTypes "github.com/storageos/go-cli/api/types"
 	cliTypes "github.com/storageos/go-cli/types"
 )
 

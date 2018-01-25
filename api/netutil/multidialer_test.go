@@ -1,7 +1,7 @@
 package netutil_test
 
 import (
-	"github.com/storageos/go-api/netutil"
+	"github.com/storageos/go-cli/api/netutil"
 	"net"
 	"strings"
 	"testing"

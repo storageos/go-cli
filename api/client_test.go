@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	//"github.com/storageos/go-api/netutil"
+	//"github.com/storageos/go-cli/api/netutil"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"

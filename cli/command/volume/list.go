@@ -4,7 +4,7 @@ import (
 	"sort"
 
 	"github.com/dnephin/cobra"
-	"github.com/storageos/go-api/types"
+	"github.com/storageos/go-cli/api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"

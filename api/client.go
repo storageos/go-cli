@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/storageos/go-api/netutil"
+	"github.com/storageos/go-cli/api/netutil"
 	"io"
 	"io/ioutil"
 	"net"

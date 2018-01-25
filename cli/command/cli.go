@@ -9,7 +9,7 @@ import (
 
 	"github.com/dnephin/cobra"
 
-	api "github.com/storageos/go-api"
+	api "github.com/storageos/go-cli/api"
 	cliconfig "github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/cli/config/configfile"
 	cliflags "github.com/storageos/go-cli/cli/flags"
