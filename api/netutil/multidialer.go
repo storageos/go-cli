@@ -66,7 +66,7 @@ func NewMultiDialer(nodes []string, dialer *net.Dialer) (*MultiDialer, error) {
 // ignored.
 func (m *MultiDialer) DialContext(ctx context.Context, network, ignoredAddress string) (net.Conn, error) {
 	if len(m.Addresses) == 0 {
-		return nil, ErrNoAddresses
+		return nil, newInvalidNodeError(errNoAddresses)
 	}
 
 	// Shuffle a copy of the addresses (for even load balancing)
@@ -96,7 +96,7 @@ func (m *MultiDialer) DialContext(ctx context.Context, network, ignoredAddress s
 	}
 
 	// We failed to dail all of the addresses we have
-	return nil, ErrAllFailed
+	return nil, errAllFailed(m.Addresses)
 }
 
 // Dial returns the result of a call to m.DialContext passing in the background context

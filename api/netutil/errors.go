@@ -3,22 +3,24 @@ package netutil
 import (
 	"errors"
 	"fmt"
+	sosErr "github.com/storageos/go-cli/pkg/errors"
+	"strings"
 )
 
-var ErrAllFailed = errors.New("failed to dial all provided addresses")
-var ErrNoAddresses = errors.New("the MultiDialer instance has not been initialised with client addresses")
+func errAllFailed(addrs []string) error {
+	msg := fmt.Sprintf("failed to dial all known cluster members, (%s)", strings.Join(addrs, ","))
+	help := "ensure that the value of $STORAGEOS_HOST (or the -H flag) is correct, and that there are healthy StorageOS nodes in this cluster"
 
-type InvalidNodeError struct {
-	cause error
-}
-
-func (i *InvalidNodeError) Error() string {
-	return fmt.Sprintf("invalid node format: %s", i.cause.Error())
+	return sosErr.NewTypedStorageOSError(sosErr.APIUncontactable, nil, msg, help)
 }
 
 func newInvalidNodeError(err error) error {
-	return &InvalidNodeError{err}
+	msg := fmt.Sprintf("invalid node format: %s", err)
+	help := "please check the format of $STORAGEOS_HOST (or the -H flag) complies with the StorageOS JOIN format"
+
+	return sosErr.NewTypedStorageOSError(sosErr.InvalidHostConfig, err, msg, help)
 }
 
+var errNoAddresses = errors.New("the MultiDialer instance has not been initialised with client addresses")
 var errUnsupportedScheme = errors.New("unsupported URL scheme")
 var errInvalidPortNumber = errors.New("invalid port number")

@@ -4,9 +4,9 @@ package errors
 
 import "strconv"
 
-const _StorageOSErrorKind_name = "UnknownError"
+const _StorageOSErrorKind_name = "UnknownErrorAPIUncontactableInvalidHostConfig"
 
-var _StorageOSErrorKind_index = [...]uint8{0, 12}
+var _StorageOSErrorKind_index = [...]uint8{0, 12, 28, 45}
 
 func (i StorageOSErrorKind) String() string {
 	if i < 0 || i >= StorageOSErrorKind(len(_StorageOSErrorKind_index)-1) {

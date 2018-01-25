@@ -25,9 +25,6 @@ const (
 	DefaultVersion    = 1
 )
 
-// ErrInvalidEndpoint is returned when the endpoint is not a valid HTTP URL.
-type InvalidNodeError = netutil.InvalidNodeError
-
 var (
 	// ErrConnectionRefused is returned when the client cannot connect to the given endpoint.
 	ErrConnectionRefused = errors.New("cannot connect to StorageOS API endpoint")
