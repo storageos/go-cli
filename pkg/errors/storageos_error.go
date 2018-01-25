@@ -16,6 +16,7 @@ type StorageOSError interface {
 	String() string           // A short string representing the error (for logging etc)
 	Help() string             // A larger string that should provide informative debug instruction to users
 	Kind() StorageOSErrorKind // A type representing a set of known error conditions, helpful to switch on
+	Extra() map[string]string // A container for error specific information
 
 	// TODO: should we include callstack traces here? We could have a debug mode for it.
 }

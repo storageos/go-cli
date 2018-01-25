@@ -18,6 +18,7 @@ import (
 	cliconfig "github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/cli/debug"
 	cliflags "github.com/storageos/go-cli/cli/flags"
+	soserr "github.com/storageos/go-cli/pkg/errors"
 	"github.com/storageos/go-cli/pkg/term"
 	"github.com/storageos/go-cli/version"
 )
@@ -218,6 +219,19 @@ func main() {
 	cmd := newStorageOSCommand(storageosCli)
 
 	if err := cmd.Execute(); err != nil {
+		if customError, ok := err.(soserr.StorageOSError); ok {
+			if msg := customError.String(); msg != "" {
+				fmt.Fprintf(stderr, "error: %s\n", msg)
+			}
+			if cause := customError.Err(); cause != nil {
+				fmt.Fprintf(stderr, "\ncaused by: %s\n", cause)
+			}
+			if help := customError.Help(); help != "" {
+				fmt.Fprintf(stderr, "\n%s\n", help)
+			}
+			os.Exit(1)
+		}
+
 		if sterr, ok := err.(cli.StatusError); ok {
 			if sterr.Status != "" {
 				fmt.Fprintln(stderr, sterr.Status)

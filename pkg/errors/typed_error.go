@@ -33,6 +33,7 @@ type internal_TypedStorageOSError struct {
 	Cause       error               `json:"caused_by"`
 	ErrMessage  string              `json:"error_message"`
 	HelpMessage string              `json:"help_message"`
+	ExtraMap    map[string]string   `json:"extra"`
 }
 
 type typedStorageOSError struct {
@@ -60,3 +61,4 @@ func (t *typedStorageOSError) Err() error               { return t.internal.Caus
 func (t *typedStorageOSError) String() string           { return t.internal.ErrMessage }
 func (t *typedStorageOSError) Help() string             { return t.internal.HelpMessage }
 func (t *typedStorageOSError) Kind() StorageOSErrorKind { return *t.internal.ErrorKind }
+func (t *typedStorageOSError) Extra() map[string]string { return t.internal.ExtraMap }
