@@ -1,27 +1,57 @@
-machine:
-  environment:
-    # GOROOT is not set by default
-    GOROOT: ""
-    GOPATH: "${HOME}/.go_project"
-    PATH: "${GOPATH}/bin:${PATH}"
-    BUILD_PATH: "${GOPATH}/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.9
+    working_directory: /go/src/github.com/storageos/go-cli
+    environment:
+      TEST_RESULTS: /tmp/test-results
+    steps:
+      - checkout
+      - run: mkdir -p $TEST_RESULTS
+      - run: go vet $(go list ./... | grep -v /vendor/) | tee ${TEST_RESULTS}/go-vet.out
+      - run: go test -v -race -run Test[^Mkdir] $(go list ./... | grep -v /vendor/) | tee ${TEST_RESULTS}/go-test.out
+      - run: go get github.com/mitchellh/gox
+      - run: make release
+      - store_artifacts:
+          path: /go/src/github.com/storageos/go-cli/cmd/storageos/release/
+          destination: binaries
+      - store_test_results:
+          path: /tmp/test-results
 
-dependencies:      
-  override:
-    - mkdir -p ~/.go_project/src/github.com/${CIRCLE_PROJECT_USERNAME}
-    - ln -s ${HOME}/${CIRCLE_PROJECT_REPONAME} ${BUILD_PATH}
-
-test:
-  pre:
-    - cd $BUILD_PATH && go vet $(go list ./... | grep -v /vendor/)
-  override:
-    - cd $BUILD_PATH && go test -v -race -run Test[^Mkdir] $(go list ./... | grep -v /vendor/)
-
-deployment:
   release:
-    tag: /[0-9]+(\.[0-9]+)*/    
-    commands:
-      - go get github.com/mitchellh/gox
-      - go get github.com/tcnksm/ghr      
-      - cd $BUILD_PATH && make release
-      - cd $BUILD_PATH && ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` cmd/storageos/release/
+    docker:
+      - image: circleci/golang:1.9
+    working_directory: /go/src/github.com/storageos/go-cli
+    environment:
+      TEST_RESULTS: /tmp/test-results    
+    steps:
+      - checkout
+      - run: mkdir -p $TEST_RESULTS
+      - run: go vet $(go list ./... | grep -v /vendor/) | tee ${TEST_RESULTS}/go-vet.out
+      - run: go test -v -race -run Test[^Mkdir] $(go list ./... | grep -v /vendor/) | tee ${TEST_RESULTS}/go-test.out
+      - run: go get github.com/mitchellh/gox github.com/tcnksm/ghr
+      - run: make release
+      - store_artifacts:
+          path: /go/src/github.com/storageos/go-cli/cmd/storageos/release/
+          destination: binaries
+      - store_test_results:
+          path: /tmp/test-results
+      - run: ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` cmd/storageos/release/
+      
+workflows:
+  version: 2
+  update:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - release:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
