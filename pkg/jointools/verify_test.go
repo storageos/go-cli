@@ -1,12 +1,17 @@
 package jointools_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/storageos/go-cli/pkg/jointools"
 )
 
 func TestVerifyJOINSingleHost(t *testing.T) {
+	if os.Getenv("CI") != "" {
+		t.Skip("dns doesn't work correctly in circle ci")
+	}
+
 	fixtures := []struct {
 		input       string
 		expectError bool
@@ -54,6 +59,10 @@ func TestVerifyJOINSingleHost(t *testing.T) {
 }
 
 func TestVerifyJOINMultiHost(t *testing.T) {
+	if os.Getenv("CI") != "" {
+		t.Skip("dns doesn't work correctly in circle ci")
+	}
+
 	fixtures := []struct {
 		input       string
 		expectError bool
@@ -89,6 +98,10 @@ func TestVerifyJOINMultiHost(t *testing.T) {
 }
 
 func TestVerifyJOINFragment(t *testing.T) {
+	if os.Getenv("CI") != "" {
+		t.Skip("dns doesn't work correctly in circle ci")
+	}
+
 	fixtures := []struct {
 		input       string
 		expectError bool
