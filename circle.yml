@@ -4,13 +4,11 @@ jobs:
     docker:
       - image: circleci/golang:1.9
     working_directory: /go/src/github.com/storageos/go-cli
-    environment:
-      TEST_RESULTS: /tmp/test-results
     steps:
       - checkout
-      - run: mkdir -p $TEST_RESULTS
-      - run: go vet $(go list ./... | grep -v /vendor/) | tee ${TEST_RESULTS}/go-vet.out
-      - run: go test -v -race -run Test[^Mkdir] $(go list ./... | grep -v /vendor/) | tee ${TEST_RESULTS}/go-test.out
+      - run: mkdir -p /tmp/test-results
+      - run: go vet $(go list ./... | grep -v /vendor/) | tee /tmp/test-results/go-vet.out
+      - run: go test -v -race -run Test[^Mkdir] $(go list ./... | grep -v /vendor/) | tee /tmp/test-results/go-test.out
       - run: go get github.com/mitchellh/gox
       - run: make release
       - store_artifacts:
@@ -23,13 +21,11 @@ jobs:
     docker:
       - image: circleci/golang:1.9
     working_directory: /go/src/github.com/storageos/go-cli
-    environment:
-      TEST_RESULTS: /tmp/test-results    
     steps:
       - checkout
-      - run: mkdir -p $TEST_RESULTS
-      - run: go vet $(go list ./... | grep -v /vendor/) | tee ${TEST_RESULTS}/go-vet.out
-      - run: go test -v -race -run Test[^Mkdir] $(go list ./... | grep -v /vendor/) | tee ${TEST_RESULTS}/go-test.out
+      - run: mkdir -p /tmp/test-results
+      - run: go vet $(go list ./... | grep -v /vendor/) | tee /tmp/test-results/go-vet.out
+      - run: go test -v -race -run Test[^Mkdir] $(go list ./... | grep -v /vendor/) | tee /tmp/test-results/go-test.out
       - run: go get github.com/mitchellh/gox github.com/tcnksm/ghr
       - run: make release
       - store_artifacts:
