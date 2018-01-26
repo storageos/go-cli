@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run: mkdir -p /tmp/test-results
       - run: go vet $(go list ./... | grep -v /vendor/) | tee /tmp/test-results/go-vet.out
-      - run: go test -v -race -run Test[^Mkdir] $(go list ./... | grep -v /vendor/) | tee /tmp/test-results/go-test.out
+      - run: go test -v -race -run Test[^Mkdir] $(go list ./... | grep -v /vendor/) | tee -p /tmp/test-results/go-test.out
       - run: go get github.com/mitchellh/gox
       - run: make release
       - store_artifacts:
