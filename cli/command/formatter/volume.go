@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	units "github.com/docker/go-units"
-	"github.com/storageos/go-cli/api/types"
+	"github.com/storageos/go-api/types"
 	cliconfig "github.com/storageos/go-cli/cli/config"
 )
 

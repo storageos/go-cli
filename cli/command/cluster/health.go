@@ -10,7 +10,7 @@ import (
 	"github.com/dnephin/cobra"
 	log "github.com/sirupsen/logrus"
 
-	apiTypes "github.com/storageos/go-cli/api/types"
+	apiTypes "github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
 	"github.com/storageos/go-cli/discovery"

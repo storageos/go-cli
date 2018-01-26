@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/storageos/go-cli/api/types"
+	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli/command"
 )
 

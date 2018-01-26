@@ -18,7 +18,7 @@ import (
 	"github.com/storageos/go-cli/pkg/system"
 	"github.com/storageos/go-cli/pkg/validation"
 
-	"github.com/storageos/go-cli/api/types"
+	"github.com/storageos/go-api/types"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/storageos/go-cli/pkg/host"

@@ -11,14 +11,14 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 
-	"github.com/storageos/go-cli/api/types/versions"
+	"github.com/storageos/go-api/soserror"
+	"github.com/storageos/go-api/types/versions"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/commands"
 	cliconfig "github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/cli/debug"
 	cliflags "github.com/storageos/go-cli/cli/flags"
-	soserr "github.com/storageos/go-cli/pkg/errors"
 	"github.com/storageos/go-cli/pkg/term"
 	"github.com/storageos/go-cli/version"
 )
@@ -219,7 +219,7 @@ func main() {
 	cmd := newStorageOSCommand(storageosCli)
 
 	if err := cmd.Execute(); err != nil {
-		if customError, ok := err.(soserr.StorageOSError); ok {
+		if customError, ok := err.(soserror.StorageOSError); ok {
 			if msg := customError.String(); msg != "" {
 				fmt.Fprintf(stderr, "error: %s\n", msg)
 			}
