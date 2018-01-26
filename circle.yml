@@ -39,6 +39,10 @@ workflows:
   version: 2
   push:
     jobs:
+      - test:
+          filters:
+            tags:
+              only: /.*/
       - build:
           requires:
             - test
