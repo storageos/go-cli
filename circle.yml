@@ -35,10 +35,11 @@ jobs:
   release:
     <<: *defaults
     steps:
+      - checkout
       - attach_workspace:
           at:  cmd/storageos/release/
       - run: go get github.com/tcnksm/ghr
-      - run: echo ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` cmd/storageos/release/
+      - run: ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --recreate --replace `git describe --tags` cmd/storageos/release/
       
 workflows:
   version: 2
