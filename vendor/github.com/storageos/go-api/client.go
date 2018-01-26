@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/storageos/go-api/netutil"
+	"github.com/storageos/go-api/serror"
 	"io"
 	"io/ioutil"
 	"net"
@@ -24,9 +25,6 @@ const (
 	DefaultVersionStr = "1"
 	DefaultVersion    = 1
 )
-
-// ErrInvalidEndpoint is returned when the endpoint is not a valid HTTP URL.
-type InvalidNodeError = netutil.InvalidNodeError
 
 var (
 	// ErrConnectionRefused is returned when the client cannot connect to the given endpoint.
@@ -277,6 +275,11 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 
 	resp, err := httpClient.Do(req.WithContext(ctx))
 	if err != nil {
+		// If it is a custom error, return it. It probably knows more than us
+		if serror.IsStorageOSError(err) {
+			return nil, err
+		}
+
 		if strings.Contains(err.Error(), "connection refused") {
 			return nil, ErrConnectionRefused
 		}
