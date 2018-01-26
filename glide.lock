@@ -1,5 +1,5 @@
 hash: c3028d9aa5b48078d5f5e28345fd90deeec6a5d950ce3d34060de2dd147fc78b
-updated: 2018-01-26T12:16:16.786530171Z
+updated: 2018-01-26T15:44:04.266831031Z
 imports:
 - name: github.com/Azure/go-ansiterm
   version: 19f72df4d05d31cbe1c56bfc8045c96babff6c7e
@@ -30,7 +30,7 @@ imports:
 - name: github.com/spf13/pflag
   version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/storageos/go-api
-  version: e06f2d85a30cc906c15c20324a442cced8419102
+  version: 3a4032328d99c1b43fbda3d85bd3c80fa06e1707
   subpackages:
   - netutil
   - serror
