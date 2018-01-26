@@ -37,7 +37,7 @@ jobs:
       
 workflows:
   version: 2
-  update:
+  push:
     jobs:
       - build:
           requires:
