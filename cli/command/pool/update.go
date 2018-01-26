@@ -3,13 +3,13 @@ package pool
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/dnephin/cobra"
 	"github.com/spf13/pflag"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
+	"github.com/storageos/go-cli/cli/opts"
 )
 
 const (
@@ -24,18 +24,23 @@ const (
 )
 
 type updateOptions struct {
-	active           bool
-	controllerAdd    string
-	controllerRemove string
-	defaultDriver    string
-	description      string
-	isDefault        bool
-	labelAdd         string
-	labelRemove      string
+	active            bool
+	addControllers    opts.ListOpts
+	removeControllers opts.ListOpts
+	defaultDriver     string
+	description       string
+	isDefault         bool
+	addLabels         opts.ListOpts
+	removeLabels      opts.ListOpts
 }
 
 func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	opt := updateOptions{}
+	opt := updateOptions{
+		addControllers:    opts.NewListOpts(opts.ValidateEnv),
+		removeControllers: opts.NewListOpts(nil),
+		addLabels:         opts.NewListOpts(opts.ValidateEnv),
+		removeLabels:      opts.NewListOpts(nil),
+	}
 
 	cmd := &cobra.Command{
 		Use:   "update [OPTIONS] POOL",
@@ -48,13 +53,13 @@ func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVar(&opt.active, flagActive, true, "Enable or disable the pool")
-	flags.StringVar(&opt.controllerAdd, flagControllerAdd, "", "Add a controller to the capacity pool")
-	flags.StringVar(&opt.controllerRemove, flagControllerRemove, "", "Remove a controller from the capacity pool")
-	flags.BoolVar(&opt.isDefault, flagDefault, false, "Set as default capacity pool")
-	flags.StringVar(&opt.defaultDriver, flagDefaultDriver, "", "Default driver for the capacity pool")
+	flags.Var(&opt.addControllers, flagControllerAdd, "Add controllers to the pool")
+	flags.Var(&opt.removeControllers, flagControllerRemove, "Remove controllers from the pool")
+	flags.BoolVar(&opt.isDefault, flagDefault, false, "Set as default pool")
+	flags.StringVar(&opt.defaultDriver, flagDefaultDriver, "", "Default driver for the pool")
 	flags.StringVarP(&opt.description, flagDescription, "d", "", "Pool description")
-	flags.StringVar(&opt.labelAdd, flagLabelAdd, "", "Add or update a capacity pool label (key=value)")
-	flags.StringVar(&opt.labelRemove, flagLabelRemove, "", "Remove a capacity pool label")
+	flags.Var(&opt.addLabels, flagLabelAdd, "Add or update pool labels (key=value)")
+	flags.Var(&opt.removeLabels, flagLabelRemove, "Remove pool labels")
 
 	return cmd
 }
@@ -65,7 +70,7 @@ func runUpdate(storageosCli *command.StorageOSCli, flags *pflag.FlagSet, ref str
 
 	pool, err := client.Pool(ref)
 	if err != nil {
-		return fmt.Errorf("Failed to find pool (%s): %v", ref, err)
+		return fmt.Errorf("failed to find pool (%s): %v", ref, err)
 	}
 
 	// Ensure that there is a slice before attempting to modify controllers
@@ -74,26 +79,22 @@ func runUpdate(storageosCli *command.StorageOSCli, flags *pflag.FlagSet, ref str
 	}
 
 	if flags.Changed(flagControllerAdd) {
-		controller, err := flags.GetString(flagControllerAdd)
-		if err != nil {
-			return fmt.Errorf("Error retrieving name of controller to add: %v", err)
-		}
-		if controller != "" {
+		controllers := flags.Lookup(flagControllerAdd).Value.(*opts.ListOpts).GetAll()
+		for _, controller := range controllers {
 			pool.ControllerNames = append(pool.ControllerNames, controller)
 		}
 	}
 
 	if flags.Changed(flagControllerRemove) {
-		controller, err := flags.GetString(flagControllerRemove)
-		if err != nil {
-			return fmt.Errorf("Error retrieving name of controller to remove: %v", err)
-		}
-		if controller != "" {
+		controllers := flags.Lookup(flagControllerRemove).Value.(*opts.ListOpts).GetAll()
+		for _, controller := range controllers {
 			for i, c := range pool.ControllerNames {
 				if controller == c {
 					pool.ControllerNames = append(pool.ControllerNames[:i], pool.ControllerNames[i+1:]...)
 					break
 				}
+				// Fail if any controller to be removed doesn't exist
+				return fmt.Errorf("%s is not a member of the pool", controller)
 			}
 		}
 	}
@@ -101,7 +102,7 @@ func runUpdate(storageosCli *command.StorageOSCli, flags *pflag.FlagSet, ref str
 	if flags.Changed(flagActive) {
 		active, err := flags.GetBool(flagActive)
 		if err != nil {
-			return fmt.Errorf("Error retrieving value of active flag: %v", err)
+			return fmt.Errorf("error retrieving value of active flag: %v", err)
 		}
 		pool.Active = active
 	}
@@ -109,7 +110,7 @@ func runUpdate(storageosCli *command.StorageOSCli, flags *pflag.FlagSet, ref str
 	if flags.Changed(flagDefault) {
 		def, err := flags.GetBool(flagDefault)
 		if err != nil {
-			return fmt.Errorf("Error retrieving value of default flag: %v", err)
+			return fmt.Errorf("error retrieving value of default flag: %v", err)
 		}
 		pool.Default = def
 	}
@@ -117,7 +118,7 @@ func runUpdate(storageosCli *command.StorageOSCli, flags *pflag.FlagSet, ref str
 	if flags.Changed(flagDefaultDriver) {
 		driver, err := flags.GetString(flagDefaultDriver)
 		if err != nil {
-			return fmt.Errorf("Error retrieving name of default driver to use: %v", err)
+			return fmt.Errorf("error retrieving name of default driver to use: %v", err)
 		}
 		pool.DefaultDriver = driver
 	}
@@ -125,7 +126,7 @@ func runUpdate(storageosCli *command.StorageOSCli, flags *pflag.FlagSet, ref str
 	if flags.Changed(flagDescription) {
 		desc, err := flags.GetString(flagDescription)
 		if err != nil {
-			return fmt.Errorf("Error retrieving description to use: %v", err)
+			return fmt.Errorf("error retrieving description to use: %v", err)
 		}
 		pool.Description = desc
 	}
@@ -136,27 +137,20 @@ func runUpdate(storageosCli *command.StorageOSCli, flags *pflag.FlagSet, ref str
 	}
 
 	if flags.Changed(flagLabelAdd) {
-		label, err := flags.GetString(flagLabelAdd)
-		if err != nil {
-			return fmt.Errorf("Error retrieving label pair to add: %v", err)
-		}
-		if label != "" {
-			pair := strings.Split(label, "=")
+		labels := flags.Lookup(flagLabelAdd).Value.(*opts.ListOpts).GetAll()
 
-			if len(pair) != 2 || pair[0] == "" || pair[1] == "" {
-				return fmt.Errorf("Bad label format: %s", label)
-			}
-
-			pool.Labels[pair[0]] = pair[1]
+		for label, value := range opts.ConvertKVStringsToMap(labels) {
+			pool.Labels[label] = value
 		}
 	}
 
 	if flags.Changed(flagLabelRemove) {
-		label, err := flags.GetString(flagLabelRemove)
-		if err != nil {
-			return fmt.Errorf("Error retrieving label to remove: %v", err)
-		}
-		if label != "" {
+		keys := flags.Lookup(flagLabelRemove).Value.(*opts.ListOpts).GetAll()
+		// Fail if any label to be removed doesn't exist
+		for _, label := range keys {
+			if _, exists := pool.Labels[label]; !exists {
+				return fmt.Errorf("key %s doesn't exist in the pool's labels", label)
+			}
 			delete(pool.Labels, label)
 		}
 	}
