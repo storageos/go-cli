@@ -16,7 +16,7 @@ jobs:
           name: Run unit tests
           command: |
             trap "go-junit-report <output/go-test.out > output/go-test-report.xml" EXIT
-            make test | tee output/go-test.out
+            go test -v -race -run "Test[^Mkdir|^RunCmdDeadline]" $(go list ./... | grep -v /vendor/) | tee output/go-test.out
       - store_test_results:
           path: output
   build:
