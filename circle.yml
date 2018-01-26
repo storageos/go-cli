@@ -1,27 +1,66 @@
-machine:
-  environment:
-    # GOROOT is not set by default
-    GOROOT: ""
-    GOPATH: "${HOME}/.go_project"
-    PATH: "${GOPATH}/bin:${PATH}"
-    BUILD_PATH: "${GOPATH}/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+defaults: &defaults
+  working_directory: /go/src/github.com/storageos/go-cli
+  docker:
+    - image: circleci/golang:1.9
 
-dependencies:      
-  override:
-    - mkdir -p ~/.go_project/src/github.com/${CIRCLE_PROJECT_USERNAME}
-    - ln -s ${HOME}/${CIRCLE_PROJECT_REPONAME} ${BUILD_PATH}
-
-test:
-  pre:
-    - cd $BUILD_PATH && go vet $(go list ./... | grep -v /vendor/)
-  override:
-    - cd $BUILD_PATH && go test -v -race -run Test[^Mkdir] $(go list ./... | grep -v /vendor/)
-
-deployment:
+version: 2
+jobs:
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: mkdir -p output
+      - run: go vet $(go list ./... | grep -v /vendor/) | tee output/go-vet.out
+      - run: go get github.com/jstemmer/go-junit-report
+      - run:
+          name: Run unit tests
+          command: |
+            trap "go-junit-report <output/go-test.out > output/go-test-report.xml" EXIT
+            go test -v -race -run "Test[^Mkdir|^RunCmdDeadline]" $(go list ./... | grep -v /vendor/) | tee output/go-test.out
+      - store_test_results:
+          path: output
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: go get github.com/mitchellh/gox
+      - run: make release
+      - store_artifacts:
+          path: /go/src/github.com/storageos/go-cli/cmd/storageos/release/
+          destination: binaries
+      - persist_to_workspace:
+          root: cmd/storageos
+          paths:
+            - release
   release:
-    tag: /[0-9]+(\.[0-9]+)*/    
-    commands:
-      - go get github.com/mitchellh/gox
-      - go get github.com/tcnksm/ghr      
-      - cd $BUILD_PATH && make release
-      - cd $BUILD_PATH && ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` cmd/storageos/release/
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at:  cmd/storageos
+      - run: go get github.com/tcnksm/ghr
+      - run: ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` cmd/storageos/release/
+      
+workflows:
+  version: 2
+  push:
+    jobs:
+      - test:
+          filters:
+            tags:
+              only: /.*/
+      - build:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /.*/
+      - release:
+          requires:
+            - test
+            - build
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
