@@ -1,50 +1,53 @@
+defaults: &defaults
+  working_directory: /go/src/github.com/storageos/go-cli
+  docker:
+    - image: circleci/golang:1.9
+
 version: 2
 jobs:
-  build:
-    docker:
-      - image: circleci/golang:1.9
-    working_directory: /go/src/github.com/storageos/go-cli
+  test:
+    <<: *defaults
     steps:
       - checkout
-      - run: mkdir -p /tmp/test-results
-      - run: go vet $(go list ./... | grep -v /vendor/) | tee /tmp/test-results/go-vet.out
-      - run: go test -v -race -run "Test[^Mkdir|^RunCmdDeadline]" $(go list ./... | grep -v /vendor/) | tee /tmp/test-results/go-test.out
+      - run: mkdir -p output
+      - run: go vet $(go list ./... | grep -v /vendor/) | tee output/go-vet.out
+      - run: go test -v -race -run "Test[^Mkdir|^RunCmdDeadline]" $(go list ./... | grep -v /vendor/) | tee output/go-test.out
+      - store_test_results:
+          path: output
+  build:
+    <<: *defaults
+    steps:
+      - checkout
       - run: go get github.com/mitchellh/gox
       - run: make release
       - store_artifacts:
           path: /go/src/github.com/storageos/go-cli/cmd/storageos/release/
           destination: binaries
-      - store_test_results:
-          path: /tmp/test-results
-
+      - persist_to_workspace:
+          root: cmd/storageos
+          paths:
+            - release
   release:
-    docker:
-      - image: circleci/golang:1.9
-    working_directory: /go/src/github.com/storageos/go-cli
+    <<: *defaults
     steps:
-      - checkout
-      - run: mkdir -p /tmp/test-results
-      - run: go vet $(go list ./... | grep -v /vendor/) | tee /tmp/test-results/go-vet.out
-      - run: go test -v -race -run "Test[^Mkdir|^RunCmdDeadline]" $(go list ./... | grep -v /vendor/) | tee /tmp/test-results/go-test.out
-      - run: go get github.com/mitchellh/gox github.com/tcnksm/ghr
-      - run: make release
-      - store_artifacts:
-          path: /go/src/github.com/storageos/go-cli/cmd/storageos/release/
-          destination: binaries
-      - store_test_results:
-          path: /tmp/test-results
-      - run: ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` cmd/storageos/release/
+      - attach_workspace:
+          at:  cmd/storageos/release/
+      - run: go get github.com/tcnksm/ghr
+      - run: echo ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` cmd/storageos/release/
       
 workflows:
   version: 2
   update:
     jobs:
       - build:
+          requires:
+            - test
           filters:
             tags:
               only: /.*/
       - release:
           requires:
+            - test
             - build
           filters:
             tags:
