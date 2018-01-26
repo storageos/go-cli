@@ -37,7 +37,8 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at:  cmd/storageos/release/
+          at:  cmd/storageos
+      - run: ls -lsa cmd/storageos/release/
       - run: go get github.com/tcnksm/ghr
       - run: ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --recreate --replace `git describe --tags` cmd/storageos/release/
       
