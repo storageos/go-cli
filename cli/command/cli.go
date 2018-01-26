@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"github.com/dnephin/cobra"
 
 	api "github.com/storageos/go-api"
+	"github.com/storageos/go-api/serror"
 	cliconfig "github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/cli/config/configfile"
 	cliflags "github.com/storageos/go-cli/cli/flags"
@@ -183,7 +185,22 @@ func getServerHost(hosts string, tls bool) (host string, err error) {
 
 	// Verify and expand the join value in the host var
 	if errs := jointools.VerifyJOIN(host); errs != nil {
-		return "", fmt.Errorf("error: %+v", errs)
+		causes := make([]string, 0)
+		help := make([]string, 0)
+
+		for _, e := range errs {
+			causes = append(causes, e.Error())
+			if se, ok := e.(serror.StorageOSError); ok {
+				help = append(help, se.Help())
+			}
+		}
+
+		return "", serror.NewTypedStorageOSError(
+			serror.InvalidHostConfig,
+			errors.New(strings.Join(causes, ",")),
+			"invalid host config",
+			strings.Join(help, ","),
+		)
 	}
 	return jointools.ExpandJOIN(host), nil
 }
