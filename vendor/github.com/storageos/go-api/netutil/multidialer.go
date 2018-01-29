@@ -86,7 +86,11 @@ func (m *MultiDialer) DialContext(ctx context.Context, network, ignoredAddress s
 			return nil, ctx.Err()
 
 		default:
-			conn, err := m.Dialer.DialContext(ctx, network, addr)
+			// Create new child context for a single dial
+			dctx, cancel := context.WithTimeout(ctx, time.Second)
+			defer cancel()
+
+			conn, err := m.Dialer.DialContext(dctx, network, addr)
 			if err != nil {
 				continue
 			}
