@@ -3,12 +3,12 @@ package pool
 import (
 	"fmt"
 
+	"context"
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/opts"
-	"context"
 )
 
 type createOptions struct {
@@ -26,7 +26,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := createOptions{
 		controllers: opts.NewListOpts(opts.ValidateEnv),
 		drivers:     opts.NewListOpts(opts.ValidateEnv),
-		labels:      opts.NewListOpts(opts.ValidateEnv),
+		labels:      opts.NewListOpts(opts.ValidationPipeline(opts.ValidateEnv, opts.ValidateLabel)),
 	}
 
 	cmd := &cobra.Command{
