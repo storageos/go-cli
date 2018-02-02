@@ -22,54 +22,6 @@ var (
 	DefaultHost = DefaultTCPHost
 )
 
-// ValidateHost validates that the specified string is a valid host and returns it.
-func ValidateHost(val string) (string, error) {
-	host := strings.TrimSpace(val)
-	// The empty string means default and is not handled by parseAddr
-	if host != "" {
-		_, err := parseAddr(host)
-		if err != nil {
-			return val, err
-		}
-	}
-	// Note: unlike most flag validators, we don't return the mutated value here
-	//       we need to know what the user entered later (using ParseHost) to adjust for TLS
-	return val, nil
-}
-
-// ParseHost and set defaults for a Daemon host string
-func ParseHost(defaultToTLS bool, val string) (string, error) {
-	host := strings.TrimSpace(val)
-	if host == "" {
-		host = DefaultTCPHost
-	} else {
-		var err error
-		host, err = parseAddr(host)
-		if err != nil {
-			return val, err
-		}
-	}
-	return host, nil
-}
-
-// parseAddr parses the specified address and returns an address that will be used as the host.
-// Depending of the address specified, this may return one of the global Default* strings defined in hosts.go.
-func parseAddr(addr string) (string, error) {
-	addrParts := strings.SplitN(addr, "://", 2)
-	if len(addrParts) == 1 && addrParts[0] != "" {
-		addrParts = []string{"tcp", addrParts[0]}
-	}
-
-	switch addrParts[0] {
-	case "tcp":
-		return ParseTCPAddr(addrParts[1], DefaultTCPHost)
-	case "unix":
-		return parseSimpleProtoAddr("unix", addrParts[1], DefaultUnixSocket)
-	default:
-		return "", fmt.Errorf("Invalid bind address format: %s", addr)
-	}
-}
-
 // parseSimpleProtoAddr parses and validates that the specified address is a valid
 // socket address for simple protocols like unix and npipe. It returns a formatted
 // socket address, either using the address parsed from addr, or the contents of

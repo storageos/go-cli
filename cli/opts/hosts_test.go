@@ -1,92 +1,9 @@
 package opts
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 )
-
-func TestParseHost(t *testing.T) {
-	invalid := []string{
-		"something with spaces",
-		"://",
-		"unknown://",
-		"tcp://:port",
-		"tcp://invalid:port",
-	}
-
-	valid := map[string]string{
-		"":                         DefaultHost,
-		" ":                        DefaultHost,
-		"  ":                       DefaultHost,
-		"tcp://host:":              fmt.Sprintf("tcp://host:%d", DefaultHTTPPort),
-		"tcp://":                   DefaultTCPHost,
-		"tcp://:5705":              fmt.Sprintf("tcp://%s:5705", DefaultHTTPHost),
-		"tcp://:2376":              fmt.Sprintf("tcp://%s:2376", DefaultHTTPHost),
-		"tcp://0.0.0.0:8080":       "tcp://0.0.0.0:8080",
-		"tcp://192.168.0.0:12000":  "tcp://192.168.0.0:12000",
-		"tcp://192.168:8080":       "tcp://192.168:8080",
-		"tcp://0.0.0.0:1234567890": "tcp://0.0.0.0:1234567890", // yeah it's valid :P
-		" tcp://:7777/path ":       fmt.Sprintf("tcp://%s:7777/path", DefaultHTTPHost),
-		"tcp://storageos.com:5705": "tcp://storageos.com:5705",
-		"unix://":                  "unix://" + DefaultUnixSocket,
-		"unix://path/to/socket":    "unix://path/to/socket",
-	}
-
-	for _, value := range invalid {
-		if _, err := ParseHost(false, value); err == nil {
-			t.Errorf("Expected an error for %v, got [nil]", value)
-		}
-	}
-
-	for value, expected := range valid {
-		if actual, err := ParseHost(false, value); err != nil || actual != expected {
-			t.Errorf("Expected for %v [%v], got [%v, %v]", value, expected, actual, err)
-		}
-	}
-}
-
-func TestParseAddr(t *testing.T) {
-	invalids := map[string]string{
-
-		"tcp:a.b.c.d":                   "Invalid bind address format: tcp:a.b.c.d",
-		"tcp:a.b.c.d/path":              "Invalid bind address format: tcp:a.b.c.d/path",
-		"udp://127.0.0.1":               "Invalid bind address format: udp://127.0.0.1",
-		"udp://127.0.0.1:2375":          "Invalid bind address format: udp://127.0.0.1:2375",
-		"tcp://unix:///run/docker.sock": "Invalid proto, expected tcp: unix:///run/docker.sock",
-		" tcp://:7777/path ":            "Invalid bind address format:  tcp://:7777/path ",
-		"":                              "Invalid bind address format: ",
-	}
-	valids := map[string]string{
-		"0.0.0.1:":                    "tcp://0.0.0.1:5705",
-		"0.0.0.1:5555":                "tcp://0.0.0.1:5555",
-		"0.0.0.1:5555/path":           "tcp://0.0.0.1:5555/path",
-		"[::1]:":                      "tcp://[::1]:5705",
-		"[::1]:5555/path":             "tcp://[::1]:5555/path",
-		"[0:0:0:0:0:0:0:1]:":          "tcp://[0:0:0:0:0:0:0:1]:5705",
-		"[0:0:0:0:0:0:0:1]:5555/path": "tcp://[0:0:0:0:0:0:0:1]:5555/path",
-		":6666":                   fmt.Sprintf("tcp://%s:6666", DefaultHTTPHost),
-		":6666/path":              fmt.Sprintf("tcp://%s:6666/path", DefaultHTTPHost),
-		"tcp://":                  DefaultTCPHost,
-		"tcp://:7777":             fmt.Sprintf("tcp://%s:7777", DefaultHTTPHost),
-		"tcp://:7777/path":        fmt.Sprintf("tcp://%s:7777/path", DefaultHTTPHost),
-		"unix:///run/docker.sock": "unix:///run/docker.sock",
-		"unix://":                 "unix://" + DefaultUnixSocket,
-		"localhost:":              "tcp://localhost:5705",
-		"localhost:5555":          "tcp://localhost:5555",
-		"localhost:5555/path":     "tcp://localhost:5555/path",
-	}
-	for invalidAddr, expectedError := range invalids {
-		if addr, err := parseAddr(invalidAddr); err == nil || err.Error() != expectedError {
-			t.Errorf("tcp %v address expected error %q return, got %q and addr %v", invalidAddr, expectedError, err, addr)
-		}
-	}
-	for validAddr, expectedAddr := range valids {
-		if addr, err := parseAddr(validAddr); err != nil || addr != expectedAddr {
-			t.Errorf("%v -> expected %v, got (%v) addr (%v)", validAddr, expectedAddr, err, addr)
-		}
-	}
-}
 
 func TestParseTCP(t *testing.T) {
 	var (
