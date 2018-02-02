@@ -247,7 +247,7 @@ func TestPoolCreate(t *testing.T) {
 		t.Fatalf("PoolCreate: Wrong return value. Wanted pool. Got %v.", pool)
 	}
 	if len(pool.ID) != 36 {
-		t.Errorf("PoolCreate: Wrong return value. Wanted 34 character UUID. Got %d. (%s)", len(pool.ID), pool.ID)
+		t.Errorf("PoolCreate: Wrong return value. Wanted 36 character UUID. Got %d. (%s)", len(pool.ID), pool.ID)
 	}
 	req := fakeRT.requests[0]
 	expectedMethod := "POST"
@@ -307,6 +307,129 @@ func TestPool(t *testing.T) {
 	u, _ := url.Parse(client.getAPIPath(PoolAPIPrefix+"/"+name, url.Values{}, false))
 	if req.URL.Path != u.Path {
 		t.Errorf("PoolCreate(%q): Wrong request path. Want %q. Got %q.", name, u.Path, req.URL.Path)
+	}
+}
+
+func TestPoolUpdate(t *testing.T) {
+	id := "b4c87d6c-2958-6283-128b-f767153938ad"
+	name := "unit01"
+	body := `{
+        "id": "` + id + `",
+        "name": "` + name + `",
+        "description": "This is the default pool",
+        "default": true,
+        "defaultDriver": "filesystem",
+        "controllerNames": [
+            "controller_a",
+            "controller_b",
+            "controller_c"
+        ],
+        "driverNames": [
+            "filesystem"
+        ],
+        "driverInstances": [
+            {
+                "id": "cce5b1c0-d2e6-14d6-6b01-d8b0ed3cdbda",
+                "name": "default",
+                "description": "Default storage pool",
+                "active": true,
+                "config": {
+                    "dataDir": "/var/lib/storageos/data"
+                },
+                "controllerName": "controller_a",
+                "poolID": "` + id + `",
+                "driverName": "filesystem",
+                "capacityStats": {
+                    "totalCapacityBytes": 1000000000,
+                    "availableCapacityBytes": 500000000,
+                    "provisionedCapacityBytes": 0
+                }
+            },
+            {
+                "id": "b9e9028b-8154-fa4b-caad-ff1455dc7752",
+                "name": "default",
+                "description": "This is the default pool",
+                "active": false,
+                "config": {
+                    "dataDir": "/var/lib/storageos/data"
+                },
+                "controllerName": "controller_b",
+                "poolID": "` + id + `",
+                "driverName": "filesystem",
+                "capacityStats": {
+                    "totalCapacityBytes": 0,
+                    "availableCapacityBytes": 0,
+                    "provisionedCapacityBytes": 0
+                }
+            },
+            {
+                "id": "a9g9228g-8954-mabw-caad-ff1455dc7752",
+                "name": "default",
+                "description": "This is the default pool",
+                "active": false,
+                "config": {
+                    "dataDir": "/var/lib/storageos/data"
+                },
+                "controllerName": "controller_c",
+                "poolID": "` + id + `",
+                "driverName": "filesystem",
+                "capacityStats": {
+                    "totalCapacityBytes": 0,
+                    "availableCapacityBytes": 0,
+                    "provisionedCapacityBytes": 0
+                }
+            }
+        ],
+        "active": false,
+        "capacityStats": {
+            "totalCapacityBytes": 1000000000,
+            "availableCapacityBytes": 500000000,
+            "provisionedCapacityBytes": 0
+        },
+        "labels": {
+            "foo": "baz"
+        }
+    }`
+	fakeRT := &FakeRoundTripper{message: body, status: http.StatusOK}
+	client := newTestClient(fakeRT)
+	pool, err := client.PoolUpdate(
+		types.PoolUpdateOptions{
+			ID:              id,
+			Name:            name,
+			Description:     "Unit test pool",
+			Default:         false,
+			DefaultDriver:   "x",
+			ControllerNames: []string{"controller_a", "controller_b", "controller_c"},
+			DriverNames:     []string{"driver_x", "driver_y", "driver_z"},
+			Active:          true,
+			Labels: map[string]string{
+				"foo": "baz",
+			},
+			Context: context.Background(),
+		},
+	)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if pool == nil {
+		t.Fatalf("PoolUpdate: Wrong return value. Wanted pool. Got %v.", pool)
+	}
+	if pool.ID != id {
+		t.Errorf("PoolUpdate: Wrong return value. Wanted UUID %s. Got %s.", id, pool.ID)
+	}
+	if pool.Name != name {
+		t.Errorf("PoolUpdate: Wrong return value. Wanted name %s. Got %s.", name, pool.Name)
+	}
+
+	req := fakeRT.requests[0]
+	expectedMethod := "PUT"
+	if req.Method != expectedMethod {
+		t.Errorf("PoolUpdate(): Wrong HTTP method. Want %s. Got %s.", expectedMethod, req.Method)
+	}
+	u, _ := url.Parse(client.getAPIPath(PoolAPIPrefix+"/"+id, url.Values{}, false))
+	if req.URL.Path != u.Path {
+		t.Errorf("PoolUpdate(): Wrong request path. Want %q. Got %q", u.Path, req.URL.Path)
 	}
 }
 
