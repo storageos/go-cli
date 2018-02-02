@@ -38,7 +38,7 @@ func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := updateOptions{
 		addControllers:    opts.NewListOpts(opts.ValidateEnv),
 		removeControllers: opts.NewListOpts(nil),
-		addLabels:         opts.NewListOpts(opts.ValidateEnv),
+		addLabels:         opts.NewListOpts(opts.ValidateLabel),
 		removeLabels:      opts.NewListOpts(nil),
 	}
 
@@ -102,7 +102,7 @@ func runUpdate(storageosCli *command.StorageOSCli, flags *pflag.FlagSet, ref str
 	if flags.Changed(flagActive) {
 		active, err := flags.GetBool(flagActive)
 		if err != nil {
-			return fmt.Errorf("error retrieving value of active flag: %v", err)
+			return err
 		}
 		pool.Active = active
 	}
@@ -110,7 +110,7 @@ func runUpdate(storageosCli *command.StorageOSCli, flags *pflag.FlagSet, ref str
 	if flags.Changed(flagDefault) {
 		def, err := flags.GetBool(flagDefault)
 		if err != nil {
-			return fmt.Errorf("error retrieving value of default flag: %v", err)
+			return err
 		}
 		pool.Default = def
 	}
@@ -118,7 +118,7 @@ func runUpdate(storageosCli *command.StorageOSCli, flags *pflag.FlagSet, ref str
 	if flags.Changed(flagDefaultDriver) {
 		driver, err := flags.GetString(flagDefaultDriver)
 		if err != nil {
-			return fmt.Errorf("error retrieving name of default driver to use: %v", err)
+			return err
 		}
 		pool.DefaultDriver = driver
 	}
@@ -126,7 +126,7 @@ func runUpdate(storageosCli *command.StorageOSCli, flags *pflag.FlagSet, ref str
 	if flags.Changed(flagDescription) {
 		desc, err := flags.GetString(flagDescription)
 		if err != nil {
-			return fmt.Errorf("error retrieving description to use: %v", err)
+			return err
 		}
 		pool.Description = desc
 	}
