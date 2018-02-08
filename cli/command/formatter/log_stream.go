@@ -89,7 +89,7 @@ type logStreamContext struct {
 // Text uses the default logrus text formatter
 func (c *logStreamContext) Text() string {
 
-	f := logrus.TextFormatter{}
+	f := TextFormatter{}
 
 	out, err := f.Format(c.entry)
 	if err != nil {
@@ -108,6 +108,13 @@ func (c *logStreamContext) Time() string {
 
 func (c *logStreamContext) Level() string {
 	return c.entry.Level.String()
+}
+
+func (c *logStreamContext) Host() string {
+	if v, ok := c.entry.Data["host"]; ok {
+		return str(v)
+	}
+	return ""
 }
 
 func (c *logStreamContext) Module() string {
