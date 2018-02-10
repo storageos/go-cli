@@ -4,16 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/url"
 	"os"
+	"strings"
 
 	"github.com/dnephin/cobra"
 
 	api "github.com/storageos/go-api"
+	"github.com/storageos/go-api/serror"
 	cliconfig "github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/cli/config/configfile"
 	cliflags "github.com/storageos/go-cli/cli/flags"
-	"github.com/storageos/go-cli/cli/opts"
+	"github.com/storageos/go-cli/pkg/jointools"
 )
 
 // Streams is an interface which exposes the standard input and output streams
@@ -123,7 +124,6 @@ func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 	cli.client = client
 
 	cli.defaultVersion = cli.client.ClientVersion()
-
 	return nil
 }
 
@@ -139,9 +139,6 @@ func LoadDefaultConfigFile(err io.Writer) *configfile.ConfigFile {
 	if e != nil {
 		fmt.Fprintf(err, "WARNING: Error loading config file:%v\n", e)
 	}
-	// if !configFile.ContainsAuth() {
-	// 	credentials.DetectDefaultStore(configFile)
-	// }
 	return configFile
 }
 
@@ -162,27 +159,28 @@ func NewAPIClientFromFlags(host string, opt *cliflags.CommonOptions, configFile 
 		return &api.Client{}, err
 	}
 
+	initClientAuth(host, opt, configFile, client)
+	return client, nil
+}
+
+func initClientAuth(join string, opt *cliflags.CommonOptions, configFile *configfile.ConfigFile, client *api.Client) {
 	var username string
 	var password string
 
-	p, err := url.Parse(host)
-	if err != nil {
-		username = os.Getenv(cliconfig.EnvStorageosUsername)
-		password = os.Getenv(cliconfig.EnvStorageosPassword)
-	} else {
-		port := p.Port()
-		if port == "" {
-			port = api.DefaultPort
-		}
+	// Env vars bind weakest to this value
+	username = os.Getenv(cliconfig.EnvStorageosUsername)
+	password = os.Getenv(cliconfig.EnvStorageosPassword)
 
-		credHost := fmt.Sprintf("%s:%s", p.Hostname(), port)
-		username, password, err = configFile.CredentialsStore.GetCredentials(credHost)
-		if err != nil {
-			username = os.Getenv(cliconfig.EnvStorageosUsername)
-			password = os.Getenv(cliconfig.EnvStorageosPassword)
+	// For each host we know about, check to see if we have a stored password
+	joinFragments := strings.Split(join, ",")
+	for _, host := range joinFragments {
+		if u, p, err := configFile.CredentialsStore.GetCredentials(host); err == nil {
+			username, password = u, p
+			break // don't check any more hosts, we have what we need
 		}
 	}
 
+	// cli options overide the env vars and login methods
 	if opt.Username != "" {
 		username = opt.Username
 	}
@@ -190,25 +188,42 @@ func NewAPIClientFromFlags(host string, opt *cliflags.CommonOptions, configFile 
 		password = opt.Password
 	}
 
+	// setup auth only if we have a password
 	if username != "" && password != "" {
 		client.SetAuth(username, password)
 	}
-
-	return client, nil
 }
 
-func getServerHost(hosts []string, tls bool) (host string, err error) {
-	switch len(hosts) {
-	case 0:
-		host = os.Getenv(cliconfig.EnvStorageOSHost)
-	case 1:
-		host = hosts[0]
-	default:
-		return "", errors.New("Please specify only one -H")
+func getServerHost(hosts string, tls bool) (host string, err error) {
+	host = os.Getenv(cliconfig.EnvStorageOSHost)
+	if hosts != "" {
+		host = hosts
 	}
 
-	host, err = opts.ParseHost(tls, host)
-	return
+	if host == "" {
+		host = api.DefaultHost
+	}
+
+	// Verify and expand the join value in the host var
+	if errs := jointools.VerifyJOIN(host); errs != nil {
+		causes := make([]string, 0)
+		help := make([]string, 0)
+
+		for _, e := range errs {
+			causes = append(causes, e.Error())
+			if se, ok := e.(serror.StorageOSError); ok {
+				help = append(help, se.Help())
+			}
+		}
+
+		return "", serror.NewTypedStorageOSError(
+			serror.InvalidHostConfig,
+			errors.New(strings.Join(causes, ",")),
+			"invalid host config",
+			strings.Join(help, ","),
+		)
+	}
+	return jointools.ExpandJOIN(host), nil
 }
 
 // Standard alias definitions

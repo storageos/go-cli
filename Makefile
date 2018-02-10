@@ -10,6 +10,10 @@ build:
 	@echo "++ Building storageos binary"
 	cd cmd/storageos && CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)"
 
+install:
+	@echo "++ Installing storageos binary into \$GOPATH/bin"
+	touch version/client.go && go install -ldflags "$(LDFLAGS)" github.com/storageos/go-cli/cmd/storageos
+
 release:
 	@echo "++ Building storageos release binaries"
 	go get github.com/mitchellh/gox

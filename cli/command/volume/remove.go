@@ -14,6 +14,7 @@ import (
 )
 
 type removeOptions struct {
+	all     bool
 	force   bool
 	volumes []string
 }
@@ -27,21 +28,53 @@ func newRemoveCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Short:   "Remove one or more volumes",
 		Long:    removeDescription,
 		Example: removeExample,
-		Args:    cli.RequiresMinArgs(1),
+		Args:    cli.RequiresMinArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opt.volumes = args
+
+			if cmd.Flag("all").Value.String() == "false" && len(opt.volumes) == 0 {
+				return fmt.Errorf(
+					"\"%s\" requires at least 1 argument(s).\nSee '%s --help'.\n\nUsage:  %s\n\n%s",
+					cmd.CommandPath(),
+					cmd.CommandPath(),
+					cmd.UseLine(),
+					cmd.Short,
+				)
+			}
+
 			return runRemove(storageosCli, &opt)
 		},
 	}
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.force, "force", "f", false, "Force the removal of one or more volumes")
+	flags.BoolVar(&opt.all, "all", false, "Remove all volumes")
+
 	return cmd
 }
 
 func runRemove(storageosCli *command.StorageOSCli, opt *removeOptions) error {
 	client := storageosCli.Client()
 	status := 0
+
+	if opt.all {
+		volumes, err := storageosCli.Client().VolumeList(types.ListOptions{})
+		if err != nil {
+			fmt.Fprintf(storageosCli.Err(), "%s\n", err)
+			status = 1
+		}
+
+		if len(volumes) == 0 {
+			fmt.Fprintf(storageosCli.Err(), "%s\n", "no volumes to delete")
+			status = 1
+		} else {
+			opt.volumes = make([]string, len(volumes))
+			for i, volume := range volumes {
+				ref := volume.Namespace + "/" + volume.Name
+				opt.volumes[i] = ref
+			}
+		}
+	}
 
 	for _, ref := range opt.volumes {
 		namespace, name, err := validation.ParseRefWithDefault(ref)

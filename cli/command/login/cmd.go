@@ -10,8 +10,7 @@ import (
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
-	"github.com/storageos/go-cli/cli/opts"
-	"github.com/storageos/go-cli/pkg/validation"
+	"github.com/storageos/go-cli/pkg/jointools"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -55,12 +54,7 @@ func NewLoginCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 }
 
 func verifyCredsWithServer(username, password, host string) error {
-	h, err := opts.ParseHost(true, host)
-	if err != nil {
-		return fmt.Errorf("Failed to verify credentials (%v)", err)
-	}
-
-	client, err := api.NewVersionedClient(h, api.DefaultVersionStr)
+	client, err := api.NewVersionedClient(host, api.DefaultVersionStr)
 	if err != nil {
 		return fmt.Errorf("Failed to verify credentials (%v)", err)
 	}
@@ -74,19 +68,26 @@ func verifyCredsWithServer(username, password, host string) error {
 }
 
 func getHost(opt loginOptions, args []string) (string, error) {
-	if opt.host != "" {
-		if len(args) > 0 {
-			return "", errors.New("Conflicting options: either specify --host or provide positional arg, not both")
-		}
+	var join string
 
-		return validation.ParseHostPort(opt.host, api.DefaultPort)
+	switch {
+	case opt.host != "" && len(args) > 0:
+		return "", errors.New("Conflicting options: either specify --host or provide positional arg, not both")
+
+	case opt.host != "":
+		join = opt.host
+
+	case len(args) > 0:
+		join = args[0]
+
+	default:
+		join = api.DefaultHost
 	}
 
-	if len(args) > 0 {
-		return validation.ParseHostPort(args[0], api.DefaultPort)
+	if errs := jointools.VerifyJOIN(join); errs != nil {
+		return "", fmt.Errorf("error: %+v", errs)
 	}
-
-	return validation.ParseHostPort(api.DefaultHost, api.DefaultPort)
+	return jointools.ExpandJOIN(join), nil
 }
 
 func promptUsername(storageosCli *command.StorageOSCli) (string, error) {
