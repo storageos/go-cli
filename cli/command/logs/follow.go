@@ -11,7 +11,20 @@ import (
 	"github.com/storageos/go-cli/cli/command/formatter"
 )
 
-const logsPath = "/v1/logs"
+const (
+
+	// Endpoint path for logs
+	logsPath = "/v1/logs"
+
+	// Time allowed to read the next message from the peer.
+	wait = 60 * time.Second
+
+	// Send pings to peer with this period. Must be less than wait.
+	pingPeriod = (wait * 9) / 10
+
+	// Maximum message size allowed from peer.
+	maxMessageSize = 4096
+)
 
 func runFollow(storageosCli *command.StorageOSCli, opt logOptions) error {
 
@@ -27,9 +40,12 @@ func runFollow(storageosCli *command.StorageOSCli, opt logOptions) error {
 
 	c, err := storageosCli.WebsocketConn(logsPath)
 	if err != nil || c == nil {
-		return fmt.Errorf("Could not create connection to stream logs")
+		return fmt.Errorf("Connection error: %v", err)
 	}
 	defer c.Close()
+
+	c.SetPongHandler(func(string) error { return c.SetReadDeadline(time.Now().Add(wait)) })
+	c.SetReadLimit(maxMessageSize)
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
@@ -41,16 +57,29 @@ func runFollow(storageosCli *command.StorageOSCli, opt logOptions) error {
 		defer c.Close()
 		defer close(done)
 		for {
+			c.SetReadDeadline(time.Now().Add(wait))
 			_, message, err := c.ReadMessage()
 			if err != nil {
 				// Read errors are permanent, must close connection
+				if !websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+					return
+				}
+				if !websocket.IsUnexpectedCloseError(err, websocket.CloseAbnormalClosure) {
+					fmt.Println("Server closed connection")
+					return
+				}
+				fmt.Printf("error: %v\n", err)
 				return
 			}
 			formatter.LogStreamWrite(fmtCtx, message)
 		}
 	}()
 
-	// Interrupt handler
+	// Ticker for keepalives
+	ticker := time.NewTicker(pingPeriod)
+	defer ticker.Stop()
+
+	// Write/Interrupt handler
 	for {
 		select {
 		case <-interrupt:
@@ -65,6 +94,12 @@ func runFollow(storageosCli *command.StorageOSCli, opt logOptions) error {
 			}
 			c.Close()
 			return nil
+		case <-ticker.C:
+			c.SetWriteDeadline(time.Now().Add(wait))
+			if err := c.WriteMessage(websocket.PingMessage, nil); err != nil {
+				fmt.Printf("Keepalive failed: %v\n", err)
+				return err
+			}
 		case <-done:
 			return nil
 		}
