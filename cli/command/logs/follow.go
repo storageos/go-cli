@@ -104,5 +104,4 @@ func runFollow(storageosCli *command.StorageOSCli, opt logOptions) error {
 			return nil
 		}
 	}
-	return nil
 }
