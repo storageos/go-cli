@@ -25,8 +25,8 @@ var Version string
 var Experimental string
 
 // GetStorageOSVersion returns version info.
-func GetStorageOSVersion() types.VersionInfo {
-	v := types.VersionInfo{
+func GetStorageOSVersion() *types.VersionInfo {
+	v := &types.VersionInfo{
 		Name:       ProductName,
 		Revision:   Revision,
 		BuildDate:  BuildDate,

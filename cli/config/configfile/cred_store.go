@@ -1,7 +1,9 @@
 package configfile
 
 import (
+	"fmt"
 	"runtime"
+	"strings"
 )
 
 type CredStore map[string]credentials
@@ -36,13 +38,24 @@ func (c CredStore) SetCredentials(host string, username string, password string)
 		UseKeychain: runtime.GOOS == "darwin",
 	}
 
-	c[host] = creds
-	if creds.UseKeychain {
-		return creds.saveToKeychain(host)
+	var errs []error
+	for _, h := range strings.Split(host, ",") {
+		c[h] = creds
+		if creds.UseKeychain {
+			if err := creds.saveToKeychain(h); err != nil {
+				errs = append(errs, err)
+			}
+		}
+	}
+
+	if errs != nil {
+		return fmt.Errorf("error: %+v", errs)
 	}
 	return nil
 }
 
 func (c CredStore) DeleteCredentials(host string) {
-	delete(c, host)
+	for _, h := range strings.Split(host, ",") {
+		delete(c, h)
+	}
 }

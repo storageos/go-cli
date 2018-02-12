@@ -3,12 +3,15 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/dnephin/cobra"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 
+	"github.com/storageos/go-api/serror"
 	"github.com/storageos/go-api/types/versions"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
@@ -35,6 +38,38 @@ func init() {
 	debug.Disable()
 }
 
+func isCoreOS() (bool, error) {
+	f, err := ioutil.ReadFile("/etc/lsb-release")
+	if err != nil {
+		return false, err
+	}
+
+	return strings.Contains(string(f), "DISTRIB_ID=CoreOS"), nil
+}
+
+func isInContainer() (bool, error) {
+	f, err := ioutil.ReadFile("/proc/1/cgroup")
+	if err != nil {
+		return false, err
+	}
+
+	// TODO: How reliable is this method of detection. Is there a better way?
+	return strings.Contains(string(f), "docker"), nil
+}
+
+func verfyHostPlatform() error {
+	// Detect native execution on coreOS
+	// coreOS should not run user-land programs, and we will not work there (outside a container)
+	if coreos, err := isCoreOS(); err == nil && coreos {
+
+		// If we dont think we are in a container, fail and warn the user
+		if inContainer, err := isInContainer(); err == nil && !inContainer {
+			return errors.New("To use the StorageOS CLI on Container Linux, you need to run the storageos/cli image.")
+		}
+	}
+	return nil
+}
+
 func newStorageOSCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opts := cliflags.NewClientOptions()
 	var flags *pflag.FlagSet
@@ -54,6 +89,11 @@ func newStorageOSCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 			return storageosCli.ShowHelp(cmd, args)
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			// verify the host platform, exit immediately if known to be incompatible
+			if err := verfyHostPlatform(); err != nil {
+				return err
+			}
+
 			// flags must be the top-level command flags, not cmd.Flags()
 			opts.Common.SetDefaultOptions(flags)
 			preRun(opts)
@@ -179,6 +219,19 @@ func main() {
 	cmd := newStorageOSCommand(storageosCli)
 
 	if err := cmd.Execute(); err != nil {
+		if customError, ok := err.(serror.StorageOSError); ok {
+			if msg := customError.String(); msg != "" {
+				fmt.Fprintf(stderr, "error: %s\n", msg)
+			}
+			if cause := customError.Err(); cause != nil {
+				fmt.Fprintf(stderr, "\ncaused by: %s\n", cause)
+			}
+			if help := customError.Help(); help != "" {
+				fmt.Fprintf(stderr, "\n%s\n", help)
+			}
+			os.Exit(1)
+		}
+
 		if sterr, ok := err.(cli.StatusError); ok {
 			if sterr.Status != "" {
 				fmt.Fprintln(stderr, sterr.Status)
