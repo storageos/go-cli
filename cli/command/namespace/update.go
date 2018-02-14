@@ -3,13 +3,13 @@ package namespace
 import (
 	"fmt"
 
+	"context"
 	"github.com/dnephin/cobra"
 	"github.com/spf13/pflag"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/opts"
-	"context"
 )
 
 const (
@@ -28,7 +28,7 @@ type updateOptions struct {
 
 func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := updateOptions{
-		labels: opts.NewListOpts(opts.ValidateEnv),
+		labels: opts.NewListOpts(opts.ValidationPipeline(opts.ValidateEnv, opts.ValidateLabel)),
 	}
 
 	cmd := &cobra.Command{

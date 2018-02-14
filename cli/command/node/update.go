@@ -7,6 +7,7 @@ import (
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
+	"github.com/storageos/go-cli/cli/opts"
 	"strings"
 )
 
@@ -58,6 +59,10 @@ func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions, nodeID str
 	}
 
 	if opt.addLabel != "" {
+		if _, err := opts.ValidateLabel(opt.addLabel); err != nil {
+			return err
+		}
+
 		arr := strings.Split(opt.addLabel, "=")
 
 		if len(arr) != 2 || arr[0] == "" || arr[1] == "" {
