@@ -39,7 +39,7 @@ func ParseRefWithDefault(ref string) (string, string, error) {
 	return namespace, name, err
 }
 
-var deprecatedLables = map[string]string{
+var depricatedLabels = map[string]string{
 	"storageos.feature.replication":   "storageos.com/replication",
 	"storageos.feature.deduplication": "storageos.com/deduplication",
 	"storageos.feature.replicas":      "storageos.com/replicas",
@@ -53,7 +53,7 @@ var deprecatedLables = map[string]string{
 
 func labeldeprecationNotice(old, new string) string {
 	depNotice := fmt.Sprintf("the label '%s' has been deprecated in favour of '%s'", old, new)
-	return depNotice + ", refer to current documentation for useage information"
+	return depNotice + ", refer to https://docs.storageos.com for usage details"
 }
 
 func ValidateLabelSet(labels map[string]string) (warnings []string, err error) {
@@ -62,7 +62,9 @@ func ValidateLabelSet(labels map[string]string) (warnings []string, err error) {
 	for k, v := range labels {
 		w, e := ValidateLabel(k, v)
 		warnings = append(warnings, w...)
-		errs = append(errs, e.Error())
+		if err != nil {
+			errs = append(errs, e.Error())
+		}
 	}
 
 	if len(errs) > 0 {
@@ -73,7 +75,7 @@ func ValidateLabelSet(labels map[string]string) (warnings []string, err error) {
 }
 
 func ValidateLabel(k, v string) (warnings []string, err error) {
-	if updated, ok := deprecatedLables[k]; ok {
+	if updated, ok := depricatedLabels[k]; ok {
 		warnings = append(warnings, labeldeprecationNotice(k, updated))
 
 		// TODO: validate value, with extra context?
