@@ -50,13 +50,13 @@ func TestValidateLabelSet(t *testing.T) {
 			expectWarning: false,
 		},
 		{
-			name:          "single depricated label",
+			name:          "single deprecated label",
 			labels:        map[string]string{"storageos.feature.nocompress": "true"},
 			expectErr:     false,
 			expectWarning: true,
 		},
 		{
-			name: "multiple depricated labels",
+			name: "multiple deprecated labels",
 			labels: map[string]string{
 				"storageos.feature.nocompress": "true",
 				"storageos.feature.replicas":   "5",
@@ -65,7 +65,7 @@ func TestValidateLabelSet(t *testing.T) {
 			expectWarning: true,
 		},
 		{
-			name: "multiple labels, some depricated",
+			name: "multiple labels, some deprecated",
 			labels: map[string]string{
 				"foo": "bar",
 				"baz": "bang",

@@ -10,11 +10,11 @@ import (
 	"github.com/storageos/go-cli/cli/command/formatter"
 )
 
-type byControllerName []*types.Controller
+type byNodeName []*types.Node
 
-func (r byControllerName) Len() int      { return len(r) }
-func (r byControllerName) Swap(i, j int) { r[i], r[j] = r[j], r[i] }
-func (r byControllerName) Less(i, j int) bool {
+func (r byNodeName) Len() int      { return len(r) }
+func (r byNodeName) Swap(i, j int) { r[i], r[j] = r[j], r[i] }
+func (r byNodeName) Less(i, j int) bool {
 	return r[i].Name < r[j].Name
 }
 
@@ -52,7 +52,7 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 		LabelSelector: opt.selector,
 	}
 
-	nodes, err := client.ControllerList(params)
+	nodes, err := client.NodeList(params)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 		}
 	}
 
-	sort.Sort(byControllerName(nodes))
+	sort.Sort(byNodeName(nodes))
 
 	nodeCtx := formatter.Context{
 		Output: storageosCli.Out(),

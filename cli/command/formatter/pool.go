@@ -72,7 +72,7 @@ func (c *poolContext) Drivers() string {
 
 func (c *poolContext) Nodes() string {
 	c.AddHeader(poolNodesHeader)
-	return strconv.Itoa(len(c.v.ControllerNames))
+	return strconv.Itoa(len(c.v.NodeNames))
 }
 
 func (c *poolContext) CapacityUsed() string {
