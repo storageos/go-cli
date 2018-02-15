@@ -43,7 +43,7 @@ func NewNodeFormat(source string, quiet bool) Format {
 }
 
 // NodeWrite writes formatted nodes using the Context
-func NodeWrite(ctx Context, nodes []*types.Controller) error {
+func NodeWrite(ctx Context, nodes []*types.Node) error {
 	render := func(format func(subContext subContext) error) error {
 		for _, node := range nodes {
 			if err := format(&nodeContext{v: *node}); err != nil {
@@ -57,7 +57,7 @@ func NodeWrite(ctx Context, nodes []*types.Controller) error {
 
 type nodeContext struct {
 	HeaderContext
-	v types.Controller
+	v types.Node
 }
 
 func (c *nodeContext) MarshalJSON() ([]byte, error) {

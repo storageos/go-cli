@@ -2,11 +2,12 @@ package node
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
-	"strings"
 )
 
 type uncordonOptions struct {
@@ -34,13 +35,13 @@ func runUncordon(storageosCli *command.StorageOSCli, opt uncordonOptions) error 
 	failed := make([]string, 0, len(opt.nodes))
 
 	for _, nodeID := range opt.nodes {
-		n, err := client.Controller(nodeID)
+		n, err := client.Node(nodeID)
 		if err != nil {
 			failed = append(failed, nodeID)
 			continue
 		}
 
-		_, err = client.ControllerUpdate(types.ControllerUpdateOptions{
+		_, err = client.NodeUpdate(types.NodeUpdateOptions{
 			ID:          n.ID,
 			Name:        n.Name,
 			Description: n.Description,

@@ -3,10 +3,7 @@ package validation
 import (
 	"errors"
 	"fmt"
-	//"net"
-	//"net/url"
 	"regexp"
-	//"strconv"
 	"strings"
 
 	storageos "github.com/storageos/go-api"
@@ -39,7 +36,7 @@ func ParseRefWithDefault(ref string) (string, string, error) {
 	return namespace, name, err
 }
 
-var depricatedLabels = map[string]string{
+var deprecatedLabels = map[string]string{
 	"storageos.feature.replication":   "storageos.com/replication",
 	"storageos.feature.deduplication": "storageos.com/deduplication",
 	"storageos.feature.replicas":      "storageos.com/replicas",
@@ -75,7 +72,7 @@ func ValidateLabelSet(labels map[string]string) (warnings []string, err error) {
 }
 
 func ValidateLabel(k, v string) (warnings []string, err error) {
-	if updated, ok := depricatedLabels[k]; ok {
+	if updated, ok := deprecatedLabels[k]; ok {
 		warnings = append(warnings, labeldeprecationNotice(k, updated))
 
 		// TODO: validate value, with extra context?

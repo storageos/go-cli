@@ -1,9 +1,9 @@
 package pool
 
 import (
+	"context"
 	"fmt"
 
-	"context"
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
@@ -17,6 +17,7 @@ type createOptions struct {
 	isDefault     bool
 	defaultDriver string
 	controllers   opts.ListOpts
+	nodes         opts.ListOpts
 	drivers       opts.ListOpts
 	active        bool
 	labels        opts.ListOpts
@@ -25,6 +26,7 @@ type createOptions struct {
 func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := createOptions{
 		controllers: opts.NewListOpts(opts.ValidateEnv),
+		nodes:       opts.NewListOpts(opts.ValidateEnv),
 		drivers:     opts.NewListOpts(opts.ValidateEnv),
 		labels:      opts.NewListOpts(opts.ValidationPipeline(opts.ValidateEnv, opts.ValidateLabel)),
 	}
@@ -50,7 +52,8 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVarP(&opt.description, "description", "d", "", "Pool description")
 	flags.BoolVar(&opt.isDefault, "default", false, "Set as default pool")
 	flags.StringVar(&opt.defaultDriver, "default-driver", "", "Default capacity driver")
-	flags.Var(&opt.controllers, "controllers", "Controllers that contribute capacity to the pool")
+	flags.Var(&opt.controllers, "controllers", "DEPRECATED: use nodes instead")
+	flags.Var(&opt.nodes, "nodes", "Nodes that contribute capacity to the pool")
 	flags.Var(&opt.drivers, "drivers", "Drivers providing capacity to the pool")
 	flags.BoolVar(&opt.active, "active", true, "Enable or disable the pool")
 	flags.Var(&opt.labels, "label", "Set metadata (key=value pairs) on the pool")
@@ -67,6 +70,7 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 		Default:         opt.isDefault,
 		DefaultDriver:   opt.defaultDriver,
 		ControllerNames: opt.controllers.GetAll(),
+		NodeNames:       opt.nodes.GetAll(),
 		DriverNames:     opt.drivers.GetAll(),
 		Active:          opt.active,
 		Labels:          opts.ConvertKVStringsToMap(opt.labels.GetAll()),

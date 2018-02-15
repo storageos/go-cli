@@ -24,8 +24,12 @@ type Pool struct {
 	// no default set, driver weight is used to determine the default.
 	DefaultDriver string `json:"defaultDriver"`
 
+	// NodeNames is a list of nodes that are contributing to the storage pool.
+	NodeNames []string `json:"nodeNames"`
+
 	// ControllerNames is a list of controller names that are participating in the
 	// storage pool.
+	// DEPRECATED: remove in 0.11
 	ControllerNames []string `json:"controllerNames"`
 
 	// DriverNames is a list of backend storage drivers that are available in the

@@ -1,9 +1,9 @@
 package namespace
 
 import (
+	"context"
 	"fmt"
 
-	"context"
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"

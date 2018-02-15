@@ -136,7 +136,7 @@ func getAPINodes(storageosCli *command.StorageOSCli, timeout int) ([]*cliTypes.N
 	listOptions := apiTypes.ListOptions{
 		Context: ctx,
 	}
-	apiNodes, err := storageosCli.Client().ControllerList(listOptions)
+	apiNodes, err := storageosCli.Client().NodeList(listOptions)
 	if err != nil {
 		return nil, fmt.Errorf("API not responding to list nodes: %v", err)
 	}

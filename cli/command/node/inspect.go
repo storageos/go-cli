@@ -35,7 +35,7 @@ func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	client := storageosCli.Client()
 
 	getFunc := func(ref string) (interface{}, []byte, error) {
-		i, err := client.Controller(ref)
+		i, err := client.Node(ref)
 		return i, nil, err
 	}
 

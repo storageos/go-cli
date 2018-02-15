@@ -40,7 +40,7 @@ func NewVolumeFormat(source string, quiet bool) Format {
 }
 
 // VolumeWrite writes formatted volumes using the Context
-func VolumeWrite(ctx Context, volumes []*types.Volume, nodes []*types.Controller) error {
+func VolumeWrite(ctx Context, volumes []*types.Volume, nodes []*types.Node) error {
 	render := func(format func(subContext subContext) error) error {
 		for _, volume := range volumes {
 			if err := format(&volumeContext{v: *volume, nodes: nodes}); err != nil {
@@ -55,7 +55,7 @@ func VolumeWrite(ctx Context, volumes []*types.Volume, nodes []*types.Controller
 type volumeContext struct {
 	HeaderContext
 	v     types.Volume
-	nodes []*types.Controller
+	nodes []*types.Node
 }
 
 func (c *volumeContext) MarshalJSON() ([]byte, error) {
@@ -133,7 +133,7 @@ func (c *volumeContext) Replicas() string {
 func (c *volumeContext) Location() string {
 	c.AddHeader(volumeLocationHeader)
 	if c.v.Master != nil {
-		master, err := c.nodeByID(c.v.Master.Controller)
+		master, err := c.nodeByID(c.v.Master.Node)
 		if err != nil {
 			return "-"
 		}
@@ -144,7 +144,7 @@ func (c *volumeContext) Location() string {
 	return "-"
 }
 
-func (c *volumeContext) nodeByID(id string) (*types.Controller, error) {
+func (c *volumeContext) nodeByID(id string) (*types.Node, error) {
 	for _, node := range c.nodes {
 		if node.ID == id {
 			return node, nil

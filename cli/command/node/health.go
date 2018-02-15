@@ -42,7 +42,7 @@ func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 func runHealth(storageosCli *command.StorageOSCli, opt *healthOptions) error {
 
-	c, err := storageosCli.Client().Controller(opt.name)
+	c, err := storageosCli.Client().Node(opt.name)
 	if err != nil {
 		return err
 	}

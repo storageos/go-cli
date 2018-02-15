@@ -35,6 +35,7 @@ const (
 )
 
 // Controller is used to represent a storage node in a cluster
+// DEPRECATED: remove in 0.11
 type Controller struct {
 	ID               string                 `json:"id,omitempty"`
 	HostID           uint16                 `json:"hostID"`
