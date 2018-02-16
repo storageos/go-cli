@@ -2,25 +2,24 @@ package types
 
 import "context"
 
-// ControllerUpdateOptions are available parameters for updating existing controllers.
-// DEPRECATED: remove in 0.11
-type ControllerUpdateOptions struct {
+// NodeUpdateOptions are available parameters for updating existing nodes.
+type NodeUpdateOptions struct {
 
-	// Controller unique ID.
+	// Node unique ID.
 	// Read Only: true
 	ID string `json:"id"`
 
-	// Controller name.
+	// Node name.
 	// Read Only: true
 	Name string `json:"name"`
 
-	// Description of the controller.
+	// Description of the node.
 	Description string `json:"description"`
 
 	// Labels are user-defined key/value metadata.
 	Labels map[string]string `json:"labels"`
 
-	// Cordon sets the controler into an unschedulable state if true
+	// Cordon marks the node as unschedulable if true
 	Cordon bool `json:"unschedulable"`
 
 	// Context can be set with a timeout or can be used to cancel a request.

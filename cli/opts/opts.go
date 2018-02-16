@@ -1,6 +1,7 @@
 package opts
 
 import (
+	"errors"
 	"fmt"
 	"math/big"
 	"net"
@@ -9,6 +10,7 @@ import (
 	"strings"
 
 	units "github.com/docker/go-units"
+	"github.com/storageos/go-cli/pkg/validation"
 	// "github.com/storageos/go-api/types"
 )
 
@@ -224,6 +226,22 @@ type ValidatorFctType func(val string) (string, error)
 // ValidatorFctListType defines a validator function that returns a validated list of string and/or an error
 type ValidatorFctListType func(val string) ([]string, error)
 
+// ValidationPipeline returns a validator function that applies all the provided validators in order
+func ValidationPipeline(validators ...ValidatorFctType) ValidatorFctType {
+	return func(val string) (string, error) {
+		var err error
+
+		for _, f := range validators {
+			val, err = f(val)
+			if err != nil {
+				return "", err
+			}
+		}
+
+		return val, nil
+	}
+}
+
 // ValidateIPAddress validates an Ip address.
 func ValidateIPAddress(val string) (string, error) {
 	var ip = net.ParseIP(strings.TrimSpace(val))
@@ -265,9 +283,17 @@ func validateDomain(val string) (string, error) {
 // ValidateLabel validates that the specified string is a valid label, and returns it.
 // Labels are in the form on key=value.
 func ValidateLabel(val string) (string, error) {
-	if strings.Count(val, "=") < 1 {
+	split := strings.Split(val, "=")
+	if len(split) < 2 {
 		return "", fmt.Errorf("bad attribute format: %s", val)
 	}
+
+	if warns, err := validation.ValidateLabel(split[0], split[1]); err != nil {
+		return "", err
+	} else if len(warns) > 0 {
+		return "", errors.New(strings.Join(warns, ","))
+	}
+
 	return val, nil
 }
 

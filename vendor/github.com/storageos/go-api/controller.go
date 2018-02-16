@@ -12,7 +12,7 @@ import (
 var (
 
 	// ControllerAPIPrefix is a partial path to the HTTP endpoint.
-	ControllerAPIPrefix = "controllers"
+	ControllerAPIPrefix = "nodes"
 
 	// ErrNoSuchController is the error returned when the controller does not exist.
 	ErrNoSuchController = errors.New("no such controller")
@@ -22,6 +22,7 @@ var (
 )
 
 // ControllerList returns the list of available controllers.
+// DEPRECATED: remove in 0.11
 func (c *Client) ControllerList(opts types.ListOptions) ([]*types.Controller, error) {
 	listOpts := doOptions{
 		fieldSelector: opts.FieldSelector,
@@ -48,6 +49,7 @@ func (c *Client) ControllerList(opts types.ListOptions) ([]*types.Controller, er
 }
 
 // Controller returns a controller by its reference.
+// DEPRECATED: remove in 0.11
 func (c *Client) Controller(ref string) (*types.Controller, error) {
 
 	resp, err := c.do("GET", ControllerAPIPrefix+"/"+ref, doOptions{})
@@ -66,6 +68,7 @@ func (c *Client) Controller(ref string) (*types.Controller, error) {
 }
 
 // ControllerUpdate updates a controller on the server.
+// DEPRECATED: remove in 0.11
 func (c *Client) ControllerUpdate(opts types.ControllerUpdateOptions) (*types.Controller, error) {
 	ref := opts.Name
 	if IsUUID(opts.ID) {
@@ -87,6 +90,7 @@ func (c *Client) ControllerUpdate(opts types.ControllerUpdateOptions) (*types.Co
 }
 
 // ControllerDelete removes a controller by its reference.
+// DEPRECATED: remove in 0.11
 func (c *Client) ControllerDelete(opts types.DeleteOptions) error {
 	deleteOpts := doOptions{
 		namespace: opts.Namespace,
