@@ -30,7 +30,7 @@ func (c *HeaderContext) FullHeader() string {
 	if c.header == nil {
 		return ""
 	}
-	return strings.Join(c.header, "\t")
+	return strings.Join(c.header, "\t") + "\n"
 }
 
 // AddHeader adds another column to the header

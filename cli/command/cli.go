@@ -37,6 +37,7 @@ type Cli interface {
 // Instances of the client can be returned from NewStorageOSCli.
 type StorageOSCli struct {
 	configFile      *configfile.ConfigFile
+	hosts           []string
 	username        string
 	password        string
 	in              *InStream
@@ -46,6 +47,21 @@ type StorageOSCli struct {
 	client          *api.Client
 	hasExperimental bool
 	defaultVersion  string
+}
+
+// GetHosts returns the client's endpoints
+func (cli *StorageOSCli) GetHosts() []string {
+	return cli.hosts
+}
+
+// GetHosts returns the client's username
+func (cli *StorageOSCli) GetUsername() string {
+	return cli.username
+}
+
+// GetPassword returns the client's password
+func (cli *StorageOSCli) GetPassword() string {
+	return cli.password
 }
 
 // HasExperimental returns true if experimental features are accessible.
@@ -95,11 +111,17 @@ func (cli *StorageOSCli) ConfigFile() *configfile.ConfigFile {
 func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 	cli.configFile = LoadDefaultConfigFile(cli.err)
 
-	var err error
-	cli.client, err = NewAPIClientFromFlags(opt.Common, cli.configFile)
+	host, err := getServerHost(opt.Common.Hosts, opt.Common.TLS)
 	if err != nil {
 		return err
 	}
+	cli.hosts = []string{host}
+
+	client, err := NewAPIClientFromFlags(host, opt.Common, cli.configFile)
+	if err != nil {
+		return err
+	}
+	cli.client = client
 
 	cli.defaultVersion = cli.client.ClientVersion()
 	return nil
@@ -121,11 +143,10 @@ func LoadDefaultConfigFile(err io.Writer) *configfile.ConfigFile {
 }
 
 // NewAPIClientFromFlags creates a new APIClient from command line flags
-// func NewAPIClientFromFlags(opts *cliflags.CommonOptions, configFile *configfile.ConfigFile) (client.APIClient, error) {
-func NewAPIClientFromFlags(opt *cliflags.CommonOptions, configFile *configfile.ConfigFile) (*api.Client, error) {
-	host, err := getServerHost(opt.Hosts, opt.TLS)
-	if err != nil {
-		return &api.Client{}, err
+func NewAPIClientFromFlags(host string, opt *cliflags.CommonOptions, configFile *configfile.ConfigFile) (*api.Client, error) {
+
+	if host == "" {
+		return &api.Client{}, fmt.Errorf("STORAGEOS_HOST evironemnt variable not set")
 	}
 
 	verStr := api.DefaultVersionStr
