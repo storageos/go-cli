@@ -25,6 +25,8 @@ func (cli *StorageOSCli) WebsocketConn(path string) (*websocket.Conn, error) {
 	return c, err
 }
 
+// WebsocketURLs creates websocket URL of all the hosts and returns a slice of
+// the URLs.
 func (cli *StorageOSCli) WebsocketURLs() []*url.URL {
 
 	urls := []*url.URL{}
