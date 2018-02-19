@@ -166,7 +166,7 @@ func activeReplicas(volume *types.Volume) int {
 }
 
 // GetDesiredReplicas - get desired replicas.
-// If the value is invalid (i.e. storageos.feature.replicas="hi") - desired
+// If the value is invalid (i.e. storageos.com/replicas="hi") - desired
 // replicas will be set to 0. Only valid values will be tolerated.
 func getDesiredReplicas(volume *types.Volume) int {
 	r, ok := volume.Labels[cliconfig.FeatureReplicas]

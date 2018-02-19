@@ -30,7 +30,7 @@ var (
 
 // default features
 const (
-	FeatureReplicas = "storageos.feature.replicas"
+	FeatureReplicas = "storageos.com/replicas"
 )
 
 // DeviceRootPath defines the directory in which the raw StorageOS volumes are
