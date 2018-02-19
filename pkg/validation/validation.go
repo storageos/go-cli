@@ -37,15 +37,18 @@ func ParseRefWithDefault(ref string) (string, string, error) {
 }
 
 var deprecatedLabels = map[string]string{
-	"storageos.feature.replication":   "storageos.com/replication",
-	"storageos.feature.deduplication": "storageos.com/deduplication",
-	"storageos.feature.replicas":      "storageos.com/replicas",
-	"storageos.feature.nocompress":    "storageos.com/compression",
-	"storageos.feature.nocache":       "storageos.com/nocache", // TODO: is this one correct?
-	"storageos.feature.throttle":      "storageos.com/throttle",
-	"storageos.hint.master":           "storageos.com/hint.master",
-	"storageos.hint.docker":           "storageos.com/hint.docker",
-	"storageos.driver":                "storageos.com/driver",
+	// Not yet implemented
+	//"storageos.feature.deduplication": "storageos.com/deduplication",
+
+	"storageos.feature.replication":  "storageos.com/replication",
+	"storageos.feature.replicas":     "storageos.com/replicas",
+	"storageos.feature.nocompress":   "storageos.com/nocompress",
+	"storageos.feature.nocache":      "storageos.com/nocache",      // TODO: is this one correct?
+	"storageos.feature.nowritecache": "storageos.com/nowritecache", // TODO: is this one correct?
+	"storageos.feature.throttle":     "storageos.com/throttle",
+	"storageos.hint.master":          "storageos.com/hint.master",
+	"storageos.hint.docker":          "storageos.com/hint.docker",
+	"storageos.driver":               "storageos.com/driver",
 }
 
 func labeldeprecationNotice(old, new string) string {
