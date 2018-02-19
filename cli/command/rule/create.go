@@ -31,7 +31,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "create [OPTIONS] [RULE]",
 		Short: `Creates a rule. To create a rule that configures 2 replicas for volumes with the label env=prod, run:
-storageos rule create --selector env==prod --action add --label storageos.feature.replicas=2 replicator
+storageos rule create --selector env==prod --action add --label storageos.com/replicas=2 replicator
 		`,
 		Args: cli.RequiresMaxArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
