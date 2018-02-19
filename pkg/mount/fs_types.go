@@ -94,7 +94,7 @@ func (f FSType) MkfsCommand(path string) (command string, args []string, err err
 	// We set some extra options on ext4 for additional performance and safety
 	if f == ext4 {
 		_, volID := filepath.Split(path)
-		args = append([]string{"-F", "-U", volID, "-b", "4096", "-E", "lazy_itable_init=0,lazy_journal_init=0"}, args...)
+		args = append([]string{"-F", "-U", volID, "-b", "4096", "-E", "lazy_itable_init=1,lazy_journal_init=1"}, args...)
 	}
 
 	return f.mkfsBin(), args, nil
