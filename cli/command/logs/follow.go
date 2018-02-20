@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
 )
@@ -57,7 +58,10 @@ func runFollow(storageosCli *command.StorageOSCli, opt logOptions) error {
 		defer c.Close()
 		defer close(done)
 		for {
-			c.SetReadDeadline(time.Now().Add(wait))
+			if err := c.SetReadDeadline(time.Now().Add(wait)); err != nil {
+				log.Error("Failed to SetReadDeadline:", err)
+				return
+			}
 			_, message, err := c.ReadMessage()
 			if err != nil {
 				// Read errors are permanent, must close connection

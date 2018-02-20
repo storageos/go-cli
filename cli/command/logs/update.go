@@ -38,6 +38,8 @@ func runUpdate(storageosCli *command.StorageOSCli, opt logOptions) error {
 		return fmt.Errorf("Failed to update logging: %v", err)
 	}
 
-	fmt.Fprintln(storageosCli.Out(), "OK")
+	if _, err := fmt.Fprintln(storageosCli.Out(), "OK"); err != nil {
+		return err
+	}
 	return nil
 }
