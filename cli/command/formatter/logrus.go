@@ -41,7 +41,7 @@ type TextFormatter struct {
 	// Force disabling colors.
 	DisableColors bool
 
-	// Disable timestamp logging. useful when output is redirected to logging
+	// Disable timestamp logging. Useful when output is redirected to logging
 	// system that already adds timestamps.
 	DisableTimestamp bool
 
@@ -100,40 +100,58 @@ func (f *TextFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		timestampFormat = defaultTimestampFormat
 	}
 	if isColored {
-		f.printColored(b, entry, keys, timestampFormat)
+		if err := f.printColored(b, entry, keys, timestampFormat); err != nil {
+			return nil, err
+		}
 	} else {
 		if !f.DisableTimestamp {
-			f.appendKeyValue(b, "time", entry.Time.Format(timestampFormat))
+			if err := f.appendKeyValue(b, "time", entry.Time.Format(timestampFormat)); err != nil {
+				return nil, err
+			}
 		}
-		f.appendKeyValue(b, "level", entry.Level.String())
+		if err := f.appendKeyValue(b, "level", entry.Level.String()); err != nil {
+			return nil, err
+		}
 
 		// Add StorageOS custom fields
 		if host, ok := entry.Data["host"]; ok {
-			f.appendKeyValue(b, "host", host)
+			if err := f.appendKeyValue(b, "host", host); err != nil {
+				return nil, err
+			}
 			delete(entry.Data, "host")
 		}
 		if module, ok := entry.Data["module"]; ok {
-			f.appendKeyValue(b, "module", module)
+			if err := f.appendKeyValue(b, "module", module); err != nil {
+				return nil, err
+			}
 			delete(entry.Data, "module")
 		}
 		if category, ok := entry.Data["category"]; ok {
-			f.appendKeyValue(b, "category", category)
+			if err := f.appendKeyValue(b, "category", category); err != nil {
+				return nil, err
+			}
 			delete(entry.Data, "category")
 		}
 
 		if entry.Message != "" {
-			f.appendKeyValue(b, "msg", entry.Message)
+			if err := f.appendKeyValue(b, "msg", entry.Message); err != nil {
+				return nil, err
+			}
 		}
 		for _, key := range keys {
-			f.appendKeyValue(b, key, entry.Data[key])
+			if err := f.appendKeyValue(b, key, entry.Data[key]); err != nil {
+				return nil, err
+			}
 		}
 	}
 
-	b.WriteByte('\n')
+	if err := b.WriteByte('\n'); err != nil {
+		return nil, err
+	}
 	return b.Bytes(), nil
 }
 
-func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys []string, timestampFormat string) {
+func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys []string, timestampFormat string) error {
 	var levelColor int
 	switch entry.Level {
 	case logrus.DebugLevel:
@@ -149,17 +167,53 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys 
 	levelText := strings.ToUpper(entry.Level.String())[0:4]
 
 	if f.DisableTimestamp {
-		fmt.Fprintf(b, "\x1b[%dm%s\x1b[0m %-44s ", levelColor, levelText, entry.Message)
+		err := printColoredWithoutTimestamp(b, levelColor, levelText, entry.Message)
+		if err != nil {
+			return err
+		}
 	} else if !f.FullTimestamp {
-		fmt.Fprintf(b, "\x1b[%dm%s\x1b[0m[%04d] %-44s ", levelColor, levelText, int(entry.Time.Sub(baseTimestamp)/time.Second), entry.Message)
+		err := printColoredWithDuration(b, levelColor, levelText, int(entry.Time.Sub(baseTimestamp)/time.Second), entry.Message)
+		if err != nil {
+			return err
+		}
 	} else {
-		fmt.Fprintf(b, "\x1b[%dm%s\x1b[0m[%s] %-44s ", levelColor, levelText, entry.Time.Format(timestampFormat), entry.Message)
+		err := printColoredWithTimestamp(b, levelColor, levelText, entry.Time.Format(timestampFormat), entry.Message)
+		if err != nil {
+			return err
+		}
 	}
+
 	for _, k := range keys {
 		v := entry.Data[k]
-		fmt.Fprintf(b, " \x1b[%dm%s\x1b[0m=", levelColor, k)
-		f.appendValue(b, v)
+		if err := printColoredKey(b, levelColor, k); err != nil {
+			return err
+		}
+
+		if err := f.appendValue(b, v); err != nil {
+			return err
+		}
 	}
+	return nil
+}
+
+func printColoredWithoutTimestamp(b *bytes.Buffer, levelColor int, levelText string, message string) error {
+	_, err := fmt.Fprintf(b, "\x1b[%dm%s\x1b[0m %-44s ", levelColor, levelText, message)
+	return err
+}
+
+func printColoredWithDuration(b *bytes.Buffer, levelColor int, levelText string, duration int, message string) error {
+	_, err := fmt.Fprintf(b, "\x1b[%dm%s\x1b[0m[%04d] %-44s ", levelColor, levelText, duration, message)
+	return err
+}
+
+func printColoredWithTimestamp(b *bytes.Buffer, levelColor int, levelText string, timestamp string, message string) error {
+	_, err := fmt.Fprintf(b, "\x1b[%dm%s\x1b[0m[%s] %-44s ", levelColor, levelText, timestamp, message)
+	return err
+}
+
+func printColoredKey(b *bytes.Buffer, levelColor int, key string) error {
+	_, err := fmt.Fprintf(b, " \x1b[%dm%s\x1b[0m=", levelColor, key)
+	return err
 }
 
 func (f *TextFormatter) needsQuoting(text string) bool {
@@ -177,26 +231,40 @@ func (f *TextFormatter) needsQuoting(text string) bool {
 	return false
 }
 
-func (f *TextFormatter) appendKeyValue(b *bytes.Buffer, key string, value interface{}) {
+func (f *TextFormatter) appendKeyValue(b *bytes.Buffer, key string, value interface{}) error {
 	if b.Len() > 0 {
-		b.WriteByte(' ')
+		if err := b.WriteByte(' '); err != nil {
+			return err
+		}
 	}
-	b.WriteString(key)
-	b.WriteByte('=')
-	f.appendValue(b, value)
+
+	if _, err := b.WriteString(key); err != nil {
+		return err
+	}
+
+	if err := b.WriteByte('='); err != nil {
+		return err
+	}
+
+	return f.appendValue(b, value)
 }
 
-func (f *TextFormatter) appendValue(b *bytes.Buffer, value interface{}) {
+func (f *TextFormatter) appendValue(b *bytes.Buffer, value interface{}) error {
 	stringVal, ok := value.(string)
 	if !ok {
 		stringVal = fmt.Sprint(value)
 	}
 
 	if !f.needsQuoting(stringVal) {
-		b.WriteString(stringVal)
+		if _, err := b.WriteString(stringVal); err != nil {
+			return err
+		}
 	} else {
-		b.WriteString(fmt.Sprintf("%q", stringVal))
+		if _, err := b.WriteString(fmt.Sprintf("%q", stringVal)); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func checkIfTerminal(w io.Writer) bool {
