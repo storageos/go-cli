@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/dnephin/cobra"
-	log "github.com/sirupsen/logrus"
 
 	apiTypes "github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
+	cliNode "github.com/storageos/go-cli/cli/command/node"
 	"github.com/storageos/go-cli/discovery"
 	cliTypes "github.com/storageos/go-cli/types"
 )
@@ -77,10 +77,6 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 }
 
 func runNodeHealth(storageosCli *command.StorageOSCli, node *cliTypes.Node, timeout int) error {
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(timeout))
-	defer cancel()
-
 	addr := node.AdvertiseAddress
 
 	u, err := url.Parse(node.AdvertiseAddress)
@@ -88,18 +84,7 @@ func runNodeHealth(storageosCli *command.StorageOSCli, node *cliTypes.Node, time
 		addr = u.Host
 	}
 
-	// Ignore errors and carry on
-	cpHealth, err := storageosCli.Client().CPHealth(ctx, addr)
-	if err != nil {
-		log.Debugf("error updating cp health: %v", err)
-	}
-	node.Health.CP = cpHealth
-
-	dpHealth, err := storageosCli.Client().DPHealth(ctx, addr)
-	if err != nil {
-		log.Debugf("error updating dp health: %v", err)
-	}
-	node.Health.DP = dpHealth
+	cliNode.UpdateNodeHealth(node, addr, timeout)
 
 	return nil
 }
