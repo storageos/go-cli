@@ -60,17 +60,9 @@ func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions, nodeID str
 	}
 
 	if opt.addLabel != "" {
-		if _, err := opts.ValidateLabel(opt.addLabel); err != nil {
+		if err := updateLabel(n, opt.addLabel); err != nil {
 			return err
 		}
-
-		arr := strings.Split(opt.addLabel, "=")
-
-		if len(arr) != 2 || arr[0] == "" || arr[1] == "" {
-			return errors.New("Bad label format: " + opt.addLabel)
-		}
-
-		n.Labels[arr[0]] = arr[1]
 	}
 
 	if _, err = client.NodeUpdate(types.NodeUpdateOptions{
@@ -84,5 +76,25 @@ func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions, nodeID str
 	}
 
 	fmt.Fprintln(storageosCli.Out(), nodeID)
+	return nil
+}
+
+func updateLabel(n *types.Node, labels string) error {
+	if _, err := opts.ValidateLabel(labels); err != nil {
+		return err
+	}
+
+	arr := strings.Split(labels, "=")
+
+	if len(arr) != 2 || arr[0] == "" || arr[1] == "" {
+		return errors.New("Bad label format: " + labels)
+	}
+
+	// If labels map is uninitialized, initialize it.
+	if n.Labels == nil {
+		n.Labels = make(map[string]string)
+	}
+	n.Labels[arr[0]] = arr[1]
+
 	return nil
 }

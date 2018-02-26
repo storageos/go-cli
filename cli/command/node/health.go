@@ -2,10 +2,15 @@ package node
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/dnephin/cobra"
 
+	api "github.com/storageos/go-api"
+	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
@@ -53,15 +58,7 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOptions) error {
 		AdvertiseAddress: c.Address,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(opt.timeout))
-	defer cancel()
-
-	// Ignore errors and carry on
-	cpHealth, _ := storageosCli.Client().CPHealth(ctx, node.AdvertiseAddress)
-	node.Health.CP = cpHealth
-
-	dpHealth, err := storageosCli.Client().DPHealth(ctx, node.AdvertiseAddress)
-	node.Health.DP = dpHealth
+	UpdateNodeHealth(node, node.AdvertiseAddress, opt.timeout)
 
 	format := opt.format
 	if len(format) == 0 {
@@ -77,4 +74,53 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOptions) error {
 		Format: formatter.NewNodeHealthFormat(format, opt.quiet),
 	}
 	return formatter.NodeHealthWrite(nodeHealthCtx, node)
+}
+
+// UpdateNodeHealth updates the health status of a given node by querying the
+// node endpoints.
+func UpdateNodeHealth(node *cliTypes.Node, address string, timeout int) error {
+	healthEndpointFormat := "http://%s:%s/v1/" + api.HealthAPIPrefix
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(timeout))
+	defer cancel()
+
+	client := &http.Client{}
+
+	// CP Health Status
+	var cpStatus types.CPHealthStatus
+	cpURL := fmt.Sprintf(healthEndpointFormat, address, api.DefaultPort)
+	cpReq, err := http.NewRequest("GET", cpURL, nil)
+	if err != nil {
+		return err
+	}
+
+	cpResp, err := client.Do(cpReq.WithContext(ctx))
+	if err != nil {
+		return err
+	}
+
+	if err := json.NewDecoder(cpResp.Body).Decode(&cpStatus); err != nil {
+		return err
+	}
+	node.Health.CP = &cpStatus
+
+	// DP Health Status
+	var dpHealth types.DPHealthStatus
+	dpURL := fmt.Sprintf(healthEndpointFormat, address, api.DataplaneHealthPort)
+	dpReq, err := http.NewRequest("GET", dpURL, nil)
+	if err != nil {
+		return err
+	}
+
+	dpResp, err := client.Do(dpReq.WithContext(ctx))
+	if err != nil {
+		return err
+	}
+
+	if err := json.NewDecoder(dpResp.Body).Decode(&dpHealth); err != nil {
+		return err
+	}
+	node.Health.DP = &dpHealth
+
+	return nil
 }
