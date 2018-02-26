@@ -45,9 +45,21 @@ func (u updateOptions) processGroups(current []string) []string {
 		}
 	}
 
+	// Checks if a given group exists in the newGroups.
+	containsGroup := func(s string) bool {
+		for _, v := range newGroups {
+			if s == v {
+				return true
+			}
+		}
+		return false
+	}
+
 	// add groups
 	for _, v := range u.addGroups {
-		newGroups = append(newGroups, v)
+		if !containsGroup(v) {
+			newGroups = append(newGroups, v)
+		}
 	}
 
 	return newGroups
