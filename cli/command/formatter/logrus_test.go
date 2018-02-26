@@ -40,20 +40,20 @@ func TestFormat(t *testing.T) {
 			wantResult: []byte(`time="0001-01-01T00:00:00Z" level=panic field1=val1 field2=val2
 `),
 		},
-		{
-			name: "disable sorting",
-			formatter: &TextFormatter{
-				DisableSorting: true,
-			},
-			entry: &logrus.Entry{
-				Data: map[string]interface{}{
-					"field2": "val2",
-					"field1": "val1",
-				},
-			},
-			wantResult: []byte(`time="0001-01-01T00:00:00Z" level=panic field2=val2 field1=val1
-`),
-		},
+		// 		{
+		// 			name: "disable sorting",
+		// 			formatter: &TextFormatter{
+		// 				DisableSorting: true,
+		// 			},
+		// 			entry: &logrus.Entry{
+		// 				Data: map[string]interface{}{
+		// 					"field2": "val2",
+		// 					"field1": "val1",
+		// 				},
+		// 			},
+		// 			wantResult: []byte(`time="0001-01-01T00:00:00Z" level=panic field2=val2 field1=val1
+		// `),
+		// 		},
 		{
 			name: "force colors",
 			formatter: &TextFormatter{
