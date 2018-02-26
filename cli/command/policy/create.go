@@ -1,13 +1,15 @@
 package policy
 
 import (
+	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"strings"
 
-	"context"
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
@@ -88,50 +90,30 @@ func runCreate(cmd *cobra.Command, storageosCli *command.StorageOSCli, opt creat
 	}
 }
 
-// Attempts to parse JSONish data (multiple formats) to jsonl format
-func jsonlParse(data []byte) ([]byte, error) {
-	type jsonList []*json.RawMessage
+// jsonlValidate scans the byte array, limited by newline, and validates each
+// line to be a valid json object.
+func jsonlValidate(data []byte) error {
+	var jsonObj map[string]interface{}
+	var jsonArray []interface{}
 
-	isJSONType := func(t interface{}, data []byte) bool {
-		return json.Unmarshal(data, t) == nil
+	if len(data) == 0 {
+		return errors.New("empty JSON line input")
 	}
 
-	isJSONL := func(data []byte) bool {
-		split := bytes.Split(data, []byte("\n"))
-		obj := &json.RawMessage{}
-		for _, elm := range split {
-			if !isJSONType(obj, elm) {
-				return false
+	dataReader := bytes.NewReader(data)
+	scanner := bufio.NewScanner(dataReader)
+	for scanner.Scan() {
+		byteData := scanner.Bytes()
+		if err := json.Unmarshal(byteData, &jsonObj); err != nil {
+			// Invalidate if it's a json array object.
+			if errArray := json.Unmarshal(byteData, &jsonArray); errArray == nil {
+				return errors.New("expected a json object per line, got a json array")
 			}
+			return err
 		}
-		return true
 	}
 
-	if isJSONL(data) {
-		return data, nil
-	}
-
-	list := jsonList{}
-	obj := &json.RawMessage{}
-
-	var concat []byte
-	if isJSONType(&list, data) {
-		for _, obj := range list {
-			deref := *((*[]byte)(obj))
-			concat = append(concat, deref...)
-			concat = append(concat, '\n')
-		}
-		return concat, nil
-	}
-
-	if isJSONType(&obj, data) {
-		deref := *((*[]byte)(obj))
-		concat = append(concat, deref...)
-		concat = append(concat, '\n')
-		return concat, nil
-	}
-
-	return nil, fmt.Errorf("unknown data format")
+	return nil
 }
 
 func runCreateFromFiles(storageosCli *command.StorageOSCli, opt createOptions) error {
@@ -143,12 +125,11 @@ func runCreateFromFiles(storageosCli *command.StorageOSCli, opt createOptions) e
 			return fmt.Errorf("failed to read policy file (No. %s): %s", file, err)
 		}
 
-		jsonlBuf, err := jsonlParse(buf)
-		if err != nil {
+		if err := jsonlValidate(buf); err != nil {
 			return fmt.Errorf("failed to parse policy file (No. %s): %s", file, err)
 		}
 
-		jsonlFiles = append(jsonlFiles, jsonlBuf)
+		jsonlFiles = append(jsonlFiles, buf)
 	}
 
 	return sendJSONL(storageosCli, bytes.Join(jsonlFiles, []byte("\n")))
@@ -174,14 +155,20 @@ func runCreateFromStdin(storageosCli *command.StorageOSCli, opt createOptions) e
 		return fmt.Errorf("failed to read stdin: %s", err)
 	}
 
-	jsonlBuf, err := jsonlParse(buf)
-	if err != nil {
+	if err := jsonlValidate(buf); err != nil {
 		return fmt.Errorf("failed to parse stdin: %s", err)
 	}
 
-	return sendJSONL(storageosCli, jsonlBuf)
+	return sendJSONL(storageosCli, buf)
 }
 
 func sendJSONL(storageosCli *command.StorageOSCli, jsonl []byte) error {
-	return storageosCli.Client().PolicyCreate(jsonl, context.Background())
+	jsonlReader := bytes.NewReader(jsonl)
+	scanner := bufio.NewScanner(jsonlReader)
+	for scanner.Scan() {
+		if err := storageosCli.Client().PolicyCreate(scanner.Bytes(), context.Background()); err != nil {
+			return err
+		}
+	}
+	return nil
 }
