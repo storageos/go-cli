@@ -106,7 +106,7 @@ func verifyGroupLogic(opt updateOptions) error {
 	return nil
 }
 
-func verifyUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
+func verifyUpdate(opt updateOptions) error {
 	if !(opt.username == "" || verifyUsername(opt.username)) {
 		return fmt.Errorf(`Username doesn't follow format "[a-zA-Z0-9]+"`)
 	}
@@ -124,7 +124,7 @@ func verifyUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
 	}
 
 	if !(opt.role == "" || verifyRole(opt.role)) {
-		return fmt.Errorf(`Role must be either "user" or "admin", not %s`, opt.role)
+		return fmt.Errorf(`Role must be either "user" or "admin", not %q`, opt.role)
 	}
 
 	return nil
@@ -146,7 +146,7 @@ func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
 		return err
 	}
 
-	if err := verifyUpdate(storageosCli, opt); err != nil {
+	if err := verifyUpdate(opt); err != nil {
 		return err
 	}
 
