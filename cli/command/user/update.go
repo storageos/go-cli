@@ -92,6 +92,17 @@ func verifyGroupLogic(opt updateOptions) error {
 	if (len(opt.groups) > 0) && (len(opt.addGroups)+len(opt.removeGroups)) > 0 {
 		return errors.New("Cannot set both groups and add/remove groups")
 	}
+
+	// Check if a group is in both add and remove.
+	if (len(opt.addGroups) > 0) && (len(opt.removeGroups) > 0) {
+		for _, i := range opt.addGroups {
+			for _, j := range opt.removeGroups {
+				if i == j {
+					return errors.New("Cannot add and remove the same group at a time")
+				}
+			}
+		}
+	}
 	return nil
 }
 
