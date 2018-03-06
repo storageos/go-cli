@@ -79,6 +79,11 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 		Context:      context.Background(),
 	}
 
+	// Validate size.
+	if params.Size <= 0 {
+		return errors.New("volume size should be higher than 0")
+	}
+
 	vol, err := client.VolumeCreate(params)
 	if err != nil {
 		return err
