@@ -9,16 +9,15 @@ import (
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
-	"github.com/storageos/go-cli/cli/command/inspect"
 )
 
-type inspectOptions struct {
+type connectivityOptions struct {
 	format string
 	names  []string
 }
 
 func newConnectivityCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	var opt inspectOptions
+	var opt connectivityOptions
 
 	cmd := &cobra.Command{
 		Use:   "connectivity [OPTIONS] NODE [NODE...]",
@@ -34,10 +33,10 @@ func newConnectivityCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	return cmd
 }
 
-func runConnectivity(storageosCli *command.StorageOSCli, opt inspectOptions) error {
+func runConnectivity(storageosCli *command.StorageOSCli, opt connectivityOptions) error {
 	client := storageosCli.Client()
 
-	result := make(map[string]types.NodeConnectivity)
+	result := make(map[string]*types.NodeConnectivity)
 	for _, ref := range opt.names {
 		c, err := client.Connectivity(ref)
 		if err != nil {
@@ -50,7 +49,7 @@ func runConnectivity(storageosCli *command.StorageOSCli, opt inspectOptions) err
 	return printConnectivityResult(storageosCli.Out(), result)
 }
 
-func printConnectivityResult(out io.Writer, result map[string]types.NodeConnectivity) error {
+func printConnectivityResult(out io.Writer, result map[string]*types.NodeConnectivity) error {
 	var printRefHeader = len(result) > 1
 
 	for node, result := range result {
@@ -59,12 +58,13 @@ func printConnectivityResult(out io.Writer, result map[string]types.NodeConnecti
 		}
 
 		fmtCtx := formatter.Context{
-			Output: storageosCli.Out(),
-			Format: formatter.newConnectivityFormat(formatter.TableFormatKey),
+			Output: out,
+			Format: formatter.NewConnectivityFormat(formatter.TableFormatKey),
 		}
 
-		if err := formatter.ConnectivityWrite(nodeCtx, nodes); err != nil {
-			return error
+		if err := formatter.ConnectivityWrite(fmtCtx, result); err != nil {
+			return err
 		}
 	}
+	return nil
 }
