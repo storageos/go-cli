@@ -5,11 +5,13 @@ import (
 )
 
 const (
-	defaultConnectivityTableFormat = "table {{.Name}}\t{{.Status}}\t{{.API}}"
+	defaultConnectivityTableFormat = "table {{.Name}}\t{{.Status}}\t{{.API}}\t{{.Nats}}\t{{.Etcd}}"
 
 	connectivityNodeNameHeader = "NAME"
 	connectivityStateHeader    = "STATUS"
 	connectivityAPIHeader      = "API"
+	connectivityNatsHeader     = "NATS"
+	connectivityEtcdHeader     = "ETCD"
 )
 
 // NewConnectivityFormat returns a format for use with a node conectivity Context
@@ -19,7 +21,7 @@ func NewConnectivityFormat(source string) Format {
 		return defaultConnectivityTableFormat
 
 	case RawFormatKey:
-		return `name: {{.Name}}\nstatus: {{.Status}}\napi: {{.API}}\n`
+		return `name: {{.Name}}\nstatus: {{.Status}}\napi: {{.API}}\nnats: {{.Nats}}\netcd: {{.Etcd}}\n`
 	}
 
 	return Format(source)
@@ -63,6 +65,22 @@ func (c *connectivityContext) Status() string {
 func (c *connectivityContext) API() string {
 	c.AddHeader(connectivityAPIHeader)
 	if c.result.APIConnectivity {
+		return "OK"
+	}
+	return "Fail"
+}
+
+func (c *connectivityContext) Nats() string {
+	c.AddHeader(connectivityNatsHeader)
+	if c.result.NatsConnectivity {
+		return "OK"
+	}
+	return "Fail"
+}
+
+func (c *connectivityContext) Etcd() string {
+	c.AddHeader(connectivityEtcdHeader)
+	if c.result.EtcdConnectivity {
 		return "OK"
 	}
 	return "Fail"
