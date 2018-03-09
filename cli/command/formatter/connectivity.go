@@ -26,10 +26,10 @@ func NewConnectivityFormat(source string) Format {
 }
 
 // ConnectivityWrite writes formatted node conectivities using the Context
-func ConnectivityWrite(ctx Context, result *types.NodeConnectivity) error {
+func ConnectivityWrite(ctx Context, result []types.ConnectivityResult) error {
 	render := func(format func(subContext subContext) error) error {
-		for node, status := range result.Nodes {
-			if err := format(&connectivityContext{nodeName: node, status: status}); err != nil {
+		for _, cr := range result {
+			if err := format(&connectivityContext{result: cr}); err != nil {
 				return err
 			}
 		}
@@ -40,8 +40,7 @@ func ConnectivityWrite(ctx Context, result *types.NodeConnectivity) error {
 
 type connectivityContext struct {
 	HeaderContext
-	status   types.ConnectivityStatus
-	nodeName string
+	result types.ConnectivityResult
 }
 
 func (c *connectivityContext) MarshalJSON() ([]byte, error) {
@@ -50,12 +49,12 @@ func (c *connectivityContext) MarshalJSON() ([]byte, error) {
 
 func (c *connectivityContext) Name() string {
 	c.AddHeader(nodeNameHeader)
-	return c.nodeName
+	return c.result.Target.Name
 }
 
 func (c *connectivityContext) Status() string {
 	c.AddHeader(connectivityStateHeader)
-	if c.status.CanConnect {
+	if c.result.Pass {
 		return "OK"
 	}
 	return "Fail"
@@ -63,10 +62,8 @@ func (c *connectivityContext) Status() string {
 
 func (c *connectivityContext) API() string {
 	c.AddHeader(connectivityAPIHeader)
-	for _, name := range c.status.FailedTests {
-		if name == "API" {
-			return "Fail"
-		}
+	if c.result.APIConnectivity {
+		return "OK"
 	}
-	return "OK"
+	return "Fail"
 }
