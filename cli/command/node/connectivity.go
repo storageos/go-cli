@@ -94,8 +94,10 @@ func printConnectivityResult(out io.Writer, results []result) error {
 			Format: formatter.NewConnectivityFormat(formatter.TableFormatKey),
 		}
 
-		if err := formatter.ConnectivityWrite(fmtCtx, result.result); err != nil {
-			return err
+		if result.result != nil {
+			if err := formatter.ConnectivityWrite(fmtCtx, result.result); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
