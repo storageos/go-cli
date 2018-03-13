@@ -3,9 +3,10 @@ package node
 import (
 	"context"
 	"fmt"
-	"github.com/dnephin/cobra"
 	"io"
-	// storageos "github.com/storageos/go-api"
+
+	"github.com/dnephin/cobra"
+
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
@@ -91,11 +92,11 @@ func printConnectivityResult(out io.Writer, results []result) error {
 
 		fmtCtx := formatter.Context{
 			Output: out,
-			Format: formatter.NewConnectivityFormat(formatter.TableFormatKey),
+			Format: formatter.NewNodeConnectivityFormat(formatter.TableFormatKey),
 		}
 
 		if result.result != nil {
-			if err := formatter.ConnectivityWrite(fmtCtx, result.result); err != nil {
+			if err := formatter.NodeConnectivityWrite(fmtCtx, result.result); err != nil {
 				return err
 			}
 		}
