@@ -8,7 +8,7 @@ import (
 type Node struct {
 	NodeConfig
 
-	HostID      uint16    `json:"hostID"`
+	HostID      uint32    `json:"hostID"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	CreatedAt   time.Time `json:"createdAt"`
