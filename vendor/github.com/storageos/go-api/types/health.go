@@ -93,3 +93,42 @@ func (d *DPHealthStatus) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
+// HealthStatus is the health status json object.
+type HealthStatus struct {
+	Submodules HealthSubmodules `json:"submodules"`
+}
+
+// HealthSubmodules is the "submodules" attribuet of HealthStatus.
+type HealthSubmodules struct {
+	KV             SubModuleStatus `json:"kv,omitempty"`
+	KVWrite        SubModuleStatus `json:"kv_write,omitempty"`
+	NATS           SubModuleStatus `json:"nats,omitempty"`
+	Scheduler      SubModuleStatus `json:"scheduler,omitempty"`
+	DirectFSClient SubModuleStatus `json:"directfs_initiator,omitempty"`
+	DirectFSServer SubModuleStatus `json:"directfs_responder,omitempty"`
+	Director       SubModuleStatus `json:"director,omitempty"`
+	FSDriver       SubModuleStatus `json:"rdb,omitempty"`
+	FS             SubModuleStatus `json:"presentation,omitempty"`
+}
+
+// ToCPHealthStatus returns only CPHealthStatus from the HealthStatus.
+func (h *HealthStatus) ToCPHealthStatus() *CPHealthStatus {
+	return &CPHealthStatus{
+		KV:        h.Submodules.KV,
+		KVWrite:   h.Submodules.KVWrite,
+		NATS:      h.Submodules.KVWrite,
+		Scheduler: h.Submodules.Scheduler,
+	}
+}
+
+// ToDPHealthStatus returns only DPHealthStatus from the HealthStatus.
+func (h *HealthStatus) ToDPHealthStatus() *DPHealthStatus {
+	return &DPHealthStatus{
+		DirectFSClient: h.Submodules.DirectFSClient,
+		DirectFSServer: h.Submodules.DirectFSServer,
+		Director:       h.Submodules.Director,
+		FSDriver:       h.Submodules.FSDriver,
+		FS:             h.Submodules.FS,
+	}
+}

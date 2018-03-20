@@ -108,10 +108,9 @@ func (c *clusterHealthContext) cpHealthy() bool {
 
 func (c *clusterHealthContext) dpHealthy() bool {
 	return c.v.Health.DP.DirectFSClient.Status+
-		c.v.Health.DP.DirectFSServer.Status+
 		c.v.Health.DP.Director.Status+
 		c.v.Health.DP.FSDriver.Status+
-		c.v.Health.DP.FS.Status == "alivealivealivealivealive"
+		c.v.Health.DP.FS.Status == "alivealivealivealive"
 }
 
 func (c *clusterHealthContext) Status() string {
