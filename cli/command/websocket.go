@@ -30,6 +30,11 @@ func (cli *StorageOSCli) WebsocketConn(path string) (*websocket.Conn, error) {
 // the URLs.
 func (cli *StorageOSCli) WebsocketURLs() []*url.URL {
 	urls := []*url.URL{}
+
+	if cli.hosts == "" {
+		return urls
+	}
+
 	hosts := strings.Split(cli.hosts, ",")
 	for _, h := range hosts {
 		u, err := url.Parse(h)
