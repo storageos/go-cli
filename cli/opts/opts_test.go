@@ -116,6 +116,46 @@ func TestListOptsWithValidator(t *testing.T) {
 	}
 }
 
+func TestListOptsWithSplitter(t *testing.T) {
+	o := NewSplitListOpts(nil, DefaultSplitter)
+	o.Set("foo")
+	if o.String() != "[foo]" {
+		t.Errorf("%s != [foo]", o.String())
+	}
+	// Test set list using default splitter
+	o.Set("bar" + DefaultSplitter + "qux" + DefaultSplitter + "quux")
+	if o.Len() != 4 {
+		t.Errorf("%d != 4", o.Len())
+	}
+	if o.String() != "[foo bar qux quux]" {
+		t.Errorf("%s != [foo bar qux quux]", o.String())
+	}
+	o.Set("bar")
+	if o.Len() != 5 {
+		t.Errorf("%d != 5", o.Len())
+	}
+	if !o.Get("bar") {
+		t.Error("o.Get(\"bar\") == false")
+	}
+	if o.Get("baz") {
+		t.Error("o.Get(\"baz\") == true")
+	}
+	o.Delete("foo")
+	if o.String() != "[bar qux quux bar]" {
+		t.Errorf("%s != [bar qux quux bar]", o.String())
+	}
+	o.Delete("qux")
+	o.Delete("quux")
+	listOpts := o.GetAll()
+	if len(listOpts) != 2 || listOpts[0] != "bar" || listOpts[1] != "bar" {
+		t.Errorf("Expected [[bar bar]], got [%v]", listOpts)
+	}
+	mapListOpts := o.GetMap()
+	if len(mapListOpts) != 1 {
+		t.Errorf("Expected [map[bar:{}]], got [%v]", mapListOpts)
+	}
+}
+
 func TestValidateDNSSearch(t *testing.T) {
 	valid := []string{
 		`.`,

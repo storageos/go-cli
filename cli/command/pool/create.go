@@ -25,8 +25,8 @@ type createOptions struct {
 
 func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := createOptions{
-		controllers: opts.NewListOpts(opts.ValidateEnv),
-		nodes:       opts.NewListOpts(opts.ValidateEnv),
+		controllers: opts.NewSplitListOpts(opts.ValidateEnv, opts.DefaultSplitter),
+		nodes:       opts.NewSplitListOpts(opts.ValidateEnv, opts.DefaultSplitter),
 		drivers:     opts.NewListOpts(opts.ValidateEnv),
 		labels:      opts.NewListOpts(opts.ValidationPipeline(opts.ValidateEnv, opts.ValidateLabel)),
 	}

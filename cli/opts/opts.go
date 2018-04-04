@@ -19,8 +19,16 @@ var (
 	domainRegexp = regexp.MustCompile(`^(:?(:?[a-zA-Z0-9]|(:?[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]))(:?\.(:?[a-zA-Z0-9]|(:?[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])))*)\.?\s*$`)
 )
 
+const (
+	// NoSplitter is the default splitter used by ListOpts when splitting is not enabled
+	NoSplitter = ""
+	// DefaultSplitter is the default splitter used by ListOpts when splitting is requested
+	DefaultSplitter = ","
+)
+
 // ListOpts holds a list of values and a validation function.
 type ListOpts struct {
+	splitter  string
 	values    *[]string
 	validator ValidatorFctType
 }
@@ -31,12 +39,20 @@ func NewListOpts(validator ValidatorFctType) ListOpts {
 	return *NewListOptsRef(&values, validator)
 }
 
-// NewListOptsRef creates a new ListOpts with the specified values and validator.
+// NewListOptsRef creates a new ListOpts with the specified values and validator, with no splitter.
 func NewListOptsRef(values *[]string, validator ValidatorFctType) *ListOpts {
 	return &ListOpts{
+		splitter:  NoSplitter,
 		values:    values,
 		validator: validator,
 	}
+}
+
+func NewSplitListOpts(validator ValidatorFctType, splitter string) ListOpts {
+	var values []string
+	ref := NewListOptsRef(&values, validator)
+	ref.splitter = splitter
+	return *ref
 }
 
 func (opts *ListOpts) String() string {
@@ -46,14 +62,21 @@ func (opts *ListOpts) String() string {
 // Set validates if needed the input value and adds it to the
 // internal slice.
 func (opts *ListOpts) Set(value string) error {
-	if opts.validator != nil {
-		v, err := opts.validator(value)
-		if err != nil {
-			return err
-		}
-		value = v
+	values := []string{value}
+	// Split the value given by the listopts splitter
+	if opts.splitter != NoSplitter {
+		values = strings.Split(value, opts.splitter)
 	}
-	(*opts.values) = append((*opts.values), value)
+	for _, val := range values {
+		if opts.validator != nil {
+			v, err := opts.validator(val)
+			if err != nil {
+				return err
+			}
+			val = v
+		}
+		(*opts.values) = append((*opts.values), val)
+	}
 	return nil
 }
 
