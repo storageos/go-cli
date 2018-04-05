@@ -24,9 +24,11 @@ type Node struct {
 	Scheduler bool `json:"scheduler"`
 	Cordon    bool `json:"unschedulable"`
 
-	VolumeStats   VolumeStats                         `json:"volumeStats"`
-	PoolStats     map[string]map[string]CapacityStats `json:"poolStats"`
-	CapacityStats CapacityStats                       `json:"capacityStats"`
+	VolumeStats VolumeStats `json:"volumeStats"`
+
+	// PoolStats     map[string]map[string]CapacityStats `json:"poolStats"`
+
+	CapacityStats CapacityStats `json:"capacityStats"`
 }
 
 // NodeConfig is a read-only representation of the node's configuration, set at
@@ -82,4 +84,19 @@ type NodeConfig struct {
 	// EnableDebug is used to enable various debugging features.  Used by http
 	// to enable debug endpoints and as a shortcut to enable debug logging.
 	EnableDebug bool `json:"debug"`
+
+	// Devices specify all devices that are available on the node.
+	Devices []Device `json:"devices"`
+}
+
+// Device - device type
+type Device struct {
+	ID            string
+	Labels        map[string]string `json:"labels"`
+	Status        string            `json:"status"`
+	Identifier    string            `json:"identifier"`
+	Class         string            `json:"class"`
+	CapacityStats CapacityStats     `json:"capacityStats"`
+	CreatedAt     time.Time         `json:"createdAt"`
+	UpdatedAt     time.Time         `json:"updatedAt"`
 }

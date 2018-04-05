@@ -1,14 +1,10 @@
 package types
 
-// Pool is used to define a capacity pool.
-type Pool struct {
+import "context"
 
-	// Pool unique ID.
-	// Read Only: true
-	ID string `json:"id"`
-
-	// Pool name.
-	// Required: true
+// PoolOptions are available parameters for creating or updating pools.
+type PoolOptions struct {
+	ID   string `json:"id"`
 	Name string `json:"name"`
 
 	// Pool description.
@@ -24,16 +20,9 @@ type Pool struct {
 	// Only devices from nodes that are in the 'NodeNames' list can be selected
 	DeviceSelector string `json:"deviceSelector"`
 
-	// Populated by the system. Read-only.
-	CapacityStats CapacityStats `json:"capacityStats"`
-
-	// This field is computed based on NodeSelector value
-	// Populated by the system. Read-only.
-	Nodes []*Node `json:"nodes"`
-
 	// Labels define a list of labels that describe the pool.
 	Labels map[string]string `json:"labels"`
-}
 
-// Pools is a collection of Pool objects
-type Pools []*Pool
+	// Context can be set with a timeout or can be used to cancel a request.
+	Context context.Context `json:"-"`
+}
