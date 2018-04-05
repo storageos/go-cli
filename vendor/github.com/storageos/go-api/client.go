@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/storageos/go-api/netutil"
-	"github.com/storageos/go-api/serror"
 	"io"
 	"io/ioutil"
 	"net"
@@ -18,6 +16,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/storageos/go-api/netutil"
+	"github.com/storageos/go-api/serror"
 )
 
 const (
@@ -110,7 +111,6 @@ func NewClient(nodes string) (*Client, error) {
 // the given server endpoint, using a specific remote API version.
 func NewVersionedClient(nodestring string, apiVersionString string) (*Client, error) {
 	nodes := strings.Split(nodestring, ",")
-
 	d, err := netutil.NewMultiDialer(nodes, nil)
 	if err != nil {
 		return nil, err

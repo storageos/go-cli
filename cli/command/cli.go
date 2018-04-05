@@ -37,7 +37,7 @@ type Cli interface {
 // Instances of the client can be returned from NewStorageOSCli.
 type StorageOSCli struct {
 	configFile      *configfile.ConfigFile
-	hosts           []string
+	hosts           string
 	username        string
 	password        string
 	in              *InStream
@@ -50,11 +50,11 @@ type StorageOSCli struct {
 }
 
 // GetHosts returns the client's endpoints
-func (cli *StorageOSCli) GetHosts() []string {
+func (cli *StorageOSCli) GetHosts() string {
 	return cli.hosts
 }
 
-// GetHosts returns the client's username
+// GetUsername returns the client's username
 func (cli *StorageOSCli) GetUsername() string {
 	return cli.username
 }
@@ -111,13 +111,13 @@ func (cli *StorageOSCli) ConfigFile() *configfile.ConfigFile {
 func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 	cli.configFile = LoadDefaultConfigFile(cli.err)
 
-	host, err := getServerHost(opt.Common.Hosts, opt.Common.TLS)
+	hosts, err := getServerHost(opt.Common.Hosts, opt.Common.TLS)
 	if err != nil {
 		return err
 	}
-	cli.hosts = []string{host}
+	cli.hosts = hosts
 
-	client, err := NewAPIClientFromFlags(host, opt.Common, cli.configFile)
+	client, err := NewAPIClientFromFlags(hosts, opt.Common, cli.configFile)
 	if err != nil {
 		return err
 	}

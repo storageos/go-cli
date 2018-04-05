@@ -11,14 +11,15 @@ import (
 
 const (
 	defaultPoolQuietFormat = "{{.Name}}"
-	defaultPoolTableFormat = "table {{.Name}}\t{{.Drivers}}\t{{.Nodes}}\t{{.Total}}\t{{.CapacityUsed}}\t{{.Active}}"
+	defaultPoolTableFormat = "table {{.Name}}\t{{.Default}}\t{{.NodeSelector}}\t{{.DeviceSelector}}\t{{.Nodes}}\t{{.Total}}\t{{.CapacityUsed}}"
 
-	poolNameHeader         = "NAME"
-	poolDriversHeader      = "DRIVERS"
-	poolNodesHeader        = "NODES"
-	poolCapacityUsedHeader = "USED"
-	poolTotalHeader        = "TOTAL"
-	poolActiveHeader       = "STATUS"
+	poolNameHeader           = "NAME"
+	poolDefaultHeader        = "DEFAULT"
+	poolNodeSelectorHeader   = "NODE SELECTOR"
+	poolDeviceSelectorHeader = "DEVICE SELECTOR"
+	poolNodesHeader          = "NODES"
+	poolCapacityUsedHeader   = "USED"
+	poolTotalHeader          = "TOTAL"
 )
 
 // NewPoolFormat returns a format for use with a pool Context
@@ -33,7 +34,7 @@ func NewPoolFormat(source string, quiet bool) Format {
 		if quiet {
 			return `name: {{.Name}}`
 		}
-		return `name: {{.Name}}\ndriver: {{.Driver}}\n`
+		return `name: {{.Name}}\n node selector: {{.NodeSelector}}\n`
 	}
 	return Format(source)
 }
@@ -65,14 +66,24 @@ func (c *poolContext) Name() string {
 	return c.v.Name
 }
 
-func (c *poolContext) Drivers() string {
-	c.AddHeader(poolDriversHeader)
-	return strings.Join(c.v.DriverNames, ", ")
+func (c *poolContext) Default() string {
+	c.AddHeader(poolDefaultHeader)
+	return strconv.FormatBool(c.v.Default)
+}
+
+func (c *poolContext) NodeSelector() string {
+	c.AddHeader(poolNodeSelectorHeader)
+	return c.v.NodeSelector
+}
+
+func (c *poolContext) DeviceSelector() string {
+	c.AddHeader(poolDeviceSelectorHeader)
+	return c.v.DeviceSelector
 }
 
 func (c *poolContext) Nodes() string {
 	c.AddHeader(poolNodesHeader)
-	return strconv.Itoa(len(c.v.NodeNames))
+	return strconv.Itoa(len(c.v.Nodes))
 }
 
 func (c *poolContext) CapacityUsed() string {
@@ -86,14 +97,6 @@ func (c *poolContext) CapacityUsed() string {
 func (c *poolContext) Total() string {
 	c.AddHeader(poolTotalHeader)
 	return units.HumanSize(float64(c.v.CapacityStats.TotalCapacityBytes))
-}
-
-func (c *poolContext) Active() string {
-	c.AddHeader(poolActiveHeader)
-	if c.v.Active {
-		return "active"
-	}
-	return "disabled"
 }
 
 func (c *poolContext) Labels() string {

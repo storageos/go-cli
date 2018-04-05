@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -28,10 +29,14 @@ func (cli *StorageOSCli) WebsocketConn(path string) (*websocket.Conn, error) {
 // WebsocketURLs creates websocket URL of all the hosts and returns a slice of
 // the URLs.
 func (cli *StorageOSCli) WebsocketURLs() []*url.URL {
-
 	urls := []*url.URL{}
 
-	for _, h := range cli.GetHosts() {
+	if cli.hosts == "" {
+		return urls
+	}
+
+	hosts := strings.Split(cli.hosts, ",")
+	for _, h := range hosts {
 		u, err := url.Parse(h)
 		if err != nil {
 			continue
