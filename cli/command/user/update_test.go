@@ -137,25 +137,6 @@ func TestVerifyUpdate(t *testing.T) {
 		wantErr    error
 	}{
 		{
-			name: "invalid username",
-			updateOpts: updateOptions{
-				username: "%$#",
-			},
-			wantErr: errors.New(`Username doesn't follow format "[a-zA-Z0-9]+"`),
-		},
-		{
-			name: "valid username",
-			updateOpts: updateOptions{
-				username: "foo",
-			},
-		},
-		{
-			name: "empty username",
-			updateOpts: updateOptions{
-				username: "",
-			},
-		},
-		{
 			name: "invalid groups",
 			updateOpts: updateOptions{
 				groups: stringSlice{"grp1", "!@#%", "grp2"},

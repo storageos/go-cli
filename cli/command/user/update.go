@@ -13,7 +13,6 @@ import (
 
 type updateOptions struct {
 	sourceAccount string
-	username      string
 	password      bool
 	groups        stringSlice
 	addGroups     stringSlice
@@ -79,7 +78,6 @@ func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&opt.username, "username", "", "Provide a new username")
 	flags.BoolVar(&opt.password, "password", false, "Prompt for new password (interactive)")
 	flags.StringVar(&opt.role, "role", "", "Provide a new role")
 	flags.Var(&opt.groups, "groups", "Provide a new set of groups (replacing old set)")
@@ -107,10 +105,6 @@ func verifyGroupLogic(opt updateOptions) error {
 }
 
 func verifyUpdate(opt updateOptions) error {
-	if !(opt.username == "" || verifyUsername(opt.username)) {
-		return fmt.Errorf(`Username doesn't follow format "[a-zA-Z0-9]+"`)
-	}
-
 	if i, pass := verifyGroups(opt.groups); !pass {
 		return fmt.Errorf(`Group element %d doesn't follow format "[a-zA-Z0-9]+"`, i)
 	}
@@ -157,10 +151,6 @@ func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
 		return fmt.Errorf("Failed to get user (%s): %s", opt.sourceAccount, err)
 	}
 	currentState.Groups = opt.processGroups(currentState.Groups)
-
-	if opt.username != "" {
-		currentState.Username = opt.username
-	}
 
 	if opt.password {
 		currentState.Password = password
