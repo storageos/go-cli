@@ -20,7 +20,8 @@ type NodeUpdateOptions struct {
 	Labels map[string]string `json:"labels"`
 
 	// Cordon marks the node as unschedulable if true
-	Cordon bool `json:"unschedulable"`
+	Cordon bool `json:"cordon"`
+	Drain  bool `json:"drain"`
 
 	// Context can be set with a timeout or can be used to cancel a request.
 	Context context.Context `json:"-"`

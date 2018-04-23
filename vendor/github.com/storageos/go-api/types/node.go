@@ -22,7 +22,9 @@ type Node struct {
 	Revision    string                 // the GitCommit this maps to
 
 	Scheduler bool `json:"scheduler"`
-	Cordon    bool `json:"unschedulable"`
+
+	Cordon bool `json:"cordon"`
+	Drain  bool `json:"drain"`
 
 	VolumeStats VolumeStats `json:"volumeStats"`
 
