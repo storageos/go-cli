@@ -21,9 +21,26 @@ type updateOptions struct {
 }
 
 // processGroups is destructive to given slice
-func (u updateOptions) processGroups(current []string) []string {
+func (u updateOptions) processGroups(current []string) ([]string, error) {
+	var updateError error
+
 	if u.groups != nil {
-		return u.groups
+		return u.groups, nil
+	}
+
+	// Check for redundant removal
+	for _, r := range u.removeGroups {
+		var containsGroup bool
+		for _, g := range current {
+			if g == r {
+				containsGroup = true
+			}
+		}
+
+		if !containsGroup {
+			updateError = fmt.Errorf("user not in group %s", r)
+		}
+
 	}
 
 	needsRemoval := func(s string) bool {
@@ -56,12 +73,15 @@ func (u updateOptions) processGroups(current []string) []string {
 
 	// add groups
 	for _, v := range u.addGroups {
-		if !containsGroup(v) {
-			newGroups = append(newGroups, v)
+		if containsGroup(v) {
+			updateError = fmt.Errorf("user already in group %s", v)
+			continue
 		}
+
+		newGroups = append(newGroups, v)
 	}
 
-	return newGroups
+	return newGroups, updateError
 }
 
 func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
@@ -150,7 +170,12 @@ func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
 	if err != nil {
 		return fmt.Errorf("Failed to get user (%s): %s", opt.sourceAccount, err)
 	}
-	currentState.Groups = opt.processGroups(currentState.Groups)
+
+	var updateError error
+	currentState.Groups, updateError = opt.processGroups(currentState.Groups)
+	if updateError != nil {
+		return updateError
+	}
 
 	if opt.password {
 		currentState.Password = password
