@@ -122,7 +122,7 @@ func TestProcessGroups(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			gotGroups := tc.updateOpts.processGroups(tc.current)
+			gotGroups, _ := tc.updateOpts.processGroups(tc.current)
 			if !reflect.DeepEqual(gotGroups, tc.wantGroups) {
 				t.Fatalf("got unexpected groups while processing groups:\n\t(GOT): %v\n\t(WNT): %v", gotGroups, tc.wantGroups)
 			}
