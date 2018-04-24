@@ -81,6 +81,19 @@ func (c *nodeContext) Health() string {
 		return strings.Title(c.v.Health)
 	}
 
+	meta := []string{}
+
+	if c.v.Drain {
+		meta = append(meta, "Drained")
+	}
+
+	if c.v.Cordon {
+		meta = append(meta, "Cordoned")
+	}
+
+	if len(meta) > 0 {
+		return fmt.Sprintf("%s %s (%s)", strings.Title(c.v.Health), units.HumanDuration(time.Since(c.v.HealthUpdatedAt)), strings.Join(meta, ","))
+	}
 	return fmt.Sprintf("%s %s", strings.Title(c.v.Health), units.HumanDuration(time.Since(c.v.HealthUpdatedAt)))
 }
 
