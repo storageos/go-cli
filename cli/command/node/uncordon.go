@@ -46,6 +46,7 @@ func runUncordon(storageosCli *command.StorageOSCli, opt uncordonOptions) error 
 			Name:        n.Name,
 			Description: n.Description,
 			Labels:      n.Labels,
+			Drain:       n.Drain,
 			Cordon:      false,
 		})
 		if err != nil {

@@ -84,11 +84,11 @@ func (c *nodeContext) Health() string {
 	meta := []string{}
 
 	if c.v.Drain {
-		meta = append(meta, "Drained")
+		meta = append(meta, "drained")
 	}
 
 	if c.v.Cordon {
-		meta = append(meta, "Cordoned")
+		meta = append(meta, "cordoned")
 	}
 
 	if len(meta) > 0 {

@@ -46,6 +46,7 @@ func runCordon(storageosCli *command.StorageOSCli, opt cordonOptions) error {
 			Name:        n.Name,
 			Description: n.Description,
 			Labels:      n.Labels,
+			Drain:       n.Drain,
 			Cordon:      true,
 		})
 		if err != nil {

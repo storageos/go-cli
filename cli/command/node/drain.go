@@ -62,6 +62,7 @@ func runDrain(storageosCli *command.StorageOSCli, opt drainOptions, drain bool) 
 			Name:        n.Name,
 			Description: n.Description,
 			Labels:      n.Labels,
+			Cordon:      n.Cordon,
 			Drain:       drain,
 		})
 		if err != nil {
