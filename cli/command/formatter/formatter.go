@@ -81,7 +81,6 @@ func (c *Context) postFormat(tmpl *template.Template, subContext subContext) {
 
 		t := tabwriter.NewWriter(c.Output, 20, 1, 3, ' ', 0)
 		t.Write([]byte(c.header))
-		t.Write([]byte("\n"))
 		c.buffer.WriteTo(t)
 		t.Flush()
 	} else {

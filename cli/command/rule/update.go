@@ -38,7 +38,8 @@ type updateOptions struct {
 
 func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := updateOptions{
-		labels: opts.NewListOpts(opts.ValidateEnv),
+		// Only validate new labels, otherwise old ones could be hard to remove if left between cli upgrades
+		labels: opts.NewListOpts(opts.ValidationPipeline(opts.ValidateEnv, opts.ValidateLabel)),
 	}
 
 	cmd := &cobra.Command{

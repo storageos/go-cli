@@ -3,11 +3,13 @@ package node
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
-	"strings"
+	"github.com/storageos/go-cli/cli/opts"
 )
 
 const (
@@ -44,7 +46,7 @@ func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions, nodeID string) error {
 	client := storageosCli.Client()
 
-	n, err := client.Controller(nodeID)
+	n, err := client.Node(nodeID)
 	if err != nil {
 		return fmt.Errorf("Failed to find node (%s): %v", nodeID, err)
 	}
@@ -58,16 +60,12 @@ func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions, nodeID str
 	}
 
 	if opt.addLabel != "" {
-		arr := strings.Split(opt.addLabel, "=")
-
-		if len(arr) != 2 || arr[0] == "" || arr[1] == "" {
-			return errors.New("Bad label format: " + opt.addLabel)
+		if err := updateLabel(n, opt.addLabel); err != nil {
+			return err
 		}
-
-		n.Labels[arr[0]] = arr[1]
 	}
 
-	if _, err = client.ControllerUpdate(types.ControllerUpdateOptions{
+	if _, err = client.NodeUpdate(types.NodeUpdateOptions{
 		ID:          n.ID,
 		Name:        n.Name,
 		Description: n.Description,
@@ -78,5 +76,25 @@ func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions, nodeID str
 	}
 
 	fmt.Fprintln(storageosCli.Out(), nodeID)
+	return nil
+}
+
+func updateLabel(n *types.Node, labels string) error {
+	if _, err := opts.ValidateLabel(labels); err != nil {
+		return err
+	}
+
+	arr := strings.Split(labels, "=")
+
+	if len(arr) != 2 || arr[0] == "" || arr[1] == "" {
+		return errors.New("Bad label format: " + labels)
+	}
+
+	// If labels map is uninitialized, initialize it.
+	if n.Labels == nil {
+		n.Labels = make(map[string]string)
+	}
+	n.Labels[arr[0]] = arr[1]
+
 	return nil
 }

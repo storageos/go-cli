@@ -1,6 +1,7 @@
 package namespace
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/dnephin/cobra"
@@ -8,7 +9,6 @@ import (
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/opts"
-	"context"
 )
 
 type createOptions struct {
@@ -20,7 +20,7 @@ type createOptions struct {
 
 func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := createOptions{
-		labels: opts.NewListOpts(opts.ValidateEnv),
+		labels: opts.NewListOpts(opts.ValidationPipeline(opts.ValidateEnv, opts.ValidateLabel)),
 	}
 
 	cmd := &cobra.Command{

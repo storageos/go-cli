@@ -1,11 +1,9 @@
 package validation
 
 import (
+	"errors"
 	"fmt"
-	"net"
-	"net/url"
 	"regexp"
-	"strconv"
 	"strings"
 
 	storageos "github.com/storageos/go-api"
@@ -38,52 +36,49 @@ func ParseRefWithDefault(ref string) (string, string, error) {
 	return namespace, name, err
 }
 
-// ParseHostPort returns a host:port string if the endpoint input is valid.
-func ParseHostPort(endpoint string, defaultPort string) (string, error) {
-
-	// plain IP address
-	ip := net.ParseIP(endpoint)
-	if ip != nil {
-		return hostport(ip.String(), defaultPort)
-	}
-
-	// http, https or tcp endpoint
-	if strings.HasPrefix(endpoint, "http://") || strings.HasPrefix(endpoint, "https://") || strings.HasPrefix(endpoint, "tcp://") {
-		u, err := url.Parse(endpoint)
-		if err != nil {
-			return "", err
-		}
-		parts := strings.Split(u.Host, ":")
-		if len(parts) == 2 {
-			return hostport(parts[0], u.Port())
-		}
-		return hostport(parts[0], defaultPort)
-	}
-
-	// hostname:port
-	host, port, err := net.SplitHostPort(endpoint)
-	if err == nil {
-		return hostport(host, port)
-	}
-
-	// hostname or invalid input
-	return hostport(endpoint, defaultPort)
+var deprecatedLabels = map[string]string{
+	"storageos.feature.replication":  "storageos.com/replication",
+	"storageos.feature.replicas":     "storageos.com/replicas",
+	"storageos.feature.nocompress":   "storageos.com/nocompress",
+	"storageos.feature.nocache":      "storageos.com/nocache",
+	"storageos.feature.nowritecache": "storageos.com/nowritecache",
+	"storageos.feature.throttle":     "storageos.com/throttle",
+	"storageos.hint.master":          "storageos.com/hint.master",
+	"storageos.hint.docker":          "storageos.com/hint.docker",
+	"storageos.driver":               "storageos.com/driver",
 }
 
-// hostport validates host and port input and returns host:port
-func hostport(host, port string) (string, error) {
-	if host == "" || port == "" {
-		return "", fmt.Errorf("invalid endpoint")
+func labeldeprecationNotice(old, new string) string {
+	depNotice := fmt.Sprintf("the label '%s' has been deprecated in favour of '%s'", old, new)
+	return depNotice + ", refer to https://docs.storageos.com for usage details"
+}
+
+func ValidateLabelSet(labels map[string]string) (warnings []string, err error) {
+	errs := make([]string, 0, len(labels))
+
+	for k, v := range labels {
+		w, e := ValidateLabel(k, v)
+		warnings = append(warnings, w...)
+		if err != nil {
+			errs = append(errs, e.Error())
+		}
 	}
-	if !hostnameRegexp.MatchString(host) {
-		return "", fmt.Errorf("invalid hostname format")
+
+	if len(errs) > 0 {
+		err = errors.New(strings.Join(errs, ","))
 	}
-	p, err := strconv.Atoi(port)
-	if err != nil {
-		return "", err
+
+	return warnings, err
+}
+
+func ValidateLabel(k, v string) (warnings []string, err error) {
+	if updated, ok := deprecatedLabels[k]; ok {
+		warnings = append(warnings, labeldeprecationNotice(k, updated))
+
+		// TODO: validate value, with extra context?
 	}
-	if p < 1 || p > 65535 {
-		return "", fmt.Errorf("invalid port")
-	}
-	return fmt.Sprintf("%s:%s", host, port), nil
+
+	// TODO: validate value
+
+	return warnings, nil
 }

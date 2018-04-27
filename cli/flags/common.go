@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/pflag"
 
 	cliconfig "github.com/storageos/go-cli/cli/config"
-	"github.com/storageos/go-cli/cli/opts"
 )
 
 const (
@@ -33,7 +32,7 @@ var (
 // CommonOptions are options common to both the client and the daemon.
 type CommonOptions struct {
 	Debug      bool
-	Hosts      []string
+	Hosts      string
 	Username   string
 	Password   string
 	LogLevel   string
@@ -55,24 +54,8 @@ func (commonOpts *CommonOptions) InstallFlags(flags *pflag.FlagSet) {
 	}
 
 	flags.BoolVarP(&commonOpts.Debug, "debug", "D", false, "Enable debug mode")
-	// flags.StringVarP(&commonOpts.LogLevel, "log-level", "l", "info", `Set the logging level ("debug"|"info"|"warn"|"error"|"fatal")`)
-	// flags.BoolVar(&commonOpts.TLS, "tls", false, "Use TLS; implied by --tlsverify")
-	// flags.BoolVar(&commonOpts.TLSVerify, FlagTLSVerify, storageosTLSVerify, "Use TLS and verify the remote")
 
-	// // TODO use flag flags.String("identity"}, "i"	, "", "Path to libtrust key file")
-
-	// commonOpts.TLSOptions = &tlsconfig.Options{
-	// 	CAFile:   filepath.Join(storageosCertPath, DefaultCaFile),
-	// 	CertFile: filepath.Join(storageosCertPath, DefaultCertFile),
-	// 	KeyFile:  filepath.Join(storageosCertPath, DefaultKeyFile),
-	// }
-	// tlsOptions := commonOpts.TLSOptions
-	// flags.Var(opts.NewQuotedString(&tlsOptions.CAFile), "tlscacert", "Trust certs signed only by this CA")
-	// flags.Var(opts.NewQuotedString(&tlsOptions.CertFile), "tlscert", "Path to TLS certificate file")
-	// flags.Var(opts.NewQuotedString(&tlsOptions.KeyFile), "tlskey", "Path to TLS key file")
-
-	hostOpt := opts.NewNamedListOptsRef("hosts", &commonOpts.Hosts, opts.ValidateHost)
-	flags.VarP(hostOpt, "host", "H", fmt.Sprintf("Node endpoint(s) to connect to (will override %s env variable value)", cliconfig.EnvStorageOSHost))
+	flags.StringVarP(&commonOpts.Hosts, "host", "H", "", fmt.Sprintf("Node endpoint(s) to connect to (will override %s env variable value)", cliconfig.EnvStorageOSHost))
 
 	flags.StringVarP(&commonOpts.Username, "username", "u", "", fmt.Sprintf(`API username (will override %s env variable value)`, cliconfig.EnvStorageosUsername))
 	flags.StringVarP(&commonOpts.Password, "password", "p", "", fmt.Sprintf(`API password (will override %s env variable value)`, cliconfig.EnvStorageosPassword))

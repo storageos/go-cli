@@ -3,6 +3,7 @@ package types
 import "context"
 
 // ControllerUpdateOptions are available parameters for updating existing controllers.
+// DEPRECATED: remove in 0.11
 type ControllerUpdateOptions struct {
 
 	// Controller unique ID.

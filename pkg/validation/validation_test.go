@@ -4,6 +4,103 @@ import (
 	"testing"
 )
 
+func TestValidateLabelSet(t *testing.T) {
+	fixtures := []struct {
+		name          string
+		labels        map[string]string
+		expectErr     bool
+		expectWarning bool
+	}{
+		{
+			name:          "single label",
+			labels:        map[string]string{"foo": "bar"},
+			expectErr:     false,
+			expectWarning: false,
+		},
+		{
+			name:          "multiple labels",
+			labels:        map[string]string{"foo": "bar", "baz": "bang"},
+			expectErr:     false,
+			expectWarning: false,
+		},
+		{
+			name:          "single label, with special meaning",
+			labels:        map[string]string{"storageos.com/replication": "true"},
+			expectErr:     false,
+			expectWarning: false,
+		},
+		{
+			name: "multiple labels, with special meaning",
+			labels: map[string]string{
+				"storageos.com/replication":   "true",
+				"storageos.com/deduplication": "true",
+			},
+			expectErr:     false,
+			expectWarning: false,
+		},
+		{
+			name: "multiple labels, some with special meaning",
+			labels: map[string]string{
+				"foo": "bar",
+				"baz": "bang",
+				"storageos.com/replication":   "true",
+				"storageos.com/deduplication": "true",
+			},
+			expectErr:     false,
+			expectWarning: false,
+		},
+		{
+			name:          "single deprecated label",
+			labels:        map[string]string{"storageos.feature.nocompress": "true"},
+			expectErr:     false,
+			expectWarning: true,
+		},
+		{
+			name: "multiple deprecated labels",
+			labels: map[string]string{
+				"storageos.feature.nocompress": "true",
+				"storageos.feature.replicas":   "5",
+			},
+			expectErr:     false,
+			expectWarning: true,
+		},
+		{
+			name: "multiple labels, some deprecated",
+			labels: map[string]string{
+				"foo": "bar",
+				"baz": "bang",
+				"storageos.com/replication":    "true",
+				"storageos.com/deduplication":  "true",
+				"storageos.feature.nocompress": "true",
+				"storageos.feature.replicas":   "5",
+			},
+			expectErr:     false,
+			expectWarning: true,
+		},
+	}
+
+	for _, fix := range fixtures {
+		t.Run(fix.name, func(t *testing.T) {
+			warnings, err := ValidateLabelSet(fix.labels)
+			if (err != nil) != fix.expectErr {
+				if err != nil {
+					t.Errorf("ValidateLabelSet() returned error '%v' for input %+#v", err, fix.labels)
+				} else {
+					t.Error("ValidateLabelSet() didn't return an error")
+				}
+			}
+
+			if (len(warnings) > 0) != fix.expectWarning {
+				if len(warnings) > 0 {
+					t.Errorf("ValidateLabelSet() returned warnings %+#v for input %+#v", warnings, fix.labels)
+				} else {
+					t.Error("ValidateLabelSet() didn't return warnings")
+				}
+			}
+		})
+	}
+}
+
 func TestIsValidFSType(t *testing.T) {
 	type args struct {
 		value string
@@ -53,141 +150,6 @@ func TestIsValidFSType(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := IsValidFSType(tt.args.value); (err != nil) != tt.wantErr {
 				t.Errorf("IsValidFSType() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestParseHostPort(t *testing.T) {
-	type args struct {
-		host        string
-		defaultPort string
-	}
-
-	tests := []struct {
-		name    string
-		args    args
-		want    string
-		wantErr bool
-	}{
-		{
-			name:    "just IP",
-			args:    args{host: "1.1.1.1"},
-			want:    "",
-			wantErr: true,
-		},
-		{
-			name:    "just IP - default port",
-			args:    args{host: "1.1.1.1", defaultPort: "80"},
-			want:    "1.1.1.1:80",
-			wantErr: false,
-		},
-		{
-			name:    "IP with port",
-			args:    args{host: "1.1.1.1:5000", defaultPort: "80"},
-			want:    "1.1.1.1:5000",
-			wantErr: false,
-		},
-		{
-			name:    "IP with invalid port",
-			args:    args{host: "1.1.1.1:50X00", defaultPort: "80"},
-			want:    "",
-			wantErr: true,
-		},
-		{
-			name:    "http scheme with IP",
-			args:    args{host: "http://1.1.1.1"},
-			want:    "",
-			wantErr: true,
-		},
-		{
-			name:    "http scheme with IP - default port",
-			args:    args{host: "http://1.1.1.1", defaultPort: "80"},
-			want:    "1.1.1.1:80",
-			wantErr: false,
-		},
-		{
-			name:    "http scheme with IP and port",
-			args:    args{host: "http://1.1.1.1:6000", defaultPort: "80"},
-			want:    "1.1.1.1:6000",
-			wantErr: false,
-		},
-		{
-			name:    "http scheme with IP and port - trailing slash",
-			args:    args{host: "http://1.1.1.1:6000/", defaultPort: "80"},
-			want:    "1.1.1.1:6000",
-			wantErr: false,
-		},
-		{
-			name:    "just hostname",
-			args:    args{host: "foo"},
-			want:    "",
-			wantErr: true,
-		},
-		{
-			name:    "just hostname - with domain",
-			args:    args{host: "foo.bar"},
-			want:    "",
-			wantErr: true,
-		},
-		{
-			name:    "just hostname - default port",
-			args:    args{host: "foo.bar", defaultPort: "80"},
-			want:    "foo.bar:80",
-			wantErr: false,
-		},
-		{
-			name:    "hostname with port",
-			args:    args{host: "foo.bar:5000", defaultPort: "80"},
-			want:    "foo.bar:5000",
-			wantErr: false,
-		},
-		{
-			name:    "http scheme with hostname",
-			args:    args{host: "http://foo.bar"},
-			want:    "",
-			wantErr: true,
-		},
-		{
-			name:    "http scheme with hostname - default port",
-			args:    args{host: "http://foo.bar", defaultPort: "80"},
-			want:    "foo.bar:80",
-			wantErr: false,
-		},
-		{
-			name:    "http scheme with hostname and port",
-			args:    args{host: "http://foo.bar:6000", defaultPort: "80"},
-			want:    "foo.bar:6000",
-			wantErr: false,
-		},
-		{
-			name:    "http scheme with hostname and port - trailing slash",
-			args:    args{host: "http://foo.bar:6000/", defaultPort: "80"},
-			want:    "foo.bar:6000",
-			wantErr: false,
-		},
-		{
-			name:    "http scheme with hostname and port - invalid hostname",
-			args:    args{host: "http://fo$o.bar:6000/", defaultPort: "80"},
-			want:    "",
-			wantErr: true,
-		},
-		{
-			name:    "http scheme with hostname and port - port too big",
-			args:    args{host: "http://foo.bar:99999/", defaultPort: "80"},
-			want:    "",
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := ParseHostPort(tt.args.host, tt.args.defaultPort)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseHostPort() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("ParseHostPort() = %v, want %v", got, tt.want)
 			}
 		})
 	}

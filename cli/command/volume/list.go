@@ -55,13 +55,12 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 		Namespace:     opt.namespace,
 	}
 
-	// volumes, err := client.VolumeList(context.Background(), opts.filter.Value())
 	volumes, err := client.VolumeList(params)
 	if err != nil {
 		return err
 	}
 
-	nodes, err := client.ControllerList(params)
+	nodes, err := client.NodeList(params)
 	if err != nil {
 		return err
 	}

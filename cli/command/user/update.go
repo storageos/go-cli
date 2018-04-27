@@ -13,7 +13,6 @@ import (
 
 type updateOptions struct {
 	sourceAccount string
-	username      string
 	password      bool
 	groups        stringSlice
 	addGroups     stringSlice
@@ -45,9 +44,21 @@ func (u updateOptions) processGroups(current []string) []string {
 		}
 	}
 
+	// Checks if a given group exists in the newGroups.
+	containsGroup := func(s string) bool {
+		for _, v := range newGroups {
+			if s == v {
+				return true
+			}
+		}
+		return false
+	}
+
 	// add groups
 	for _, v := range u.addGroups {
-		newGroups = append(newGroups, v)
+		if !containsGroup(v) {
+			newGroups = append(newGroups, v)
+		}
 	}
 
 	return newGroups
@@ -67,7 +78,6 @@ func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&opt.username, "username", "", "Provide a new username")
 	flags.BoolVar(&opt.password, "password", false, "Prompt for new password (interactive)")
 	flags.StringVar(&opt.role, "role", "", "Provide a new role")
 	flags.Var(&opt.groups, "groups", "Provide a new set of groups (replacing old set)")
@@ -80,14 +90,21 @@ func verifyGroupLogic(opt updateOptions) error {
 	if (len(opt.groups) > 0) && (len(opt.addGroups)+len(opt.removeGroups)) > 0 {
 		return errors.New("Cannot set both groups and add/remove groups")
 	}
+
+	// Check if a group is in both add and remove.
+	if (len(opt.addGroups) > 0) && (len(opt.removeGroups) > 0) {
+		for _, i := range opt.addGroups {
+			for _, j := range opt.removeGroups {
+				if i == j {
+					return errors.New("Cannot add and remove the same group at a time")
+				}
+			}
+		}
+	}
 	return nil
 }
 
-func verifyUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
-	if !(opt.username == "" || verifyUsername(opt.username)) {
-		return fmt.Errorf(`Username doesn't follow format "[a-zA-Z0-9]+"`)
-	}
-
+func verifyUpdate(opt updateOptions) error {
 	if i, pass := verifyGroups(opt.groups); !pass {
 		return fmt.Errorf(`Group element %d doesn't follow format "[a-zA-Z0-9]+"`, i)
 	}
@@ -101,7 +118,7 @@ func verifyUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
 	}
 
 	if !(opt.role == "" || verifyRole(opt.role)) {
-		return fmt.Errorf(`Role must be either "user" or "admin", not %s`, opt.role)
+		return fmt.Errorf(`Role must be either "user" or "admin", not %q`, opt.role)
 	}
 
 	return nil
@@ -123,7 +140,7 @@ func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
 		return err
 	}
 
-	if err := verifyUpdate(storageosCli, opt); err != nil {
+	if err := verifyUpdate(opt); err != nil {
 		return err
 	}
 
@@ -134,10 +151,6 @@ func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
 		return fmt.Errorf("Failed to get user (%s): %s", opt.sourceAccount, err)
 	}
 	currentState.Groups = opt.processGroups(currentState.Groups)
-
-	if opt.username != "" {
-		currentState.Username = opt.username
-	}
 
 	if opt.password {
 		currentState.Password = password

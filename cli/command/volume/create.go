@@ -27,7 +27,7 @@ type createOptions struct {
 
 func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := createOptions{
-		labels: opts.NewListOpts(opts.ValidateEnv),
+		labels: opts.NewListOpts(opts.ValidationPipeline(opts.ValidateEnv, opts.ValidateLabel)),
 	}
 
 	cmd := &cobra.Command{
@@ -58,7 +58,7 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVarP(&opt.pool, "pool", "p", "default", "Volume capacity pool")
 	flags.StringVarP(&opt.fsType, "fstype", "f", "", "Requested filesystem type")
 	flags.StringVarP(&opt.namespace, "namespace", "n", "", `Volume namespace (default "default")`)
-	flags.StringVar(&opt.nodeSelector, "nodeSelector", "", "Node selector")
+	flags.StringVar(&opt.nodeSelector, "node-selector", "", "Node selector")
 	flags.Var(&opt.labels, "label", "Set metadata (key=value pairs) on the volume")
 
 	return cmd
@@ -77,6 +77,11 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 		NodeSelector: opt.nodeSelector,
 		Labels:       opts.ConvertKVStringsToMap(opt.labels.GetAll()),
 		Context:      context.Background(),
+	}
+
+	// Validate size.
+	if params.Size <= 0 {
+		return errors.New("volume size should be higher than 0")
 	}
 
 	vol, err := client.VolumeCreate(params)
