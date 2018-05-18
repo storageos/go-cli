@@ -58,7 +58,7 @@ func runUnmount(storageosCli *command.StorageOSCli, opt unmountOptions, mountDri
 
 	// must be root
 	if euid := syscall.Geteuid(); euid != 0 {
-		return fmt.Errorf("volume unmount must be run as root user - try prefixing command with `sudo`")
+		return fmt.Errorf("volume unmount must be run as root user - try prefixing command with `sudo -E`")
 	}
 
 	client := storageosCli.Client()

@@ -55,7 +55,7 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 
 	// must be root
 	if euid := syscall.Geteuid(); euid != 0 {
-		return fmt.Errorf("volume mount requires root permission - try prefixing command with `sudo`")
+		return fmt.Errorf("volume mount requires root permission - try prefixing command with `sudo -E`")
 	}
 
 	client := storageosCli.Client()
