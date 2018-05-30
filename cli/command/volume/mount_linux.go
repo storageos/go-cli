@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/dnephin/cobra"
+	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	cliconfig "github.com/storageos/go-cli/cli/config"
@@ -46,9 +47,25 @@ func newMountCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 }
 
 func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
+	// Get current hostname.
+	hostname, err := host.Get()
+	if err != nil {
+		hostname = "unknown"
+	}
 
-	// checking whether we are on storageos node
-	_, err := system.Stat(cliconfig.DeviceRootPath)
+	client := storageosCli.Client()
+
+	// Check whether we are on storageos node.
+	node, err := client.Node(hostname)
+	if err != nil {
+		if err == api.ErrNoSuchNode {
+			return fmt.Errorf("cannot mount volume: current host is not a registered storageos cluster node")
+		}
+		return fmt.Errorf("failed to check if this host is a storageos cluster node: %#v", err)
+	}
+
+	// Check whether device dir exists.
+	_, err = system.Stat(node.DeviceDir)
 	if err != nil {
 		return fmt.Errorf("device root path %q not found, check whether StorageOS is running", cliconfig.DeviceRootPath)
 	}
@@ -58,7 +75,6 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 		return fmt.Errorf("volume mount requires root permission - try prefixing command with `sudo -E`")
 	}
 
-	client := storageosCli.Client()
 	namespace, name, err := validation.ParseRefWithDefault(opt.ref)
 	if err != nil {
 		return err
@@ -72,14 +88,6 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	// checking readiness
 	if err := isVolumeReady(vol, name); err != nil {
 		return fmt.Errorf("cannot mount volume: %v", err)
-	}
-
-	var hostname string
-
-	// getting current hostname
-	hostname, err = host.Get()
-	if err != nil {
-		hostname = "unknown"
 	}
 
 	err = client.VolumeMount(types.VolumeMountOptions{
@@ -97,7 +105,7 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 		return err
 	}
 
-	err = retryableMount(vol, opt.mountpoint, fst)
+	err = retryableMount(vol, node.DeviceDir, opt.mountpoint, fst)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"namespace":  namespace,
@@ -121,9 +129,9 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	return nil
 }
 
-func retryableMount(volume *types.Volume, mountpoint string, fsType mount.FSType) error {
+func retryableMount(volume *types.Volume, deviceRootDir, mountpoint string, fsType mount.FSType) error {
 
-	driver := mount.New(cliconfig.DeviceRootPath)
+	driver := mount.New(deviceRootDir)
 
 	// unmount can take some time
 	maxRetries := 10
