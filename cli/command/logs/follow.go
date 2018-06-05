@@ -1,6 +1,7 @@
 package logs
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/signal"
@@ -75,6 +76,14 @@ func runFollow(storageosCli *command.StorageOSCli, opt logOptions) error {
 				fmt.Printf("error: %v\n", err)
 				return
 			}
+
+			// If node is specified, filter the logs as per nodes.
+			if len(opt.nodes) > 0 {
+				if skipNodeLog(opt.nodes, message) {
+					continue
+				}
+			}
+
 			formatter.LogStreamWrite(fmtCtx, message)
 		}
 	}()
@@ -108,4 +117,17 @@ func runFollow(storageosCli *command.StorageOSCli, opt logOptions) error {
 			return nil
 		}
 	}
+}
+
+// skipNodeLog tells if a message should be skipped based on the list of nodes.
+func skipNodeLog(nodes []string, message []byte) bool {
+	for _, node := range nodes {
+		// Log message contains source node in the format "host":"storageos-1-80251".
+		nodePattern := fmt.Sprintf("\"host\":\"%s\"", node)
+		if bytes.Contains(message, []byte(nodePattern)) {
+			return false
+		}
+	}
+
+	return true
 }
