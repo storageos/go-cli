@@ -9,9 +9,9 @@ import (
 
 const (
 	defaultClusterHealthQuietFormat = "{{.Status}}"
-	defaultClusterHealthTableFormat = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.KV}}\t{{.NATS}}\t{{.Scheduler}}\t{{.DirectFSClient}}\t{{.DirectFSServer}}\t{{.Director}}\t{{.FSDriver}}\t{{.FS}}"
+	defaultClusterHealthTableFormat = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.KV}}\t{{.NATS}}\t{{.Scheduler}}\t{{.DirectFSClient}}\t{{.Director}}\t{{.FSDriver}}\t{{.FS}}"
 	cpClusterHealthTableFormat      = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.KV}}\t{{.KVWrite}}\t{{.NATS}}\t{{.Scheduler}}"
-	dpClusterHealthTableFormat      = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.DirectFSClient}}\t{{.DirectFSServer}}\t{{.Director}}\t{{.FSDriver}}\t{{.FS}}"
+	dpClusterHealthTableFormat      = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.DirectFSClient}}\t{{.Director}}\t{{.FSDriver}}\t{{.FS}}"
 
 	clusterHealthNodeHeader           = "NODE"
 	clusterHealthAddressHeader        = "ADDRESS"
@@ -21,7 +21,6 @@ const (
 	clusterHealthKVWriteHeader        = "KV_WRITE"
 	clusterHealthSchedulerHeader      = "SCHEDULER"
 	clusterHealthDirectFSClientHeader = "DFS_CLIENT"
-	clusterHealthDirectFSServerHeader = "DFS_SERVER"
 	clusterHealthDirectorHeader       = "DIRECTOR"
 	clusterHealthFSDriverHeader       = "FS_DRIVER"
 	clusterHealthFSHeader             = "FS"
@@ -51,7 +50,7 @@ func NewClusterHealthFormat(source string, quiet bool) Format {
 		if quiet {
 			return `{{.Node}}: {{.Status}}`
 		}
-		return `node: {{.Node}}\nstatus: {{.Status}}\nkv: {{.KV}}\nkv_write: {{.KVWrite}}\nnats: {{.NATS}}\nscheduler: {{.Scheduler}}\ndfs_client: {{.DirectFSClient}}\ndfs_server: {{.DirectFSServer}}\ndirector: {{.Director}}\nfs_driver: {{.FSDriver}}\nfs: {{.FS}}\n`
+		return `node: {{.Node}}\nstatus: {{.Status}}\nkv: {{.KV}}\nkv_write: {{.KVWrite}}\nnats: {{.NATS}}\nscheduler: {{.Scheduler}}\ndfs_client: {{.DirectFSClient}}\ndirector: {{.Director}}\nfs_driver: {{.FSDriver}}\nfs: {{.FS}}\n`
 	}
 	return Format(source)
 }
@@ -184,15 +183,6 @@ func (c *clusterHealthContext) DirectFSClient() string {
 		return clusterHealthUnknown
 	}
 	return c.v.Health.DP.DirectFSClient.Status
-}
-
-func (c *clusterHealthContext) DirectFSServer() string {
-	c.AddHeader(clusterHealthDirectFSServerHeader)
-	if c.v.Health.DP == nil {
-		return clusterHealthUnknown
-	}
-
-	return c.v.Health.DP.DirectFSServer.Status
 }
 
 func (c *clusterHealthContext) Director() string {
