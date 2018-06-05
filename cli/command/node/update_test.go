@@ -94,3 +94,43 @@ func TestUpdateLabel(t *testing.T) {
 		})
 	}
 }
+
+func TestRemoveLabel(t *testing.T) {
+	testcases := map[string]struct {
+		labels     map[string]string
+		rmLabelKey string
+		wantErr    bool
+	}{
+		"normal label remove": {
+			labels: map[string]string{
+				"label1": "val1",
+				"label2": "val2",
+			},
+			rmLabelKey: "label2",
+		},
+		"remove non existent label": {
+			labels: map[string]string{
+				"label1": "val1",
+			},
+			rmLabelKey: "label2",
+			wantErr:    true,
+		},
+		"remove from uninitialized labels": {
+			labels:     nil,
+			rmLabelKey: "label2",
+			wantErr:    true,
+		},
+	}
+
+	for k, tc := range testcases {
+		t.Run(k, func(t *testing.T) {
+			err := removeLabel(tc.labels, tc.rmLabelKey)
+			if tc.wantErr && err == nil {
+				t.Error("expected error, got none")
+			}
+			if !tc.wantErr && err != nil {
+				t.Errorf("expected no error, but got error: %v", err)
+			}
+		})
+	}
+}
