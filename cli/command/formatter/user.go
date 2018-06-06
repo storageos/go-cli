@@ -10,9 +10,9 @@ const (
 	defaultUserTableFormat = "table {{.UUID}}\t{{.Username}}\t{{.Groups}}\t{{.Role}}"
 
 	userUUIDHeader     = "ID"
-	userUsernameHeader = "Username"
-	userGroupsHeader   = "Groups"
-	userRoleHeader     = "Role"
+	userUsernameHeader = "USERNAME"
+	userGroupsHeader   = "GROUPS"
+	userRoleHeader     = "ROLE"
 )
 
 func NewUserFormat(source string, quiet bool) Format {

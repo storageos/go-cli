@@ -15,8 +15,8 @@ const (
 	defaultVolumeTableFormat = "table {{.Name}}\t{{.Size}}\t{{.MountedBy}}\t{{.NodeSelector}}\t{{.Status}}\t{{.Replicas}}\t{{.Location}}"
 
 	volumeNameHeader         = "NAMESPACE/NAME"
-	volumeMountedByHeader    = "MOUNTED BY"
-	volumeNodeSelectorHeader = "NODE SELECTOR"
+	volumeMountedByHeader    = "MOUNTED_BY"
+	volumeNodeSelectorHeader = "NODE_SELECTOR"
 	volumeStatusHeader       = "STATUS"
 	volumeReplicasHeader     = "REPLICAS"
 	volumeLocationHeader     = "LOCATION"
