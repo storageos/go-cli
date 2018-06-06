@@ -15,6 +15,7 @@ import (
 	"github.com/storageos/go-cli/cli/config/configfile"
 	cliflags "github.com/storageos/go-cli/cli/flags"
 	"github.com/storageos/go-cli/pkg/jointools"
+	"github.com/storageos/go-cli/version"
 )
 
 // Streams is an interface which exposes the standard input and output streams
@@ -158,6 +159,9 @@ func NewAPIClientFromFlags(host string, opt *cliflags.CommonOptions, configFile 
 	if err != nil {
 		return &api.Client{}, err
 	}
+
+	// Set StorageOS CLI UserAgent for all the API requests.
+	client.SetUserAgent(strings.Join([]string{version.UserAgent, version.Version}, "/"))
 
 	initClientAuth(host, opt, configFile, client)
 	return client, nil
