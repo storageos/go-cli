@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	userAgent         = "go-storageosclient"
+	DefaultUserAgent  = "go-storageosclient"
 	DefaultVersionStr = "1"
 	DefaultVersion    = 1
 )
@@ -81,6 +81,7 @@ type Client struct {
 	expectedAPIVersion     APIVersion
 	nativeHTTPClient       *http.Client
 	useTLS                 bool
+	userAgent              string
 }
 
 // ClientVersion returns the API version of the client
@@ -104,6 +105,7 @@ func NewClient(nodes string) (*Client, error) {
 		return nil, err
 	}
 	client.SkipServerVersionCheck = true
+	client.userAgent = DefaultUserAgent
 	return client, nil
 }
 
@@ -137,6 +139,11 @@ func NewVersionedClient(nodestring string, apiVersionString string) (*Client, er
 	}
 
 	return c, nil
+}
+
+// SetUserAgent sets the client useragent.
+func (c *Client) SetUserAgent(useragent string) {
+	c.userAgent = useragent
 }
 
 // SetAuth sets the API username and secret to be used for all API requests.
@@ -254,7 +261,7 @@ func (c *Client) do(method, urlpath string, doOptions doOptions) (*http.Response
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("User-Agent", c.userAgent)
 	if doOptions.data != nil {
 		req.Header.Set("Content-Type", "application/json")
 	} else if method == "POST" {

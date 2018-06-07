@@ -23,7 +23,7 @@ func (c *Client) CPHealth(ctx context.Context, hostname string) (*types.CPHealth
 		return nil, err
 	}
 
-	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("User-Agent", c.userAgent)
 	if c.username != "" && c.secret != "" {
 		req.SetBasicAuth(c.username, c.secret)
 	}
@@ -51,7 +51,7 @@ func (c *Client) DPHealth(ctx context.Context, hostname string) (*types.DPHealth
 		return nil, err
 	}
 
-	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("User-Agent", c.userAgent)
 	if c.username != "" && c.secret != "" {
 		req.SetBasicAuth(c.username, c.secret)
 	}
