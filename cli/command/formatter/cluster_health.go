@@ -3,6 +3,7 @@ package formatter
 import (
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/storageos/go-cli/types"
 )
@@ -108,11 +109,42 @@ func (c *clusterHealthContext) cpHealthy() bool {
 		c.v.Health.CP.KVWrite.Status == "alivealivealive"
 }
 
+func (c *clusterHealthContext) cpDegraded() string {
+	degraded := []string{}
+	if c.v.Health.CP.KV.Status != "alive" {
+		degraded = append(degraded, clusterHealthKVHeader)
+	}
+	if c.v.Health.CP.KVWrite.Status != "alive" {
+		degraded = append(degraded, clusterHealthKVWriteHeader)
+	}
+	if c.v.Health.CP.NATS.Status != "alive" {
+		degraded = append(degraded, clusterHealthNATSHeader)
+	}
+	return "Degraded (" + strings.Join(degraded, ", ") + ")"
+}
+
 func (c *clusterHealthContext) dpHealthy() bool {
 	return c.v.Health.DP.DirectFSClient.Status+
 		c.v.Health.DP.Director.Status+
 		c.v.Health.DP.FSDriver.Status+
 		c.v.Health.DP.FS.Status == "alivealivealivealive"
+}
+
+func (c *clusterHealthContext) dpDegraded() string {
+	degraded := []string{}
+	if c.v.Health.DP.DirectFSClient.Status != "alive" {
+		degraded = append(degraded, clusterHealthDirectFSClientHeader)
+	}
+	if c.v.Health.DP.Director.Status != "alive" {
+		degraded = append(degraded, clusterHealthDirectorHeader)
+	}
+	if c.v.Health.DP.FSDriver.Status != "alive" {
+		degraded = append(degraded, clusterHealthFSDriverHeader)
+	}
+	if c.v.Health.DP.FS.Status != "alive" {
+		degraded = append(degraded, clusterHealthFSHeader)
+	}
+	return "Degraded (" + strings.Join(degraded, ", ") + ")"
 }
 
 func (c *clusterHealthContext) Status() string {
@@ -134,7 +166,7 @@ func (c *clusterHealthContext) CPStatus() string {
 	if c.cpHealthy() {
 		return "Healthy"
 	}
-	return "Not Ready"
+	return c.cpDegraded()
 }
 
 func (c *clusterHealthContext) DPStatus() string {
@@ -145,7 +177,7 @@ func (c *clusterHealthContext) DPStatus() string {
 	if c.dpHealthy() {
 		return "Healthy"
 	}
-	return "Not Ready"
+	return c.dpDegraded()
 }
 
 func (c *clusterHealthContext) NATS() string {
