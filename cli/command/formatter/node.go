@@ -113,7 +113,7 @@ func (c *nodeContext) Capacity() string {
 		return "-"
 	}
 
-	return units.BytesSize(float64(c.v.CapacityStats.TotalCapacityBytes))
+	return units.HumanSize(float64(c.v.CapacityStats.TotalCapacityBytes))
 }
 
 func (c *nodeContext) CapacityUsed() string {
