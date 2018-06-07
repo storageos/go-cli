@@ -126,7 +126,7 @@ func (c *nodeContext) CapacityUsed() string {
 
 func (c *nodeContext) Version() string {
 	c.AddHeader(nodeVersionUsedHeader)
-	return fmt.Sprintf("%s (%s rev)", c.v.VersionInfo["storageos"].Version, c.v.VersionInfo["storageos"].Revision)
+	return fmt.Sprintf("%s", c.v.VersionInfo["storageos"].Version)
 }
 
 func (c *nodeContext) Labels() string {
