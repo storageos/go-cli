@@ -3,6 +3,7 @@ package login
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"syscall"
 
 	"github.com/dnephin/cobra"
@@ -11,6 +12,7 @@ import (
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/pkg/jointools"
+	"github.com/storageos/go-cli/version"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -59,6 +61,9 @@ func verifyCredsWithServer(username, password, host string) error {
 		return fmt.Errorf("Failed to verify credentials (%v)", err)
 	}
 	client.SetAuth(username, password)
+
+	// Set StorageOS CLI UserAgent for all the API requests.
+	client.SetUserAgent(strings.Join([]string{version.UserAgent, version.Version}, "/"))
 
 	_, err = client.Login()
 	if err != nil {

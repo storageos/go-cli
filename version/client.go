@@ -8,6 +8,7 @@ import (
 
 const (
 	ProductName string = "storageos"
+	UserAgent   string = "storageos-cli"
 	APIVersion         = "1"
 )
 
