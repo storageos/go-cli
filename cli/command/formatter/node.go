@@ -23,6 +23,8 @@ const (
 	nodeCapacityUsedHeader  = "USED"
 	nodeVersionUsedHeader   = "VERSION"
 	nodeLabelHeader         = "LABEL"
+	nodeRegionHeader        = "REGION"
+	nodeFailureDomainHeader = "FAILURE_DOMAIN"
 )
 
 // NewNodeFormat returns a format for use with a node Context
@@ -154,4 +156,30 @@ func (c *nodeContext) Label(name string) string {
 		return ""
 	}
 	return c.v.Labels[name]
+}
+
+func (c *nodeContext) Region() string {
+	c.AddHeader(nodeRegionHeader)
+	if c.v.Labels == nil {
+		return ""
+	}
+
+	if val, ok := c.v.Labels["iaas/region"]; ok {
+		return val
+	}
+
+	return ""
+}
+
+func (c *nodeContext) FailureDomain() string {
+	c.AddHeader(nodeFailureDomainHeader)
+	if c.v.Labels == nil {
+		return ""
+	}
+
+	if val, ok := c.v.Labels["iaas/failure-domain"]; ok {
+		return val
+	}
+
+	return ""
 }
