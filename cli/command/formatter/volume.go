@@ -2,6 +2,7 @@ package formatter
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -77,6 +78,13 @@ func (c *volumeContext) Labels() string {
 	for k, v := range c.v.Labels {
 		joinLabels = append(joinLabels, fmt.Sprintf("%s=%s", k, v))
 	}
+
+	sort.SliceStable(joinLabels, func(i, j int) bool {
+		fst := strings.Split(joinLabels[i], "=")[0]
+		snd := strings.Split(joinLabels[j], "=")[0]
+		return fst < snd
+	})
+
 	return strings.Join(joinLabels, ",")
 }
 
