@@ -12,7 +12,7 @@ import (
 
 const (
 	defaultNodeQuietFormat = "{{.Name}}"
-	defaultNodeTableFormat = "table {{.Name}}\t{{.Address}}\t{{.Health}}\t{{.Scheduler}}\t{{.Volumes}}\t{{.Capacity}}\t{{.CapacityUsed}}\t{{.Version}}\t{{.Labels}}"
+	defaultNodeTableFormat = "table {{.Name}}\t{{.Address}}\t{{.Health}}\t{{.Scheduler}}\t{{.Volumes}}\t{{.Capacity}}\t{{.CapacityUsed}}\t{{.Version}}"
 
 	nodeNameHeader          = "NAME"
 	nodeAddressHeader       = "ADDRESS"
