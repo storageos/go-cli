@@ -77,18 +77,7 @@ func (c *namespaceContext) Labels() string {
 		return ""
 	}
 
-	var joinLabels []string
-	for k, v := range c.v.Labels {
-		joinLabels = append(joinLabels, fmt.Sprintf("%s=%s", k, v))
-	}
-
-	sort.SliceStable(joinLabels, func(i, j int) bool {
-		fst := strings.Split(joinLabels[i], "=")[0]
-		snd := strings.Split(joinLabels[j], "=")[0]
-		return fst < snd
-	})
-
-	return strings.Join(joinLabels, ",")
+	return writeLabels(c.v.Labels)
 }
 
 func (c *namespaceContext) Label(name string) string {
