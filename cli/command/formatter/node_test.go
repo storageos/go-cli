@@ -113,6 +113,87 @@ storageos-3  127.0.0.1  Unknown Less than a second  false      M: 1, R: 2  5GB  
 				t.Errorf("unexpected result.\nexpected:\n%s\ngot:\n%s\n", test.expected, output)
 			}
 		}
+	}
+}
 
+func TestRegion(t *testing.T) {
+	cases := []struct {
+		context  nodeContext
+		expected string
+	}{
+		{
+			nodeContext{
+				HeaderContext: HeaderContext{},
+				v: types.Node{
+					NodeConfig: types.NodeConfig{
+						Labels: map[string]string{
+							"iaas/region":         "lon",
+							"iaas/failure-domain": "lon1",
+						},
+					},
+				},
+			},
+			"lon",
+		},
+		{
+			nodeContext{
+				HeaderContext: HeaderContext{},
+				v: types.Node{
+					NodeConfig: types.NodeConfig{
+						Labels: map[string]string{
+							"env": "prod",
+						},
+					},
+				},
+			},
+			"",
+		},
+	}
+
+	for _, test := range cases {
+		if region := test.context.Region(); region != test.expected {
+			t.Errorf("unexpected result.\nexpected:\n%s\ngot:\n%s\n", test.expected, region)
+		}
+	}
+}
+
+func TestFailureDomain(t *testing.T) {
+	cases := []struct {
+		context  nodeContext
+		expected string
+	}{
+		{
+			nodeContext{
+				HeaderContext: HeaderContext{},
+				v: types.Node{
+					NodeConfig: types.NodeConfig{
+						Labels: map[string]string{
+							"iaas/region":         "lon",
+							"iaas/failure-domain": "lon1",
+						},
+					},
+				},
+			},
+			"lon1",
+		},
+		{
+			nodeContext{
+				HeaderContext: HeaderContext{},
+				v: types.Node{
+					NodeConfig: types.NodeConfig{
+						Labels: map[string]string{
+							"env": "prod",
+						},
+					},
+				},
+			},
+			"",
+		},
+	}
+
+	for _, test := range cases {
+		if fd := test.context.FailureDomain(); fd != test.expected {
+			t.Errorf("unexpected result.\nexpected:\n%s\ngot:\n%s\n", test.expected, fd)
+		}
 	}
 }
