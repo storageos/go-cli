@@ -1,8 +1,6 @@
 package formatter
 
 import (
-	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/storageos/go-api/types"
