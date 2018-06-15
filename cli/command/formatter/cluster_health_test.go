@@ -8,7 +8,7 @@ import (
 	"github.com/storageos/go-cli/types"
 )
 
-func TestClusterHealthContextWrite(t *testing.T) {
+func TestClusterHealthWrite(t *testing.T) {
 	cases := []struct {
 		context  Context
 		expected string
