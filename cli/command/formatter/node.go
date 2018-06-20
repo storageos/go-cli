@@ -135,11 +135,7 @@ func (c *nodeContext) Labels() string {
 		return ""
 	}
 
-	var joinLabels []string
-	for k, v := range c.v.Labels {
-		joinLabels = append(joinLabels, fmt.Sprintf("%s=%s", k, v))
-	}
-	return strings.Join(joinLabels, ",")
+	return writeLabels(c.v.Labels)
 }
 
 func (c *nodeContext) Label(name string) string {
