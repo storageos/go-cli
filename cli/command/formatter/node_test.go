@@ -31,6 +31,15 @@ storageos-2  127.0.0.1  Alive Less than a second    false      M: 1, R: 0  5GB  
 storageos-3  127.0.0.1  Unknown Less than a second  false      M: 1, R: 2  5GB    60.00%  1.0.0
 `,
 		},
+		{
+			// Custom IAAS table format
+			Context{Format: NewNodeFormat("table {{.Name}}\t{{.Address}}\t{{.Health}}\t{{.CapacityUsed}}\t{{.Region}}\t{{.FailureDomain}}", false)},
+			`NAME         ADDRESS    HEALTH                      USED    REGION  FAILURE_DOMAIN
+storageos-1  127.0.0.1  Alive Less than a second    80.00%  euw     euw-1
+storageos-2  127.0.0.1  Alive Less than a second    52.00%  euw     euw-2
+storageos-3  127.0.0.1  Unknown Less than a second  60.00%  euw     euw-3
+`,
+		},
 	}
 
 	aliveStatus := types.SubModuleStatus{Status: "alive"}
@@ -46,6 +55,10 @@ storageos-3  127.0.0.1  Unknown Less than a second  false      M: 1, R: 2  5GB  
 			HealthUpdatedAt: time.Now(),
 			NodeConfig: types.NodeConfig{
 				Address: "127.0.0.1",
+				Labels: map[string]string{
+					"iaas/failure-domain": "euw-1",
+					"iaas/region":         "euw",
+				},
 			},
 			Scheduler: true,
 			VolumeStats: types.VolumeStats{
@@ -67,6 +80,10 @@ storageos-3  127.0.0.1  Unknown Less than a second  false      M: 1, R: 2  5GB  
 			HealthUpdatedAt: time.Now(),
 			NodeConfig: types.NodeConfig{
 				Address: "127.0.0.1",
+				Labels: map[string]string{
+					"iaas/failure-domain": "euw-2",
+					"iaas/region":         "euw",
+				},
 			},
 			Scheduler: false,
 			VolumeStats: types.VolumeStats{
@@ -88,6 +105,10 @@ storageos-3  127.0.0.1  Unknown Less than a second  false      M: 1, R: 2  5GB  
 			HealthUpdatedAt: time.Now(),
 			NodeConfig: types.NodeConfig{
 				Address: "127.0.0.1",
+				Labels: map[string]string{
+					"iaas/failure-domain": "euw-3",
+					"iaas/region":         "euw",
+				},
 			},
 			Scheduler: false,
 			VolumeStats: types.VolumeStats{
