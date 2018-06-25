@@ -12,7 +12,7 @@ import (
 
 const (
 	defaultNodeQuietFormat = "{{.Name}}"
-	defaultNodeTableFormat = "table {{.Name}}\t{{.Address}}\t{{.Health}}\t{{.Scheduler}}\t{{.Volumes}}\t{{.Capacity}}\t{{.CapacityUsed}}\t{{.Version}}\t{{.Labels}}"
+	defaultNodeTableFormat = "table {{.Name}}\t{{.Address}}\t{{.Health}}\t{{.Scheduler}}\t{{.Volumes}}\t{{.Capacity}}\t{{.CapacityUsed}}\t{{.Version}}"
 
 	nodeNameHeader          = "NAME"
 	nodeAddressHeader       = "ADDRESS"
@@ -23,6 +23,8 @@ const (
 	nodeCapacityUsedHeader  = "USED"
 	nodeVersionUsedHeader   = "VERSION"
 	nodeLabelHeader         = "LABEL"
+	nodeRegionHeader        = "REGION"
+	nodeFailureDomainHeader = "FAILURE_DOMAIN"
 )
 
 // NewNodeFormat returns a format for use with a node Context
@@ -113,7 +115,7 @@ func (c *nodeContext) Capacity() string {
 		return "-"
 	}
 
-	return units.BytesSize(float64(c.v.CapacityStats.TotalCapacityBytes))
+	return units.HumanSize(float64(c.v.CapacityStats.TotalCapacityBytes))
 }
 
 func (c *nodeContext) CapacityUsed() string {
@@ -126,7 +128,7 @@ func (c *nodeContext) CapacityUsed() string {
 
 func (c *nodeContext) Version() string {
 	c.AddHeader(nodeVersionUsedHeader)
-	return fmt.Sprintf("%s (%s rev)", c.v.VersionInfo["storageos"].Version, c.v.VersionInfo["storageos"].Revision)
+	return fmt.Sprintf("%s", c.v.VersionInfo["storageos"].Version)
 }
 
 func (c *nodeContext) Labels() string {
@@ -150,4 +152,30 @@ func (c *nodeContext) Label(name string) string {
 		return ""
 	}
 	return c.v.Labels[name]
+}
+
+func (c *nodeContext) Region() string {
+	c.AddHeader(nodeRegionHeader)
+	if c.v.Labels == nil {
+		return ""
+	}
+
+	if val, ok := c.v.Labels["iaas/region"]; ok {
+		return val
+	}
+
+	return ""
+}
+
+func (c *nodeContext) FailureDomain() string {
+	c.AddHeader(nodeFailureDomainHeader)
+	if c.v.Labels == nil {
+		return ""
+	}
+
+	if val, ok := c.v.Labels["iaas/failure-domain"]; ok {
+		return val
+	}
+
+	return ""
 }

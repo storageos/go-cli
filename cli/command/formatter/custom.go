@@ -7,7 +7,7 @@ import (
 const (
 	imageHeader        = "IMAGE"
 	createdSinceHeader = "CREATED"
-	createdAtHeader    = "CREATED AT"
+	createdAtHeader    = "CREATED_AT"
 	sizeHeader         = "SIZE"
 	labelsHeader       = "LABELS"
 	nameHeader         = "NAME"

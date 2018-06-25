@@ -8,13 +8,13 @@ const (
 	defaultPolicyTableFormat = "table {{.ID}}\t{{.User}}\t{{.Group}}\t{{.Namespace}}"
 
 	policyIDHeader              = "ID"
-	policyUserHeader            = "User"
-	policyGroupHeader           = "Group"
-	policyReadonlyHeader        = "Readonly"
-	policyAPIGroupHeader        = "APIGroup"
-	policyResourceHeader        = "Resource"
-	policyNamespaceHeader       = "Namespace"
-	policyNonResourcePathHeader = "NonResourcePath"
+	policyUserHeader            = "USER"
+	policyGroupHeader           = "GROUP"
+	policyReadonlyHeader        = "READONLY"
+	policyAPIGroupHeader        = "API_GROUP"
+	policyResourceHeader        = "RESOURCE"
+	policyNamespaceHeader       = "NAMESPACE"
+	policyNonResourcePathHeader = "NON_RESOURCE_PATH"
 )
 
 func NewPolicyFormat(source string) Format {

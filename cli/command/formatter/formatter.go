@@ -16,6 +16,7 @@ const (
 	TableFormatKey         = "table"
 	RawFormatKey           = "raw"
 	PrettyFormatKey        = "pretty"
+	DetailedTableFormatKey = "detailed"
 	CPHealthTableFormatKey = "cp"
 	DPHealthTableFormatKey = "dp"
 
@@ -79,7 +80,7 @@ func (c *Context) postFormat(tmpl *template.Template, subContext subContext) {
 			c.header = subContext.FullHeader()
 		}
 
-		t := tabwriter.NewWriter(c.Output, 20, 1, 3, ' ', 0)
+		t := tabwriter.NewWriter(c.Output, 0, 1, 2, ' ', 0)
 		t.Write([]byte(c.header))
 		c.buffer.WriteTo(t)
 		t.Flush()

@@ -3,23 +3,26 @@ package formatter
 import (
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/storageos/go-cli/types"
 )
 
 const (
-	defaultClusterHealthQuietFormat = "{{.Status}}"
-	defaultClusterHealthTableFormat = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.KV}}\t{{.NATS}}\t{{.Scheduler}}\t{{.DirectFSClient}}\t{{.Director}}\t{{.FSDriver}}\t{{.FS}}"
-	cpClusterHealthTableFormat      = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.KV}}\t{{.KVWrite}}\t{{.NATS}}\t{{.Scheduler}}"
-	dpClusterHealthTableFormat      = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.DirectFSClient}}\t{{.Director}}\t{{.FSDriver}}\t{{.FS}}"
+	defaultClusterHealthQuietFormat  = "{{.Status}}"
+	defaultClusterHealthTableFormat  = "table {{.Node}}\t{{.Address}}\t{{.CPStatus}}\t{{.DPStatus}}"
+	detailedClusterHealthTableFormat = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.KV}}\t{{.NATS}}\t{{.DirectFSClient}}\t{{.Director}}\t{{.FSDriver}}\t{{.FS}}"
+	cpClusterHealthTableFormat       = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.KV}}\t{{.KVWrite}}\t{{.NATS}}"
+	dpClusterHealthTableFormat       = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.DirectFSClient}}\t{{.Director}}\t{{.FSDriver}}\t{{.FS}}"
 
 	clusterHealthNodeHeader           = "NODE"
 	clusterHealthAddressHeader        = "ADDRESS"
+	clusterHealthCPStatusHeader       = "CP_STATUS"
+	clusterHealthDPStatusHeader       = "DP_STATUS"
 	clusterHealthStatusHeader         = "STATUS"
 	clusterHealthNATSHeader           = "NATS"
 	clusterHealthKVHeader             = "KV"
 	clusterHealthKVWriteHeader        = "KV_WRITE"
-	clusterHealthSchedulerHeader      = "SCHEDULER"
 	clusterHealthDirectFSClientHeader = "DFS_CLIENT"
 	clusterHealthDirectorHeader       = "DIRECTOR"
 	clusterHealthFSDriverHeader       = "FS_DRIVER"
@@ -36,6 +39,8 @@ func NewClusterHealthFormat(source string, quiet bool) Format {
 			return defaultClusterHealthQuietFormat
 		}
 		return defaultClusterHealthTableFormat
+	case DetailedTableFormatKey:
+		return detailedClusterHealthTableFormat
 	case CPHealthTableFormatKey:
 		if quiet {
 			return `{{.CPStatus}}`
@@ -50,7 +55,7 @@ func NewClusterHealthFormat(source string, quiet bool) Format {
 		if quiet {
 			return `{{.Node}}: {{.Status}}`
 		}
-		return `node: {{.Node}}\nstatus: {{.Status}}\nkv: {{.KV}}\nkv_write: {{.KVWrite}}\nnats: {{.NATS}}\nscheduler: {{.Scheduler}}\ndfs_client: {{.DirectFSClient}}\ndirector: {{.Director}}\nfs_driver: {{.FSDriver}}\nfs: {{.FS}}\n`
+		return `node: {{.Node}}\nstatus: {{.Status}}\nkv: {{.KV}}\nkv_write: {{.KVWrite}}\nnats: {{.NATS}}\ndfs_client: {{.DirectFSClient}}\ndirector: {{.Director}}\nfs_driver: {{.FSDriver}}\nfs: {{.FS}}\n`
 	}
 	return Format(source)
 }
@@ -101,8 +106,21 @@ func (c *clusterHealthContext) healthy() bool {
 func (c *clusterHealthContext) cpHealthy() bool {
 	return c.v.Health.CP.NATS.Status+
 		c.v.Health.CP.KV.Status+
-		c.v.Health.CP.KVWrite.Status+
-		c.v.Health.CP.Scheduler.Status == "alivealivealivealive"
+		c.v.Health.CP.KVWrite.Status == "alivealivealive"
+}
+
+func (c *clusterHealthContext) cpDegraded() string {
+	degraded := []string{}
+	if c.v.Health.CP.KV.Status != "alive" {
+		degraded = append(degraded, clusterHealthKVHeader)
+	}
+	if c.v.Health.CP.KVWrite.Status != "alive" {
+		degraded = append(degraded, clusterHealthKVWriteHeader)
+	}
+	if c.v.Health.CP.NATS.Status != "alive" {
+		degraded = append(degraded, clusterHealthNATSHeader)
+	}
+	return "Degraded (" + strings.Join(degraded, ", ") + ")"
 }
 
 func (c *clusterHealthContext) dpHealthy() bool {
@@ -110,6 +128,23 @@ func (c *clusterHealthContext) dpHealthy() bool {
 		c.v.Health.DP.Director.Status+
 		c.v.Health.DP.FSDriver.Status+
 		c.v.Health.DP.FS.Status == "alivealivealivealive"
+}
+
+func (c *clusterHealthContext) dpDegraded() string {
+	degraded := []string{}
+	if c.v.Health.DP.DirectFSClient.Status != "alive" {
+		degraded = append(degraded, clusterHealthDirectFSClientHeader)
+	}
+	if c.v.Health.DP.Director.Status != "alive" {
+		degraded = append(degraded, clusterHealthDirectorHeader)
+	}
+	if c.v.Health.DP.FSDriver.Status != "alive" {
+		degraded = append(degraded, clusterHealthFSDriverHeader)
+	}
+	if c.v.Health.DP.FS.Status != "alive" {
+		degraded = append(degraded, clusterHealthFSHeader)
+	}
+	return "Degraded (" + strings.Join(degraded, ", ") + ")"
 }
 
 func (c *clusterHealthContext) Status() string {
@@ -124,25 +159,25 @@ func (c *clusterHealthContext) Status() string {
 }
 
 func (c *clusterHealthContext) CPStatus() string {
-	c.AddHeader(clusterHealthStatusHeader)
+	c.AddHeader(clusterHealthCPStatusHeader)
 	if c.v.Health.CP == nil {
 		return "Unreachable"
 	}
 	if c.cpHealthy() {
 		return "Healthy"
 	}
-	return "Not Ready"
+	return c.cpDegraded()
 }
 
 func (c *clusterHealthContext) DPStatus() string {
-	c.AddHeader(clusterHealthStatusHeader)
+	c.AddHeader(clusterHealthDPStatusHeader)
 	if c.v.Health.DP == nil {
 		return "Unreachable"
 	}
 	if c.dpHealthy() {
 		return "Healthy"
 	}
-	return "Not Ready"
+	return c.dpDegraded()
 }
 
 func (c *clusterHealthContext) NATS() string {
@@ -167,14 +202,6 @@ func (c *clusterHealthContext) KVWrite() string {
 		return clusterHealthUnknown
 	}
 	return c.v.Health.CP.KVWrite.Status
-}
-
-func (c *clusterHealthContext) Scheduler() string {
-	c.AddHeader(clusterHealthSchedulerHeader)
-	if c.v.Health.CP == nil {
-		return clusterHealthUnknown
-	}
-	return c.v.Health.CP.Scheduler.Status
 }
 
 func (c *clusterHealthContext) DirectFSClient() string {

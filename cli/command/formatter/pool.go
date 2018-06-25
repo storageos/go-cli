@@ -15,8 +15,8 @@ const (
 
 	poolNameHeader           = "NAME"
 	poolDefaultHeader        = "DEFAULT"
-	poolNodeSelectorHeader   = "NODE SELECTOR"
-	poolDeviceSelectorHeader = "DEVICE SELECTOR"
+	poolNodeSelectorHeader   = "NODE_SELECTOR"
+	poolDeviceSelectorHeader = "DEVICE_SELECTOR"
 	poolNodesHeader          = "NODES"
 	poolCapacityUsedHeader   = "USED"
 	poolTotalHeader          = "TOTAL"
