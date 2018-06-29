@@ -14,9 +14,10 @@ import (
 )
 
 type removeOptions struct {
-	all     bool
-	force   bool
-	volumes []string
+	all       bool
+	force     bool
+	namespace string
+	volumes   []string
 }
 
 func newRemoveCommand(storageosCli *command.StorageOSCli) *cobra.Command {
@@ -49,6 +50,7 @@ func newRemoveCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.force, "force", "f", false, "Force the removal of one or more volumes")
 	flags.BoolVar(&opt.all, "all", false, "Remove all volumes")
+	flags.StringVarP(&opt.namespace, "namespace", "n", "", `Volume namespace (default "default")`)
 
 	return cmd
 }
@@ -58,7 +60,14 @@ func runRemove(storageosCli *command.StorageOSCli, opt *removeOptions) error {
 	status := 0
 
 	if opt.all {
-		volumes, err := storageosCli.Client().VolumeList(types.ListOptions{})
+		listOpts := types.ListOptions{}
+
+		// Set namespace for volume list if specified.
+		if opt.namespace != "" {
+			listOpts.Namespace = opt.namespace
+		}
+
+		volumes, err := storageosCli.Client().VolumeList(listOpts)
 		if err != nil {
 			fmt.Fprintf(storageosCli.Err(), "%s\n", err)
 			status = 1
@@ -83,6 +92,12 @@ func runRemove(storageosCli *command.StorageOSCli, opt *removeOptions) error {
 			status = 1
 			continue
 		}
+
+		// Override default namespace with the specified namespace.
+		if opt.namespace != "" {
+			namespace = opt.namespace
+		}
+
 		params := types.DeleteOptions{
 			Name:      name,
 			Namespace: namespace,
