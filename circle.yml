@@ -25,6 +25,7 @@ jobs:
       - checkout
       - run: go get github.com/mitchellh/gox
       - run: make release
+      - run: docker build . -t cli
       - store_artifacts:
           path: /go/src/github.com/storageos/go-cli/cmd/storageos/release/
           destination: binaries
@@ -40,7 +41,6 @@ jobs:
           at:  cmd/storageos
       - run: go get github.com/tcnksm/ghr
       - run: ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` cmd/storageos/release/
-      - run: docker build . -t cli
 workflows:
   version: 2
   push:
