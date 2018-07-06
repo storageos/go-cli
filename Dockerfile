@@ -1,4 +1,4 @@
-FROM golang:1.9
+FROM golang:1.10.3
 COPY . /go/src/github.com/storageos/go-cli
 WORKDIR /go/src/github.com/storageos/go-cli
 RUN make build

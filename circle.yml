@@ -1,7 +1,7 @@
 defaults: &defaults
   working_directory: /go/src/github.com/storageos/go-cli
   docker:
-    - image: circleci/golang:1.9
+    - image: circleci/golang:1.10.3
 
 version: 2
 jobs:
