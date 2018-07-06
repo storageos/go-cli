@@ -41,7 +41,7 @@ jobs:
       - setup_remote_docker
       - run: |
           TAG=$( echo $CIRCLE_TAG | sed "s/preprod-//" )
-          REPO=soegarots/cli
+          REPO=${STAGING_REPO}
           docker build -t ${REPO}:$TAG .
           docker login -u $DOCKER_USER -p $(echo $DOCKER_PASS | base64 --decode)
           docker push $REPO:$TAG
