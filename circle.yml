@@ -25,7 +25,6 @@ jobs:
       - checkout
       - run: go get github.com/mitchellh/gox
       - run: make release
-      - run: docker build . -t cli
       - store_artifacts:
           path: /go/src/github.com/storageos/go-cli/cmd/storageos/release/
           destination: binaries
@@ -33,6 +32,8 @@ jobs:
           root: cmd/storageos
           paths:
             - release
+      - setup_remote_docker
+      - run: docker build . -t cli:test
   release:
     <<: *defaults
     steps:
