@@ -69,8 +69,8 @@ storageos-3  127.0.0.1  Not Ready  alive  alive  alive       alive     unknown  
 				CP *apiTypes.CPHealthStatus
 				DP *apiTypes.DPHealthStatus
 			}{
-				&apiTypes.CPHealthStatus{aliveStatus, aliveStatus, aliveStatus, aliveStatus},
-				&apiTypes.DPHealthStatus{aliveStatus, aliveStatus, aliveStatus, aliveStatus, aliveStatus},
+				&apiTypes.CPHealthStatus{KV: aliveStatus, KVWrite: aliveStatus, NATS: aliveStatus, Scheduler: aliveStatus},
+				&apiTypes.DPHealthStatus{DirectFSClient: aliveStatus, DirectFSServer: aliveStatus, Director: aliveStatus, FSDriver: aliveStatus, FS: aliveStatus},
 			},
 		},
 		{Name: "storageos-2", AdvertiseAddress: "127.0.0.1",
@@ -79,7 +79,7 @@ storageos-3  127.0.0.1  Not Ready  alive  alive  alive       alive     unknown  
 				DP *apiTypes.DPHealthStatus
 			}{
 				&apiTypes.CPHealthStatus{KV: aliveStatus, KVWrite: unknownStatus, NATS: aliveStatus, Scheduler: aliveStatus},
-				&apiTypes.DPHealthStatus{aliveStatus, aliveStatus, aliveStatus, aliveStatus, aliveStatus},
+				&apiTypes.DPHealthStatus{DirectFSClient: aliveStatus, DirectFSServer: aliveStatus, Director: aliveStatus, FSDriver: aliveStatus, FS: aliveStatus},
 			},
 		},
 		{Name: "storageos-3", AdvertiseAddress: "127.0.0.1",
@@ -87,7 +87,7 @@ storageos-3  127.0.0.1  Not Ready  alive  alive  alive       alive     unknown  
 				CP *apiTypes.CPHealthStatus
 				DP *apiTypes.DPHealthStatus
 			}{
-				&apiTypes.CPHealthStatus{aliveStatus, aliveStatus, aliveStatus, aliveStatus},
+				&apiTypes.CPHealthStatus{KV: aliveStatus, KVWrite: aliveStatus, NATS: aliveStatus, Scheduler: aliveStatus},
 				&apiTypes.DPHealthStatus{DirectFSClient: aliveStatus, DirectFSServer: aliveStatus, Director: aliveStatus, FSDriver: unknownStatus, FS: unknownStatus},
 			},
 		},
