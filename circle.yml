@@ -10,7 +10,7 @@ jobs:
     steps:
       - checkout
       - run: mkdir -p output
-      - run: go vet $(go list ./... | grep -v /vendor/) | tee output/go-vet.out
+      - run: go vet -v $(go list ./... | grep -v /vendor/) | tee output/go-vet.out
       - run: go get github.com/jstemmer/go-junit-report
       - run:
           name: Run unit tests
