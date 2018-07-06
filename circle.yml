@@ -34,7 +34,7 @@ jobs:
             - release
       - setup_remote_docker
       - run: |
-          TAG=testing
+          TAG=${CIRCLE_BRANCH}_$CIRCLE_BUILD_NUM
           docker build -t arau/storageos-cli:$TAG .
           docker login -u $DOCKER_USER -p $(echo $DOCKER_PASS | base64 --decode)
           docker push arau/storageos-cli:$TAG
