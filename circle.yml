@@ -33,7 +33,11 @@ jobs:
           paths:
             - release
       - setup_remote_docker
-      - run: docker build . -t cli:test
+      - run: |
+          TAG=testing
+          docker build -t arau/storageos-cli:$TAG .
+          docker login -u $DOCKER_USER -p $(echo $DOCKER_PASS | base64 --decode)
+          docker push arau/storageos-cli:$TAG
   release:
     <<: *defaults
     steps:
