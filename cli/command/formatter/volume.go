@@ -134,7 +134,7 @@ func (c *volumeContext) Location() string {
 			return "-"
 		}
 
-		return fmt.Sprintf("%s (%s)", master.Name, master.Health)
+		return fmt.Sprintf("%s (%s)", master.Name, c.v.Health)
 	}
 
 	return "-"
