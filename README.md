@@ -40,7 +40,7 @@ exit
 We recommend that you create a bash alias for the docker run command:
 
 ```bash
-alias storageos=='docker run --rm -e STORAGEOS_HOST -e STORAGEOS_USERNAME -e STORAGEOS_PASSWORD storageos/cli'
+alias storageos='docker run --rm -e STORAGEOS_HOST -e STORAGEOS_USERNAME -e STORAGEOS_PASSWORD storageos/cli'
 ```
 
 ## Usage
