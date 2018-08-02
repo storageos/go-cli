@@ -96,14 +96,14 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 func parseNamespaceVolume(nsflag, vnflag, posarg string) (namespace string, volume string, err error) {
 	switch {
 	case posarg != "" && vnflag != "":
-		return "", "", errors.New("Conflicting options: either specify --name or provide positional arg, not both\n")
+		return "", "", errors.New("conflicting options: either specify --name or provide positional arg, not both")
 
 	case posarg != "":
 		split := strings.Split(posarg, "/")
 
 		switch {
 		case len(split) > 1 && nsflag != "":
-			return "", "", errors.New("Conflicting options: either specify --namespace or use 'namespace/volumename' positional arg, not both\n")
+			return "", "", errors.New("conflicting options: either specify --namespace or use 'namespace/volumename' positional arg, not both")
 
 		case len(split) > 1:
 			return split[0], split[1], nil
@@ -122,6 +122,6 @@ func parseNamespaceVolume(nsflag, vnflag, posarg string) (namespace string, volu
 		return "default", vnflag, nil
 
 	default:
-		return "", "", errors.New("Please provide a volume name\n")
+		return "", "", errors.New("please provide a volume name")
 	}
 }

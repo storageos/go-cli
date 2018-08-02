@@ -26,6 +26,7 @@ import (
 
 type mountOptions struct {
 	ref        string
+	timeout    time.Duration
 	mountpoint string // mountpoint
 }
 
@@ -42,6 +43,9 @@ func newMountCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 			return runMount(storageosCli, opt)
 		},
 	}
+
+	flags := cmd.Flags()
+	flags.DurationVarP(&opt.timeout, "timeout", "t", 20*time.Second, "Retryable mount timeout period in seconds")
 
 	return cmd
 }
@@ -86,7 +90,7 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	}
 
 	// checking readiness
-	if err := isVolumeReady(vol, name); err != nil {
+	if err := isVolumeReady(vol); err != nil {
 		return fmt.Errorf("cannot mount volume: %v", err)
 	}
 
@@ -105,7 +109,7 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 		return err
 	}
 
-	err = retryableMount(vol, node.DeviceDir, opt.mountpoint, fst)
+	err = retryableMount(vol, node.DeviceDir, opt, fst)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"namespace":  namespace,
@@ -129,23 +133,36 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	return nil
 }
 
-func retryableMount(volume *types.Volume, deviceRootDir, mountpoint string, fsType mount.FSType) error {
-
+func retryableMount(volume *types.Volume, deviceRootDir string, opts mountOptions, fsType mount.FSType) error {
+	var deadlineExceeded bool
 	driver := mount.New(deviceRootDir)
-
-	// unmount can take some time
-	maxRetries := 10
-	retries := 0
+	// Limit the time which can be spent retrying
+	timer := time.NewTimer(opts.timeout)
+	reqTimeout := time.Second
 
 RETRY:
 	// Perform the mount
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), reqTimeout)
 	defer cancel()
-	err := driver.MountVolume(ctx, volume.ID, mountpoint, fsType, volume.MkfsDoneAt.IsZero() && !volume.MkfsDone)
+
+	go func() {
+		for {
+			select {
+			case <-timer.C:
+				deadlineExceeded = true
+				cancel() // Cancel any ongoing mount attempt
+				return
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
+	err := driver.MountVolume(ctx, volume.ID, opts.mountpoint, fsType, volume.MkfsDoneAt.IsZero() && !volume.MkfsDone)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"volume_id":  volume.ID,
-			"mountpoint": mountpoint,
+			"mountpoint": opts.mountpoint,
 			"err":        err.Error(),
 		}).Error(" failed to mount volume")
 
@@ -154,20 +171,25 @@ RETRY:
 			return err
 		}
 
-		if retries < maxRetries {
+		if !deadlineExceeded {
+			fmt.Printf("error mounting, retrying")
 			time.Sleep(250 * time.Millisecond)
-			retries++
+			reqTimeout *= 2 // Increase the request time out
 			goto RETRY
 		}
 
 		return err
 	}
 
+	if deadlineExceeded {
+		return fmt.Errorf("exceeded mount retry duration")
+	}
+
 	return nil
 }
 
 // isVolumeReady - mount only unmounted and active volume
-func isVolumeReady(vol *types.Volume, ref string) error {
+func isVolumeReady(vol *types.Volume) error {
 
 	if vol.Status != "active" {
 		return fmt.Errorf("can only mount active volumes, current status: '%s'", vol.Status)
