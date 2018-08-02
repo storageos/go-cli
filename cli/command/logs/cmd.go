@@ -25,7 +25,7 @@ func NewLogsCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "logs",
-		Short: "View and manage node logs",
+		Short: "View and manage node logs on the active cluster",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opt.nodes = args
 			if opt.follow && opt.level == "" && opt.filter == "" && !opt.clearFilter {
@@ -42,7 +42,7 @@ func NewLogsCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	)
 
 	flags := cmd.Flags()
-	flags.StringVar(&opt.level, "verbosity", "", "Set the logging verbosity")
+	flags.StringVarP(&opt.level, "log-level", "l", "", "Set the logging level (\"debug\"|\"info\"|\"warn\"|\"error\"|\"fatal\")")
 	flags.StringVar(&opt.filter, "filter", "", "Set the logging filter")
 	flags.BoolVarP(&opt.clearFilter, "clear-filter", "", false, "Clears the filter")
 	flags.BoolVarP(&opt.follow, "follow", "f", false, "Tail the logs for the given node, or all nodes if not specified")
