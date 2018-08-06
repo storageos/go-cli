@@ -138,7 +138,8 @@ func retryableMount(volume *types.Volume, deviceRootDir string, opts mountOption
 	driver := mount.New(deviceRootDir)
 	// Limit the time which can be spent retrying
 	timer := time.NewTimer(opts.timeout)
-	reqTimeout := time.Second
+	reqTimeout := 5 * time.Second
+	retries := 0
 
 RETRY:
 	// Perform the mount
@@ -160,21 +161,29 @@ RETRY:
 
 	err := driver.MountVolume(ctx, volume.ID, opts.mountpoint, fsType, volume.MkfsDoneAt.IsZero() && !volume.MkfsDone)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"volume_id":  volume.ID,
-			"mountpoint": opts.mountpoint,
-			"err":        err.Error(),
-		}).Error(" failed to mount volume")
 
 		// If this is a permanent error, stop retrying
 		if mountErr, ok := err.(*mount.MountError); ok && mountErr.Fatal {
+			log.WithFields(log.Fields{
+				"volume_id":  volume.ID,
+				"mountpoint": opts.mountpoint,
+				"err":        err.Error(),
+			}).Error("failed to mount volume")
 			return err
 		}
 
 		if !deadlineExceeded {
-			fmt.Printf("error mounting, retrying")
+			// Increase the request time out
+			retries++
+			reqTimeout *= 2
+			log.WithFields(log.Fields{
+				"volume_id":  volume.ID,
+				"mountpoint": opts.mountpoint,
+				"err":        err.Error(),
+				"retry":      retries,
+			}).Error("failed to mount volume, retrying")
+			// Wait before retry
 			time.Sleep(250 * time.Millisecond)
-			reqTimeout *= 2 // Increase the request time out
 			goto RETRY
 		}
 
