@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"strings"
 
@@ -125,6 +126,19 @@ func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 	cli.client = client
 
 	cli.defaultVersion = cli.client.ClientVersion()
+
+	// Attempt to set HTTP proxy for the client, if set
+	if proxy := cli.configFile.HTTPProxy; proxy != "" {
+		proxyURL, err := url.Parse(proxy)
+		if err != nil {
+			return errors.New("invalid proxy url")
+		}
+		err = cli.client.SetProxy(proxyURL)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -147,7 +161,7 @@ func LoadDefaultConfigFile(err io.Writer) *configfile.ConfigFile {
 func NewAPIClientFromFlags(host string, opt *cliflags.CommonOptions, configFile *configfile.ConfigFile) (*api.Client, error) {
 
 	if host == "" {
-		return &api.Client{}, fmt.Errorf("STORAGEOS_HOST evironemnt variable not set")
+		return &api.Client{}, fmt.Errorf("STORAGEOS_HOST environment variable not set")
 	}
 
 	verStr := api.DefaultVersionStr
