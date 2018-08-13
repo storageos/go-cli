@@ -159,6 +159,7 @@ func retryableMount(ctx context.Context, volume *types.Volume, deviceRootDir str
 	driver := mount.New(deviceRootDir)
 	// Limit the time which can be spent retrying
 	retries := 0
+	backoff := 250 * time.Millisecond
 
 RETRY:
 	err := driver.MountVolume(ctx, volume.ID, opts.mountpoint, fsType, volume.MkfsDoneAt.IsZero() && !volume.MkfsDone)
@@ -178,9 +179,10 @@ RETRY:
 			return err
 		default:
 			// Wait before retry
-			time.Sleep(250 * time.Millisecond)
-			// Increase the request time out
+			time.Sleep(backoff)
+			// Increase backoff period
 			retries++
+			backoff *= 2
 			fmt.Printf("failed to mount volume, beginning retry %d\n", retries)
 			log.WithFields(log.Fields{
 				"volume_id":  volume.ID,
