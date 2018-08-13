@@ -9,6 +9,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// WebsocketConn will create a websocket to the given path on all hosts,
+// providing the stored authentication credentials.
 func (cli *StorageOSCli) WebsocketConn(path string) (*websocket.Conn, error) {
 	authHeader := base64.StdEncoding.EncodeToString([]byte(cli.GetUsername() + ":" + cli.GetPassword()))
 

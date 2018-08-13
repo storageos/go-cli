@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"strings"
 
@@ -125,6 +126,21 @@ func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 	cli.client = client
 
 	cli.defaultVersion = cli.client.ClientVersion()
+
+	if !envHasProxy() {
+		// Attempt to set HTTP proxy for the client, if set
+		if proxy := cli.configFile.ProxyURL; proxy != "" {
+			proxyURL, err := url.Parse(proxy)
+			if err != nil {
+				return errors.New("invalid proxy url")
+			}
+			err = cli.client.SetProxy(proxyURL)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -147,7 +163,7 @@ func LoadDefaultConfigFile(err io.Writer) *configfile.ConfigFile {
 func NewAPIClientFromFlags(host string, opt *cliflags.CommonOptions, configFile *configfile.ConfigFile) (*api.Client, error) {
 
 	if host == "" {
-		return &api.Client{}, fmt.Errorf("STORAGEOS_HOST evironemnt variable not set")
+		return &api.Client{}, fmt.Errorf("STORAGEOS_HOST environment variable not set")
 	}
 
 	verStr := api.DefaultVersionStr
@@ -230,6 +246,19 @@ func getServerHost(hosts string, tls bool) (host string, err error) {
 	return jointools.ExpandJOIN(host), nil
 }
 
+var proxyEnvVars = [...]string{"HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
+
+// envHasProxy checks if any of the environment variables
+// relating to HTTP/HTTPS proxies are set.
+func envHasProxy() bool {
+	for _, v := range proxyEnvVars {
+		if os.Getenv(v) != "" {
+			return true
+		}
+	}
+	return false
+}
+
 // Standard alias definitions
 var (
 	CreateAliases  = []string{"c"}
@@ -240,6 +269,7 @@ var (
 	HealthAliases  = []string{"h"}
 )
 
+// WithAlias adds the aliases given to the command.
 func WithAlias(c *cobra.Command, aliases ...string) *cobra.Command {
 	c.Aliases = append(c.Aliases, aliases...)
 	return c
