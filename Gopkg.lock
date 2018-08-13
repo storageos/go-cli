@@ -91,7 +91,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:acb1b57a428d8db6f90a2fa39fec219230f773093e5844032aec517fc3a01577"
+  digest = "1:555713edb857d9208a477e5c528c1c1ee56d3a96bafb9926651ad6e4ef7bfa6b"
   name = "github.com/storageos/go-api"
   packages = [
     ".",
@@ -101,7 +101,7 @@
     "types/versions",
   ]
   pruneopts = "UT"
-  revision = "55cd63ccf69e3b8423eed325a46ebfb9defd61d5"
+  revision = "44b76c3b2b84b912bc162bac602b63095a0b25a6"
 
 [[projects]]
   digest = "1:f18cfce8b0cb8923d70a9050b211197629cb7e27efea064b4d6d3ee472d1243e"
