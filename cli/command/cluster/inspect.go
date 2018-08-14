@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"fmt"
+
 	"github.com/dnephin/cobra"
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
@@ -35,8 +36,6 @@ func newInspectCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 }
 
 func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
-	// client := storageosCli.Client()
-
 	client, err := discovery.NewClient("", "", "")
 	if err != nil {
 		return err

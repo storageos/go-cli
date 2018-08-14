@@ -4,6 +4,7 @@ import (
 	"github.com/dnephin/cobra"
 
 	"github.com/storageos/go-cli/cli/command"
+	"github.com/storageos/go-cli/pkg/constants"
 )
 
 type logOptions struct {
@@ -46,7 +47,7 @@ func NewLogsCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.StringVar(&opt.filter, "filter", "", "Set the logging filter")
 	flags.BoolVarP(&opt.clearFilter, "clear-filter", "", false, "Clears the filter")
 	flags.BoolVarP(&opt.follow, "follow", "f", false, "Tail the logs for the given node, or all nodes if not specified")
-	flags.IntVarP(&opt.timeout, "timeout", "t", 5, "Timeout in seconds.")
+	flags.IntVarP(&opt.timeout, "timeout", "t", constants.DefaultAPITimeout, "Timeout in seconds.")
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display volume names")
 	flags.StringVar(&opt.format, "format", "raw", "Output format (raw or table) or a Go template")
 
