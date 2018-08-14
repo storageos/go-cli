@@ -36,9 +36,9 @@ func ExpandJOINFragment(joinfragment string) []string {
 		split = split[1:len(split)]
 		fallthrough
 	case 1:
-		// If there was no explicit scheme, assume TCP.
+		// If there was no explicit scheme, default to http.
 		if scheme == "" {
-			scheme = "tcp"
+			scheme = "http"
 		}
 		switch hostPort := strings.Split(split[0], ":"); len(hostPort) {
 		case 2:
