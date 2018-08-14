@@ -14,6 +14,7 @@ import (
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
+	"github.com/storageos/go-cli/pkg/constants"
 	cliTypes "github.com/storageos/go-cli/types"
 )
 
@@ -40,7 +41,7 @@ func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Display minimal node health info.  Can be used with format.")
 	flags.StringVar(&opt.format, "format", "", "Pretty-print health with formats: table (default), cp, dp or raw.")
-	flags.IntVarP(&opt.timeout, "timeout", "t", 1, "Timeout in seconds.")
+	flags.IntVarP(&opt.timeout, "timeout", "t", constants.DefaultAPITimeout, "Timeout in seconds.")
 
 	return cmd
 }

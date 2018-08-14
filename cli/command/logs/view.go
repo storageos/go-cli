@@ -9,6 +9,7 @@ import (
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
+	"github.com/storageos/go-cli/pkg/constants"
 )
 
 func newViewCommand(storageosCli *command.StorageOSCli) *cobra.Command {
@@ -27,7 +28,7 @@ func newViewCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display log level")
 	flags.StringVar(&opt.format, "format", "", "Pretty-print config using a Go template")
 	flags.StringVarP(&opt.selector, "selector", "s", "", "Provide selector (e.g. to list all nodes with label disk=ssd' --selector=disk=ssd')")
-	flags.IntVarP(&opt.timeout, "timeout", "t", 5, "Timeout in seconds.")
+	flags.IntVarP(&opt.timeout, "timeout", "t", constants.DefaultAPITimeout, "Timeout in seconds.")
 
 	return cmd
 }
