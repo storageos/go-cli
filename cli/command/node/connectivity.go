@@ -14,6 +14,7 @@ import (
 )
 
 type connectivityOptions struct {
+	quiet  bool
 	format string
 	names  []string
 }
@@ -39,7 +40,9 @@ func newConnectivityCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opt.format, "format", "f", "", "Format the output using the given Go template")
+	flags := cmd.Flags()
+	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display node names")
+	flags.StringVarP(&opt.format, "format", "f", "table", "Format the output using the given Go template")
 	return cmd
 }
 
@@ -78,10 +81,10 @@ func runConnectivity(storageosCli *command.StorageOSCli, opt connectivityOptions
 		res = append(res, result{ref, c})
 	}
 
-	return printConnectivityResult(storageosCli.Out(), res)
+	return printConnectivityResult(storageosCli.Out(), res, opt)
 }
 
-func printConnectivityResult(out io.Writer, results []result) error {
+func printConnectivityResult(out io.Writer, results []result, opt connectivityOptions) error {
 	for i, result := range results {
 		if len(results) > 1 {
 			if i > 0 {
@@ -92,11 +95,11 @@ func printConnectivityResult(out io.Writer, results []result) error {
 
 		fmtCtx := formatter.Context{
 			Output: out,
-			Format: formatter.NewNodeConnectivityFormat(formatter.TableFormatKey),
+			Format: formatter.NewConnectivityFormat(opt.format, opt.quiet),
 		}
 
 		if result.result != nil {
-			if err := formatter.NodeConnectivityWrite(fmtCtx, result.result); err != nil {
+			if err := formatter.ConnectivityWrite(fmtCtx, result.result); err != nil {
 				return err
 			}
 		}
