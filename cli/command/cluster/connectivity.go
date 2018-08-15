@@ -19,7 +19,7 @@ func newConnectivityCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "connectivity [OPTIONS]",
-		Short: "Display connectivity diagnistics for the cluster",
+		Short: "Display connectivity diagnostics for the cluster",
 		Args:  cli.RequiresMinArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runConnectivity(storageosCli, opt)
