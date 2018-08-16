@@ -7,9 +7,11 @@ import (
 )
 
 const (
-	connectivityTableFormat   = "table {{.Source}}\t{{.Name}}\t{{.Address}}\t{{.Latency}}\t{{.Status}}\t{{.Error}}"
-	connectivityRawFormat     = `source: {{.Source}}\nname: {{.Name}}\naddress: {{.Address}}\nlatency: {{.Latency}}\nstatus: {{.Status}}\nmessage: {{.Error}}\n`
-	connectivitySummaryFormat = "{{.Status}}"
+	connectivityTableFormat      = "table {{.Source}}\t{{.Name}}\t{{.Address}}\t{{.Latency}}\t{{.Status}}\t{{.Error}}"
+	connectivityTableQuietFormat = "table {{.Test}}\t{{.Status}}"
+	connectivityRawFormat        = `source: {{.Source}}\nname: {{.Name}}\naddress: {{.Address}}\nlatency: {{.Latency}}\nstatus: {{.Status}}\nmessage: {{.Error}}\n`
+	connectivityRawQuietFormat   = "{{.Test}}: {{.Status}}"
+	connectivitySummaryFormat    = "{{.Status}}"
 
 	connectivityNameHeader    = "NAME"
 	connectivityAddressHeader = "ADDRESS"
@@ -25,12 +27,12 @@ func NewConnectivityFormat(source string, quiet bool) Format {
 	switch source {
 	case TableFormatKey:
 		if quiet {
-			return "table {{.Test}}\t{{.Status}}"
+			return connectivityTableQuietFormat
 		}
 		return connectivityTableFormat
 	case RawFormatKey:
 		if quiet {
-			return "{{.Test}}: {{.Status}}"
+			return connectivityRawQuietFormat
 		}
 		return connectivityRawFormat
 	case SummaryFormatKey:
