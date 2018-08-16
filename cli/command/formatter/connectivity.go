@@ -9,7 +9,6 @@ import (
 const (
 	connectivityTableFormat   = "table {{.Source}}\t{{.Name}}\t{{.Address}}\t{{.Latency}}\t{{.Status}}\t{{.Error}}"
 	connectivityRawFormat     = `source: {{.Source}}\nname: {{.Name}}\naddress: {{.Address}}\nlatency: {{.Latency}}\nstatus: {{.Status}}\nmessage: {{.Error}}\n`
-	connectivityQuietFormat   = "{{.Name}}\t{{.Status}}"
 	connectivitySummaryFormat = "{{.Status}}"
 
 	connectivityNameHeader    = "NAME"

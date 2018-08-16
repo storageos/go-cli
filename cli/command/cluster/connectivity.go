@@ -27,7 +27,7 @@ func newConnectivityCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display node names")
-	flags.StringVarP(&opt.format, "format", "f", "table", "Format the output using the given Go template")
+	flags.StringVarP(&opt.format, "format", "f", "table", "Format the output using the given Go template. \"summary\", \"table\" and \"raw\" also supported.")
 	return cmd
 }
 
