@@ -41,13 +41,13 @@ func runConnectivity(storageosCli *command.StorageOSCli, opt connectivityOptions
 	var results types.ConnectivityResults
 	switch {
 	case len(opt.names) == 0:
-		results, err = client.Connectivity("")
+		results, err = client.NetworkDiagnostics("")
 		if err != nil {
 			return err
 		}
 	default:
 		for _, ref := range opt.names {
-			nodeResults, err := client.Connectivity(ref)
+			nodeResults, err := client.NetworkDiagnostics(ref)
 			if err != nil {
 				return err
 			}

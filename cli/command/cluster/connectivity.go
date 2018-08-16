@@ -34,7 +34,7 @@ func newConnectivityCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 func runConnectivity(storageosCli *command.StorageOSCli, opt connectivityOptions) error {
 	client := storageosCli.Client()
 
-	results, err := client.Connectivity("")
+	results, err := client.NetworkDiagnostics("")
 	if err != nil {
 		return err
 	}
