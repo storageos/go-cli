@@ -10,27 +10,43 @@ import (
 	"github.com/storageos/go-cli/cli/command"
 )
 
-type uncordonOptions struct {
+type drainOptions struct {
 	nodes []string
 }
 
-func newUncordonCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	var opt uncordonOptions
+func newDrainCommand(storageosCli *command.StorageOSCli) *cobra.Command {
+	var opt drainOptions
 
 	cmd := &cobra.Command{
-		Use:   "uncordon NODE [NODE...]",
-		Short: "Restore one or more nodes from an unschedulable state",
+		Use:   "drain NODE [NODE...]",
+		Short: "Migrate volumes from one or more nodes.",
 		Args:  cli.RequiresMinArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opt.nodes = args
-			return runUncordon(storageosCli, opt)
+			return runDrain(storageosCli, opt, true)
 		},
 	}
 
 	return cmd
 }
 
-func runUncordon(storageosCli *command.StorageOSCli, opt uncordonOptions) error {
+func newUndrainCommand(storageosCli *command.StorageOSCli) *cobra.Command {
+	var opt drainOptions
+
+	cmd := &cobra.Command{
+		Use:   "undrain NODE [NODE...]",
+		Short: "Stop drain on one or more nodes.",
+		Args:  cli.RequiresMinArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			opt.nodes = args
+			return runDrain(storageosCli, opt, false)
+		},
+	}
+
+	return cmd
+}
+
+func runDrain(storageosCli *command.StorageOSCli, opt drainOptions, drain bool) error {
 	client := storageosCli.Client()
 	failed := make([]string, 0, len(opt.nodes))
 
@@ -46,8 +62,8 @@ func runUncordon(storageosCli *command.StorageOSCli, opt uncordonOptions) error 
 			Name:        n.Name,
 			Description: n.Description,
 			Labels:      n.Labels,
-			Drain:       n.Drain,
-			Cordon:      false,
+			Cordon:      n.Cordon,
+			Drain:       drain,
 		})
 		if err != nil {
 			failed = append(failed, nodeID)
@@ -58,7 +74,7 @@ func runUncordon(storageosCli *command.StorageOSCli, opt uncordonOptions) error 
 	}
 
 	if len(failed) > 0 {
-		return fmt.Errorf("Failed to uncordon: %s", strings.Join(failed, ", "))
+		return fmt.Errorf("Failed to drain: %s", strings.Join(failed, ", "))
 	}
 	return nil
 }

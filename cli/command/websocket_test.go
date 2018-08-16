@@ -17,7 +17,7 @@ func TestWebsocketURLs(t *testing.T) {
 		{
 			name: "numeric and name hosts",
 			cli: StorageOSCli{
-				hosts: []string{"127.0.0.1", "storageos.net"},
+				hosts: "127.0.0.1,storageos.net",
 			},
 			wantURLs: []*url.URL{url1, url2},
 		},
@@ -29,14 +29,14 @@ func TestWebsocketURLs(t *testing.T) {
 		{
 			name: "host with existing scheme",
 			cli: StorageOSCli{
-				hosts: []string{"https://storageos.net"},
+				hosts: "https://storageos.net",
 			},
 			wantURLs: []*url.URL{url2},
 		},
 		{
 			name: "skip invalid host",
 			cli: StorageOSCli{
-				hosts: []string{":::....", "storageos.net"},
+				hosts: ":::....,storageos.net",
 			},
 			wantURLs: []*url.URL{url2},
 		},

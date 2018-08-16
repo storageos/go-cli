@@ -14,6 +14,7 @@ import (
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
+	"github.com/storageos/go-cli/pkg/constants"
 	cliTypes "github.com/storageos/go-cli/types"
 )
 
@@ -40,7 +41,7 @@ func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Display minimal node health info.  Can be used with format.")
 	flags.StringVar(&opt.format, "format", "", "Pretty-print health with formats: table (default), cp, dp or raw.")
-	flags.IntVarP(&opt.timeout, "timeout", "t", 1, "Timeout in seconds.")
+	flags.IntVarP(&opt.timeout, "timeout", "t", constants.DefaultAPITimeout, "Timeout in seconds.")
 
 	return cmd
 }
@@ -86,8 +87,7 @@ func UpdateNodeHealth(node *cliTypes.Node, address string, timeout int) error {
 
 	client := &http.Client{}
 
-	// CP Health Status
-	var cpStatus types.CPHealthStatus
+	var healthStatus types.HealthStatus
 	cpURL := fmt.Sprintf(healthEndpointFormat, address, api.DefaultPort)
 	cpReq, err := http.NewRequest("GET", cpURL, nil)
 	if err != nil {
@@ -99,28 +99,11 @@ func UpdateNodeHealth(node *cliTypes.Node, address string, timeout int) error {
 		return err
 	}
 
-	if err := json.NewDecoder(cpResp.Body).Decode(&cpStatus); err != nil {
+	if err := json.NewDecoder(cpResp.Body).Decode(&healthStatus); err != nil {
 		return err
 	}
-	node.Health.CP = &cpStatus
-
-	// DP Health Status
-	var dpHealth types.DPHealthStatus
-	dpURL := fmt.Sprintf(healthEndpointFormat, address, api.DataplaneHealthPort)
-	dpReq, err := http.NewRequest("GET", dpURL, nil)
-	if err != nil {
-		return err
-	}
-
-	dpResp, err := client.Do(dpReq.WithContext(ctx))
-	if err != nil {
-		return err
-	}
-
-	if err := json.NewDecoder(dpResp.Body).Decode(&dpHealth); err != nil {
-		return err
-	}
-	node.Health.DP = &dpHealth
+	node.Health.CP = healthStatus.ToCPHealthStatus()
+	node.Health.DP = healthStatus.ToDPHealthStatus()
 
 	return nil
 }

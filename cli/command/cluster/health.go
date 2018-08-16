@@ -14,6 +14,7 @@ import (
 	"github.com/storageos/go-cli/cli/command/formatter"
 	cliNode "github.com/storageos/go-cli/cli/command/node"
 	"github.com/storageos/go-cli/discovery"
+	"github.com/storageos/go-cli/pkg/constants"
 	cliTypes "github.com/storageos/go-cli/types"
 )
 
@@ -40,8 +41,8 @@ func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Display minimal cluster health info.  Can be used with format.")
-	flags.IntVarP(&opt.timeout, "timeout", "t", 1, "Timeout in seconds.")
-	flags.StringVar(&opt.format, "format", "", "Pretty-print health with formats: table (default), cp, dp or raw.")
+	flags.IntVarP(&opt.timeout, "timeout", "t", constants.DefaultAPITimeout, "Timeout in seconds.")
+	flags.StringVar(&opt.format, "format", "", "Pretty-print health with formats: table (default), detailed, cp, dp or raw.")
 
 	return cmd
 }
@@ -64,7 +65,7 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 
 	sort.Sort(cliTypes.NodeByName(nodes))
 	for _, node := range nodes {
-		if err := runNodeHealth(storageosCli, node, opt.timeout); err != nil {
+		if err := runNodeHealth(node, opt.timeout); err != nil {
 			return err
 		}
 	}
@@ -76,7 +77,7 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 	return formatter.ClusterHealthWrite(clusterHealthCtx, nodes)
 }
 
-func runNodeHealth(storageosCli *command.StorageOSCli, node *cliTypes.Node, timeout int) error {
+func runNodeHealth(node *cliTypes.Node, timeout int) error {
 	addr := node.AdvertiseAddress
 
 	u, err := url.Parse(node.AdvertiseAddress)

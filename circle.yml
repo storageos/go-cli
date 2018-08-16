@@ -1,7 +1,7 @@
 defaults: &defaults
   working_directory: /go/src/github.com/storageos/go-cli
   docker:
-    - image: circleci/golang:1.9
+    - image: circleci/golang:1.10.3
 
 version: 2
 jobs:
@@ -32,7 +32,20 @@ jobs:
           root: cmd/storageos
           paths:
             - release
-  release:
+  preprod_release:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at:  cmd/storageos
+      - setup_remote_docker
+      - run: |
+          TAG=$CIRCLE_SHA1
+          REPO=${STAGING_REPO}
+          docker build -t ${REPO}:$TAG .
+          docker login -u $DOCKER_USER -p $(echo $DOCKER_PASS | base64 --decode)
+          docker push $REPO:$TAG
+  prod_release:
     <<: *defaults
     steps:
       - checkout
@@ -40,7 +53,13 @@ jobs:
           at:  cmd/storageos
       - run: go get github.com/tcnksm/ghr
       - run: ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace `git describe --tags` cmd/storageos/release/
-      
+      - setup_remote_docker
+      - run: |
+          TAG=$CIRCLE_TAG
+          REPO=storageos/cli
+          docker build -t ${REPO}:$TAG .
+          docker login -u $DOCKER_USER -p $(echo $DOCKER_PASS | base64 --decode)
+          docker push $REPO:$TAG
 workflows:
   version: 2
   push:
@@ -55,12 +74,19 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - release:
+      - preprod_release:
+          requires:
+            - test
+            - build
+          filters:
+            branches:
+              only: master
+      - prod_release:
           requires:
             - test
             - build
           filters:
             tags:
-              only: /[0-9]+(\.[0-9]+)*/
+              only: /[0-9]+(\.[0-9]+).*/
             branches:
               ignore: /.*/

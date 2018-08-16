@@ -15,8 +15,8 @@ const (
 	defaultVolumeTableFormat = "table {{.Name}}\t{{.Size}}\t{{.MountedBy}}\t{{.NodeSelector}}\t{{.Status}}\t{{.Replicas}}\t{{.Location}}"
 
 	volumeNameHeader         = "NAMESPACE/NAME"
-	volumeMountedByHeader    = "MOUNTED BY"
-	volumeNodeSelectorHeader = "NODE SELECTOR"
+	volumeMountedByHeader    = "MOUNT"
+	volumeNodeSelectorHeader = "SELECTOR"
 	volumeStatusHeader       = "STATUS"
 	volumeReplicasHeader     = "REPLICAS"
 	volumeLocationHeader     = "LOCATION"
@@ -73,11 +73,7 @@ func (c *volumeContext) Labels() string {
 		return ""
 	}
 
-	var joinLabels []string
-	for k, v := range c.v.Labels {
-		joinLabels = append(joinLabels, fmt.Sprintf("%s=%s", k, v))
-	}
-	return strings.Join(joinLabels, ",")
+	return writeLabels(c.v.Labels)
 }
 
 func (c *volumeContext) Label(name string) string {
@@ -138,7 +134,12 @@ func (c *volumeContext) Location() string {
 			return "-"
 		}
 
-		return fmt.Sprintf("%s (%s)", master.Name, master.Health)
+		health := c.v.Health
+		if health == "" {
+			health = "unknown"
+		}
+
+		return fmt.Sprintf("%s (%s)", master.Name, health)
 	}
 
 	return "-"

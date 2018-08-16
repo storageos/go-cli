@@ -56,7 +56,9 @@ func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions, nodeID str
 	}
 
 	if opt.rmLabel != "" {
-		delete(n.Labels, opt.rmLabel)
+		if err := removeLabel(n.Labels, opt.rmLabel); err != nil {
+			return err
+		}
 	}
 
 	if opt.addLabel != "" {
@@ -97,4 +99,12 @@ func updateLabel(n *types.Node, labels string) error {
 	n.Labels[arr[0]] = arr[1]
 
 	return nil
+}
+
+func removeLabel(labels map[string]string, label string) error {
+	if _, ok := labels[label]; ok {
+		delete(labels, label)
+		return nil
+	}
+	return errors.New("label not found")
 }

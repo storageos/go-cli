@@ -12,7 +12,7 @@ import (
 
 const (
 	defaultNodeQuietFormat = "{{.Name}}"
-	defaultNodeTableFormat = "table {{.Name}}\t{{.Address}}\t{{.Health}}\t{{.Scheduler}}\t{{.Volumes}}\t{{.Capacity}}\t{{.CapacityUsed}}\t{{.Version}}\t{{.Labels}}"
+	defaultNodeTableFormat = "table {{.Name}}\t{{.Address}}\t{{.Health}}\t{{.Scheduler}}\t{{.Volumes}}\t{{.Capacity}}\t{{.CapacityUsed}}\t{{.Version}}"
 
 	nodeNameHeader          = "NAME"
 	nodeAddressHeader       = "ADDRESS"
@@ -23,6 +23,8 @@ const (
 	nodeCapacityUsedHeader  = "USED"
 	nodeVersionUsedHeader   = "VERSION"
 	nodeLabelHeader         = "LABEL"
+	nodeRegionHeader        = "REGION"
+	nodeFailureDomainHeader = "FAILURE_DOMAIN"
 )
 
 // NewNodeFormat returns a format for use with a node Context
@@ -81,6 +83,19 @@ func (c *nodeContext) Health() string {
 		return strings.Title(c.v.Health)
 	}
 
+	meta := []string{}
+
+	if c.v.Drain {
+		meta = append(meta, "drained")
+	}
+
+	if c.v.Cordon {
+		meta = append(meta, "cordoned")
+	}
+
+	if len(meta) > 0 {
+		return fmt.Sprintf("%s %s (%s)", strings.Title(c.v.Health), units.HumanDuration(time.Since(c.v.HealthUpdatedAt)), strings.Join(meta, ","))
+	}
 	return fmt.Sprintf("%s %s", strings.Title(c.v.Health), units.HumanDuration(time.Since(c.v.HealthUpdatedAt)))
 }
 
@@ -100,7 +115,7 @@ func (c *nodeContext) Capacity() string {
 		return "-"
 	}
 
-	return units.BytesSize(float64(c.v.CapacityStats.TotalCapacityBytes))
+	return units.HumanSize(float64(c.v.CapacityStats.TotalCapacityBytes))
 }
 
 func (c *nodeContext) CapacityUsed() string {
@@ -113,7 +128,7 @@ func (c *nodeContext) CapacityUsed() string {
 
 func (c *nodeContext) Version() string {
 	c.AddHeader(nodeVersionUsedHeader)
-	return fmt.Sprintf("%s (%s rev)", c.v.VersionInfo["storageos"].Version, c.v.VersionInfo["storageos"].Revision)
+	return fmt.Sprintf("%s", c.v.VersionInfo["storageos"].Version)
 }
 
 func (c *nodeContext) Labels() string {
@@ -122,11 +137,7 @@ func (c *nodeContext) Labels() string {
 		return ""
 	}
 
-	var joinLabels []string
-	for k, v := range c.v.Labels {
-		joinLabels = append(joinLabels, fmt.Sprintf("%s=%s", k, v))
-	}
-	return strings.Join(joinLabels, ",")
+	return writeLabels(c.v.Labels)
 }
 
 func (c *nodeContext) Label(name string) string {
@@ -141,4 +152,30 @@ func (c *nodeContext) Label(name string) string {
 		return ""
 	}
 	return c.v.Labels[name]
+}
+
+func (c *nodeContext) Region() string {
+	c.AddHeader(nodeRegionHeader)
+	if c.v.Labels == nil {
+		return ""
+	}
+
+	if val, ok := c.v.Labels["iaas/region"]; ok {
+		return val
+	}
+
+	return ""
+}
+
+func (c *nodeContext) FailureDomain() string {
+	c.AddHeader(nodeFailureDomainHeader)
+	if c.v.Labels == nil {
+		return ""
+	}
+
+	if val, ok := c.v.Labels["iaas/failure-domain"]; ok {
+		return val
+	}
+
+	return ""
 }

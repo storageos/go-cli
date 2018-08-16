@@ -62,6 +62,11 @@ func NodeHealthWrite(ctx Context, node *cliTypes.Node) error {
 		}
 		if node.Health.DP != nil {
 			for _, submodule := range node.Health.DP.ToNamedSubmodules() {
+				// Skip when there's not status data. This is to avoid printing
+				// empty DP fields for now.
+				if submodule.Status == "" {
+					continue
+				}
 				if err := format(&nodeHealthContext{t: "dataplane", v: submodule}); err != nil {
 					return err
 				}

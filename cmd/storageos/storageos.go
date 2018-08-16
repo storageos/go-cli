@@ -23,12 +23,11 @@ import (
 	"github.com/storageos/go-cli/version"
 )
 
-var shortDesc = `Converged storage for containers. 
+var shortDesc = `Converged storage for containers.
 
 By using this product, you are agreeing to the terms of the the StorageOS Ltd. End
 User Subscription Agreement (EUSA) found at: https://storageos.com/legal/#eusa
 
-WARNING: This is the beta version of StorageOS and should not be used in production.
 To be notified about stable releases and latest features, sign up at https://my.storageos.com.
 `
 

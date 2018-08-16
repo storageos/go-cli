@@ -11,6 +11,7 @@ import (
 // ConfigFile ~/.storageos/config.json file info
 type ConfigFile struct {
 	// HTTPHeaders          map[string]string           `json:"HttpHeaders,omitempty"`
+	ProxyURL            string    `json:"proxyURL,omitempty"`
 	CredentialsStore    CredStore `json:"knownHosts,omitempty"`
 	VolumesFormat       string    `json:"volumesFormat,omitempty"`
 	PoolsFormat         string    `json:"poolsFormat,omitempty"`

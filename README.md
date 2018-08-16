@@ -21,7 +21,7 @@ Choose either the binary or Docker installation methods.  Once installed, usage 
 
 ```bash
 sudo -i
-curl -sSL https://github.com/storageos/go-cli/releases/download/0.10.0/storageos_linux_amd64 > /usr/local/bin/storageos
+curl -skSL https://github.com/storageos/go-cli/releases/download/1.0.0-rc1/storageos_linux_amd64 > /usr/local/bin/storageos
 chmod +x /usr/local/bin/storageos
 exit
 ```
@@ -30,7 +30,7 @@ exit
 
 ```bash
 sudo -i
-curl -sSL https://github.com/storageos/go-cli/releases/download/0.10.0/storageos_darwin_amd64 > /usr/local/bin/storageos
+curl -skSL https://github.com/storageos/go-cli/releases/download/1.0.0-rc1/storageos_darwin_amd64 > /usr/local/bin/storageos
 chmod +x /usr/local/bin/storageos
 exit
 ```
@@ -40,7 +40,7 @@ exit
 We recommend that you create a bash alias for the docker run command:
 
 ```bash
-alias storageos=='docker run --rm -e STORAGEOS_HOST -e STORAGEOS_USERNAME -e STORAGEOS_PASSWORD storageos/cli'
+alias storageos='docker run --rm -e STORAGEOS_HOST -e STORAGEOS_USERNAME -e STORAGEOS_PASSWORD storageos/cli'
 ```
 
 ## Usage

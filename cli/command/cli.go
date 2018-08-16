@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/storageos/go-cli/cli/config/configfile"
 	cliflags "github.com/storageos/go-cli/cli/flags"
 	"github.com/storageos/go-cli/pkg/jointools"
+	"github.com/storageos/go-cli/version"
 )
 
 // Streams is an interface which exposes the standard input and output streams
@@ -37,7 +39,7 @@ type Cli interface {
 // Instances of the client can be returned from NewStorageOSCli.
 type StorageOSCli struct {
 	configFile      *configfile.ConfigFile
-	hosts           []string
+	hosts           string
 	username        string
 	password        string
 	in              *InStream
@@ -50,11 +52,11 @@ type StorageOSCli struct {
 }
 
 // GetHosts returns the client's endpoints
-func (cli *StorageOSCli) GetHosts() []string {
+func (cli *StorageOSCli) GetHosts() string {
 	return cli.hosts
 }
 
-// GetHosts returns the client's username
+// GetUsername returns the client's username
 func (cli *StorageOSCli) GetUsername() string {
 	return cli.username
 }
@@ -111,19 +113,34 @@ func (cli *StorageOSCli) ConfigFile() *configfile.ConfigFile {
 func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 	cli.configFile = LoadDefaultConfigFile(cli.err)
 
-	host, err := getServerHost(opt.Common.Hosts, opt.Common.TLS)
+	hosts, err := getServerHost(opt.Common.Hosts, opt.Common.TLS)
 	if err != nil {
 		return err
 	}
-	cli.hosts = []string{host}
+	cli.hosts = hosts
 
-	client, err := NewAPIClientFromFlags(host, opt.Common, cli.configFile)
+	client, err := NewAPIClientFromFlags(hosts, opt.Common, cli.configFile)
 	if err != nil {
 		return err
 	}
 	cli.client = client
 
 	cli.defaultVersion = cli.client.ClientVersion()
+
+	if !envHasProxy() {
+		// Attempt to set HTTP proxy for the client, if set
+		if proxy := cli.configFile.ProxyURL; proxy != "" {
+			proxyURL, err := url.Parse(proxy)
+			if err != nil {
+				return errors.New("invalid proxy url")
+			}
+			err = cli.client.SetProxy(proxyURL)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -146,7 +163,7 @@ func LoadDefaultConfigFile(err io.Writer) *configfile.ConfigFile {
 func NewAPIClientFromFlags(host string, opt *cliflags.CommonOptions, configFile *configfile.ConfigFile) (*api.Client, error) {
 
 	if host == "" {
-		return &api.Client{}, fmt.Errorf("STORAGEOS_HOST evironemnt variable not set")
+		return &api.Client{}, fmt.Errorf("STORAGEOS_HOST environment variable not set")
 	}
 
 	verStr := api.DefaultVersionStr
@@ -158,6 +175,9 @@ func NewAPIClientFromFlags(host string, opt *cliflags.CommonOptions, configFile 
 	if err != nil {
 		return &api.Client{}, err
 	}
+
+	// Set StorageOS CLI UserAgent for all the API requests.
+	client.SetUserAgent(strings.Join([]string{version.UserAgent, version.Version}, "/"))
 
 	initClientAuth(host, opt, configFile, client)
 	return client, nil
@@ -226,6 +246,19 @@ func getServerHost(hosts string, tls bool) (host string, err error) {
 	return jointools.ExpandJOIN(host), nil
 }
 
+var proxyEnvVars = [...]string{"HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
+
+// envHasProxy checks if any of the environment variables
+// relating to HTTP/HTTPS proxies are set.
+func envHasProxy() bool {
+	for _, v := range proxyEnvVars {
+		if os.Getenv(v) != "" {
+			return true
+		}
+	}
+	return false
+}
+
 // Standard alias definitions
 var (
 	CreateAliases  = []string{"c"}
@@ -236,6 +269,7 @@ var (
 	HealthAliases  = []string{"h"}
 )
 
+// WithAlias adds the aliases given to the command.
 func WithAlias(c *cobra.Command, aliases ...string) *cobra.Command {
 	c.Aliases = append(c.Aliases, aliases...)
 	return c

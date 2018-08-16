@@ -4,10 +4,13 @@ import (
 	"encoding/base64"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/gorilla/websocket"
 )
 
+// WebsocketConn will create a websocket to the given path on all hosts,
+// providing the stored authentication credentials.
 func (cli *StorageOSCli) WebsocketConn(path string) (*websocket.Conn, error) {
 	authHeader := base64.StdEncoding.EncodeToString([]byte(cli.GetUsername() + ":" + cli.GetPassword()))
 
@@ -28,10 +31,14 @@ func (cli *StorageOSCli) WebsocketConn(path string) (*websocket.Conn, error) {
 // WebsocketURLs creates websocket URL of all the hosts and returns a slice of
 // the URLs.
 func (cli *StorageOSCli) WebsocketURLs() []*url.URL {
-
 	urls := []*url.URL{}
 
-	for _, h := range cli.GetHosts() {
+	if cli.hosts == "" {
+		return urls
+	}
+
+	hosts := strings.Split(cli.hosts, ",")
+	for _, h := range hosts {
 		u, err := url.Parse(h)
 		if err != nil {
 			continue

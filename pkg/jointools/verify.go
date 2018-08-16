@@ -11,6 +11,8 @@ import (
 	"github.com/storageos/go-cli/discovery"
 )
 
+// VerifyJOIN will separate the members of a JOIN string into
+// fragments and verify that each is valid.
 func VerifyJOIN(join string) (errs []error) {
 	// Split into fragments by ',' and verify the fragments
 	for _, frag := range strings.Split(strings.TrimSpace(join), ",") {
@@ -20,6 +22,12 @@ func VerifyJOIN(join string) (errs []error) {
 	return errs
 }
 
+// VerifyJOINFragment will, given a fragment from a JOIN string,
+// verify that it is valid for use.
+//
+// In the instance that the value passed into it is a UUID,
+// the function will have the side effect of verifying that
+// value is a cluster token.
 func VerifyJOINFragment(joinfragment string) (errs []error) {
 	// Check to see if this is a discovery token
 	if api.IsUUID(joinfragment) {
@@ -59,6 +67,8 @@ func VerifyJOINFragment(joinfragment string) (errs []error) {
 	return errs
 }
 
+// VerifyHost will, given the host part of a URI authority segment, verify that
+// it is either a valid IP address or attempt to resolve it to a hostname.
 func VerifyHost(host string) []error {
 	if IsIPAddr(host) {
 		return nil // valid IP address
@@ -73,6 +83,9 @@ func VerifyHost(host string) []error {
 	return nil
 }
 
+// VerifyClusterToken will, given a token string, query the Discovery service
+// to retrieve information about the cluster if it exists. Further verification
+// is then performed on the node addresses retrieved.
 func VerifyClusterToken(token string) (errs []error) {
 	c, err := discovery.NewClient("", "", "")
 	if err != nil {
@@ -95,46 +108,37 @@ func VerifyClusterToken(token string) (errs []error) {
 	return errs
 }
 
+// IsValidScheme verifies whether or not the string value given to
+// it is a valid URI scheme for a JOIN member.
 func IsValidScheme(s string) bool {
 	switch s {
-	case "http", "tcp":
+	case "http", "tcp", "https":
 		return true
-
 	default:
 		return false
 	}
 }
 
+// IsValidPort verifies whether or not the string value given to
+// it is a valid port number.
 func IsValidPort(p string) bool {
 	port, err := strconv.Atoi(p)
 
 	return (err == nil) && (port > 0) && (port <= 65535)
 }
 
-func IsSchemeHost(s string) bool {
-	if strings.Count(s, ":") != 1 {
-		return false
-	}
-
-	if _, err := strconv.Atoi(strings.Split(s, ":")[1]); err == nil {
-		return false
-	}
-
-	return true
-}
-
+// IsHostPort checks that the input takes the form <hostname>:<port>.
 func IsHostPort(s string) bool {
 	if strings.Count(s, ":") != 1 {
 		return false
 	}
 
-	if _, err := strconv.Atoi(strings.Split(s, ":")[1]); err != nil {
-		return false
-	}
-
-	return true
+	port := strings.Split(s, ":")[1]
+	return IsValidPort(port)
 }
 
+// IsIPAddr attempts to parse the string into an IP address
+// returning whether or not it succeeded.
 func IsIPAddr(s string) bool {
 	return net.ParseIP(s) != nil
 }

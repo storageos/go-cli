@@ -1,7 +1,6 @@
 package system
 
 import (
-	"fmt"
 	"time"
 
 	"context"
@@ -10,6 +9,7 @@ import (
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
+	"github.com/storageos/go-cli/pkg/constants"
 	"github.com/storageos/go-cli/pkg/templates"
 	"github.com/storageos/go-cli/version"
 )
@@ -56,7 +56,7 @@ func NewVersionCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 }
 
 func runVersion(storageosCli *command.StorageOSCli, opts *versionOptions) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultAPITimeout*time.Second)
 	defer cancel()
 
 	templateFormat := versionTemplate
@@ -68,11 +68,6 @@ func runVersion(storageosCli *command.StorageOSCli, opts *versionOptions) error 
 	if err != nil {
 		return cli.StatusError{StatusCode: 64,
 			Status: "Template parsing error: " + err.Error()}
-	}
-
-	APIVersion := storageosCli.Client().ClientVersion()
-	if defaultAPIVersion := storageosCli.DefaultVersion(); APIVersion != defaultAPIVersion {
-		APIVersion = fmt.Sprintf("%s (downgraded from %s)", APIVersion, defaultAPIVersion)
 	}
 
 	vd := types.VersionResponse{
