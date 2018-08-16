@@ -3,7 +3,6 @@ package cluster
 import (
 	"github.com/dnephin/cobra"
 
-	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
@@ -40,28 +39,15 @@ func runConnectivity(storageosCli *command.StorageOSCli, opt connectivityOptions
 		return err
 	}
 
-	switch opt.quiet {
-	case true:
-		return formatter.ConnectivityWriteSummary(formatter.Context{
-			Output: storageosCli.Out(),
-			Format: formatter.NewConnectivityFormat(opt.format, opt.quiet),
-		}, isOK(results))
-	default:
-		fmtCtx := formatter.Context{
-			Output: storageosCli.Out(),
-			Format: formatter.NewConnectivityFormat(opt.format, opt.quiet),
-		}
-		return formatter.ConnectivityWrite(fmtCtx, results)
+	summary := false
+	if opt.format == "summary" {
+		summary = true
 	}
 
-}
-
-// isOK returns false if any connectivity result was not ok.
-func isOK(results []types.ConnectivityResult) bool {
-	for _, result := range results {
-		if !result.Passes() {
-			return false
-		}
+	fmtCtx := formatter.Context{
+		Output: storageosCli.Out(),
+		Format: formatter.NewConnectivityFormat(opt.format, opt.quiet),
+		Trunc:  summary, // Use Trunc to flag that we should summarize results
 	}
-	return true
+	return formatter.ConnectivityWrite(fmtCtx, results)
 }

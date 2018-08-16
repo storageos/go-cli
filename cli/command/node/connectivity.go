@@ -1,10 +1,6 @@
 package node
 
 import (
-	"context"
-	"fmt"
-	"io"
-
 	"github.com/dnephin/cobra"
 
 	"github.com/storageos/go-api/types"
@@ -28,14 +24,6 @@ func newConnectivityCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Args:  cli.RequiresMinArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opt.names = args
-
-			if len(opt.names) == 0 {
-				names, err := allNodeNames(storageosCli)
-				if err != nil {
-					return err
-				}
-				opt.names = names
-			}
 			return runConnectivity(storageosCli, opt)
 		},
 	}
@@ -46,63 +34,36 @@ func newConnectivityCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	return cmd
 }
 
-func allNodeNames(storageosCli *command.StorageOSCli) ([]string, error) {
-	nodes, err := storageosCli.Client().NodeList(types.ListOptions{
-		Context: context.Background(),
-	})
+func runConnectivity(storageosCli *command.StorageOSCli, opt connectivityOptions) (err error) {
 
-	if err != nil {
-		return nil, err
-	}
-
-	names := make([]string, 0, len(nodes))
-	for _, n := range nodes {
-		names = append(names, n.Name)
-	}
-
-	return names, nil
-}
-
-type result struct {
-	initiator string
-	result    []types.ConnectivityResult
-}
-
-func runConnectivity(storageosCli *command.StorageOSCli, opt connectivityOptions) error {
 	client := storageosCli.Client()
 
-	res := make([]result, 0, len(opt.names))
-	for _, ref := range opt.names {
-		c, err := client.Connectivity(ref)
+	var results types.ConnectivityResults
+	switch {
+	case len(opt.names) == 0:
+		results, err = client.Connectivity("")
 		if err != nil {
 			return err
 		}
-
-		res = append(res, result{ref, c})
-	}
-
-	return printConnectivityResult(storageosCli.Out(), res, opt)
-}
-
-func printConnectivityResult(out io.Writer, results []result, opt connectivityOptions) error {
-	for i, result := range results {
-		if len(results) > 1 {
-			if i > 0 {
-				fmt.Fprintf(out, "\n\n")
-			}
-			fmt.Fprintf(out, "Connectivity of %s:\n", result.initiator)
-		}
-
-		fmtCtx := formatter.Context{
-			Output: out,
-			Format: formatter.NewConnectivityFormat(opt.format, opt.quiet),
-		}
-
-		if result.result != nil {
-			if err := formatter.ConnectivityWrite(fmtCtx, result.result); err != nil {
+	default:
+		for _, ref := range opt.names {
+			nodeResults, err := client.Connectivity(ref)
+			if err != nil {
 				return err
 			}
+			results = append(results, nodeResults...)
 		}
 	}
-	return nil
+
+	summary := false
+	if opt.format == "summary" {
+		summary = true
+	}
+
+	fmtCtx := formatter.Context{
+		Output: storageosCli.Out(),
+		Format: formatter.NewConnectivityFormat(opt.format, opt.quiet),
+		Trunc:  summary, // Use Trunc to flag that we should summarize results
+	}
+	return formatter.ConnectivityWrite(fmtCtx, results)
 }

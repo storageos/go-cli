@@ -16,6 +16,7 @@ const (
 	TableFormatKey         = "table"
 	RawFormatKey           = "raw"
 	PrettyFormatKey        = "pretty"
+	SummaryFormatKey       = "summary"
 	CPHealthTableFormatKey = "cp"
 	DPHealthTableFormatKey = "dp"
 

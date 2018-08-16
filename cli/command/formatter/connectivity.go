@@ -7,8 +7,10 @@ import (
 )
 
 const (
-	connectivityTableFormat = "table {{.Source}}\t{{.Name}}\t{{.Address}}\t{{.Latency}}\t{{.Status}}\t{{.Error}}\t"
-	connectivityRawFormat   = `source: {{.Source}}\nname: {{.Name}}\naddress: {{.Address}}\nlatency: {{.Latency}}\nstatus: {{.Status}}\nmessage: {{.Error}}\n`
+	connectivityTableFormat   = "table {{.Source}}\t{{.Name}}\t{{.Address}}\t{{.Latency}}\t{{.Status}}\t{{.Error}}"
+	connectivityRawFormat     = `source: {{.Source}}\nname: {{.Name}}\naddress: {{.Address}}\nlatency: {{.Latency}}\nstatus: {{.Status}}\nmessage: {{.Error}}\n`
+	connectivityQuietFormat   = "{{.Name}}\t{{.Status}}"
+	connectivitySummaryFormat = "{{.Status}}"
 
 	connectivityNameHeader    = "NAME"
 	connectivityAddressHeader = "ADDRESS"
@@ -16,44 +18,41 @@ const (
 	connectivityLatencyHeader = "LATENCY"
 	connectivityStateHeader   = "STATUS"
 	connectivityErrorHeader   = "MESSAGE"
+	connectivityTestHeader    = "SOURCE->ADDRESS"
 )
 
 // NewConnectivityFormat returns a format for use with a connectivity Context
 func NewConnectivityFormat(source string, quiet bool) Format {
-
-	// Quiet should return OK/ERROR summary
-	if quiet {
-		return "{{.OK}}"
-	}
-
 	switch source {
 	case TableFormatKey:
+		if quiet {
+			return "table {{.Test}}\t{{.Status}}"
+		}
 		return connectivityTableFormat
-
 	case RawFormatKey:
+		if quiet {
+			return "{{.Test}}: {{.Status}}"
+		}
 		return connectivityRawFormat
+	case SummaryFormatKey:
+		return connectivitySummaryFormat
 	}
-
 	return Format(source)
 }
 
-// ConnectivityWriteSummary writes a formatted connectivity summary using the Context
-func ConnectivityWriteSummary(ctx Context, ok bool) error {
-	render := func(format func(subContext subContext) error) error {
-		if err := format(&connectivitySummaryContext{ok: ok}); err != nil {
-			return err
-		}
-		return nil
-	}
-	return ctx.Write(&connectivitySummaryContext{}, render)
-}
-
 // ConnectivityWrite writes formatted connectivity results using the Context
-func ConnectivityWrite(ctx Context, result []types.ConnectivityResult) error {
+func ConnectivityWrite(ctx Context, results types.ConnectivityResults) error {
 	render := func(format func(subContext subContext) error) error {
-		for _, cr := range result {
-			if err := format(&connectivityContext{result: cr}); err != nil {
+		switch ctx.Trunc {
+		case true:
+			if err := format(&connectivityContext{ok: results.IsOK()}); err != nil {
 				return err
+			}
+		case false:
+			for _, cr := range results {
+				if err := format(&connectivityContext{result: cr}); err != nil {
+					return err
+				}
 			}
 		}
 		return nil
@@ -61,55 +60,59 @@ func ConnectivityWrite(ctx Context, result []types.ConnectivityResult) error {
 	return ctx.Write(&connectivityContext{}, render)
 }
 
-type connectivitySummaryContext struct {
-	HeaderContext
-	ok bool
-}
-
-func (c *connectivitySummaryContext) OK() string {
-	if c.ok {
-		return "OK"
-	}
-	return "ERROR"
-}
-
 type connectivityContext struct {
 	HeaderContext
 	result types.ConnectivityResult
+	ok     bool
 }
 
-func (c connectivityContext) MarshalJSON() ([]byte, error) {
+func (c *connectivityContext) MarshalJSON() ([]byte, error) {
 	return marshalJSON(c)
 }
 
-func (c connectivityContext) Name() string {
+func (c *connectivityContext) Name() string {
 	c.AddHeader(connectivityNameHeader)
 	return c.result.Label
 }
 
-func (c connectivityContext) Address() string {
+func (c *connectivityContext) Address() string {
 	c.AddHeader(connectivityAddressHeader)
 	return c.result.Address
 }
 
-func (c connectivityContext) Source() string {
+func (c *connectivityContext) Source() string {
 	c.AddHeader(connectivitySourceHeader)
 	return c.result.Source
 }
 
-func (c connectivityContext) Latency() string {
+func (c *connectivityContext) Latency() string {
 	c.AddHeader(connectivityLatencyHeader)
 	return fmt.Sprint(c.result.LatencyNS)
 }
 
-func (c connectivityContext) Error() string {
+func (c *connectivityContext) Error() string {
 	c.AddHeader(connectivityErrorHeader)
 	return c.result.Error
 }
 
-func (c connectivityContext) Status() string {
+func (c *connectivityContext) Test() string {
+	c.AddHeader(connectivityTestHeader)
+	return c.result.Source + "->" + c.result.Address
+}
+
+func (c *connectivityContext) Status() string {
 	c.AddHeader(connectivityStateHeader)
-	if c.result.Passes() {
+
+	// Return result status if single result
+	if c.result.Address != "" {
+		if c.result.IsOK() {
+			return "OK"
+		}
+		return "ERROR"
+	}
+
+	// If we only have a summary, use that
+	if c.ok {
 		return "OK"
 	}
 	return "ERROR"
