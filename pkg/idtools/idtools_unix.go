@@ -11,8 +11,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/opencontainers/runc/libcontainer/user"
 	"github.com/storageos/go-cli/pkg/system"
-	"github.com/storageos/go-cli/pkg/user"
 )
 
 var (

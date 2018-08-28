@@ -67,6 +67,14 @@
   version = "v1.0"
 
 [[projects]]
+  digest = "1:e1945a9a8aff7a8504d8e3143e40bc891ccadf9ba1b2f615e8227729ce828c34"
+  name = "github.com/opencontainers/runc"
+  packages = ["libcontainer/user"]
+  pruneopts = "UT"
+  revision = "4fc53a81fb7c994640722ac585fa9ca548971871"
+  version = "v1.0.0-rc5"
+
+[[projects]]
   digest = "1:be5a31c22ef895e30d6123413a0bea6e1980dbf7d5c67d741d9a8cf267836186"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -132,6 +140,7 @@
     "github.com/docker/go-connections/tlsconfig",
     "github.com/docker/go-units",
     "github.com/gorilla/websocket",
+    "github.com/opencontainers/runc/libcontainer/user",
     "github.com/sirupsen/logrus",
     "github.com/spf13/pflag",
     "github.com/storageos/go-api",

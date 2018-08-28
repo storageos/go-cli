@@ -57,6 +57,10 @@
   name = "github.com/storageos/go-api"
   branch = "master"
 
+[[constraint]]
+  name = "github.com/opencontainers/runc"
+  version = "v1.0.0-rc5"
+
 [prune]
   go-tests = true
   unused-packages = true
