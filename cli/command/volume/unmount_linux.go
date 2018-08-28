@@ -5,23 +5,22 @@ package volume
 import (
 	"context"
 	"fmt"
+	"os"
 	"syscall"
-	// "strings"
 	"time"
 
 	"github.com/dnephin/cobra"
+	"github.com/docker/docker/pkg/system"
+
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	cliconfig "github.com/storageos/go-cli/cli/config"
-	// "github.com/storageos/go-cli/pkg/host"
 	"github.com/storageos/go-cli/pkg/mount"
-	"github.com/storageos/go-cli/pkg/system"
 	"github.com/storageos/go-cli/pkg/validation"
 
 	"github.com/storageos/go-api/types"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/storageos/go-cli/pkg/host"
 )
 
 type unmountOptions struct {
@@ -78,7 +77,7 @@ func runUnmount(storageosCli *command.StorageOSCli, opt unmountOptions, mountDri
 	}
 
 	// getting volume
-	hostname, err := host.Get()
+	hostname, err := os.Hostname()
 	if err != nil && !opt.force {
 		return fmt.Errorf("failed to get current node hostname, unable to unmount volume (must be forced), error: %s", err)
 	}

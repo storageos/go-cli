@@ -20,6 +20,14 @@
   version = "v0.4.7"
 
 [[projects]]
+  branch = "master"
+  digest = "1:fc8dbcc2a5de7c093e167828ebbdf551641761d2ad75431d3a167d467a264115"
+  name = "github.com/containerd/continuity"
+  packages = ["pathdriver"]
+  pruneopts = "UT"
+  revision = "c7c5070e6f6e090ab93b0a61eb921f2196fc3383"
+
+[[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -34,6 +42,21 @@
   pruneopts = "UT"
   revision = "0e9ca70a23585bdaab4beba1e7c4c23a1adfa857"
   version = "v1.5.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:4fd04b1f7466dd3b1e1b51beb6c033d35032b331d4b2270000dea09c816d1be8"
+  name = "github.com/docker/docker"
+  packages = [
+    "pkg/homedir",
+    "pkg/idtools",
+    "pkg/mount",
+    "pkg/system",
+    "pkg/term",
+    "pkg/term/windows",
+  ]
+  pruneopts = "UT"
+  revision = "e8cc5a0b3761f2b6ce12e7c4244180ed061c8153"
 
 [[projects]]
   digest = "1:5aa82b2c22be790c001b0896626c134a1b27bb928897df97b88f1165f393f555"
@@ -65,6 +88,25 @@
   pruneopts = "UT"
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
+
+[[projects]]
+  digest = "1:ee4d4af67d93cc7644157882329023ce9a7bcfce956a079069a9405521c7cc8d"
+  name = "github.com/opencontainers/go-digest"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
+  version = "v1.0.0-rc1"
+
+[[projects]]
+  digest = "1:11db38d694c130c800d0aefb502fb02519e514dc53d9804ce51d1ad25ec27db6"
+  name = "github.com/opencontainers/image-spec"
+  packages = [
+    "specs-go",
+    "specs-go/v1",
+  ]
+  pruneopts = "UT"
+  revision = "d60099175f88c47cd379c4738d158884749ed235"
+  version = "v1.0.1"
 
 [[projects]]
   digest = "1:e1945a9a8aff7a8504d8e3143e40bc891ccadf9ba1b2f615e8227729ce828c34"
@@ -132,15 +174,14 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/Azure/go-ansiterm",
-    "github.com/Azure/go-ansiterm/winterm",
-    "github.com/Microsoft/go-winio",
     "github.com/davecgh/go-spew/spew",
     "github.com/dnephin/cobra",
+    "github.com/docker/docker/pkg/homedir",
+    "github.com/docker/docker/pkg/system",
+    "github.com/docker/docker/pkg/term",
     "github.com/docker/go-connections/tlsconfig",
     "github.com/docker/go-units",
     "github.com/gorilla/websocket",
-    "github.com/opencontainers/runc/libcontainer/user",
     "github.com/sirupsen/logrus",
     "github.com/spf13/pflag",
     "github.com/storageos/go-api",
@@ -148,7 +189,6 @@
     "github.com/storageos/go-api/types",
     "github.com/storageos/go-api/types/versions",
     "golang.org/x/crypto/ssh/terminal",
-    "golang.org/x/sys/windows",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

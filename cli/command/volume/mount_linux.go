@@ -6,17 +6,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"syscall"
 	"time"
 
 	"github.com/dnephin/cobra"
+	"github.com/docker/docker/pkg/system"
+
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	cliconfig "github.com/storageos/go-cli/cli/config"
-	"github.com/storageos/go-cli/pkg/host"
 	"github.com/storageos/go-cli/pkg/mount"
-	"github.com/storageos/go-cli/pkg/system"
 	"github.com/storageos/go-cli/pkg/validation"
 
 	"github.com/storageos/go-api/types"
@@ -57,7 +58,7 @@ func newMountCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	// Get current hostname.
-	hostname, err := host.Get()
+	hostname, err := os.Hostname()
 	if err != nil {
 		hostname = "unknown"
 	}
