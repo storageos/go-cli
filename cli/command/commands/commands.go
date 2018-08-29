@@ -22,7 +22,7 @@ import (
 	"github.com/storageos/go-cli/cli/command/volume"
 )
 
-// AddCommands adds all the commands from cli/command to the root command
+// AddCommands adds all the commands from cli/command to the root command.
 func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 	cmd.AddCommand(
 		command.WithAlias(namespace.NewNamespaceCommand(storageosCli), "ns"),
@@ -47,6 +47,9 @@ func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 	)
 }
 
+// NewBashGenerationFunction returns a command which when run will, upon confirmation
+// attempt to either install bash completions to the appropriate file, or print them
+// to stdout.
 func NewBashGenerationFunction(storageosCli *command.StorageOSCli) *cobra.Command {
 	var dump bool
 
@@ -62,7 +65,7 @@ func NewBashGenerationFunction(storageosCli *command.StorageOSCli) *cobra.Comman
 
 			// If we are not on linux or darwin, we don't know how to install
 			if runtime.GOOS != "linux" && runtime.GOOS != "darwin" {
-				return fmt.Errorf("cannot install on %s, try manualy with the --stdout flag", runtime.GOOS)
+				return fmt.Errorf("cannot install on %s, try manually with the --stdout flag", runtime.GOOS)
 			}
 
 			dirs := []string{

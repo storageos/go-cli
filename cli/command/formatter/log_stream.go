@@ -81,9 +81,7 @@ func marshalEntry(msg []byte) (*logrus.Entry, error) {
 
 type logStreamContext struct {
 	HeaderContext
-	m     map[string]interface{}
 	entry *logrus.Entry
-	text  []byte
 }
 
 // Text uses the default logrus text formatter
@@ -148,7 +146,7 @@ func (c *logStreamContext) Error() string {
 func str(v interface{}) string {
 	switch vv := v.(type) {
 	case string:
-		return string(vv)
+		return vv
 	default:
 		return ""
 	}

@@ -63,7 +63,7 @@ func verfyHostPlatform() error {
 
 		// If we dont think we are in a container, fail and warn the user
 		if inContainer, err := isInContainer(); err == nil && !inContainer {
-			return errors.New("To use the StorageOS CLI on Container Linux, you need to run the storageos/cli image.")
+			return errors.New("to use the StorageOS CLI on Container Linux, you need to run the storageos/cli image")
 		}
 	}
 	return nil

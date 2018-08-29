@@ -53,6 +53,9 @@ func labeldeprecationNotice(old, new string) string {
 	return depNotice + ", refer to https://docs.storageos.com for usage details"
 }
 
+// ValidateLabelSet will perform validation of the labels given, using the behaviour
+// of ValidateLabel. Any warning messages are collected, whilst any errors are combined
+// and returned as a singular error.
 func ValidateLabelSet(labels map[string]string) (warnings []string, err error) {
 	errs := make([]string, 0, len(labels))
 
@@ -71,6 +74,8 @@ func ValidateLabelSet(labels map[string]string) (warnings []string, err error) {
 	return warnings, err
 }
 
+// ValidateLabel will check if the the label key given has been deprecated,
+// returning the appropriate deprecation notice if so.
 func ValidateLabel(k, v string) (warnings []string, err error) {
 	if updated, ok := deprecatedLabels[k]; ok {
 		warnings = append(warnings, labeldeprecationNotice(k, updated))

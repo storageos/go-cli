@@ -1,8 +1,9 @@
 package formatter
 
 import (
-	"github.com/storageos/go-api/types"
 	"strings"
+
+	"github.com/storageos/go-api/types"
 )
 
 const (
@@ -15,6 +16,11 @@ const (
 	userRoleHeader     = "ROLE"
 )
 
+// NewUserFormat returns a format string for user list operations
+// corresponding to the format key passed to it. If the key given
+// is not supported it will be converted to a format string and returned.
+// If the quiet parameter is set and the format key is supported,
+// only the username will be displayed.
 func NewUserFormat(source string, quiet bool) Format {
 	switch source {
 	case TableFormatKey:
@@ -31,6 +37,8 @@ func NewUserFormat(source string, quiet bool) Format {
 	return Format(source)
 }
 
+// UserWrite writes the given usuers to the provided context,
+// using the format specified within the context.
 func UserWrite(ctx Context, users []*types.User) error {
 	render := func(format func(subContext subContext) error) error {
 		for _, user := range users {

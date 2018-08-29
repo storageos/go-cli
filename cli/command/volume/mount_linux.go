@@ -166,7 +166,7 @@ RETRY:
 	err := driver.MountVolume(ctx, volume.ID, opts.mountpoint, fsType, volume.MkfsDoneAt.IsZero() && !volume.MkfsDone)
 	if err != nil {
 		// If this is a permanent error, stop retrying
-		if mountErr, ok := err.(*mount.MountError); ok && mountErr.Fatal {
+		if mountErr, ok := err.(*mount.Error); ok && mountErr.Fatal {
 			log.WithFields(log.Fields{
 				"volume_id":  volume.ID,
 				"mountpoint": opts.mountpoint,

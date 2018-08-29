@@ -3,6 +3,7 @@ package logout
 import (
 	"errors"
 	"fmt"
+
 	"github.com/dnephin/cobra"
 
 	api "github.com/storageos/go-api"
@@ -15,6 +16,9 @@ type logoutOptions struct {
 	host string
 }
 
+// NewLogoutCommand returns a command which, when run, will remove the
+// entry for the given host(s) from the credentials store if present.
+// The host may be given either by positional argument or flag.
 func NewLogoutCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := logoutOptions{}
 
@@ -28,7 +32,7 @@ func NewLogoutCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&opt.host, "host", "", "The host to remove the credentials for")
+	flags.StringVarP(&opt.host, "host", "H", "", "The host to remove the credentials for")
 	flags.Lookup("host").Hidden = true
 
 	return cmd
