@@ -114,8 +114,7 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	if err != nil {
 		select {
 		case <-ctx.Done():
-			// FIXME: if we timed out on requesting volume mount from CP, we should be able
-			// to cancel the mount request so that user doesn't have to unmount
+			// Server should handle what to do if we close the connection whilst waiting for a response
 			return fmt.Errorf("timed out waiting for volume mount lock")
 		default:
 			return err
