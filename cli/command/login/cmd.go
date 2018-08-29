@@ -113,7 +113,7 @@ func promptUsername(storageosCli *command.StorageOSCli) (string, error) {
 
 func promptPassword(storageosCli *command.StorageOSCli) (string, error) {
 	fmt.Fprint(storageosCli.Out(), "Password: ")
-	p, err := terminal.ReadPassword(syscall.Stdin)
+	p, err := terminal.ReadPassword(int(syscall.Stdin)) // Cast to int for windows and others which use uintptr
 	if err != nil {
 		return "", err
 	}
