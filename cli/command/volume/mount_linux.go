@@ -30,6 +30,9 @@ var (
 	ErrVolumeMounted = errors.New("volume is mounted, unmount it before mounting it again")
 )
 
+// Failed mount retry back-off upper bound.
+const mountBackoffUB = 4 * time.Second
+
 type mountOptions struct {
 	ref        string
 	timeout    time.Duration
@@ -105,8 +108,9 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	defer cancel()
 
 	err = client.VolumeMount(types.VolumeMountOptions{
-		Context: ctx,
-		ID:      vol.ID, Namespace: namespace,
+		Context:    ctx,
+		ID:         vol.ID,
+		Namespace:  namespace,
 		Client:     hostname,
 		Mountpoint: opt.mountpoint,
 		FsType:     vol.FSType,
@@ -163,39 +167,38 @@ func retryableMount(ctx context.Context, volume *types.Volume, deviceRootDir str
 
 RETRY:
 	err := driver.MountVolume(ctx, volume.ID, opts.mountpoint, fsType, volume.MkfsDoneAt.IsZero() && !volume.MkfsDone)
-	if err != nil {
-		// If this is a permanent error, stop retrying
-		if mountErr, ok := err.(*mount.Error); ok && mountErr.Fatal {
-			log.WithFields(log.Fields{
-				"volume_id":  volume.ID,
-				"mountpoint": opts.mountpoint,
-				"err":        err.Error(),
-			}).Error("failed to mount volume")
-			return err
-		}
-
-		select {
-		case <-ctx.Done():
-			return err
-		default:
-			// Wait before retry
-			time.Sleep(backoff)
-			// Increase backoff period
-			retries++
-			backoff *= 2
-			fmt.Printf("failed to mount volume, beginning retry %d\n", retries)
-			log.WithFields(log.Fields{
-				"volume_id":  volume.ID,
-				"mountpoint": opts.mountpoint,
-				"err":        err.Error(),
-				"retry":      retries,
-			}).Error("failed to mount volume, beginning retry")
-			goto RETRY
-		}
-
+	if err == nil {
+		return nil
 	}
 
-	return nil
+	// If this is a permanent error, stop retrying
+	if mountErr, ok := err.(*mount.Error); ok && mountErr.Fatal {
+		log.WithFields(log.Fields{
+			"volume_id":  volume.ID,
+			"mountpoint": opts.mountpoint,
+			"err":        err.Error(),
+		}).Error("failed to mount volume")
+		return err
+	}
+
+	select {
+	case <-ctx.Done():
+		return err
+	case <-time.After(backoff):
+		// Increase backoff period
+		retries++
+		if backoff < mountBackoffUB {
+			backoff *= 2
+		}
+		fmt.Printf("failed to mount volume, beginning retry %d\n", retries)
+		log.WithFields(log.Fields{
+			"volume_id":  volume.ID,
+			"mountpoint": opts.mountpoint,
+			"err":        err.Error(),
+			"retry":      retries,
+		}).Error("failed to mount volume, beginning retry")
+		goto RETRY
+	}
 }
 
 // isVolumeReady - mount only unmounted and active volume
