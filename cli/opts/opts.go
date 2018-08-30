@@ -288,10 +288,8 @@ func ValidateLabel(val string) (string, error) {
 		return "", fmt.Errorf("bad attribute format: %s", val)
 	}
 
-	if warns, err := validation.ValidateLabel(split[0], split[1]); err != nil {
-		return "", err
-	} else if len(warns) > 0 {
-		return "", errors.New(strings.Join(warns, ","))
+	if notice, deprecated := validation.IsDeprecated(split[0]); deprecated {
+		return "", errors.New(notice)
 	}
 
 	return val, nil
