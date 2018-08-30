@@ -45,7 +45,6 @@
   version = "v1.5.1"
 
 [[projects]]
-  branch = "master"
   digest = "1:4fd04b1f7466dd3b1e1b51beb6c033d35032b331d4b2270000dea09c816d1be8"
   name = "github.com/docker/docker"
   packages = [
@@ -57,7 +56,7 @@
     "pkg/term/windows",
   ]
   pruneopts = "UT"
-  revision = "e8cc5a0b3761f2b6ce12e7c4244180ed061c8153"
+  revision = "64b7575802d4cab61fd339f14427b1d881c3b6c4"
 
 [[projects]]
   digest = "1:5aa82b2c22be790c001b0896626c134a1b27bb928897df97b88f1165f393f555"
