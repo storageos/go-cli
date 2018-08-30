@@ -82,7 +82,7 @@ func getHost(opt loginOptions, args []string) (string, error) {
 
 	switch {
 	case opt.host != "" && len(args) > 0:
-		return "", errors.New("Conflicting options: either specify --host or provide positional arg, not both")
+		return "", errors.New("conflicting options: either specify --host or provide positional arg, not both")
 
 	case opt.host != "":
 		join = opt.host

@@ -33,19 +33,19 @@ func TestUpdateLabel(t *testing.T) {
 			name:    "multiple labels",
 			node:    &types.Node{},
 			label:   "country=UK,load=prod",
-			wantErr: errors.New("Bad label format: country=UK,load=prod"),
+			wantErr: errors.New("bad label format: country=UK,load=prod"),
 		},
 		{
 			name:    "invalid label",
 			node:    &types.Node{},
 			label:   "country=",
-			wantErr: errors.New("Bad label format: country="),
+			wantErr: errors.New("bad label format: country="),
 		},
 		{
 			name:    "invalid label",
 			node:    &types.Node{},
 			label:   "=UK",
-			wantErr: errors.New("Bad label format: =UK"),
+			wantErr: errors.New("bad label format: =UK"),
 		},
 		{
 			name: "append new label",

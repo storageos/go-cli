@@ -43,7 +43,7 @@ func getHost(opt logoutOptions, args []string) (string, error) {
 
 	switch {
 	case len(args) == 1 && opt.host != "":
-		return "", errors.New("Conflicting options: either specify --host or provide positional arg, not both")
+		return "", errors.New("conflicting options: either specify --host or provide positional arg, not both")
 
 	case len(args) == 1:
 		join = args[0]
