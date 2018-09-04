@@ -72,7 +72,7 @@ func verifyCredsWithServer(username, password, host string) error {
 	return nil
 }
 
-func getHost(opt loginOptions, args []string) (string, error) {
+func getHost(discoveryHost string, opt loginOptions, args []string) (string, error) {
 	var join string
 
 	switch {
@@ -89,10 +89,10 @@ func getHost(opt loginOptions, args []string) (string, error) {
 		join = api.DefaultHost
 	}
 
-	if errs := jointools.VerifyJOIN(join); errs != nil {
+	if errs := jointools.VerifyJOIN(discoveryHost, join); errs != nil {
 		return "", fmt.Errorf("error: %+v", errs)
 	}
-	return jointools.ExpandJOIN(join), nil
+	return jointools.ExpandJOIN(discoveryHost, join), nil
 }
 
 func promptUsername(storageosCli *command.StorageOSCli) (string, error) {
@@ -118,7 +118,7 @@ func promptPassword(storageosCli *command.StorageOSCli) (string, error) {
 }
 
 func runLogin(storageosCli *command.StorageOSCli, opt loginOptions, args []string) (err error) {
-	opt.host, err = getHost(opt, args)
+	opt.host, err = getHost(storageosCli.GetDiscovery(), opt, args)
 	if err != nil {
 		return err
 	}

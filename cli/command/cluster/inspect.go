@@ -36,7 +36,7 @@ func newInspectCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 }
 
 func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
-	client, err := discovery.NewClient("", "", "")
+	client, err := discovery.NewClient(storageosCli.GetDiscovery(), "", "")
 	if err != nil {
 		return err
 	}

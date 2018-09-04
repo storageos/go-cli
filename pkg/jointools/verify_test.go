@@ -51,7 +51,7 @@ func TestVerifyJOINSingleHost(t *testing.T) {
 	}
 
 	for _, f := range fixtures {
-		errs := jointools.VerifyJOIN(f.input)
+		errs := jointools.VerifyJOIN("", f.input)
 		if (errs != nil) != f.expectError {
 			t.Errorf("unexpected result. input: %v, errors: %+v (expecting error? %v)", f.input, errs, f.expectError)
 		}
@@ -90,7 +90,7 @@ func TestVerifyJOINMultiHost(t *testing.T) {
 	}
 
 	for _, f := range fixtures {
-		errs := jointools.VerifyJOIN(f.input)
+		errs := jointools.VerifyJOIN("", f.input)
 		if (errs != nil) != f.expectError {
 			t.Errorf("unexpected result. input: %v, errors: %+v (expecting error? %v)", f.input, errs, f.expectError)
 		}
@@ -141,7 +141,7 @@ func TestVerifyJOINFragment(t *testing.T) {
 	}
 
 	for _, f := range fixtures {
-		errs := jointools.VerifyJOINFragment(f.input)
+		errs := jointools.VerifyJOINFragment("", f.input)
 		if (errs != nil) != f.expectError {
 			t.Errorf("unexpected result. input: %v, errors: %+v (expecting error? %v)", f.input, errs, f.expectError)
 		}
