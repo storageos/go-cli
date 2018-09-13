@@ -3,6 +3,7 @@ package logout
 import (
 	"errors"
 	"fmt"
+
 	"github.com/dnephin/cobra"
 
 	api "github.com/storageos/go-api"
@@ -15,13 +16,14 @@ type logoutOptions struct {
 	host string
 }
 
+// NewLogoutCommand returns the Cobra command for logout
 func NewLogoutCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := logoutOptions{}
 
 	cmd := &cobra.Command{
 		Use:   "logout [HOST]",
 		Short: "Delete stored login credentials for a given storageos host",
-		Args:  cli.RequiresMaxArgs(1),
+		Args:  cli.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runDelete(storageosCli, opt, args)
 		},
