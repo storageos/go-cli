@@ -49,7 +49,7 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 		return err
 	}
 
-	client, err := discovery.NewClient("", "", "")
+	client, err := discovery.NewClient(storageosCli.GetDiscovery(), "", "")
 	if err != nil {
 		return err
 	}

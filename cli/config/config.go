@@ -22,6 +22,7 @@ const (
 	EnvStorageosUsername   = "STORAGEOS_USERNAME"
 	EnvStorageosPassword   = "STORAGEOS_PASSWORD"
 	EnvStorageosAPIVersion = "STORAGEOS_API_VERSION"
+	EnvStorageOSDiscovery  = "STORAGEOS_DISCOVERY"
 )
 
 var (

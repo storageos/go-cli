@@ -10,11 +10,11 @@ import (
 )
 
 // ExpandJOIN will expand each JOIN fragment out to the form <scheme>://<ip>:<port>.
-func ExpandJOIN(join string) string {
+func ExpandJOIN(discoveryHost, join string) string {
 	fragments := make([]string, 0)
 
 	for _, frag := range strings.Split(strings.TrimSpace(join), ",") {
-		fragments = append(fragments, ExpandJOINFragment(strings.TrimSpace(frag))...)
+		fragments = append(fragments, ExpandJOINFragment(discoveryHost, strings.TrimSpace(frag))...)
 	}
 
 	return strings.Join(fragments, ",")
@@ -22,10 +22,10 @@ func ExpandJOIN(join string) string {
 
 // ExpandJOINFragment will, given an individal JOIN string fragment, expand it out
 // to the form <scheme>://<ip>:<port>.
-func ExpandJOINFragment(joinfragment string) []string {
+func ExpandJOINFragment(discoveryHost, joinfragment string) []string {
 	// Check to see if this is a discovery token
 	if api.IsUUID(joinfragment) {
-		return ExpandClusterToken(joinfragment)
+		return ExpandClusterToken(discoveryHost, joinfragment)
 	}
 
 	var scheme string
@@ -82,8 +82,8 @@ func ExpandHost(host string) []string {
 // ExpandClusterToken will query the Discovery service for the cluster
 // corresponding to the token given, performing the expansion on the
 // JOIN fragments retrieved.
-func ExpandClusterToken(token string) (nodes []string) {
-	c, err := discovery.NewClient("", "", "")
+func ExpandClusterToken(discoveryHost, token string) (nodes []string) {
+	c, err := discovery.NewClient(discoveryHost, "", "")
 	if err != nil {
 		return nil
 	}
@@ -97,7 +97,7 @@ func ExpandClusterToken(token string) (nodes []string) {
 	for _, node := range cluster.Nodes {
 		// Nodes could not have joined yet, this is not per-se an error
 		if node.AdvertiseAddress != "" {
-			nodes = append(nodes, ExpandJOINFragment(node.AdvertiseAddress)...)
+			nodes = append(nodes, ExpandJOINFragment(discoveryHost, node.AdvertiseAddress)...)
 		}
 	}
 

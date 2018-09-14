@@ -13,10 +13,10 @@ import (
 
 // VerifyJOIN will separate the members of a JOIN string into
 // fragments and verify that each is valid.
-func VerifyJOIN(join string) (errs []error) {
+func VerifyJOIN(discoveryHost, join string) (errs []error) {
 	// Split into fragments by ',' and verify the fragments
 	for _, frag := range strings.Split(strings.TrimSpace(join), ",") {
-		errs = append(errs, VerifyJOINFragment(strings.TrimSpace(frag))...)
+		errs = append(errs, VerifyJOINFragment(discoveryHost, strings.TrimSpace(frag))...)
 	}
 
 	return errs
@@ -28,10 +28,10 @@ func VerifyJOIN(join string) (errs []error) {
 // In the instance that the value passed into it is a UUID,
 // the function will have the side effect of verifying that
 // value is a cluster token.
-func VerifyJOINFragment(joinfragment string) (errs []error) {
+func VerifyJOINFragment(discoveryHost, joinfragment string) (errs []error) {
 	// Check to see if this is a discovery token
 	if api.IsUUID(joinfragment) {
-		return VerifyClusterToken(joinfragment)
+		return VerifyClusterToken(discoveryHost, joinfragment)
 	}
 
 	split := strings.Split(joinfragment, "://")
@@ -86,8 +86,8 @@ func VerifyHost(host string) []error {
 // VerifyClusterToken will, given a token string, query the Discovery service
 // to retrieve information about the cluster if it exists. Further verification
 // is then performed on the node addresses retrieved.
-func VerifyClusterToken(token string) (errs []error) {
-	c, err := discovery.NewClient("", "", "")
+func VerifyClusterToken(discoveryHost, token string) (errs []error) {
+	c, err := discovery.NewClient(discoveryHost, "", "")
 	if err != nil {
 		return []error{fmt.Errorf("failed to query discovery service, %s", err)}
 	}
@@ -101,7 +101,7 @@ func VerifyClusterToken(token string) (errs []error) {
 	for _, node := range cluster.Nodes {
 		// Nodes could not have joined yet, this is not per-se an error
 		if node.AdvertiseAddress != "" {
-			errs = append(errs, VerifyJOINFragment(node.AdvertiseAddress)...)
+			errs = append(errs, VerifyJOINFragment(discoveryHost, node.AdvertiseAddress)...)
 		}
 	}
 

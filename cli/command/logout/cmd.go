@@ -3,6 +3,7 @@ package logout
 import (
 	"errors"
 	"fmt"
+
 	"github.com/dnephin/cobra"
 
 	api "github.com/storageos/go-api"
@@ -34,7 +35,7 @@ func NewLogoutCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	return cmd
 }
 
-func getHost(opt logoutOptions, args []string) (string, error) {
+func getHost(discoveryHost string, opt logoutOptions, args []string) (string, error) {
 	var join string
 
 	switch {
@@ -51,15 +52,15 @@ func getHost(opt logoutOptions, args []string) (string, error) {
 		join = api.DefaultHost
 	}
 
-	if errs := jointools.VerifyJOIN(join); errs != nil {
+	if errs := jointools.VerifyJOIN(discoveryHost, join); errs != nil {
 		return "", fmt.Errorf("error: %+v", errs)
 	}
-	return jointools.ExpandJOIN(join), nil
+	return jointools.ExpandJOIN(discoveryHost, join), nil
 
 }
 
 func runDelete(storageosCli *command.StorageOSCli, opt logoutOptions, args []string) error {
-	host, err := getHost(opt, args)
+	host, err := getHost(storageosCli.GetDiscovery(), opt, args)
 	if err != nil {
 		return err
 	}

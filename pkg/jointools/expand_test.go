@@ -40,7 +40,7 @@ func TestExpandJOINFragment(t *testing.T) {
 	}
 
 	for _, f := range fixtures {
-		frags := jointools.ExpandJOINFragment(f.input)
+		frags := jointools.ExpandJOINFragment("", f.input)
 		if len(frags) != 1 {
 			t.Errorf("unexpected number of endpoints (output: %+v), cluster token?", frags)
 		} else {
@@ -86,7 +86,7 @@ func TestExpandJOINSingleHost(t *testing.T) {
 	}
 
 	for _, f := range fixtures {
-		out := jointools.ExpandJOIN(f.input)
+		out := jointools.ExpandJOIN("", f.input)
 		if out != f.output {
 			t.Errorf("unexpected result. input: %v, output: %v (expected %v)", f.input, out, f.output)
 		}
@@ -129,7 +129,7 @@ func TestExpandJOINMultiHost(t *testing.T) {
 	}
 
 	for _, f := range fixtures {
-		out := jointools.ExpandJOIN(f.input)
+		out := jointools.ExpandJOIN("", f.input)
 		if out != f.output {
 			t.Errorf("unexpected result. input: %v, output: %v (expected %v)", f.input, out, f.output)
 		}

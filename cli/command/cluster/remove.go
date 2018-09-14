@@ -39,7 +39,7 @@ func newRemoveCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 func runRemove(storageosCli *command.StorageOSCli, opt *removeOptions) error {
 
-	client, err := discovery.NewClient("", "", "")
+	client, err := discovery.NewClient(storageosCli.GetDiscovery(), "", "")
 	if err != nil {
 		return err
 	}

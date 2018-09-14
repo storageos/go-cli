@@ -13,6 +13,7 @@ environment variables:
 export STORAGEOS_HOST=<ip_address:port>
 export STORAGEOS_USERNAME=<your username>
 export STORAGEOS_PASSWORD=<your password>
+export STORAGEOS_DISCOVERY=<ip_address> # Optional - only when not using the default discovery service.
 ```
 
 Choose either the binary or Docker installation methods.  Once installed, usage should be the same.
