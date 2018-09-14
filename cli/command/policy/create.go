@@ -117,22 +117,32 @@ func jsonlValidate(data []byte) error {
 }
 
 func runCreateFromFiles(storageosCli *command.StorageOSCli, opt createOptions) error {
+	combinedJsonl, err := combineJsonlFiles(opt.policies)
+	if err != nil {
+		return err
+	}
+	return sendJSONL(storageosCli, combinedJsonl)
+}
+
+// combineJsonlFiles combines the content of multiple jsonl files and returns
+// a single byte array.
+func combineJsonlFiles(policies stringSlice) ([]byte, error) {
 	var jsonlFiles [][]byte
 
-	for _, file := range opt.policies {
+	for _, file := range policies {
 		buf, err := ioutil.ReadFile(file)
 		if err != nil {
-			return fmt.Errorf("failed to read policy file (No. %s): %s", file, err)
+			return nil, fmt.Errorf("failed to read policy file (No. %s): %s", file, err)
 		}
 
 		if err := jsonlValidate(buf); err != nil {
-			return fmt.Errorf("failed to parse policy file (No. %s): %s", file, err)
+			return nil, fmt.Errorf("failed to parse policy file (No. %s): %s", file, err)
 		}
 
 		jsonlFiles = append(jsonlFiles, buf)
 	}
 
-	return sendJSONL(storageosCli, bytes.Join(jsonlFiles, []byte("\n")))
+	return bytes.Join(jsonlFiles, []byte("")), nil
 }
 
 func runCreateFromFlags(storageosCli *command.StorageOSCli, opt createOptions) error {
