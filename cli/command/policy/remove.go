@@ -12,7 +12,7 @@ import (
 
 func newRemoveCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "rm [OPTIONS] USER [USER...]",
+		Use:     "rm [OPTIONS] POLICY [POLICY...]",
 		Aliases: []string{"remove"},
 		Short:   "Remove one or more polic(y|ies)",
 		Args:    cli.RequiresMinArgs(1),
