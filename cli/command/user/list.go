@@ -49,8 +49,8 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Args:    cli.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if opt.admins && opt.users {
-				fmt.Fprintln(storageosCli.Err(), "Cannot return only admins and only users")
-				return errors.New("Cannot return only admins and only users")
+				fmt.Fprintln(storageosCli.Err(), "cannot return only admins and only users")
+				return errors.New("cannot return only admins and only users")
 			}
 
 			return runList(storageosCli, opt)

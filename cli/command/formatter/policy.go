@@ -18,6 +18,9 @@ const (
 	policyNonResourcePathHeader = "NON_RESOURCE_PATH"
 )
 
+// NewPolicyFormat returns a format string for policy list operations
+// corresponding to the format key passed to it. If the parameter given
+// is not supported, it will be converted to a format string and returned.
 func NewPolicyFormat(source string, quiet bool) Format {
 	switch source {
 	case TableFormatKey:
@@ -31,6 +34,8 @@ func NewPolicyFormat(source string, quiet bool) Format {
 	return Format(source)
 }
 
+// PolicyWrite writes the given policies to the provided context,
+// using the format specified within the context.
 func PolicyWrite(ctx Context, policies []*types.PolicyWithID) error {
 	render := func(format func(subContext subContext) error) error {
 		for _, policy := range policies {

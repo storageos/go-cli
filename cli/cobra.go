@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/dnephin/cobra"
-	"github.com/storageos/go-cli/pkg/term"
+	"github.com/docker/docker/pkg/term"
 )
 
 // SetupRootCommand sets default usage, help, and error handling for the

@@ -22,6 +22,11 @@ type loginOptions struct {
 	password string
 }
 
+// NewLoginCommand returns a command which, when run, will authenticate the
+// provided credentials against the target host(s). Upon successful authentication,
+// the details will be stored against the host address(es) in the credentials store.
+// The command takes the target host(s) either via flag or positional argument,
+// whilst username and password can be given either interactively or by flag.
 func NewLoginCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := loginOptions{}
 
@@ -77,7 +82,7 @@ func getHost(discoveryHost string, opt loginOptions, args []string) (string, err
 
 	switch {
 	case opt.host != "" && len(args) > 0:
-		return "", errors.New("Conflicting options: either specify --host or provide positional arg, not both")
+		return "", errors.New("conflicting options: either specify --host or provide positional arg, not both")
 
 	case opt.host != "":
 		join = opt.host
@@ -108,7 +113,7 @@ func promptUsername(storageosCli *command.StorageOSCli) (string, error) {
 
 func promptPassword(storageosCli *command.StorageOSCli) (string, error) {
 	fmt.Fprint(storageosCli.Out(), "Password: ")
-	p, err := terminal.ReadPassword(int(syscall.Stdin))
+	p, err := terminal.ReadPassword(int(syscall.Stdin)) // Cast to int for windows and others which use uintptr
 	if err != nil {
 		return "", err
 	}

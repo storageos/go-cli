@@ -1,7 +1,6 @@
 package validation
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -53,32 +52,27 @@ func labeldeprecationNotice(old, new string) string {
 	return depNotice + ", refer to https://docs.storageos.com for usage details"
 }
 
-func ValidateLabelSet(labels map[string]string) (warnings []string, err error) {
-	errs := make([]string, 0, len(labels))
+// GetDeprecations will check the provided labels for deprecated values.
+// A list of deprecation notices are returned, if any.
+func GetDeprecations(labels map[string]string) (notices []string) {
 
-	for k, v := range labels {
-		w, e := ValidateLabel(k, v)
-		warnings = append(warnings, w...)
-		if err != nil {
-			errs = append(errs, e.Error())
+	for l := range labels {
+		n, deprecated := IsDeprecated(l)
+		if deprecated {
+			notices = append(notices, n)
 		}
 	}
 
-	if len(errs) > 0 {
-		err = errors.New(strings.Join(errs, ","))
-	}
-
-	return warnings, err
+	return notices
 }
 
-func ValidateLabel(k, v string) (warnings []string, err error) {
-	if updated, ok := deprecatedLabels[k]; ok {
-		warnings = append(warnings, labeldeprecationNotice(k, updated))
+// IsDeprecated will check if the label given has been deprecated,
+// returning the appropriate deprecation notice if so.
+func IsDeprecated(label string) (notice string, deprecated bool) {
 
-		// TODO: validate value, with extra context?
+	if updated, ok := deprecatedLabels[label]; ok {
+		return labeldeprecationNotice(label, updated), true
 	}
 
-	// TODO: validate value
-
-	return warnings, nil
+	return "", false
 }

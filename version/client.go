@@ -6,6 +6,7 @@ import (
 	"github.com/storageos/go-api/types"
 )
 
+// Version information constants for storageos.
 const (
 	ProductName string = "storageos"
 	UserAgent   string = "storageos-cli"

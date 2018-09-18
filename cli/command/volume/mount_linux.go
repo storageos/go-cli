@@ -6,17 +6,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"syscall"
 	"time"
 
 	"github.com/dnephin/cobra"
+	"github.com/docker/docker/pkg/system"
+
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	cliconfig "github.com/storageos/go-cli/cli/config"
-	"github.com/storageos/go-cli/pkg/host"
 	"github.com/storageos/go-cli/pkg/mount"
-	"github.com/storageos/go-cli/pkg/system"
 	"github.com/storageos/go-cli/pkg/validation"
 
 	"github.com/storageos/go-api/types"
@@ -24,8 +25,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	// ErrVolumeMounted should be returned if it the volume has a mount lock.
+	ErrVolumeMounted = errors.New("volume is mounted, unmount it before mounting it again")
+)
+
+// Failed mount retry back-off upper bound.
+const mountBackoffUB = 4 * time.Second
+
 type mountOptions struct {
 	ref        string
+	timeout    time.Duration
 	mountpoint string // mountpoint
 }
 
@@ -43,12 +53,15 @@ func newMountCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		},
 	}
 
+	flags := cmd.Flags()
+	flags.DurationVarP(&opt.timeout, "timeout", "t", 20*time.Second, "Mount action timeout period")
+
 	return cmd
 }
 
 func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	// Get current hostname.
-	hostname, err := host.Get()
+	hostname, err := os.Hostname()
 	if err != nil {
 		hostname = "unknown"
 	}
@@ -86,18 +99,30 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	}
 
 	// checking readiness
-	if err := isVolumeReady(vol, name); err != nil {
+	if err := isVolumeReady(vol); err != nil {
 		return fmt.Errorf("cannot mount volume: %v", err)
 	}
 
+	// Create a context which times out the mount
+	ctx, cancel := context.WithTimeout(context.Background(), opt.timeout)
+	defer cancel()
+
 	err = client.VolumeMount(types.VolumeMountOptions{
-		ID: vol.ID, Namespace: namespace,
+		Context:    ctx,
+		ID:         vol.ID,
+		Namespace:  namespace,
 		Client:     hostname,
 		Mountpoint: opt.mountpoint,
 		FsType:     vol.FSType,
 	})
 	if err != nil {
-		return err
+		select {
+		case <-ctx.Done():
+			// Server should handle what to do if we close the connection whilst waiting for a response
+			return fmt.Errorf("timed out waiting for volume mount lock")
+		default:
+			return err
+		}
 	}
 
 	fst, err := mount.ParseFSType(vol.FSType)
@@ -105,23 +130,28 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 		return err
 	}
 
-	err = retryableMount(vol, node.DeviceDir, opt.mountpoint, fst)
+	err = retryableMount(ctx, vol, node.DeviceDir, opt, fst)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"namespace":  namespace,
-			"volumeName": name,
-			"error":      err,
-		}).Error("error while mounting volume")
-		// should unmount volume in the CP if we failed here
-		newErr := client.VolumeUnmount(types.VolumeUnmountOptions{ID: vol.ID, Namespace: namespace})
-		if newErr != nil {
+		select {
+		case <-ctx.Done():
+			client.VolumeUnmount(types.VolumeUnmountOptions{ID: vol.ID, Namespace: namespace})
+			return fmt.Errorf("timed out performing volume mount")
+		default:
 			log.WithFields(log.Fields{
-				"volumeId": vol.ID,
-				"err":      newErr,
-			}).Error("failed to unmount volume")
+				"namespace":  namespace,
+				"volumeName": name,
+				"error":      err,
+			}).Error("error while mounting volume")
+			// should unmount volume in the CP if we failed here
+			newErr := client.VolumeUnmount(types.VolumeUnmountOptions{ID: vol.ID, Namespace: namespace})
+			if newErr != nil {
+				log.WithFields(log.Fields{
+					"volumeId": vol.ID,
+					"err":      newErr,
+				}).Error("failed to unmount volume")
+			}
+			return fmt.Errorf("failed to mount volume: %v", err)
 		}
-
-		return fmt.Errorf("Failed to mount: %v", err)
 	}
 
 	fmt.Printf("volume %s mounted: %s\n", vol.Name, opt.mountpoint)
@@ -129,52 +159,57 @@ func runMount(storageosCli *command.StorageOSCli, opt mountOptions) error {
 	return nil
 }
 
-func retryableMount(volume *types.Volume, deviceRootDir, mountpoint string, fsType mount.FSType) error {
-
+func retryableMount(ctx context.Context, volume *types.Volume, deviceRootDir string, opts mountOptions, fsType mount.FSType) error {
 	driver := mount.New(deviceRootDir)
-
-	// unmount can take some time
-	maxRetries := 10
+	// Limit the time which can be spent retrying
 	retries := 0
+	backoff := 250 * time.Millisecond
 
 RETRY:
-	// Perform the mount
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-	err := driver.MountVolume(ctx, volume.ID, mountpoint, fsType, volume.MkfsDoneAt.IsZero() && !volume.MkfsDone)
-	if err != nil {
+	err := driver.MountVolume(ctx, volume.ID, opts.mountpoint, fsType, volume.MkfsDoneAt.IsZero() && !volume.MkfsDone)
+	if err == nil {
+		return nil
+	}
+
+	// If this is a permanent error, stop retrying
+	if mountErr, ok := err.(*mount.Error); ok && mountErr.Fatal {
 		log.WithFields(log.Fields{
 			"volume_id":  volume.ID,
-			"mountpoint": mountpoint,
+			"mountpoint": opts.mountpoint,
 			"err":        err.Error(),
-		}).Error(" failed to mount volume")
-
-		// If this is a permanent error, stop retrying
-		if mountErr, ok := err.(*mount.MountError); ok && mountErr.Fatal {
-			return err
-		}
-
-		if retries < maxRetries {
-			time.Sleep(250 * time.Millisecond)
-			retries++
-			goto RETRY
-		}
-
+		}).Error("failed to mount volume")
 		return err
 	}
 
-	return nil
+	select {
+	case <-ctx.Done():
+		return err
+	case <-time.After(backoff):
+		// Increase backoff period
+		retries++
+		if backoff < mountBackoffUB {
+			backoff *= 2
+		}
+		fmt.Printf("failed to mount volume, beginning retry %d\n", retries)
+		log.WithFields(log.Fields{
+			"volume_id":  volume.ID,
+			"mountpoint": opts.mountpoint,
+			"err":        err.Error(),
+			"retry":      retries,
+		}).Error("failed to mount volume, beginning retry")
+		goto RETRY
+	}
 }
 
 // isVolumeReady - mount only unmounted and active volume
-func isVolumeReady(vol *types.Volume, ref string) error {
+func isVolumeReady(vol *types.Volume) error {
 
 	if vol.Status != "active" {
 		return fmt.Errorf("can only mount active volumes, current status: '%s'", vol.Status)
 	}
 
 	if vol.Mounted {
-		return errors.New("volume is mounted, unmount it before mounting it again")
+		return ErrVolumeMounted
 	}
 
 	return nil

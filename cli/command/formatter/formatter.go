@@ -68,7 +68,7 @@ func (c *Context) preFormat() {
 func (c *Context) parseFormat() (*template.Template, error) {
 	tmpl, err := templates.Parse(c.finalFormat)
 	if err != nil {
-		return tmpl, fmt.Errorf("Template parsing error: %v\n", err)
+		return tmpl, fmt.Errorf("template parsing error: %v", err)
 	}
 	return tmpl, err
 }
@@ -95,7 +95,7 @@ func (c *Context) contextFormat(tmpl *template.Template, subContext subContext) 
 	origLen := c.buffer.Len()
 
 	if err := tmpl.Execute(c.buffer, subContext); err != nil {
-		return fmt.Errorf("Template parsing error: %v\n", err)
+		return fmt.Errorf("template parsing error: %v", err)
 	}
 	if c.Format.IsTable() && len(c.header) == 0 {
 		c.header = subContext.FullHeader()

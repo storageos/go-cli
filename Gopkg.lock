@@ -2,14 +2,15 @@
 
 
 [[projects]]
-  digest = "1:42438de56663c9af79baacdcb986156b1820e0d2f030458040055c25d5c9ae01"
+  branch = "master"
+  digest = "1:6da51e5ec493ad2b44cb04129e2d0a068c8fb9bd6cb5739d199573558696bb94"
   name = "github.com/Azure/go-ansiterm"
   packages = [
     ".",
     "winterm",
   ]
   pruneopts = "UT"
-  revision = "19f72df4d05d31cbe1c56bfc8045c96babff6c7e"
+  revision = "d6e3b3328b783f23731bc4d058875b0371ff8109"
 
 [[projects]]
   digest = "1:bf42be3cb1519bf8018dfd99720b1005ee028d947124cab3ccf965da59381df6"
@@ -18,6 +19,14 @@
   pruneopts = "UT"
   revision = "7da180ee92d8bd8bb8c37fc560e673e6557c392f"
   version = "v0.4.7"
+
+[[projects]]
+  branch = "master"
+  digest = "1:fc8dbcc2a5de7c093e167828ebbdf551641761d2ad75431d3a167d467a264115"
+  name = "github.com/containerd/continuity"
+  packages = ["pathdriver"]
+  pruneopts = "UT"
+  revision = "c7c5070e6f6e090ab93b0a61eb921f2196fc3383"
 
 [[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
@@ -34,6 +43,20 @@
   pruneopts = "UT"
   revision = "0e9ca70a23585bdaab4beba1e7c4c23a1adfa857"
   version = "v1.5.1"
+
+[[projects]]
+  digest = "1:4fd04b1f7466dd3b1e1b51beb6c033d35032b331d4b2270000dea09c816d1be8"
+  name = "github.com/docker/docker"
+  packages = [
+    "pkg/homedir",
+    "pkg/idtools",
+    "pkg/mount",
+    "pkg/system",
+    "pkg/term",
+    "pkg/term/windows",
+  ]
+  pruneopts = "UT"
+  revision = "64b7575802d4cab61fd339f14427b1d881c3b6c4"
 
 [[projects]]
   digest = "1:5aa82b2c22be790c001b0896626c134a1b27bb928897df97b88f1165f393f555"
@@ -65,6 +88,33 @@
   pruneopts = "UT"
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
+
+[[projects]]
+  digest = "1:ee4d4af67d93cc7644157882329023ce9a7bcfce956a079069a9405521c7cc8d"
+  name = "github.com/opencontainers/go-digest"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
+  version = "v1.0.0-rc1"
+
+[[projects]]
+  digest = "1:11db38d694c130c800d0aefb502fb02519e514dc53d9804ce51d1ad25ec27db6"
+  name = "github.com/opencontainers/image-spec"
+  packages = [
+    "specs-go",
+    "specs-go/v1",
+  ]
+  pruneopts = "UT"
+  revision = "d60099175f88c47cd379c4738d158884749ed235"
+  version = "v1.0.1"
+
+[[projects]]
+  digest = "1:e1945a9a8aff7a8504d8e3143e40bc891ccadf9ba1b2f615e8227729ce828c34"
+  name = "github.com/opencontainers/runc"
+  packages = ["libcontainer/user"]
+  pruneopts = "UT"
+  revision = "4fc53a81fb7c994640722ac585fa9ca548971871"
+  version = "v1.0.0-rc5"
 
 [[projects]]
   digest = "1:be5a31c22ef895e30d6123413a0bea6e1980dbf7d5c67d741d9a8cf267836186"
@@ -124,11 +174,11 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/Azure/go-ansiterm",
-    "github.com/Azure/go-ansiterm/winterm",
-    "github.com/Microsoft/go-winio",
     "github.com/davecgh/go-spew/spew",
     "github.com/dnephin/cobra",
+    "github.com/docker/docker/pkg/homedir",
+    "github.com/docker/docker/pkg/system",
+    "github.com/docker/docker/pkg/term",
     "github.com/docker/go-connections/tlsconfig",
     "github.com/docker/go-units",
     "github.com/gorilla/websocket",
@@ -139,7 +189,6 @@
     "github.com/storageos/go-api/types",
     "github.com/storageos/go-api/types/versions",
     "golang.org/x/crypto/ssh/terminal",
-    "golang.org/x/sys/windows",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -14,15 +14,6 @@ import (
 	"github.com/storageos/go-cli/types"
 )
 
-const (
-	userAgent         = "go-storageosclient"
-	unixProtocol      = "unix"
-	namedPipeProtocol = "npipe"
-	DefaultVersionStr = "1"
-	DefaultVersion    = 1
-	defaultNamespace  = "default"
-)
-
 var (
 	// ErrInvalidEndpoint is returned when the endpoint is not a valid HTTP URL.
 	ErrInvalidEndpoint = errors.New("invalid endpoint")

@@ -15,6 +15,8 @@ type ClusterCreateOps struct {
 	Size int
 }
 
+// Cluster is a representation of a storageos cluster as used by a
+// storageos discovery service.
 type Cluster struct {
 	// cluster ID used for joining or getting cluster status
 	ID string `json:"id,omitempty"`
@@ -34,6 +36,7 @@ type Cluster struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 }
 
+// Node is an encapsulation of a storageos cluster node and its health state.
 type Node struct {
 	ID               string `json:"id,omitempty"` // node/controller UUID
 	Name             string `json:"name,omitempty"`
@@ -48,7 +51,7 @@ type Node struct {
 	}
 }
 
-// NodeByName sorts node list by hostname
+// NodeByName sorts node list by hostname.
 type NodeByName []*Node
 
 func (n NodeByName) Len() int           { return len(n) }

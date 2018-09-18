@@ -24,11 +24,6 @@
 #   go-tests = true
 #   unused-packages = true
 
-
-[[constraint]]
-  name = "github.com/Microsoft/go-winio"
-  version = "0.4.2"
-
 [[constraint]]
   name = "github.com/davecgh/go-spew"
   version = "1.1.0"
@@ -56,6 +51,10 @@
 [[constraint]]
   name = "github.com/storageos/go-api"
   branch = "master"
+
+[[constraint]]
+  name = "github.com/docker/docker"
+  revision = "64b7575802d4cab61fd339f14427b1d881c3b6c4"
 
 [prune]
   go-tests = true

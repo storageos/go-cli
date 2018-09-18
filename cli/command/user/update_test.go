@@ -31,7 +31,7 @@ func TestVerifyGroupLogic(t *testing.T) {
 				addGroups:    stringSlice{"grp4", "grp5"},
 				removeGroups: stringSlice{"grp5", "grp2"},
 			},
-			wantErr: errors.New("Cannot add and remove the same group at a time"),
+			wantErr: errors.New("cannot add and remove the same group at a time"),
 		},
 		{
 			name: "groups and addGroups",
@@ -39,7 +39,7 @@ func TestVerifyGroupLogic(t *testing.T) {
 				groups:    stringSlice{"grp1", "grp2", "grp3"},
 				addGroups: stringSlice{"grp4", "grp5"},
 			},
-			wantErr: errors.New("Cannot set both groups and add/remove groups"),
+			wantErr: errors.New("cannot set both groups and add/remove groups"),
 		},
 		{
 			name: "groups and removeGroups",
@@ -47,7 +47,7 @@ func TestVerifyGroupLogic(t *testing.T) {
 				groups:       stringSlice{"grp1", "grp2", "grp3"},
 				removeGroups: stringSlice{"grp4", "grp5"},
 			},
-			wantErr: errors.New("Cannot set both groups and add/remove groups"),
+			wantErr: errors.New("cannot set both groups and add/remove groups"),
 		},
 	}
 
@@ -141,7 +141,7 @@ func TestVerifyUpdate(t *testing.T) {
 			updateOpts: updateOptions{
 				groups: stringSlice{"grp1", "!@#%", "grp2"},
 			},
-			wantErr: errors.New(`Group element 1 doesn't follow format "[a-zA-Z0-9]+"`),
+			wantErr: errors.New(`group element 1 doesn't follow format "[a-zA-Z0-9]+"`),
 		},
 		{
 			name: "valid groups",
@@ -180,7 +180,7 @@ func TestVerifyUpdate(t *testing.T) {
 			updateOpts: updateOptions{
 				role: "foo",
 			},
-			wantErr: errors.New(`Role must be either "user" or "admin", not "foo"`),
+			wantErr: errors.New(`role must be either "user" or "admin", not "foo"`),
 		},
 		{
 			name: "valid role",

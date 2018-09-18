@@ -89,7 +89,7 @@ func updateLabel(n *types.Node, labels string) error {
 	arr := strings.Split(labels, "=")
 
 	if len(arr) != 2 || arr[0] == "" || arr[1] == "" {
-		return errors.New("Bad label format: " + labels)
+		return errors.New("bad label format: " + labels)
 	}
 
 	// If labels map is uninitialized, initialize it.

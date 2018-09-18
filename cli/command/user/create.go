@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"context"
+
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
@@ -84,13 +85,13 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 			return err
 		}
 	} else if len(opt.password) < 8 {
-		return errors.New("Password too short (<8 chars)")
+		return errors.New("password too short (<8 chars)")
 	}
 
 	opt.role = strings.ToLower(opt.role)
 
 	if !verify(storageosCli, opt) {
-		return errors.New("Input failed verification")
+		return errors.New("input failed verification")
 	}
 
 	client := storageosCli.Client()

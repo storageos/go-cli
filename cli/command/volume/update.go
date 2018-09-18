@@ -23,7 +23,6 @@ const (
 )
 
 type updateOptions struct {
-	name        string
 	description string
 	size        int
 	labels      opts.ListOpts

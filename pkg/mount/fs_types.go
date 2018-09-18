@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 )
 
+// FSType represents a filesystem type and provides a collection
+// of commands to work with the filesystem.
 //go:generate stringer -type=FSType fs_types.go
 type FSType int
 
@@ -43,7 +45,7 @@ func (f FSType) mkfsBin() string {
 }
 
 func (f FSType) checkPlatform() error {
-	platformError := &MountError{fmt.Sprintf("filesystem (%v) not supported by host", f), true}
+	platformError := &Error{fmt.Sprintf("filesystem (%v) not supported by host", f), true}
 
 	// Check the mkfs binary exists and is executable
 	fi, err := os.Lstat(f.mkfsBin())
@@ -68,6 +70,8 @@ func (f FSType) checkPlatform() error {
 
 }
 
+// UnmountCommand returns the umount command path and the required arguments for
+// the given mount, if the filesystem is supported by the host.
 func (f FSType) UnmountCommand(mountpoint string) (command string, args []string, err error) {
 	if err := f.checkPlatform(); err != nil {
 		return "", nil, err
@@ -76,6 +80,9 @@ func (f FSType) UnmountCommand(mountpoint string) (command string, args []string
 	return f.umountBin(), []string{mountpoint}, nil
 }
 
+// MountCommand returns the mount command path and the required arguments to mount
+// the specified path to the desired mountpoint, if the filesystem is supported by
+// the host.
 func (f FSType) MountCommand(path, mountpoint string) (command string, args []string, err error) {
 	if err := f.checkPlatform(); err != nil {
 		return "", nil, err
@@ -84,6 +91,9 @@ func (f FSType) MountCommand(path, mountpoint string) (command string, args []st
 	return f.mountBin(), []string{"-t", f.String(), path, mountpoint}, nil
 }
 
+// MkfsCommand returns the mkfs command path appropriate for the filesystem type
+// as well as any required arguments specific to the filesystem, if the filesystem
+// is supported by the host.
 func (f FSType) MkfsCommand(path string) (command string, args []string, err error) {
 	if err := f.checkPlatform(); err != nil {
 		return "", nil, err

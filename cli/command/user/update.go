@@ -108,7 +108,7 @@ func newUpdateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 func verifyGroupLogic(opt updateOptions) error {
 	if (len(opt.groups) > 0) && (len(opt.addGroups)+len(opt.removeGroups)) > 0 {
-		return errors.New("Cannot set both groups and add/remove groups")
+		return errors.New("cannot set both groups and add/remove groups")
 	}
 
 	// Check if a group is in both add and remove.
@@ -116,7 +116,7 @@ func verifyGroupLogic(opt updateOptions) error {
 		for _, i := range opt.addGroups {
 			for _, j := range opt.removeGroups {
 				if i == j {
-					return errors.New("Cannot add and remove the same group at a time")
+					return errors.New("cannot add and remove the same group at a time")
 				}
 			}
 		}
@@ -126,7 +126,7 @@ func verifyGroupLogic(opt updateOptions) error {
 
 func verifyUpdate(opt updateOptions) error {
 	if i, pass := verifyGroups(opt.groups); !pass {
-		return fmt.Errorf(`Group element %d doesn't follow format "[a-zA-Z0-9]+"`, i)
+		return fmt.Errorf(`group element %d doesn't follow format "[a-zA-Z0-9]+"`, i)
 	}
 
 	if i, pass := verifyGroups(opt.addGroups); !pass {
@@ -138,7 +138,7 @@ func verifyUpdate(opt updateOptions) error {
 	}
 
 	if !(opt.role == "" || verifyRole(opt.role)) {
-		return fmt.Errorf(`Role must be either "user" or "admin", not %q`, opt.role)
+		return fmt.Errorf(`role must be either "user" or "admin", not %q`, opt.role)
 	}
 
 	return nil

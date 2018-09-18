@@ -4,29 +4,25 @@ import (
 	"testing"
 )
 
-func TestValidateLabelSet(t *testing.T) {
+func TestGetDeprecations(t *testing.T) {
 	fixtures := []struct {
 		name          string
 		labels        map[string]string
-		expectErr     bool
 		expectWarning bool
 	}{
 		{
 			name:          "single label",
 			labels:        map[string]string{"foo": "bar"},
-			expectErr:     false,
 			expectWarning: false,
 		},
 		{
 			name:          "multiple labels",
 			labels:        map[string]string{"foo": "bar", "baz": "bang"},
-			expectErr:     false,
 			expectWarning: false,
 		},
 		{
 			name:          "single label, with special meaning",
 			labels:        map[string]string{"storageos.com/replication": "true"},
-			expectErr:     false,
 			expectWarning: false,
 		},
 		{
@@ -35,7 +31,6 @@ func TestValidateLabelSet(t *testing.T) {
 				"storageos.com/replication":   "true",
 				"storageos.com/deduplication": "true",
 			},
-			expectErr:     false,
 			expectWarning: false,
 		},
 		{
@@ -46,13 +41,11 @@ func TestValidateLabelSet(t *testing.T) {
 				"storageos.com/replication":   "true",
 				"storageos.com/deduplication": "true",
 			},
-			expectErr:     false,
 			expectWarning: false,
 		},
 		{
 			name:          "single deprecated label",
 			labels:        map[string]string{"storageos.feature.nocompress": "true"},
-			expectErr:     false,
 			expectWarning: true,
 		},
 		{
@@ -61,7 +54,6 @@ func TestValidateLabelSet(t *testing.T) {
 				"storageos.feature.nocompress": "true",
 				"storageos.feature.replicas":   "5",
 			},
-			expectErr:     false,
 			expectWarning: true,
 		},
 		{
@@ -74,27 +66,19 @@ func TestValidateLabelSet(t *testing.T) {
 				"storageos.feature.nocompress": "true",
 				"storageos.feature.replicas":   "5",
 			},
-			expectErr:     false,
 			expectWarning: true,
 		},
 	}
 
 	for _, fix := range fixtures {
 		t.Run(fix.name, func(t *testing.T) {
-			warnings, err := ValidateLabelSet(fix.labels)
-			if (err != nil) != fix.expectErr {
-				if err != nil {
-					t.Errorf("ValidateLabelSet() returned error '%v' for input %+#v", err, fix.labels)
-				} else {
-					t.Error("ValidateLabelSet() didn't return an error")
-				}
-			}
+			notices := GetDeprecations(fix.labels)
 
-			if (len(warnings) > 0) != fix.expectWarning {
-				if len(warnings) > 0 {
-					t.Errorf("ValidateLabelSet() returned warnings %+#v for input %+#v", warnings, fix.labels)
+			if (len(notices) > 0) != fix.expectWarning {
+				if len(notices) > 0 {
+					t.Errorf("GetDeprecations() returned warnings %+#v for input %+#v", notices, fix.labels)
 				} else {
-					t.Error("ValidateLabelSet() didn't return warnings")
+					t.Error("GetDeprecations() didn't return warnings")
 				}
 			}
 		})

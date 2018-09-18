@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 
+	"github.com/docker/docker/pkg/term"
 	"github.com/storageos/go-api/serror"
 	"github.com/storageos/go-api/types/versions"
 	"github.com/storageos/go-cli/cli"
@@ -19,7 +20,6 @@ import (
 	cliconfig "github.com/storageos/go-cli/cli/config"
 	"github.com/storageos/go-cli/cli/debug"
 	cliflags "github.com/storageos/go-cli/cli/flags"
-	"github.com/storageos/go-cli/pkg/term"
 	"github.com/storageos/go-cli/version"
 )
 
@@ -63,7 +63,7 @@ func verfyHostPlatform() error {
 
 		// If we dont think we are in a container, fail and warn the user
 		if inContainer, err := isInContainer(); err == nil && !inContainer {
-			return errors.New("To use the StorageOS CLI on Container Linux, you need to run the storageos/cli image.")
+			return errors.New("to use the StorageOS CLI on Container Linux, you need to run the storageos/cli image")
 		}
 	}
 	return nil

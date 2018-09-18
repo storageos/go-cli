@@ -16,7 +16,9 @@ type logoutOptions struct {
 	host string
 }
 
-// NewLogoutCommand returns the Cobra command for logout
+// NewLogoutCommand returns a command which, when run, will remove the
+// entry for the given host(s) from the credentials store if present.
+// The host may be given either by positional argument or flag.
 func NewLogoutCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := logoutOptions{}
 
@@ -30,7 +32,7 @@ func NewLogoutCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&opt.host, "host", "", "The host to remove the credentials for")
+	flags.StringVarP(&opt.host, "host", "H", "", "The host to remove the credentials for")
 	flags.Lookup("host").Hidden = true
 
 	return cmd
@@ -41,7 +43,7 @@ func getHost(discoveryHost string, opt logoutOptions, args []string) (string, er
 
 	switch {
 	case len(args) == 1 && opt.host != "":
-		return "", errors.New("Conflicting options: either specify --host or provide positional arg, not both")
+		return "", errors.New("conflicting options: either specify --host or provide positional arg, not both")
 
 	case len(args) == 1:
 		join = args[0]

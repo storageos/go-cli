@@ -22,8 +22,8 @@ func newRemoveCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		Args:    cli.RequiresMinArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !verifyUsers(args) {
-				fmt.Fprintln(storageosCli.Err(), "Invalid username")
-				return errors.New("Invalid username")
+				fmt.Fprintln(storageosCli.Err(), "invalid username")
+				return errors.New("invalid username")
 			}
 
 			return runRemove(storageosCli, args)
