@@ -9,6 +9,7 @@ import (
 )
 
 type listOptions struct {
+	quiet  bool
 	format string
 }
 
@@ -26,6 +27,7 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
+	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display policy ID")
 	flags.StringVar(&opt.format, "format", "", "Pretty-print rules using a Go template")
 
 	return cmd
@@ -43,7 +45,7 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 
 	format := opt.format
 	if len(format) == 0 {
-		if len(storageosCli.ConfigFile().PoliciesFormat) > 0 {
+		if len(storageosCli.ConfigFile().PoliciesFormat) > 0 && !opt.quiet {
 			format = storageosCli.ConfigFile().PoliciesFormat
 		} else {
 			format = formatter.TableFormatKey
@@ -52,6 +54,6 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 
 	return formatter.PolicyWrite(formatter.Context{
 		Output: storageosCli.Out(),
-		Format: formatter.NewPolicyFormat(format),
+		Format: formatter.NewPolicyFormat(format, opt.quiet),
 	}, policies.GetPoliciesWithID())
 }

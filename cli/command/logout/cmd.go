@@ -23,9 +23,9 @@ func NewLogoutCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	opt := logoutOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "logout [HOST]",
+		Use:   "logout HOST",
 		Short: "Delete stored login credentials for a given storageos host",
-		Args:  cli.RequiresMaxArgs(1),
+		Args:  cli.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runDelete(storageosCli, opt, args)
 		},
@@ -38,7 +38,7 @@ func NewLogoutCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	return cmd
 }
 
-func getHost(opt logoutOptions, args []string) (string, error) {
+func getHost(discoveryHost string, opt logoutOptions, args []string) (string, error) {
 	var join string
 
 	switch {
@@ -55,15 +55,15 @@ func getHost(opt logoutOptions, args []string) (string, error) {
 		join = api.DefaultHost
 	}
 
-	if errs := jointools.VerifyJOIN(join); errs != nil {
+	if errs := jointools.VerifyJOIN(discoveryHost, join); errs != nil {
 		return "", fmt.Errorf("error: %+v", errs)
 	}
-	return jointools.ExpandJOIN(join), nil
+	return jointools.ExpandJOIN(discoveryHost, join), nil
 
 }
 
 func runDelete(storageosCli *command.StorageOSCli, opt logoutOptions, args []string) error {
-	host, err := getHost(opt, args)
+	host, err := getHost(storageosCli.GetDiscovery(), opt, args)
 	if err != nil {
 		return err
 	}

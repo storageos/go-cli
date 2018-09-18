@@ -6,6 +6,7 @@ import (
 
 const (
 	defaultPolicyTableFormat = "table {{.ID}}\t{{.User}}\t{{.Group}}\t{{.Namespace}}"
+	defaultPolicyQuietFormat = "{{.ID}}"
 
 	policyIDHeader              = "ID"
 	policyUserHeader            = "USER"
@@ -20,9 +21,12 @@ const (
 // NewPolicyFormat returns a format string for policy list operations
 // corresponding to the format key passed to it. If the parameter given
 // is not supported, it will be converted to a format string and returned.
-func NewPolicyFormat(source string) Format {
+func NewPolicyFormat(source string, quiet bool) Format {
 	switch source {
 	case TableFormatKey:
+		if quiet {
+			return defaultPolicyQuietFormat
+		}
 		return defaultPolicyTableFormat
 	case RawFormatKey:
 		return "id: {{.ID}}\nuser: {{.User}}\ngroup: {{.Group}}\nnamespace: {{.Namespace}}"

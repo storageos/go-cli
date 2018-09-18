@@ -40,6 +40,7 @@ type Cli interface {
 type StorageOSCli struct {
 	configFile      *configfile.ConfigFile
 	hosts           string
+	discovery       string
 	username        string
 	password        string
 	in              *InStream
@@ -54,6 +55,11 @@ type StorageOSCli struct {
 // GetHosts returns the client's endpoints
 func (cli *StorageOSCli) GetHosts() string {
 	return cli.hosts
+}
+
+// GetDiscovery returns the client's discovery endpoint
+func (cli *StorageOSCli) GetDiscovery() string {
+	return cli.discovery
 }
 
 // GetUsername returns the client's username
@@ -113,7 +119,9 @@ func (cli *StorageOSCli) ConfigFile() *configfile.ConfigFile {
 func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 	cli.configFile = LoadDefaultConfigFile(cli.err)
 
-	hosts, err := getServerHost(opt.Common.Hosts, opt.Common.TLS)
+	cli.discovery = getDiscovery(opt.Common.Discovery)
+
+	hosts, err := getServerHost(opt.Common.Hosts, opt.Common.TLS, cli.discovery)
 	if err != nil {
 		return err
 	}
@@ -214,7 +222,17 @@ func initClientAuth(join string, opt *cliflags.CommonOptions, configFile *config
 	}
 }
 
-func getServerHost(hosts string, tls bool) (host string, err error) {
+func getDiscovery(discoveryFlag string) string {
+	discoveryHost := os.Getenv(cliconfig.EnvStorageOSDiscovery)
+
+	// Override the env var with flag.
+	if discoveryFlag != "" {
+		discoveryHost = discoveryFlag
+	}
+	return discoveryHost
+}
+
+func getServerHost(hosts string, tls bool, discoveryHost string) (host string, err error) {
 	host = os.Getenv(cliconfig.EnvStorageOSHost)
 	if hosts != "" {
 		host = hosts
@@ -225,7 +243,7 @@ func getServerHost(hosts string, tls bool) (host string, err error) {
 	}
 
 	// Verify and expand the join value in the host var
-	if errs := jointools.VerifyJOIN(host); errs != nil {
+	if errs := jointools.VerifyJOIN(discoveryHost, host); errs != nil {
 		causes := make([]string, 0)
 		help := make([]string, 0)
 
@@ -243,7 +261,7 @@ func getServerHost(hosts string, tls bool) (host string, err error) {
 			strings.Join(help, ","),
 		)
 	}
-	return jointools.ExpandJOIN(host), nil
+	return jointools.ExpandJOIN(discoveryHost, host), nil
 }
 
 var proxyEnvVars = [...]string{"HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}

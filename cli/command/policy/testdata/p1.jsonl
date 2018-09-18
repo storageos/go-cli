@@ -1,0 +1,2 @@
+{"spec":{"user":"foo", "namespace": "*"}}
+{"spec":{"user":"foo2", "namespace": "ns2"}}

@@ -93,14 +93,14 @@ func runNodeHealth(node *cliTypes.Node, timeout int) error {
 func getNodes(storageosCli *command.StorageOSCli, opt *healthOpt) ([]*cliTypes.Node, error) {
 
 	if opt.cluster != "" {
-		return getDiscoveryNodes(opt.cluster)
+		return getDiscoveryNodes(storageosCli.GetDiscovery(), opt.cluster)
 	}
 	return getAPINodes(storageosCli, opt.timeout)
 }
 
-func getDiscoveryNodes(clusterID string) ([]*cliTypes.Node, error) {
+func getDiscoveryNodes(discoveryHost, clusterID string) ([]*cliTypes.Node, error) {
 
-	client, err := discovery.NewClient("", "", "")
+	client, err := discovery.NewClient(discoveryHost, "", "")
 	if err != nil {
 		return nil, err
 	}

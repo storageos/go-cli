@@ -40,6 +40,7 @@ type CommonOptions struct {
 	TLSVerify  bool
 	TLSOptions *tlsconfig.Options
 	TrustKey   string
+	Discovery  string
 }
 
 // NewCommonOptions returns a new CommonOptions
@@ -56,6 +57,7 @@ func (commonOpts *CommonOptions) InstallFlags(flags *pflag.FlagSet) {
 	flags.BoolVarP(&commonOpts.Debug, "debug", "D", false, "Enable debug mode")
 
 	flags.StringVarP(&commonOpts.Hosts, "host", "H", "", fmt.Sprintf("Node endpoint(s) to connect to (will override %s env variable value)", cliconfig.EnvStorageOSHost))
+	flags.StringVarP(&commonOpts.Discovery, "discovery", "d", "", fmt.Sprintf("The discovery endpoint. Defaults to https://discovery.storageos.cloud (will override %s env variable value)", cliconfig.EnvStorageOSDiscovery))
 
 	flags.StringVarP(&commonOpts.Username, "username", "u", "", fmt.Sprintf(`API username (will override %s env variable value)`, cliconfig.EnvStorageosUsername))
 	flags.StringVarP(&commonOpts.Password, "password", "p", "", fmt.Sprintf(`API password (will override %s env variable value)`, cliconfig.EnvStorageosPassword))

@@ -2,6 +2,8 @@ package policy
 
 import (
 	"errors"
+	"io/ioutil"
+	"path"
 	"testing"
 )
 
@@ -70,5 +72,32 @@ func TestJsonlValidate(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestCombineJsonlFiles(t *testing.T) {
+	wantJSONL := `{"spec":{"user":"foo", "namespace": "*"}}
+{"spec":{"user":"foo2", "namespace": "ns2"}}
+{"spec":{"user":"foo3", "namespace": "*"}}
+{"spec":{"user":"foo4", "namespace": "ns2"}}
+`
+
+	files, err := ioutil.ReadDir("testdata")
+	if err != nil {
+		t.Fatal("unexpected error while reading directory:", err)
+	}
+
+	var policies stringSlice
+	for _, f := range files {
+		policies.Set(path.Join("testdata", f.Name()))
+	}
+
+	combinedJsonl, err := combineJsonlFiles(policies)
+	if err != nil {
+		t.Fatal("unexpected error while combining jsonl files:", err)
+	}
+
+	if string(combinedJsonl) != wantJSONL {
+		t.Fatalf("unexpected combined JSONL value:\n\t(GOT): %v\n\t(WNT): %v", string(combinedJsonl), wantJSONL)
 	}
 }
