@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 
 	"github.com/dnephin/cobra"
-	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 )
@@ -74,5 +73,5 @@ func runCreateFromStdin(storageosCli *command.StorageOSCli, opt createOptions) e
 }
 
 func sendKey(storageosCli *command.StorageOSCli, data []byte) error {
-	return storageosCli.Client().LicenceCreate(&types.LicenceKeyContainer{Key: string(bytes.TrimSpace(data))})
+	return storageosCli.Client().LicenceCreate(string(bytes.TrimSpace(data)))
 }
