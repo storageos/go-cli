@@ -15,7 +15,7 @@ func NewLicenceCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		RunE:  storageosCli.ShowHelp,
 	}
 	cmd.AddCommand(
-		command.WithAlias(newCreateCommand(storageosCli), command.CreateAliases...),
+		command.WithAlias(newApplyCommand(storageosCli), command.ApplyAliases...),
 		command.WithAlias(newInspectCommand(storageosCli), command.InspectAliases...),
 		command.WithAlias(newRemoveCommand(storageosCli), command.RemoveAliases...),
 	)

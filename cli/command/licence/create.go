@@ -10,22 +10,22 @@ import (
 	"github.com/storageos/go-cli/cli/command"
 )
 
-type createOptions struct {
+type applyOptions struct {
 	filename string
 	stdin    bool
 }
 
-func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
-	opt := createOptions{}
+func newApplyCommand(storageosCli *command.StorageOSCli) *cobra.Command {
+	opt := applyOptions{}
 
 	cmd := &cobra.Command{
-		Use: "create [OPTIONS]",
-		Short: `Create a new licence, Either provide the filename of the licence file or write to stdin.
-		E.g. "storageos licence create --filename=licence"
-		E.g. "cat licence | storageos licence create --stdin"`,
+		Use: "apply [OPTIONS]",
+		Short: `Apply a new licence, Either provide the filename of the licence file or write to stdin.
+		E.g. "storageos licence apply --filename=licence"
+		E.g. "cat licence | storageos licence apply --stdin"`,
 		Args: cli.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runCreate(cmd, storageosCli, opt)
+			return runApply(cmd, storageosCli, opt)
 		},
 	}
 
@@ -35,16 +35,16 @@ func newCreateCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	return cmd
 }
 
-func runCreate(cmd *cobra.Command, storageosCli *command.StorageOSCli, opt createOptions) error {
+func runApply(cmd *cobra.Command, storageosCli *command.StorageOSCli, opt applyOptions) error {
 	switch {
 	case opt.stdin:
 		if opt.filename != "" {
 			return fmt.Errorf("Please provide stdin or use other methods. (Not both)")
 		}
-		return runCreateFromStdin(storageosCli, opt)
+		return runApplyFromStdin(storageosCli, opt)
 
 	case opt.filename != "":
-		return runCreateFromFile(storageosCli, opt)
+		return runApplyFromFile(storageosCli, opt)
 
 	default:
 		return fmt.Errorf(
@@ -56,7 +56,7 @@ func runCreate(cmd *cobra.Command, storageosCli *command.StorageOSCli, opt creat
 	}
 }
 
-func runCreateFromFile(storageosCli *command.StorageOSCli, opt createOptions) error {
+func runApplyFromFile(storageosCli *command.StorageOSCli, opt applyOptions) error {
 	data, err := ioutil.ReadFile(opt.filename)
 	if err != nil {
 		return err
@@ -64,7 +64,7 @@ func runCreateFromFile(storageosCli *command.StorageOSCli, opt createOptions) er
 	return sendKey(storageosCli, data)
 }
 
-func runCreateFromStdin(storageosCli *command.StorageOSCli, opt createOptions) error {
+func runApplyFromStdin(storageosCli *command.StorageOSCli, opt applyOptions) error {
 	buf, err := ioutil.ReadAll(storageosCli.In())
 	if err != nil {
 		return fmt.Errorf("failed to read stdin: %s", err)
@@ -73,5 +73,5 @@ func runCreateFromStdin(storageosCli *command.StorageOSCli, opt createOptions) e
 }
 
 func sendKey(storageosCli *command.StorageOSCli, data []byte) error {
-	return storageosCli.Client().LicenceCreate(string(bytes.TrimSpace(data)))
+	return storageosCli.Client().LicenceApply(string(bytes.TrimSpace(data)))
 }
