@@ -25,8 +25,8 @@ func (c *Client) Licence() (*types.Licence, error) {
 	return licence, nil
 }
 
-// LicenceCreate creates a licence on the server.
-func (c *Client) LicenceCreate(licenceKey string) error {
+// LicenceApply applies a licence on the server.
+func (c *Client) LicenceApply(licenceKey string) error {
 	_, err := c.do("POST", licenceAPIPrefix, doOptions{
 		data: &types.LicenceKeyContainer{Key: licenceKey},
 	})
