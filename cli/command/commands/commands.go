@@ -9,6 +9,7 @@ import (
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/cluster"
+	"github.com/storageos/go-cli/cli/command/licence"
 	"github.com/storageos/go-cli/cli/command/login"
 	"github.com/storageos/go-cli/cli/command/logout"
 	"github.com/storageos/go-cli/cli/command/logs"
@@ -35,6 +36,7 @@ func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 		login.NewLoginCommand(storageosCli),
 		logout.NewLogoutCommand(storageosCli),
 		logs.NewLogsCommand(storageosCli),
+		licence.NewLicenceCommand(storageosCli),
 
 		// system
 		// system.NewSystemCommand(storageosCli),

@@ -176,7 +176,7 @@ func sendJSONL(storageosCli *command.StorageOSCli, jsonl []byte) error {
 	jsonlReader := bytes.NewReader(jsonl)
 	scanner := bufio.NewScanner(jsonlReader)
 	for scanner.Scan() {
-		if err := storageosCli.Client().PolicyCreate(scanner.Bytes(), context.Background()); err != nil {
+		if err := storageosCli.Client().PolicyCreate(context.Background(), scanner.Bytes()); err != nil {
 			return err
 		}
 	}

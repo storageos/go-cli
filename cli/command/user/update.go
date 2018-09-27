@@ -185,5 +185,5 @@ func runUpdate(storageosCli *command.StorageOSCli, opt updateOptions) error {
 		currentState.Role = opt.role
 	}
 
-	return client.UserUpdate(currentState, context.Background())
+	return client.UserUpdate(context.Background(), currentState)
 }

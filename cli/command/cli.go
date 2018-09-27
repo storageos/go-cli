@@ -285,6 +285,7 @@ var (
 	UpdateAliases  = []string{"u"}
 	RemoveAliases  = []string{"remove"}
 	HealthAliases  = []string{"h"}
+	ApplyAliases   = []string{"a"}
 )
 
 // WithAlias adds the aliases given to the command.
