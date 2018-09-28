@@ -18,7 +18,8 @@ const (
 // the django server running on portal-API as well as the corresponding decoding package on the
 // storageOS control plane
 type Licence struct {
-	ArrayUUID    string               `json:"arrayUUID"`
+	ArrayUUID    string               `json:"arrayUUID,omitempty"`
+	ClusterID    string               `json:"clusterID,omitempty"`
 	CustomerID   string               `json:"customerID"`
 	CustomerName string               `json:"customerName"`
 	Storage      int                  `json:"storage"`
