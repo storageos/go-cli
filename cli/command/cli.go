@@ -6,7 +6,9 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/dnephin/cobra"
 
@@ -50,6 +52,7 @@ type StorageOSCli struct {
 	client          *api.Client
 	hasExperimental bool
 	defaultVersion  string
+	timeout         int
 }
 
 // GetHosts returns the client's endpoints
@@ -70,6 +73,11 @@ func (cli *StorageOSCli) GetUsername() string {
 // GetPassword returns the client's password
 func (cli *StorageOSCli) GetPassword() string {
 	return cli.password
+}
+
+// GetTimeout returns the client's timeout
+func (cli *StorageOSCli) GetTimeout() time.Duration {
+	return time.Duration(cli.timeout) * time.Second
 }
 
 // HasExperimental returns true if experimental features are accessible.
@@ -127,10 +135,20 @@ func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 	}
 	cli.hosts = hosts
 
+	if opt.Common.Timeout > 0 {
+		cli.timeout = opt.Common.Timeout
+	} else {
+		cli.timeout, err = getTimeout()
+		if err != nil {
+			return err
+		}
+	}
+
 	client, err := NewAPIClientFromFlags(hosts, opt.Common, cli.configFile)
 	if err != nil {
 		return err
 	}
+	client.SetTimeout(cli.GetTimeout())
 	cli.client = client
 
 	cli.defaultVersion = cli.client.ClientVersion()
@@ -230,6 +248,15 @@ func getDiscovery(discoveryFlag string) string {
 		discoveryHost = discoveryFlag
 	}
 	return discoveryHost
+}
+
+func getTimeout() (int, error) {
+	timeoutStr := os.Getenv(cliconfig.EnvStorageOSTimeout)
+
+	if timeoutStr == "" {
+		return cliconfig.DefaultTimeout, nil
+	}
+	return strconv.Atoi(timeoutStr)
 }
 
 func getServerHost(hosts string, tls bool, discoveryHost string) (host string, err error) {
