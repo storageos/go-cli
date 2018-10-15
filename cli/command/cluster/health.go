@@ -3,7 +3,6 @@ package cluster
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"sort"
 	"time"
 
@@ -65,7 +64,7 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 
 	sort.Sort(cliTypes.NodeByName(nodes))
 	for _, node := range nodes {
-		if err := runNodeHealth(node, opt.timeout); err != nil {
+		if err := runNodeHealth(storageosCli, node); err != nil {
 			return err
 		}
 	}
@@ -77,17 +76,8 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 	return formatter.ClusterHealthWrite(clusterHealthCtx, nodes)
 }
 
-func runNodeHealth(node *cliTypes.Node, timeout int) error {
-	addr := node.AdvertiseAddress
-
-	u, err := url.Parse(node.AdvertiseAddress)
-	if err == nil && u.Host != "" {
-		addr = u.Host
-	}
-
-	cliNode.UpdateNodeHealth(node, addr, timeout)
-
-	return nil
+func runNodeHealth(cli *command.StorageOSCli, node *cliTypes.Node) error {
+	return cliNode.UpdateNodeHealth(cli, node)
 }
 
 func getNodes(storageosCli *command.StorageOSCli, opt *healthOpt) ([]*cliTypes.Node, error) {

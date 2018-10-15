@@ -2,15 +2,9 @@ package node
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"time"
 
 	"github.com/dnephin/cobra"
 
-	api "github.com/storageos/go-api"
-	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
@@ -59,7 +53,9 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOptions) error {
 		AdvertiseAddress: c.Address,
 	}
 
-	UpdateNodeHealth(node, node.AdvertiseAddress, opt.timeout)
+	if err := UpdateNodeHealth(storageosCli, node); err != nil {
+		return err
+	}
 
 	format := opt.format
 	if len(format) == 0 {
@@ -79,31 +75,16 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOptions) error {
 
 // UpdateNodeHealth updates the health status of a given node by querying the
 // node endpoints.
-func UpdateNodeHealth(node *cliTypes.Node, address string, timeout int) error {
-	healthEndpointFormat := "http://%s:%s/v1/" + api.HealthAPIPrefix
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(timeout))
-	defer cancel()
-
-	client := &http.Client{}
-
-	var healthStatus types.HealthStatus
-	cpURL := fmt.Sprintf(healthEndpointFormat, address, api.DefaultPort)
-	cpReq, err := http.NewRequest("GET", cpURL, nil)
+func UpdateNodeHealth(storageosCli *command.StorageOSCli, node *cliTypes.Node) error {
+	cpHealth, err := storageosCli.Client().CPHealth(context.Background(), node.AdvertiseAddress)
 	if err != nil {
 		return err
 	}
-
-	cpResp, err := client.Do(cpReq.WithContext(ctx))
+	dpHealth, err := storageosCli.Client().DPHealth(context.Background(), node.AdvertiseAddress)
 	if err != nil {
 		return err
 	}
-
-	if err := json.NewDecoder(cpResp.Body).Decode(&healthStatus); err != nil {
-		return err
-	}
-	node.Health.CP = healthStatus.ToCPHealthStatus()
-	node.Health.DP = healthStatus.ToDPHealthStatus()
-
+	node.Health.CP = cpHealth
+	node.Health.DP = dpHealth
 	return nil
 }
