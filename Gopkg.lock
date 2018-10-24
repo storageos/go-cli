@@ -140,7 +140,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "feature/DEV-2445-array-user-groups"
+  branch = "master"
   digest = "1:449ec587412aaddcf7990fcec3f3b70c39d293049d6e55a8755544fd5573a686"
   name = "github.com/storageos/go-api"
   packages = [
@@ -151,7 +151,7 @@
     "types/versions",
   ]
   pruneopts = "UT"
-  revision = "9cda5637a0f3016001fff0597590bc84a153a5b8"
+  revision = "1293349c740492d9c8ba48e9fb95e8999ebd6fd0"
 
 [[projects]]
   digest = "1:f18cfce8b0cb8923d70a9050b211197629cb7e27efea064b4d6d3ee472d1243e"

@@ -50,7 +50,7 @@
 
 [[constraint]]
   name = "github.com/storageos/go-api"
-  branch = "feature/DEV-2445-array-user-groups"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/docker/docker"
