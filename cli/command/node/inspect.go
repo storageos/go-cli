@@ -1,9 +1,6 @@
 package node
 
 import (
-	"errors"
-	"strconv"
-
 	"github.com/dnephin/cobra"
 	// storageos "github.com/storageos/go-api"
 	"github.com/storageos/go-api/types"
@@ -38,26 +35,28 @@ func newInspectCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	client := storageosCli.Client()
 
-	getAll := func() (refs []string, getter func(ref string) (interface{}, []byte, error)) {
-		nodes, err := client.NodeList(types.ListOptions{})
+	/*
+		getAll := func() (refs []string, getter func(ref string) (interface{}, []byte, error)) {
+			nodes, err := client.NodeList(types.ListOptions{})
 
-		for i := range nodes {
-			refs = append(refs, strconv.Itoa(i))
-		}
-
-		return refs, func(ref string) (interface{}, []byte, error) {
-			if err != nil {
-				return nil, nil, err
+			for i := range nodes {
+				refs = append(refs, strconv.Itoa(i))
 			}
 
-			i, err := strconv.Atoi(ref)
-			if err != nil {
-				return nil, nil, errors.New("iteration error in node getter function")
-			}
+			return refs, func(ref string) (interface{}, []byte, error) {
+				if err != nil {
+					return nil, nil, err
+				}
 
-			return nodes[i], nil, nil
+				i, err := strconv.Atoi(ref)
+				if err != nil {
+					return nil, nil, errors.New("iteration error in node getter function")
+				}
+
+				return nodes[i], nil, nil
+			}
 		}
-	}
+	*/
 
 	getFunc := func(ref string) (interface{}, []byte, error) {
 		i, err := client.Node(ref)
@@ -65,8 +64,19 @@ func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	}
 
 	if len(opt.names) == 0 {
-		refs, getter := getAll()
-		return inspect.Inspect(storageosCli.Out(), refs, opt.format, getter)
+		getAll := func() ([]interface{}, error) {
+			nodes, err := client.NodeList(types.ListOptions{})
+			if err != nil {
+				return nil, err
+			}
+
+			res := make([]interface{}, 0, len(nodes))
+			for _, node := range nodes {
+				res = append(res, node)
+			}
+			return res, nil
+		}
+		return inspect.All(storageosCli.Out(), opt.format, getAll)
 	}
 
 	return inspect.Inspect(storageosCli.Out(), opt.names, opt.format, getFunc)
