@@ -15,18 +15,15 @@ func TestPolicyWrite(t *testing.T) {
 		// Quiet format
 		{
 			Context{Format: NewPolicyFormat(defaultPolicyQuietFormat, true)},
-			`policy1ID
-policy2ID
-policy3ID
-`,
+			``,
 		},
 		// Table format
 		{
 			Context{Format: NewPolicyFormat(defaultPolicyTableFormat, false)},
-			`ID         USER  GROUP  NAMESPACE
-policy1ID  foo1         ns1
-policy2ID        grp1   ns4
-policy3ID        foo2   ns1
+			`NAME  USER  GROUP  NAMESPACE
+      foo1         ns1
+            grp1   ns4
+            foo2   ns1
 `,
 		},
 	}
@@ -80,7 +77,7 @@ policy3ID        foo2   ns1
 			t.Fatalf("unexpected error while writing policy context: %v", err)
 		} else {
 			if test.expected != output.String() {
-				t.Errorf("unexpected result.\n\t(GOT): %v\n\t(WNT): %v", output.String(), test.expected)
+				t.Errorf("unexpected result.\n\t(GOT): \n%v\n\t(WNT): \n%v", output.String(), test.expected)
 			}
 		}
 	}
