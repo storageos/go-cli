@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	units "github.com/docker/go-units"
 	"github.com/storageos/go-api/types"
 	cliconfig "github.com/storageos/go-cli/cli/config"
 )
@@ -108,7 +107,7 @@ func (c *volumeContext) NodeSelector() string {
 
 func (c *volumeContext) Size() string {
 	c.AddHeader(sizeHeader)
-	return units.HumanSize(float64(c.v.Size * 1000000000))
+	return bytesSize(uint64(c.v.Size) * GiB)
 }
 
 func (c *volumeContext) Status() string {
