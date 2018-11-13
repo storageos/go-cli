@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/dnephin/cobra"
+	"github.com/spf13/cobra"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/cluster"
 	"github.com/storageos/go-cli/cli/command/licence"
@@ -62,7 +62,7 @@ func NewBashGenerationFunction(storageosCli *command.StorageOSCli) *cobra.Comman
 
 			// Just dump to stdout if requested
 			if dump {
-				return cmd.Parent().GenBashCompletion(cmd.Out())
+				return cmd.Parent().GenBashCompletion(cmd.OutOrStdout())
 			}
 
 			// If we are not on linux or darwin, we don't know how to install

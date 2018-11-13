@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/dnephin/cobra"
+	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"

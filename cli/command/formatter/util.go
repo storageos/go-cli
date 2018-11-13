@@ -34,3 +34,19 @@ func writeLabels(labels map[string]string) string {
 func bytesSize(size uint64) string {
 	return units.BytesSize(float64(size))
 }
+
+// AllObjects are a slice of all context objects for template doc generation
+var AllObjects = []interface{}{
+	&clusterHealthContext{},
+	&connectivityContext{},
+	&loggerContext{},
+	&logStreamContext{},
+	&namespaceContext{},
+	&nodeContext{},
+	&nodeHealthContext{},
+	&policyContext{},
+	&poolContext{},
+	&ruleContext{},
+	&userContext{},
+	&volumeContext{},
+}

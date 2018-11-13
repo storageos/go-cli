@@ -3,20 +3,20 @@ package volume
 import (
 	"sort"
 
-	"github.com/dnephin/cobra"
+	"github.com/spf13/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
+	"github.com/storageos/go-cli/pkg/constants"
 )
 
-type byNamespaceName []*types.Volume
+type byVolumeName []*types.Volume
 
-func (r byNamespaceName) Len() int      { return len(r) }
-func (r byNamespaceName) Swap(i, j int) { r[i], r[j] = r[j], r[i] }
-func (r byNamespaceName) Less(i, j int) bool {
-	return r[i].Namespace < r[j].Namespace ||
-		(r[i].Namespace == r[j].Namespace && r[i].Name < r[j].Name)
+func (r byVolumeName) Len() int      { return len(r) }
+func (r byVolumeName) Swap(i, j int) { r[i], r[j] = r[j], r[i] }
+func (r byVolumeName) Less(i, j int) bool {
+	return r[i].Name < r[j].Name
 }
 
 type listOptions struct {
@@ -41,7 +41,7 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display volume names")
-	flags.StringVar(&opt.format, "format", "", "Pretty-print volumes using a Go template")
+	flags.StringVar(&opt.format, "format", "", "Pretty-print volumes using a Go template"+constants.VolumeContextTemplate)
 	flags.StringVarP(&opt.selector, "selector", "s", "", "Provide selector (e.g. to list all volumes with label app=cassandra ' --selector=app=cassandra')")
 	flags.StringVarP(&opt.namespace, "namespace", "n", "", "Namespace scope")
 
@@ -75,7 +75,7 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 		}
 	}
 
-	sort.Sort(byNamespaceName(volumes))
+	sort.Sort(byVolumeName(volumes))
 
 	volumeCtx := formatter.Context{
 		Output: storageosCli.Out(),

@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/dnephin/cobra"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/docker/docker/pkg/term"
@@ -284,13 +284,13 @@ func hideUnsupportedFeatures(cmd *cobra.Command, clientVersion string, hasExperi
 	for _, subcmd := range cmd.Commands() {
 		// hide experimental subcommands
 		if !hasExperimental {
-			if _, ok := subcmd.Tags["experimental"]; ok {
+			if _, ok := subcmd.Annotations["experimental"]; ok {
 				subcmd.Hidden = true
 			}
 		}
 
 		// hide subcommands not supported by the server
-		if subcmdVersion, ok := subcmd.Tags["version"]; ok && versions.LessThan(clientVersion, subcmdVersion) {
+		if subcmdVersion, ok := subcmd.Annotations["version"]; ok && versions.LessThan(clientVersion, subcmdVersion) {
 			subcmd.Hidden = true
 		}
 	}
@@ -300,14 +300,14 @@ func isSupported(cmd *cobra.Command, clientVersion string, hasExperimental bool)
 	// We check recursively so that, e.g., `storageos volume ls` will return the same output as `storageos volume`
 	if !hasExperimental {
 		for curr := cmd; curr != nil; curr = curr.Parent() {
-			if _, ok := curr.Tags["experimental"]; ok {
+			if _, ok := curr.Annotations["experimental"]; ok {
 				fmt.Print("e")
 				return errors.New("only supported on a StorageOS with experimental features enabled")
 			}
 		}
 	}
 
-	if cmdVersion, ok := cmd.Tags["version"]; ok && versions.LessThan(clientVersion, cmdVersion) {
+	if cmdVersion, ok := cmd.Annotations["version"]; ok && versions.LessThan(clientVersion, cmdVersion) {
 		fmt.Print("ERR: api version\n")
 		return fmt.Errorf("requires API version %s, but the StorageOS API version is %s", cmdVersion, clientVersion)
 	}
@@ -349,7 +349,7 @@ func isFlagSupported(f *pflag.Flag, clientVersion string) bool {
 // hasTags return true if any of the command's parents has tags
 func hasTags(cmd *cobra.Command) bool {
 	for curr := cmd; curr != nil; curr = curr.Parent() {
-		if len(curr.Tags) > 0 {
+		if len(curr.Annotations) > 0 {
 			return true
 		}
 	}

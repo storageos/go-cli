@@ -3,11 +3,12 @@ package node
 import (
 	"sort"
 
-	"github.com/dnephin/cobra"
+	"github.com/spf13/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
+	"github.com/storageos/go-cli/pkg/constants"
 )
 
 type byNodeName []*types.Node
@@ -39,7 +40,7 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display node names")
-	flags.StringVar(&opt.format, "format", "", "Pretty-print nodes using a Go template")
+	flags.StringVar(&opt.format, "format", "", "Pretty-print nodes using a Go template"+constants.NodeContextTemplate)
 	flags.StringVarP(&opt.selector, "selector", "s", "", "Provide selector (e.g. to list all nodes with label disk=ssd' --selector=disk=ssd')")
 
 	return cmd

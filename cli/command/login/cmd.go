@@ -6,7 +6,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/dnephin/cobra"
+	"github.com/spf13/cobra"
 
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-cli/cli"
