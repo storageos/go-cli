@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -52,7 +51,7 @@ type StorageOSCli struct {
 	client          *api.Client
 	hasExperimental bool
 	defaultVersion  string
-	timeout         int
+	timeout         time.Duration
 }
 
 // GetHosts returns the client's endpoints
@@ -77,7 +76,7 @@ func (cli *StorageOSCli) GetPassword() string {
 
 // GetTimeout returns the client's timeout
 func (cli *StorageOSCli) GetTimeout() time.Duration {
-	return time.Duration(cli.timeout) * time.Second
+	return cli.timeout
 }
 
 // HasExperimental returns true if experimental features are accessible.
@@ -250,13 +249,13 @@ func getDiscovery(discoveryFlag string) string {
 	return discoveryHost
 }
 
-func getTimeout() (int, error) {
+func getTimeout() (time.Duration, error) {
 	timeoutStr := os.Getenv(cliconfig.EnvStorageOSTimeout)
 
 	if timeoutStr == "" {
 		return cliconfig.DefaultTimeout, nil
 	}
-	return strconv.Atoi(timeoutStr)
+	return time.ParseDuration(timeoutStr)
 }
 
 func getServerHost(hosts string, tls bool, discoveryHost string) (host string, err error) {

@@ -3,6 +3,7 @@ package flags
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/docker/go-connections/tlsconfig"
 	"github.com/sirupsen/logrus"
@@ -41,7 +42,7 @@ type CommonOptions struct {
 	TLSOptions *tlsconfig.Options
 	TrustKey   string
 	Discovery  string
-	Timeout    int
+	Timeout    time.Duration
 }
 
 // NewCommonOptions returns a new CommonOptions
@@ -63,7 +64,7 @@ func (commonOpts *CommonOptions) InstallFlags(flags *pflag.FlagSet) {
 	flags.StringVarP(&commonOpts.Username, "username", "u", "", fmt.Sprintf(`API username (will override %s env variable value)`, cliconfig.EnvStorageosUsername))
 	flags.StringVarP(&commonOpts.Password, "password", "p", "", fmt.Sprintf(`API password (will override %s env variable value)`, cliconfig.EnvStorageosPassword))
 
-	flags.IntVarP(&commonOpts.Timeout, "timeout", "t", 0, fmt.Sprintf(`client timeout in seconds (will override %s env variable value if set), default 10s`, cliconfig.EnvStorageOSTimeout))
+	flags.DurationVarP(&commonOpts.Timeout, "timeout", "t", 0, fmt.Sprintf(`client timeout in seconds (will override %s env variable value if set), default 10s`, cliconfig.EnvStorageOSTimeout))
 }
 
 // SetDefaultOptions sets default values for options after flag parsing is

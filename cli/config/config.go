@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/docker/docker/pkg/homedir"
 	"github.com/storageos/go-cli/cli/config/configfile"
@@ -43,7 +44,7 @@ const DeviceRootPath = "/var/lib/storageos/volumes"
 const DefaultFSType = "ext4"
 
 // DefaultTimeout is the default API client timeout in seconds
-const DefaultTimeout = 10
+const DefaultTimeout = 10 * time.Second
 
 func init() {
 	if configDir == "" {
