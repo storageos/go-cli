@@ -35,19 +35,15 @@ func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	client := storageosCli.Client()
 
 	if len(opt.policies) == 0 {
-		getAll := func() ([]interface{}, error) {
-			policies, err := client.PolicyList(types.ListOptions{})
-			if err != nil {
-				return nil, err
-			}
-
-			res := make([]interface{}, 0, len(policies))
-			for _, policy := range policies {
-				res = append(res, policy)
-			}
-			return res, nil
+		policies, err := client.PolicyList(types.ListOptions{})
+		if err != nil {
+			return err
 		}
-		return inspect.All(storageosCli.Out(), opt.format, getAll)
+		list := make([]inspect.ElemRaw, 0, len(policies))
+		for _, policy := range policies {
+			list = append(list, inspect.ElemRaw{Elem: policy})
+		}
+		return inspect.List(storageosCli.Out(), list, opt.format)
 
 	}
 

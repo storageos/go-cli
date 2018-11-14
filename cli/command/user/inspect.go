@@ -36,18 +36,15 @@ func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	client := storageosCli.Client()
 
 	if len(opt.users) == 0 {
-		getAll := func() ([]interface{}, error) {
-			users, err := client.UserList(types.ListOptions{})
-			if err != nil {
-				return nil, err
-			}
-			res := make([]interface{}, 0, len(users))
-			for _, user := range users {
-				res = append(res, user)
-			}
-			return res, nil
+		users, err := client.UserList(types.ListOptions{})
+		if err != nil {
+			return err
 		}
-		return inspect.All(storageosCli.Out(), opt.format, getAll)
+		list := make([]inspect.ElemRaw, 0, len(users))
+		for _, user := range users {
+			list = append(list, inspect.ElemRaw{Elem: user})
+		}
+		return inspect.List(storageosCli.Out(), list, opt.format)
 	}
 
 	getFunc := func(ref string) (interface{}, []byte, error) {

@@ -59,6 +59,7 @@ func (c *policyContext) MarshalJSON() ([]byte, error) {
 
 func (c *policyContext) Name() string {
 	c.AddHeader(policyNameHeader)
+	// TODO: return policy name after it is supported
 	return ""
 }
 

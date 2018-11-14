@@ -40,19 +40,15 @@ func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	}
 
 	if len(opt.names) == 0 {
-		getAll := func() ([]interface{}, error) {
-			nodes, err := client.NodeList(types.ListOptions{})
-			if err != nil {
-				return nil, err
-			}
-
-			res := make([]interface{}, 0, len(nodes))
-			for _, node := range nodes {
-				res = append(res, node)
-			}
-			return res, nil
+		nodes, err := client.NodeList(types.ListOptions{})
+		if err != nil {
+			return err
 		}
-		return inspect.All(storageosCli.Out(), opt.format, getAll)
+		list := make([]inspect.ElemRaw, 0, len(nodes))
+		for _, node := range nodes {
+			list = append(list, inspect.ElemRaw{Elem: node})
+		}
+		return inspect.List(storageosCli.Out(), list, opt.format)
 	}
 
 	return inspect.Inspect(storageosCli.Out(), opt.names, opt.format, getFunc)

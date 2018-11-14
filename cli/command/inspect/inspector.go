@@ -55,54 +55,36 @@ type GetRefFunc func(ref string) (interface{}, []byte, error)
 // GetAllFunc is a function which used by Inspect to fetch all objects
 type GetAllFunc func() ([]interface{}, error)
 
+// ElemRaw represents a parsed object with its unparsed raw data
+type ElemRaw struct {
+	Elem interface{}
+	Raw  []byte
+}
+
 // Inspect fetches objects by reference using GetRefFunc and writes the json
 // representation to the output writer.
 func Inspect(out io.Writer, references []string, tmplStr string, getRef GetRefFunc) error {
-	inspector, err := NewTemplateInspectorFromString(out, tmplStr)
-	if err != nil {
-		return cli.StatusError{StatusCode: 64, Status: err.Error()}
-	}
-
-	var inspectErr error
+	elements := make([]ElemRaw, 0, len(references))
 	for _, ref := range references {
 		element, raw, err := getRef(ref)
 		if err != nil {
-			inspectErr = err
-			break
+			return err
 		}
-
-		if err := inspector.Inspect(element, raw); err != nil {
-			inspectErr = err
-			break
-		}
+		elements = append(elements, ElemRaw{Elem: element, Raw: raw})
 	}
-
-	if err := inspector.Flush(); err != nil {
-		logrus.Errorf("%s\n", err)
-	}
-
-	if inspectErr != nil {
-		return cli.StatusError{StatusCode: 1, Status: inspectErr.Error()}
-	}
-	return nil
+	return List(out, elements, tmplStr)
 }
 
-// All fetches all objects using GetAllFunc and writes the json
-// representation to the output writer.
-func All(out io.Writer, tmplStr string, getAll GetAllFunc) error {
+// List writes the json representation of elements to the output writer
+func List(out io.Writer, elements []ElemRaw, tmplStr string) error {
 	inspector, err := NewTemplateInspectorFromString(out, tmplStr)
 	if err != nil {
 		return cli.StatusError{StatusCode: 64, Status: err.Error()}
 	}
 
 	var inspectErr error
-	elements, err := getAll()
-	if err != nil {
-		return err
-	}
-
 	for _, element := range elements {
-		if err := inspector.Inspect(element, nil); err != nil {
+		if err := inspector.Inspect(element.Elem, element.Raw); err != nil {
 			inspectErr = err
 			break
 		}
