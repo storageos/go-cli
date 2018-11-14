@@ -24,10 +24,10 @@ chaos/unknown
 		// Table format
 		{
 			Context{Format: NewVolumeFormat(defaultVolumeTableFormat, false)},
-			`NAMESPACE/NAME      SIZE   MOUNT  SELECTOR  STATUS       REPLICAS  LOCATION
-default/myVol       100GB                   active       0/0       storageos-1 (healthy)
-production/prodVol  50GB                    active       1/1       storageos-2 (healthy)
-chaos/unknown       5GB                     unavailable  0/1       storageos-1 (unknown)
+			`NAMESPACE/NAME      SIZE    MOUNT  SELECTOR  STATUS       REPLICAS  LOCATION
+default/myVol       100GiB                   active       0/0       storageos-1 (healthy)
+production/prodVol  50GiB                    active       1/1       storageos-2 (healthy)
+chaos/unknown       5GiB                     unavailable  0/1       storageos-1 (unknown)
 `,
 		},
 	}
