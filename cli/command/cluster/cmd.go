@@ -21,6 +21,7 @@ func NewClusterCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		command.WithAlias(newRemoveCommand(storageosCli), command.RemoveAliases...),
 		command.WithAlias(newHealthCommand(storageosCli), command.HealthAliases...),
 		newConnectivityCommand(storageosCli),
+		newMaintenanceCommand(storageosCli),
 	)
 	return cmd
 }

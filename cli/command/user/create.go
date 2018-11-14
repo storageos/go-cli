@@ -99,7 +99,7 @@ func runCreate(storageosCli *command.StorageOSCli, opt createOptions) error {
 	params := types.UserCreateOptions{
 		Username: opt.username,
 		Password: opt.password,
-		Groups:   opt.groups,
+		Groups:   []string(opt.groups),
 		Role:     opt.role,
 		Context:  context.Background(),
 	}
