@@ -3,12 +3,11 @@ package namespace
 import (
 	"sort"
 
-	"github.com/spf13/cobra"
+	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
-	"github.com/storageos/go-cli/pkg/constants"
 )
 
 type byNamespaceName []*types.Namespace
@@ -40,7 +39,7 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display namespace names")
-	flags.StringVar(&opt.format, "format", "", "Pretty-print namespaces using a Go template"+constants.NamespaceContextTemplate)
+	flags.StringVar(&opt.format, "format", "", "Pretty-print namespaces using a Go template (type --format -h or --help for a detail usage)")
 	flags.StringVarP(&opt.selector, "selector", "s", "", "Provide selector (e.g. to list all namespaces with label app=cassandra ' --selector=app=cassandra')")
 
 	return cmd

@@ -2,6 +2,7 @@ package formatter
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -23,6 +24,24 @@ const (
 
 	defaultQuietFormat = "{{.ID}}"
 )
+
+var allKeys = map[Format]bool{
+	TableFormatKey:         true,
+	RawFormatKey:           true,
+	PrettyFormatKey:        true,
+	SummaryFormatKey:       true,
+	DetailedTableFormatKey: true,
+	CPHealthTableFormatKey: true,
+	DPHealthTableFormatKey: true,
+}
+
+// errFormatUsage is returned when the format is not valid, intentionally empty
+var errFormatUsage = errors.New("")
+
+// IsFormat returns true if passed in a valid format
+func IsFormat(formatKey Format) bool {
+	return allKeys[formatKey] || strings.Contains(string(formatKey), "{{")
+}
 
 // Format is the format string rendered using the Context
 type Format string
@@ -114,6 +133,11 @@ type SubFormat func(func(subContext) error) error
 
 // Write the template to the buffer using this Context
 func (c *Context) Write(sub subContext, f SubFormat) error {
+	if !IsFormat(c.Format) {
+		fmt.Println(templates.MethodUsage(sub))
+		return errFormatUsage
+	}
+
 	c.buffer = bytes.NewBufferString("")
 	c.preFormat()
 

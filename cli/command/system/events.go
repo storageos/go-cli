@@ -9,7 +9,7 @@ package system
 //
 // 	"context"
 //
-// 	"github.com/spf13/cobra"
+// 	"github.com/dnephin/cobra"
 // 	"github.com/storageos/go-api/types"
 // 	"github.com/storageos/go-cli/cli"
 // 	"github.com/storageos/go-cli/cli/command"
@@ -39,7 +39,7 @@ package system
 // 	flags := cmd.Flags()
 // 	flags.StringVar(&opt.since, "since", "", "Show all events created since timestamp")
 // 	flags.StringVar(&opt.until, "until", "", "Stream events until this timestamp")
-// 	flags.StringVar(&opt.format, "format", "", "Format the output using the given Go template")
+// 	flags.StringVar(&opt.format, "format", "", "Format the output using the given Go template (type --format -h or --help for a detail usage)")
 //
 // 	return cmd
 // }

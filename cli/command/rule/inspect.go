@@ -1,11 +1,10 @@
 package rule
 
 import (
-	"github.com/spf13/cobra"
+	"github.com/dnephin/cobra"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/inspect"
-	"github.com/storageos/go-cli/pkg/constants"
 	"github.com/storageos/go-cli/pkg/validation"
 )
 
@@ -27,7 +26,7 @@ func newInspectCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opt.format, "format", "f", "", "Format the output using the given Go template"+constants.RuleTemplate)
+	cmd.Flags().StringVarP(&opt.format, "format", "f", "", "Format the output using the given Go template (type --format -h or --help for a detail usage)")
 
 	return cmd
 }

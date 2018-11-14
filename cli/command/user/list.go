@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/spf13/cobra"
+	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
-	"github.com/storageos/go-cli/pkg/constants"
 )
 
 type byUserName []*types.User
@@ -60,7 +59,7 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display usernames")
-	flags.StringVar(&opt.format, "format", "", "Pretty-print rules using a Go template"+constants.UserContextTemplate)
+	flags.StringVar(&opt.format, "format", "", "Pretty-print rules using a Go template (type --format -h or --help for a detail usage)")
 	flags.BoolVar(&opt.admins, "admin-only", false, "Only return the admin users")
 	flags.BoolVar(&opt.users, "user-only", false, "Only return the non-admin users")
 

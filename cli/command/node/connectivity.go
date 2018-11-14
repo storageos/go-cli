@@ -1,13 +1,12 @@
 package node
 
 import (
-	"github.com/spf13/cobra"
+	"github.com/dnephin/cobra"
 
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
-	"github.com/storageos/go-cli/pkg/constants"
 )
 
 type connectivityOptions struct {
@@ -31,7 +30,7 @@ func newConnectivityCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display test and status")
-	flags.StringVarP(&opt.format, "format", "f", "table", "Format the output using the given Go template. \"summary\", \"table\" and \"raw\" also supported."+constants.ConnectivityContextTemplate)
+	flags.StringVarP(&opt.format, "format", "f", "table", "Format the output using the given Go template (type --format -h or --help for a detail usage). \"summary\", \"table\" and \"raw\" also supported.")
 	return cmd
 }
 

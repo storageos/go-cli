@@ -1,7 +1,7 @@
 package logs
 
 import (
-	"github.com/spf13/cobra"
+	"github.com/dnephin/cobra"
 
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/pkg/constants"
@@ -49,7 +49,7 @@ func NewLogsCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 	flags.BoolVarP(&opt.follow, "follow", "f", false, "Tail the logs for the given node, or all nodes if not specified")
 	flags.IntVarP(&opt.timeout, "timeout", "t", constants.DefaultAPITimeout, "Timeout in seconds.")
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display volume names")
-	flags.StringVar(&opt.format, "format", "raw", "Output format (raw or table) or a Go template"+constants.LoggerContextTemplate)
+	flags.StringVar(&opt.format, "format", "raw", "Output format (raw or table) or a Go template (type --format -h or --help for a detail usage)")
 
 	return cmd
 }

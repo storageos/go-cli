@@ -1,12 +1,11 @@
 package policy
 
 import (
-	"github.com/spf13/cobra"
+	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
-	"github.com/storageos/go-cli/pkg/constants"
 )
 
 type listOptions struct {
@@ -29,7 +28,7 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display policy ID")
-	flags.StringVar(&opt.format, "format", "", "Pretty-print rules using a Go template"+constants.PolicyContextTemplate)
+	flags.StringVar(&opt.format, "format", "", "Pretty-print rules using a Go template (type --format -h or --help for a detail usage)")
 
 	return cmd
 }

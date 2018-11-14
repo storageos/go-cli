@@ -3,14 +3,19 @@ package inspect
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"text/template"
 
 	"github.com/sirupsen/logrus"
 	"github.com/storageos/go-cli/cli"
+	"github.com/storageos/go-cli/cli/command/formatter"
 	"github.com/storageos/go-cli/pkg/templates"
 )
+
+// errFormatUsage is returned when the format is not valid, intentionally empty
+var errFormatUsage = errors.New("")
 
 // Inspector defines an interface to implement to process elements
 type Inspector interface {
@@ -61,11 +66,17 @@ func Inspect(out io.Writer, references []string, tmplStr string, getRef GetRefFu
 	}
 
 	var inspectErr error
-	for _, ref := range references {
+	for i, ref := range references {
 		element, raw, err := getRef(ref)
 		if err != nil {
 			inspectErr = err
 			break
+		}
+		if i == 0 {
+			if !formatter.IsFormat(formatter.Format(tmplStr)) {
+				fmt.Println(templates.FieldUsage(element))
+				return errFormatUsage
+			}
 		}
 
 		if err := inspector.Inspect(element, raw); err != nil {

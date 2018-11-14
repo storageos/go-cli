@@ -37,6 +37,14 @@
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:4d679b74b9083b6ce8a25f5a24104a1fc7e8e7dc6dc9033f7d78429a0fa798fb"
+  name = "github.com/dnephin/cobra"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0e9ca70a23585bdaab4beba1e7c4c23a1adfa857"
+  version = "v1.5.1"
+
+[[projects]]
   digest = "1:4fd04b1f7466dd3b1e1b51beb6c033d35032b331d4b2270000dea09c816d1be8"
   name = "github.com/docker/docker"
   packages = [
@@ -124,20 +132,12 @@
   version = "v1.0.4"
 
 [[projects]]
-  digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
-  name = "github.com/spf13/cobra"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "ef82de70bb3f60c65fb8eebacbb2d122ef517385"
-  version = "v0.0.3"
-
-[[projects]]
-  digest = "1:c1b1102241e7f645bc8e0c22ae352e8f0dc6484b6cb4d132fa9f24174e0119e2"
+  digest = "1:1b21a2b4058a779f290c7341cd93267492e0ecea6c8b54f64a4a5fd7ff131034"
   name = "github.com/spf13/pflag"
   packages = ["."]
   pruneopts = "UT"
-  revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
-  version = "v1.0.3"
+  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -175,6 +175,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/davecgh/go-spew/spew",
+    "github.com/dnephin/cobra",
     "github.com/docker/docker/pkg/homedir",
     "github.com/docker/docker/pkg/system",
     "github.com/docker/docker/pkg/term",
@@ -182,7 +183,6 @@
     "github.com/docker/go-units",
     "github.com/gorilla/websocket",
     "github.com/sirupsen/logrus",
-    "github.com/spf13/cobra",
     "github.com/spf13/pflag",
     "github.com/storageos/go-api",
     "github.com/storageos/go-api/serror",
