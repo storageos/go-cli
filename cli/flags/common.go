@@ -25,6 +25,11 @@ const (
 	FlagTLSVerify = "tlsverify"
 )
 
+const (
+	// FlagTimeout is timeout flag
+	FlagTimeout = "timeout"
+)
+
 var (
 	storageosCertPath  = os.Getenv("DOCKER_CERT_PATH")
 	storageosTLSVerify = os.Getenv("DOCKER_TLS_VERIFY") != ""
@@ -64,7 +69,7 @@ func (commonOpts *CommonOptions) InstallFlags(flags *pflag.FlagSet) {
 	flags.StringVarP(&commonOpts.Username, "username", "u", "", fmt.Sprintf(`API username (will override %s env variable value)`, cliconfig.EnvStorageosUsername))
 	flags.StringVarP(&commonOpts.Password, "password", "p", "", fmt.Sprintf(`API password (will override %s env variable value)`, cliconfig.EnvStorageosPassword))
 
-	flags.DurationVarP(&commonOpts.Timeout, "timeout", "t", 0, fmt.Sprintf(`client timeout in seconds (will override %s env variable value if set), default 10s`, cliconfig.EnvStorageOSTimeout))
+	flags.DurationVarP(&commonOpts.Timeout, FlagTimeout, "t", cliconfig.DefaultTimeout, fmt.Sprintf(`client timeout in seconds (will override %s env variable value if set), default 10s`, cliconfig.EnvStorageOSTimeout))
 }
 
 // SetDefaultOptions sets default values for options after flag parsing is

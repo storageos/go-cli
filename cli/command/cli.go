@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/dnephin/cobra"
+	"github.com/spf13/pflag"
 
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-api/serror"
@@ -123,7 +124,7 @@ func (cli *StorageOSCli) ConfigFile() *configfile.ConfigFile {
 
 // Initialize the dockerCli runs initialization that must happen after command
 // line flags are parsed.
-func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
+func (cli *StorageOSCli) Initialize(flagset *pflag.FlagSet, opt *cliflags.ClientOptions) error {
 	cli.configFile = LoadDefaultConfigFile(cli.err)
 
 	cli.discovery = getDiscovery(opt.Common.Discovery)
@@ -134,7 +135,7 @@ func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 	}
 	cli.hosts = hosts
 
-	if opt.Common.Timeout > 0 {
+	if flagset.Changed(cliflags.FlagTimeout) {
 		cli.timeout = opt.Common.Timeout
 	} else {
 		cli.timeout, err = getTimeout()
