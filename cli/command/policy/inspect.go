@@ -39,9 +39,9 @@ func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 		if err != nil {
 			return err
 		}
-		list := make([]inspect.ElemRaw, 0, len(policies))
+		list := make([]interface{}, 0, len(policies))
 		for _, policy := range policies {
-			list = append(list, inspect.ElemRaw{Elem: policy})
+			list = append(list, policy)
 		}
 		return inspect.List(storageosCli.Out(), list, opt.format)
 
