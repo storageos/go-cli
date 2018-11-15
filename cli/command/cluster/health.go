@@ -62,8 +62,7 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 		}
 	}
 
-	sortContainer := cliTypes.SortableCLIType(&nodes)
-	if err := sortContainer.SortByName(); err != nil {
+	if err := cliTypes.SortCLINodes(cliTypes.ByNodeName, nodes); err != nil {
 		return err
 	}
 

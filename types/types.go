@@ -56,83 +56,74 @@ type Node struct {
 	Health NodeHealth
 }
 
-// SortableNodeType provides a container type to sort slices of the node type
-// by name. This simplifies sorting as the type will manage the sort
-// opperations on both types
-type SortableNodeType struct {
-	apiNode *[]*apiTypes.Node
-	cliNode *[]*Node
-}
+type nodeSortBy int
 
-func SortableAPIType(apiNode *[]*apiTypes.Node) *SortableNodeType {
-	return &SortableNodeType{
-		apiNode: apiNode,
+const (
+	ByNodeName nodeSortBy = iota
+)
+
+func SortAPINodes(by nodeSortBy, nodes []*apiTypes.Node) error {
+	lessfunc, err := apiNodeSortFunc(by, nodes)
+	if err != nil {
+		return err
 	}
-}
-
-func SortableCLIType(cliNode *[]*Node) *SortableNodeType {
-	return &SortableNodeType{
-		cliNode: cliNode,
-	}
-}
-
-func (s *SortableNodeType) SortByName() error {
-	switch {
-	case s.apiNode != nil && s.cliNode == nil:
-		break
-	case s.cliNode != nil && s.apiNode == nil:
-		break
-	default:
-		return errors.New("more than one type of node slice used")
-	}
-
-	sort.Sort(s)
+	sort.Slice(nodes, lessfunc)
 	return nil
 }
 
-func (s *SortableNodeType) Len() int {
-	switch {
-	case s.apiNode != nil:
-		return len(*s.apiNode)
-	case s.cliNode != nil:
-		return len(*s.cliNode)
+func SortCLINodes(by nodeSortBy, nodes []*Node) error {
+	lessfunc, err := cliNodeSortFunc(by, nodes)
+	if err != nil {
+		return err
+	}
+	sort.Slice(nodes, lessfunc)
+	return nil
+}
+
+func apiNodeSortFunc(sortBy nodeSortBy, nodes []*apiTypes.Node) (func(i, j int) bool, error) {
+	switch sortBy {
+	case ByNodeName:
+		return func(i, j int) bool {
+			name1, name2 := trimCommonPrefix(nodes[i].Name, nodes[j].Name)
+
+			// Are the postfixes both numerical, if so sort as integers
+			n1, err1 := strconv.Atoi(name1)
+			n2, err2 := strconv.Atoi(name2)
+			if err1 == nil && err2 == nil {
+				return n1 < n2
+			}
+
+			// Postfixes don't appear to be numerical, sort them lexicographically
+			return name1 < name2
+
+		}, nil
+
 	default:
-		return 0
+		return nil, errors.New("sort method not implemented")
 	}
 }
 
-func (s *SortableNodeType) Swap(i, j int) {
-	if s.apiNode != nil {
-		apiSlice := *s.apiNode
-		apiSlice[i], apiSlice[j] = apiSlice[j], apiSlice[i]
-	}
+func cliNodeSortFunc(sortBy nodeSortBy, nodes []*Node) (func(i, j int) bool, error) {
+	switch sortBy {
+	case ByNodeName:
+		return func(i, j int) bool {
+			name1, name2 := trimCommonPrefix(nodes[i].Name, nodes[j].Name)
 
-	if s.cliNode != nil {
-		cliSlice := *s.cliNode
-		cliSlice[i], cliSlice[j] = cliSlice[j], cliSlice[i]
-	}
-}
+			// Are the postfixes both numerical, if so sort as integers
+			n1, err1 := strconv.Atoi(name1)
+			n2, err2 := strconv.Atoi(name2)
+			if err1 == nil && err2 == nil {
+				return n1 < n2
+			}
 
-func (s *SortableNodeType) Less(i, j int) bool {
-	var name1, name2 string
-	if s.apiNode != nil {
-		apiSlice := *s.apiNode
-		name1, name2 = trimCommonPrefix(apiSlice[i].Name, apiSlice[j].Name)
-	}
-	if s.cliNode != nil {
-		cliSlice := *s.cliNode
-		name1, name2 = trimCommonPrefix(cliSlice[i].Name, cliSlice[j].Name)
-	}
+			// Postfixes don't appear to be numerical, sort them lexicographically
+			return name1 < name2
 
-	// Are the postfixes both numerical, if so sort as integers
-	n1, err1 := strconv.Atoi(name1)
-	n2, err2 := strconv.Atoi(name2)
-	if err1 == nil && err2 == nil {
-		return n1 < n2
-	}
+		}, nil
 
-	// Postfixes don't appear to be numerical, sort them lexicographically
-	return name1 < name2
+	default:
+		return nil, errors.New("sort method not implemented")
+	}
 }
 
 func trimCommonPrefix(a, b string) (string, string) {

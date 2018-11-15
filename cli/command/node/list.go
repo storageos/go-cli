@@ -57,8 +57,7 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 		}
 	}
 
-	sortContainer := clitypes.SortableAPIType(&nodes)
-	if err := sortContainer.SortByName(); err != nil {
+	if err := clitypes.SortAPINodes(clitypes.ByNodeName, nodes); err != nil {
 		return err
 	}
 

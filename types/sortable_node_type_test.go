@@ -63,9 +63,7 @@ func TestSortableNodeTypeCLINodes(t *testing.T) {
 	}
 
 	for _, fixture := range fixtures {
-		// Create the sorting container for the current fixture
-		container := cliTypes.SortableCLIType(&fixture.nodes)
-		if err := container.SortByName(); (err != nil) != fixture.expectError {
+		if err := cliTypes.SortCLINodes(cliTypes.ByNodeName, fixture.nodes); (err != nil) != fixture.expectError {
 			t.Fatalf("Got error %e, expected error? %t", err, fixture.expectError)
 		}
 
@@ -136,9 +134,7 @@ func TestSortableNodeTypeAPINodes(t *testing.T) {
 	}
 
 	for _, fixture := range fixtures {
-		// Create the sorting container for the current fixture
-		container := cliTypes.SortableAPIType(&fixture.nodes)
-		if err := container.SortByName(); (err != nil) != fixture.expectError {
+		if err := cliTypes.SortAPINodes(cliTypes.ByNodeName, fixture.nodes); (err != nil) != fixture.expectError {
 			t.Fatalf("Got error %e, expected error? %t", err, fixture.expectError)
 		}
 
