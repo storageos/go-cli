@@ -21,11 +21,11 @@ const (
 	DefaultKeyFile = "key.pem"
 	// DefaultCertFile is the default filename for the cert pem file
 	DefaultCertFile = "cert.pem"
-	// FlagTLSVerify is the flag name for the TLS verification option
-	FlagTLSVerify = "tlsverify"
 )
 
 const (
+	// FlagTLSVerify is the flag name for the TLS verification option
+	FlagTLSVerify = "tlsverify"
 	// FlagTimeout is timeout flag
 	FlagTimeout = "timeout"
 )
@@ -69,7 +69,7 @@ func (commonOpts *CommonOptions) InstallFlags(flags *pflag.FlagSet) {
 	flags.StringVarP(&commonOpts.Username, "username", "u", "", fmt.Sprintf(`API username (will override %s env variable value)`, cliconfig.EnvStorageosUsername))
 	flags.StringVarP(&commonOpts.Password, "password", "p", "", fmt.Sprintf(`API password (will override %s env variable value)`, cliconfig.EnvStorageosPassword))
 
-	flags.DurationVarP(&commonOpts.Timeout, FlagTimeout, "t", cliconfig.DefaultTimeout, fmt.Sprintf(`client timeout in seconds (will override %s env variable value if set), default 10s`, cliconfig.EnvStorageOSTimeout))
+	flags.DurationVarP(&commonOpts.Timeout, FlagTimeout, "t", cliconfig.DefaultTimeout, fmt.Sprintf(`client timeout in seconds (will override %s env variable value if set)`, cliconfig.EnvStorageOSTimeout))
 }
 
 // SetDefaultOptions sets default values for options after flag parsing is
