@@ -52,9 +52,6 @@ func NewTemplateInspectorFromString(out io.Writer, tmplStr string) (Inspector, e
 // reference
 type GetRefFunc func(ref string) (interface{}, []byte, error)
 
-// GetAllFunc is a function which used by Inspect to fetch all objects
-type GetAllFunc func() ([]interface{}, error)
-
 // ElemRaw represents a parsed object with its unparsed raw data
 type ElemRaw struct {
 	Elem interface{}

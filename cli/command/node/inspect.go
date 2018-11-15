@@ -34,11 +34,6 @@ func newInspectCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	client := storageosCli.Client()
 
-	getFunc := func(ref string) (interface{}, []byte, error) {
-		i, err := client.Node(ref)
-		return i, nil, err
-	}
-
 	if len(opt.names) == 0 {
 		nodes, err := client.NodeList(types.ListOptions{})
 		if err != nil {
@@ -49,6 +44,11 @@ func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 			list = append(list, inspect.ElemRaw{Elem: node})
 		}
 		return inspect.List(storageosCli.Out(), list, opt.format)
+	}
+
+	getFunc := func(ref string) (interface{}, []byte, error) {
+		i, err := client.Node(ref)
+		return i, nil, err
 	}
 
 	return inspect.Inspect(storageosCli.Out(), opt.names, opt.format, getFunc)
