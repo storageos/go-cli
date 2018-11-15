@@ -84,6 +84,7 @@ func (cli *StorageOSCli) DefaultVersion() string {
 
 // Client returns the APIClient
 func (cli *StorageOSCli) Client() *api.Client {
+	cli.client.SkipServerVersionCheck = true
 	return cli.client
 }
 
