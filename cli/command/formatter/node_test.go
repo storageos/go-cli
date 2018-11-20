@@ -26,9 +26,9 @@ storageos-3
 			// Test default table format
 			Context{Format: NewNodeFormat(defaultNodeTableFormat, false)},
 			`NAME         ADDRESS    HEALTH                      SCHEDULER  VOLUMES     TOTAL  USED    VERSION
-storageos-1  127.0.0.1  Alive Less than a second    true       M: 0, R: 2  5GB    80.00%  1.0.0
-storageos-2  127.0.0.1  Alive Less than a second    false      M: 1, R: 0  5GB    52.00%  1.0.0
-storageos-3  127.0.0.1  Unknown Less than a second  false      M: 1, R: 2  5GB    60.00%  1.0.0
+storageos-1  127.0.0.1  Alive Less than a second    true       M: 0, R: 2  5GiB   80.00%  1.0.0
+storageos-2  127.0.0.1  Alive Less than a second    false      M: 1, R: 0  5GiB   52.00%  1.0.0
+storageos-3  127.0.0.1  Unknown Less than a second  false      M: 1, R: 2  5GiB   60.00%  1.0.0
 `,
 		},
 		{
@@ -48,8 +48,8 @@ storageos-3  127.0.0.1  Unknown Less than a second  60.00%  euw     euw-3
 	nodes := []*types.Node{
 		{Name: "storageos-1",
 			CapacityStats: types.CapacityStats{
-				AvailableCapacityBytes: 1e9,
-				TotalCapacityBytes:     5e9,
+				AvailableCapacityBytes: 1 * GiB,
+				TotalCapacityBytes:     5 * GiB,
 			},
 			Health:          aliveStatus.Status,
 			HealthUpdatedAt: time.Now(),
@@ -73,8 +73,8 @@ storageos-3  127.0.0.1  Unknown Less than a second  60.00%  euw     euw-3
 		},
 		{Name: "storageos-2",
 			CapacityStats: types.CapacityStats{
-				AvailableCapacityBytes: 2.4e9,
-				TotalCapacityBytes:     5e9,
+				AvailableCapacityBytes: GiB * 12 / 5, // 2.4
+				TotalCapacityBytes:     5 * GiB,
 			},
 			Health:          aliveStatus.Status,
 			HealthUpdatedAt: time.Now(),
@@ -98,8 +98,8 @@ storageos-3  127.0.0.1  Unknown Less than a second  60.00%  euw     euw-3
 		},
 		{Name: "storageos-3",
 			CapacityStats: types.CapacityStats{
-				AvailableCapacityBytes: 2e9,
-				TotalCapacityBytes:     5e9,
+				AvailableCapacityBytes: 2 * GiB,
+				TotalCapacityBytes:     5 * GiB,
 			},
 			Health:          unknownStatus.Status,
 			HealthUpdatedAt: time.Now(),

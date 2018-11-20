@@ -10,12 +10,13 @@ import (
 	"github.com/storageos/go-cli/cli/command/formatter"
 )
 
-type byVolumeName []*types.Volume
+type byNamespaceName []*types.Volume
 
-func (r byVolumeName) Len() int      { return len(r) }
-func (r byVolumeName) Swap(i, j int) { r[i], r[j] = r[j], r[i] }
-func (r byVolumeName) Less(i, j int) bool {
-	return r[i].Name < r[j].Name
+func (r byNamespaceName) Len() int      { return len(r) }
+func (r byNamespaceName) Swap(i, j int) { r[i], r[j] = r[j], r[i] }
+func (r byNamespaceName) Less(i, j int) bool {
+	return r[i].Namespace < r[j].Namespace ||
+		(r[i].Namespace == r[j].Namespace && r[i].Name < r[j].Name)
 }
 
 type listOptions struct {
@@ -74,7 +75,7 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 		}
 	}
 
-	sort.Sort(byVolumeName(volumes))
+	sort.Sort(byNamespaceName(volumes))
 
 	volumeCtx := formatter.Context{
 		Output: storageosCli.Out(),
