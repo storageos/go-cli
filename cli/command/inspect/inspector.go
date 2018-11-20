@@ -52,23 +52,47 @@ func NewTemplateInspectorFromString(out io.Writer, tmplStr string) (Inspector, e
 // reference
 type GetRefFunc func(ref string) (interface{}, []byte, error)
 
+// elemRaw represents a parsed object with its unparsed raw data
+type elemRaw struct {
+	elem interface{}
+	raw  []byte
+}
+
 // Inspect fetches objects by reference using GetRefFunc and writes the json
 // representation to the output writer.
 func Inspect(out io.Writer, references []string, tmplStr string, getRef GetRefFunc) error {
+	elements := make([]elemRaw, 0, len(references))
+	for _, ref := range references {
+		element, raw, err := getRef(ref)
+		if err != nil {
+			return err
+		}
+		elements = append(elements, elemRaw{elem: element, raw: raw})
+	}
+	return list(out, elements, tmplStr)
+}
+
+// List writes the json representation of elements to the output writer
+func List(out io.Writer, elements []interface{}, tmplStr string) error {
+	elems := make([]elemRaw, 0, len(elements))
+	for _, element := range elements {
+		elems = append(elems, elemRaw{elem: element})
+	}
+	return list(out, elems, tmplStr)
+}
+
+// list writes the json representation of elements to the output writer
+//
+// used by both Inspect and List
+func list(out io.Writer, elements []elemRaw, tmplStr string) error {
 	inspector, err := NewTemplateInspectorFromString(out, tmplStr)
 	if err != nil {
 		return cli.StatusError{StatusCode: 64, Status: err.Error()}
 	}
 
 	var inspectErr error
-	for _, ref := range references {
-		element, raw, err := getRef(ref)
-		if err != nil {
-			inspectErr = err
-			break
-		}
-
-		if err := inspector.Inspect(element, raw); err != nil {
+	for _, element := range elements {
+		if err := inspector.Inspect(element.elem, element.raw); err != nil {
 			inspectErr = err
 			break
 		}
