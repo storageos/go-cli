@@ -69,7 +69,7 @@ func (commonOpts *CommonOptions) InstallFlags(flags *pflag.FlagSet) {
 	flags.StringVarP(&commonOpts.Username, "username", "u", "", fmt.Sprintf(`API username (will override %s env variable value)`, cliconfig.EnvStorageosUsername))
 	flags.StringVarP(&commonOpts.Password, "password", "p", "", fmt.Sprintf(`API password (will override %s env variable value)`, cliconfig.EnvStorageosPassword))
 
-	flags.DurationVarP(&commonOpts.Timeout, FlagTimeout, "t", cliconfig.DefaultTimeout, fmt.Sprintf(`client timeout in seconds (will override %s env variable value if set)`, cliconfig.EnvStorageOSTimeout))
+	flags.DurationVarP(&commonOpts.Timeout, FlagTimeout, "t", cliconfig.DefaultTimeout, fmt.Sprintf(`client timeout in duration format, like 500ms, 2s, 1m (will override %s env variable value if set)`, cliconfig.EnvStorageOSTimeout))
 }
 
 // SetDefaultOptions sets default values for options after flag parsing is
