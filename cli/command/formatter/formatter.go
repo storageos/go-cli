@@ -26,6 +26,7 @@ const (
 )
 
 var allKeys = map[Format]bool{
+	"":                     true, // default format
 	TableFormatKey:         true,
 	RawFormatKey:           true,
 	PrettyFormatKey:        true,
