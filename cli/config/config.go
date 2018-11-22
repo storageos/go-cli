@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/docker/docker/pkg/homedir"
 	"github.com/storageos/go-cli/cli/config/configfile"
@@ -23,6 +24,7 @@ const (
 	EnvStorageosPassword   = "STORAGEOS_PASSWORD"
 	EnvStorageosAPIVersion = "STORAGEOS_API_VERSION"
 	EnvStorageOSDiscovery  = "STORAGEOS_DISCOVERY"
+	EnvStorageOSTimeout    = "STORAGEOS_TIMEOUT"
 )
 
 var (
@@ -40,6 +42,9 @@ const DeviceRootPath = "/var/lib/storageos/volumes"
 
 // DefaultFSType is the default filesystem we'll use if creating filesystems.
 const DefaultFSType = "ext4"
+
+// DefaultTimeout is the default API client timeout in seconds
+const DefaultTimeout = 10 * time.Second
 
 func init() {
 	if configDir == "" {
