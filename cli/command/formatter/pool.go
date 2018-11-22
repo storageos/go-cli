@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	units "github.com/docker/go-units"
 	"github.com/storageos/go-api/types"
 )
 
@@ -96,7 +95,7 @@ func (c *poolContext) CapacityUsed() string {
 
 func (c *poolContext) Total() string {
 	c.AddHeader(poolTotalHeader)
-	return units.HumanSize(float64(c.v.CapacityStats.TotalCapacityBytes))
+	return bytesSize(c.v.CapacityStats.TotalCapacityBytes)
 }
 
 func (c *poolContext) Labels() string {

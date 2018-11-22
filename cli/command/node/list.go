@@ -1,22 +1,13 @@
 package node
 
 import (
-	"sort"
-
 	"github.com/dnephin/cobra"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
+	clitypes "github.com/storageos/go-cli/types"
 )
-
-type byNodeName []*types.Node
-
-func (r byNodeName) Len() int      { return len(r) }
-func (r byNodeName) Swap(i, j int) { r[i], r[j] = r[j], r[i] }
-func (r byNodeName) Less(i, j int) bool {
-	return r[i].Name < r[j].Name
-}
 
 type listOptions struct {
 	quiet    bool
@@ -66,7 +57,9 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 		}
 	}
 
-	sort.Sort(byNodeName(nodes))
+	if err := clitypes.SortAPINodes(clitypes.ByNodeName, nodes); err != nil {
+		return err
+	}
 
 	nodeCtx := formatter.Context{
 		Output: storageosCli.Out(),

@@ -8,9 +8,8 @@ import (
 
 const (
 	defaultUserQuietFormat = "{{.Username}}"
-	defaultUserTableFormat = "table {{.UUID}}\t{{.Username}}\t{{.Groups}}\t{{.Role}}"
+	defaultUserTableFormat = "table {{.Username}}\t{{.Groups}}\t{{.Role}}"
 
-	userUUIDHeader     = "ID"
 	userUsernameHeader = "USERNAME"
 	userGroupsHeader   = "GROUPS"
 	userRoleHeader     = "ROLE"
@@ -32,7 +31,7 @@ func NewUserFormat(source string, quiet bool) Format {
 		if quiet {
 			return `username: {{.Username}}`
 		}
-		return `id: {{.UUID}}\nusername: {{.Username}}\ngroups: {{.Groups}}\nrole: {{.Role}}\n`
+		return `username: {{.Username}}\ngroups: {{.Groups}}\nrole: {{.Role}}\n`
 	}
 	return Format(source)
 }
@@ -58,11 +57,6 @@ type userContext struct {
 
 func (c *userContext) MarshalJSON() ([]byte, error) {
 	return marshalJSON(c)
-}
-
-func (c *userContext) UUID() string {
-	c.AddHeader(userUUIDHeader)
-	return c.v.UUID
 }
 
 func (c *userContext) Username() string {
