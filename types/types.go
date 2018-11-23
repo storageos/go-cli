@@ -84,18 +84,7 @@ func apiNodeSortFunc(sortBy nodeSortBy, nodes []*apiTypes.Node) (func(i, j int) 
 	switch sortBy {
 	case ByNodeName:
 		return func(i, j int) bool {
-			name1, name2 := trimCommonPrefix(nodes[i].Name, nodes[j].Name)
-
-			// Are the postfixes both numerical, if so sort as integers
-			n1, err1 := strconv.Atoi(name1)
-			n2, err2 := strconv.Atoi(name2)
-			if err1 == nil && err2 == nil {
-				return n1 < n2
-			}
-
-			// Postfixes don't appear to be numerical, sort them lexicographically
-			return name1 < name2
-
+			return HumanisedStringLess(nodes[i].Name, nodes[j].Name)
 		}, nil
 
 	default:
@@ -107,23 +96,26 @@ func cliNodeSortFunc(sortBy nodeSortBy, nodes []*Node) (func(i, j int) bool, err
 	switch sortBy {
 	case ByNodeName:
 		return func(i, j int) bool {
-			name1, name2 := trimCommonPrefix(nodes[i].Name, nodes[j].Name)
-
-			// Are the postfixes both numerical, if so sort as integers
-			n1, err1 := strconv.Atoi(name1)
-			n2, err2 := strconv.Atoi(name2)
-			if err1 == nil && err2 == nil {
-				return n1 < n2
-			}
-
-			// Postfixes don't appear to be numerical, sort them lexicographically
-			return name1 < name2
-
+			return HumanisedStringLess(nodes[i].Name, nodes[j].Name)
 		}, nil
 
 	default:
 		return nil, errors.New("sort method not implemented")
 	}
+}
+
+func HumanisedStringLess(i, j string) bool {
+	name1, name2 := trimCommonPrefix(i, j)
+
+	// Are the postfixes both numerical, if so sort as integers
+	n1, err1 := strconv.Atoi(name1)
+	n2, err2 := strconv.Atoi(name2)
+	if err1 == nil && err2 == nil {
+		return n1 < n2
+	}
+
+	// Postfixes don't appear to be numerical, sort them lexicographically
+	return name1 < name2
 }
 
 func trimCommonPrefix(a, b string) (string, string) {
