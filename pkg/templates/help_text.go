@@ -34,12 +34,26 @@ fields:
 		<< .Description >><< end >>
 
 These can be composed to really customise the output, for example to print a
-list of replicas for a volume:
+list of devices usable by StorageOS:
 
-	{{ .DeviceDir}} has mounts: 
+	{{ .Name }} - {{ .DeviceDir}} has mounts:
 		{{ range .Devices }}
 		{{ index (split .Identifier \"/\") 4}} - {{ upper .Status }}
 	{{ end }}
+
+Outputs:
+
+	storageos-1-dom - /var/lib/storageos/volumes has mounts:
+		data - ACTIVE
+		ssd1 - ACTIVE
+		ssd4 - ACTIVE
+
+	storageos-3-dom - /var/lib/storageos/volumes has mounts:
+		data - ACTIVE
+		nas1 - ACTIVE
+
+	storageos-2-dom - /var/lib/storageos/volumes has mounts:
+		data - ACTIVE
 
 Conditionals, additional functions, variable binding, and string formatting
 are also supported for most fields, for more information refer to the Go
