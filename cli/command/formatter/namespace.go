@@ -34,6 +34,16 @@ func NewNamespaceFormat(source string, quiet bool) Format {
 
 // NamespaceWrite writes formatted namespaces using the Context
 func NamespaceWrite(ctx Context, namespaces []*types.Namespace) error {
+	// Try handle a custom format, excluding the predefined templates
+	TryFormatUnless(
+		string(ctx.Format),
+		namespaces,
+		defaultNamespaceQuietFormat,
+		defaultNamespaceTableFormat,
+		`name: {{.Name}}`,
+		`name: {{.Name}}\ndisplay name: {{.DisplayName}}\n`,
+	)
+
 	render := func(format func(subContext subContext) error) error {
 		for _, namespace := range namespaces {
 			if err := format(&namespaceContext{v: *namespace}); err != nil {

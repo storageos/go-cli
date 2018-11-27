@@ -38,6 +38,16 @@ func NewRuleFormat(source string, quiet bool) Format {
 
 // RuleWrite writes formatted rules using the Context
 func RuleWrite(ctx Context, rules []*types.Rule) error {
+	// Try handle a custom format, excluding the predefined templates
+	TryFormatUnless(
+		string(ctx.Format),
+		rules,
+		defaultRuleQuietFormat,
+		defaultRuleTableFormat,
+		`name: {{.Name}}`,
+		`name: {{.Name}}\nselector: {{.Selector}}\noperator: {{.Operator}}\naction: {{.RuleAction}}\nlabels: {{.Labels}}\n`,
+	)
+
 	render := func(format func(subContext subContext) error) error {
 		for _, rule := range rules {
 			if err := format(&ruleContext{v: *rule}); err != nil {

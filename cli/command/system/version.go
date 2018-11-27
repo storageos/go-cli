@@ -9,6 +9,7 @@ import (
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
+	"github.com/storageos/go-cli/cli/command/formatter"
 	"github.com/storageos/go-cli/pkg/constants"
 	"github.com/storageos/go-cli/pkg/templates"
 	"github.com/storageos/go-cli/version"
@@ -50,7 +51,7 @@ func NewVersionCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 
-	flags.StringVarP(&opts.format, "format", "f", "", "Format the output using the given Go template")
+	flags.StringVarP(&opts.format, "format", "f", "", "Format the output using a custom template (try \"help\" for more info)")
 
 	return cmd
 }
@@ -64,14 +65,20 @@ func runVersion(storageosCli *command.StorageOSCli, opts *versionOptions) error 
 		templateFormat = opts.format
 	}
 
+	vd := types.VersionResponse{
+		Client: version.GetStorageOSVersion(),
+	}
+
+	formatter.TryFormatUnless(
+		string(templateFormat),
+		vd,
+		versionTemplate,
+	)
+
 	tmpl, err := templates.Parse(templateFormat)
 	if err != nil {
 		return cli.StatusError{StatusCode: 64,
 			Status: "Template parsing error: " + err.Error()}
-	}
-
-	vd := types.VersionResponse{
-		Client: version.GetStorageOSVersion(),
 	}
 
 	serverVersion, err := storageosCli.Client().ServerVersion(ctx)
