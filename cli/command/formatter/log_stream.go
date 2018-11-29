@@ -31,7 +31,6 @@ func NewLogStreamFormat(source string, quiet bool) Format {
 
 // LogStreamWrite writes a formatted stream of log messages
 func LogStreamWrite(ctx Context, msg []byte) error {
-
 	render := func(format func(subContext subContext) error) error {
 
 		entry, err := marshalEntry(msg)

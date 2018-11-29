@@ -37,6 +37,15 @@ func NewPolicyFormat(source string, quiet bool) Format {
 // PolicyWrite writes the given policies to the provided context,
 // using the format specified within the context.
 func PolicyWrite(ctx Context, policies []*types.PolicyWithID) error {
+	// Try handle a custom format, excluding the predefined templates
+	TryFormatUnless(
+		string(ctx.Format),
+		policies,
+		defaultPolicyTableFormat,
+		defaultPolicyQuietFormat,
+		"name: {{.Name}}\nuser: {{.User}}\ngroup: {{.Group}}\nnamespace: {{.Namespace}}",
+	)
+
 	render := func(format func(subContext subContext) error) error {
 		for _, policy := range policies {
 			if err := format(&policyContext{v: *policy}); err != nil {

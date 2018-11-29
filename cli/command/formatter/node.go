@@ -46,6 +46,16 @@ func NewNodeFormat(source string, quiet bool) Format {
 
 // NodeWrite writes formatted nodes using the Context
 func NodeWrite(ctx Context, nodes []*types.Node) error {
+	// Try handle a custom format, excluding the predefined templates
+	TryFormatUnless(
+		string(ctx.Format),
+		nodes,
+		defaultNodeQuietFormat,
+		defaultNodeTableFormat,
+		`name: {{.Name}}`,
+		`name: {{.Name}}\naddress: {{.Address}}\nhealth: {{.Health}}\nscheduler: {{.Scheduler}}\nvolumes: {{.Volumes}}\ncapacity: {{.Capacity}}\ncapacityUsed: {{.CapacityUsed}}\nversion: {{.Version}}\nlabels: {{.Labels}}\n`,
+	)
+
 	render := func(format func(subContext subContext) error) error {
 		for _, node := range nodes {
 			if err := format(&nodeContext{v: *node}); err != nil {

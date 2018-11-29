@@ -30,7 +30,7 @@ func newInspectCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opt.format, "format", "f", "", "Format the output using the given Go template")
+	cmd.Flags().StringVarP(&opt.format, "format", "f", "", "Format the output using a custom template (try \"help\" for more info)")
 
 	return cmd
 }

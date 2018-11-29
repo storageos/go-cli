@@ -26,7 +26,7 @@ func newViewCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display log level")
-	flags.StringVar(&opt.format, "format", "", "Pretty-print config using a Go template")
+	flags.StringVar(&opt.format, "format", "", "Output format (raw or table)")
 	flags.StringVarP(&opt.selector, "selector", "s", "", "Provide selector (e.g. to list all nodes with label disk=ssd' --selector=disk=ssd')")
 	flags.IntVarP(&opt.timeout, "timeout", "t", constants.DefaultAPITimeout, "Timeout in seconds.")
 

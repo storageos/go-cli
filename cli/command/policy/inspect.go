@@ -26,7 +26,7 @@ func newInspectCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opt.format, "format", "f", "", "Format the output using the given Go template")
+	cmd.Flags().StringVarP(&opt.format, "format", "f", "", "Format the output using a custom template (try \"help\" for more info)")
 
 	return cmd
 }
@@ -44,7 +44,6 @@ func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 			list = append(list, policy)
 		}
 		return inspect.List(storageosCli.Out(), list, opt.format)
-
 	}
 
 	getFunc := func(ref string) (interface{}, []byte, error) {

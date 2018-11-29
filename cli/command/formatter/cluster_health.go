@@ -62,6 +62,21 @@ func NewClusterHealthFormat(source string, quiet bool) Format {
 
 // ClusterHealthWrite writes formatted ClusterHealthhelements using the Context
 func ClusterHealthWrite(ctx Context, nodes []*types.Node) error {
+	// Try handle a custom format, excluding the predefined templates
+	TryFormatUnless(
+		string(ctx.Format),
+		nodes,
+		defaultClusterHealthQuietFormat,
+		defaultClusterHealthTableFormat,
+		detailedClusterHealthTableFormat,
+		cpClusterHealthTableFormat,
+		dpClusterHealthTableFormat,
+		`{{.CPStatus}}`,
+		`{{.DPStatus}}`,
+		`{{.Node}}: {{.Status}}`,
+		`node: {{.Node}}\nstatus: {{.Status}}\nkv: {{.KV}}\nkv_write: {{.KVWrite}}\nnats: {{.NATS}}\ndfs_client: {{.DirectFSClient}}\ndirector: {{.Director}}\nfs_driver: {{.FSDriver}}\nfs: {{.FS}}\n`,
+	)
+
 	if len(nodes) == 0 {
 		return fmt.Errorf("No cluster nodes found")
 	}

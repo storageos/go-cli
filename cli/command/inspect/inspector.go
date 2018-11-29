@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 	"text/template"
 
 	"github.com/sirupsen/logrus"
@@ -39,6 +40,11 @@ func NewTemplateInspector(outputStream io.Writer, tmpl *template.Template) Inspe
 func NewTemplateInspectorFromString(out io.Writer, tmplStr string) (Inspector, error) {
 	if tmplStr == "" {
 		return NewIndentedInspector(out), nil
+	}
+
+	// If the format is "help", print the usage text
+	if strings.ToLower(tmplStr) == "help" {
+		return &formatHelp{}, nil
 	}
 
 	tmpl, err := templates.Parse(tmplStr)
