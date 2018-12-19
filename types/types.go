@@ -39,6 +39,7 @@ type Cluster struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 }
 
+// NodeHealth is a containter type for holding Node health information
 type NodeHealth struct {
 	CP *apiTypes.CPHealthStatus
 	DP *apiTypes.DPHealthStatus
@@ -58,10 +59,12 @@ type Node struct {
 
 type nodeSortBy int
 
+// Pre-defined sorting methods
 const (
 	ByNodeName nodeSortBy = iota
 )
 
+// SortAPINodes sorts the set of nodes by the provided scheme
 func SortAPINodes(by nodeSortBy, nodes []*apiTypes.Node) error {
 	lessfunc, err := apiNodeSortFunc(by, nodes)
 	if err != nil {
@@ -71,6 +74,7 @@ func SortAPINodes(by nodeSortBy, nodes []*apiTypes.Node) error {
 	return nil
 }
 
+// SortCLINodes sorts the set of nodes by the provided scheme
 func SortCLINodes(by nodeSortBy, nodes []*Node) error {
 	lessfunc, err := cliNodeSortFunc(by, nodes)
 	if err != nil {
@@ -104,6 +108,12 @@ func cliNodeSortFunc(sortBy nodeSortBy, nodes []*Node) (func(i, j int) bool, err
 	}
 }
 
+// HumanisedStringLess is a string compare function, useable for sorting that
+// attemps to detect expected humanised sorting e.g. hostnames with numeric
+// postfixes.
+//
+// This function (for now) is quite basic, but could support more edge-cases as
+// they arrise.
 func HumanisedStringLess(i, j string) bool {
 	name1, name2 := trimCommonPrefix(i, j)
 
