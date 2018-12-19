@@ -52,6 +52,19 @@ func NewNodeHealthFormat(source string, quiet bool) Format {
 
 // NodeHealthWrite writes formatted NamedSubModuleStatus elements using the Context
 func NodeHealthWrite(ctx Context, node *cliTypes.Node) error {
+	// Try handle a custom format, excluding the predefined templates
+	TryFormatUnless(
+		string(ctx.Format),
+		node,
+		defaultNodeSubmodulesQuietFormat,
+		defaultNodeSubmodulesTableFormat,
+		cpNodeSubmodulesTableFormat,
+		dpNodeSubmodulesTableFormat,
+		cpNodeSubmodulesQuietFormat,
+		dpNodeSubmodulesQuietFormat,
+		defaultNodeRawFormat,
+	)
+
 	render := func(format func(subContext subContext) error) error {
 		if node.Health.CP != nil {
 			for _, submodule := range node.Health.CP.ToNamedSubmodules() {

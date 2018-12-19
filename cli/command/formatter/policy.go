@@ -5,10 +5,10 @@ import (
 )
 
 const (
-	defaultPolicyTableFormat = "table {{.ID}}\t{{.User}}\t{{.Group}}\t{{.Namespace}}"
-	defaultPolicyQuietFormat = "{{.ID}}"
+	defaultPolicyTableFormat = "table {{.Name}}\t{{.User}}\t{{.Group}}\t{{.Namespace}}"
+	defaultPolicyQuietFormat = "{{.Name}}"
 
-	policyIDHeader              = "ID"
+	policyNameHeader            = "NAME"
 	policyUserHeader            = "USER"
 	policyGroupHeader           = "GROUP"
 	policyReadonlyHeader        = "READONLY"
@@ -29,7 +29,7 @@ func NewPolicyFormat(source string, quiet bool) Format {
 		}
 		return defaultPolicyTableFormat
 	case RawFormatKey:
-		return "id: {{.ID}}\nuser: {{.User}}\ngroup: {{.Group}}\nnamespace: {{.Namespace}}"
+		return "name: {{.Name}}\nuser: {{.User}}\ngroup: {{.Group}}\nnamespace: {{.Namespace}}"
 	}
 	return Format(source)
 }
@@ -37,6 +37,15 @@ func NewPolicyFormat(source string, quiet bool) Format {
 // PolicyWrite writes the given policies to the provided context,
 // using the format specified within the context.
 func PolicyWrite(ctx Context, policies []*types.PolicyWithID) error {
+	// Try handle a custom format, excluding the predefined templates
+	TryFormatUnless(
+		string(ctx.Format),
+		policies,
+		defaultPolicyTableFormat,
+		defaultPolicyQuietFormat,
+		"name: {{.Name}}\nuser: {{.User}}\ngroup: {{.Group}}\nnamespace: {{.Namespace}}",
+	)
+
 	render := func(format func(subContext subContext) error) error {
 		for _, policy := range policies {
 			if err := format(&policyContext{v: *policy}); err != nil {
@@ -57,9 +66,10 @@ func (c *policyContext) MarshalJSON() ([]byte, error) {
 	return marshalJSON(c)
 }
 
-func (c *policyContext) ID() string {
-	c.AddHeader(policyIDHeader)
-	return c.v.ID
+func (c *policyContext) Name() string {
+	c.AddHeader(policyNameHeader)
+	// TODO: return policy name after it is supported
+	return ""
 }
 
 func (c *policyContext) User() string {

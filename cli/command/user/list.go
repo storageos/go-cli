@@ -59,7 +59,7 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display usernames")
-	flags.StringVar(&opt.format, "format", "", "Pretty-print rules using a Go template")
+	flags.StringVar(&opt.format, "format", "", "Format the output using a custom template (try \"help\" for more info)")
 	flags.BoolVar(&opt.admins, "admin-only", false, "Only return the admin users")
 	flags.BoolVar(&opt.users, "user-only", false, "Only return the non-admin users")
 

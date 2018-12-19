@@ -6,11 +6,15 @@ import (
 	"text/template"
 )
 
-// basicFunctions are the set of initial
-// functions provided to every template.
+// basicFunctions are the set of initial functions provided to every template.
+//
+// If changing these, be sure to update HelpText()
 var basicFunctions = template.FuncMap{
 	"json": func(v interface{}) string {
-		a, _ := json.Marshal(v)
+		a, err := json.Marshal(v)
+		if err != nil {
+			return "<unable to JSON encode this field>"
+		}
 		return string(a)
 	},
 	"split":    strings.Split,

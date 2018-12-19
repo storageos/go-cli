@@ -40,6 +40,16 @@ func NewPoolFormat(source string, quiet bool) Format {
 
 // PoolWrite writes formatted pools using the Context
 func PoolWrite(ctx Context, pools []*types.Pool) error {
+	// Try handle a custom format, excluding the predefined templates
+	TryFormatUnless(
+		string(ctx.Format),
+		pools,
+		defaultPoolQuietFormat,
+		defaultPoolTableFormat,
+		`name: {{.Name}}`,
+		`name: {{.Name}}\n node selector: {{.NodeSelector}}\n`,
+	)
+
 	render := func(format func(subContext subContext) error) error {
 		for _, pool := range pools {
 			if err := format(&poolContext{v: *pool}); err != nil {

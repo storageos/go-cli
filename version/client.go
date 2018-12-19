@@ -3,7 +3,7 @@ package version
 import (
 	"runtime"
 
-	"github.com/storageos/go-api/types"
+	apiTypes "github.com/storageos/go-api/types"
 )
 
 // Version information constants for storageos.
@@ -27,8 +27,8 @@ var Version string
 var Experimental string
 
 // GetStorageOSVersion returns version info.
-func GetStorageOSVersion() *types.VersionInfo {
-	v := &types.VersionInfo{
+func GetStorageOSVersion() *apiTypes.VersionInfo {
+	v := &apiTypes.VersionInfo{
 		Name:       ProductName,
 		Revision:   Revision,
 		BuildDate:  BuildDate,
