@@ -10,7 +10,7 @@ import (
 const (
 	defaultClusterHealthQuietFormat  = "{{.Status}}"
 	defaultClusterHealthTableFormat  = "table {{.Node}}\t{{.CPStatus}}\t{{.DPStatus}}"
-	detailedClusterHealthTableFormat = "table {{.Node}}\t{{.Status}}\t{{.KV}}\t{{.NATS}}\t{{.DirectFSInitiator}}\t{{.Director}}\t{{.Presentation}}\t{{.RDB}}"
+	detailedClusterHealthTableFormat = "table {{.Node}}\t{{.Status}}\t{{.KV}}\t{{.KVWrite}}\t{{.NATS}}\t{{.DirectFSInitiator}}\t{{.Director}}\t{{.Presentation}}\t{{.RDB}}"
 	cpClusterHealthTableFormat       = "table {{.Node}}\t{{.Status}}\t{{.KV}}\t{{.KVWrite}}\t{{.NATS}}"
 	dpClusterHealthTableFormat       = "table {{.Node}}\t{{.Status}}\t{{.DirectFSInitiator}}\t{{.Director}}\t{{.Presentation}}\t{{.RDB}}"
 
@@ -60,12 +60,7 @@ func NewClusterHealthFormat(source string, quiet bool) Format {
 }
 
 // ClusterHealthWrite writes formatted ClusterHealthhelements using the Context
-//<<<<<<< HEAD
 func ClusterHealthWrite(ctx Context, status []*apiTypes.ClusterHealthNode) error {
-	//	if len(status) == 0 {
-	//=======
-	//func ClusterHealthWrite(ctx Context, nodes []*types.Node) error {
-	// Try handle a custom format, excluding the predefined templates
 	TryFormatUnless(
 		string(ctx.Format),
 		status,
@@ -81,7 +76,6 @@ func ClusterHealthWrite(ctx Context, status []*apiTypes.ClusterHealthNode) error
 	)
 
 	if len(status) == 0 {
-		//>>>>>>> origin/development
 		return fmt.Errorf("No cluster nodes found")
 	}
 	render := func(format func(subContext subContext) error) error {
