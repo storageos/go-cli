@@ -18,7 +18,7 @@ func (c *Client) ClusterHealth(ctx context.Context) ([]*types.ClusterHealthNode,
 	status := []*types.ClusterHealthNode{}
 	url := fmt.Sprintf("/cluster/%s", HealthAPIPrefix)
 
-	resp, err := c.do("GET", url, doOptions{context: ctx})
+	resp, err := c.do("GET", url, doOptions{context: ctx, retryOn: []int{http.StatusNotFound}})
 	if err != nil {
 		return nil, err
 	}

@@ -3,49 +3,38 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6da51e5ec493ad2b44cb04129e2d0a068c8fb9bd6cb5739d199573558696bb94"
   name = "github.com/Azure/go-ansiterm"
   packages = [
     ".",
-    "winterm",
+    "winterm"
   ]
-  pruneopts = "UT"
   revision = "d6e3b3328b783f23731bc4d058875b0371ff8109"
 
 [[projects]]
-  digest = "1:bf42be3cb1519bf8018dfd99720b1005ee028d947124cab3ccf965da59381df6"
   name = "github.com/Microsoft/go-winio"
   packages = ["."]
-  pruneopts = "UT"
-  revision = "7da180ee92d8bd8bb8c37fc560e673e6557c392f"
-  version = "v0.4.7"
+  revision = "97e4973ce50b2ff5f09635a57e2b88a037aae829"
+  version = "v0.4.11"
 
 [[projects]]
   branch = "master"
-  digest = "1:fc8dbcc2a5de7c093e167828ebbdf551641761d2ad75431d3a167d467a264115"
   name = "github.com/containerd/continuity"
   packages = ["pathdriver"]
-  pruneopts = "UT"
-  revision = "c7c5070e6f6e090ab93b0a61eb921f2196fc3383"
+  revision = "004b46473808b3e7a4a3049c20e4376c91eb966d"
 
 [[projects]]
-  digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
-  pruneopts = "UT"
-  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
-  version = "v1.1.0"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
 
 [[projects]]
-  digest = "1:4d679b74b9083b6ce8a25f5a24104a1fc7e8e7dc6dc9033f7d78429a0fa798fb"
   name = "github.com/dnephin/cobra"
   packages = ["."]
-  pruneopts = "UT"
   revision = "0e9ca70a23585bdaab4beba1e7c4c23a1adfa857"
   version = "v1.5.1"
 
 [[projects]]
-  digest = "1:4fd04b1f7466dd3b1e1b51beb6c033d35032b331d4b2270000dea09c816d1be8"
   name = "github.com/docker/docker"
   packages = [
     "pkg/homedir",
@@ -53,142 +42,109 @@
     "pkg/mount",
     "pkg/system",
     "pkg/term",
-    "pkg/term/windows",
+    "pkg/term/windows"
   ]
-  pruneopts = "UT"
   revision = "64b7575802d4cab61fd339f14427b1d881c3b6c4"
 
 [[projects]]
-  digest = "1:5aa82b2c22be790c001b0896626c134a1b27bb928897df97b88f1165f393f555"
   name = "github.com/docker/go-connections"
   packages = ["tlsconfig"]
-  pruneopts = "UT"
   revision = "3ede32e2033de7505e6500d6c868c2b9ed9f169d"
   version = "v0.3.0"
 
 [[projects]]
-  digest = "1:57d39983d01980c1317c2c5c6dd4b5b0c4a804ad2df800f2f6cbcd6a6d05f6ca"
   name = "github.com/docker/go-units"
   packages = ["."]
-  pruneopts = "UT"
-  revision = "0dadbb0345b35ec7ef35e228dabb8de89a65bf52"
-  version = "v0.3.2"
+  revision = "47565b4f722fb6ceae66b95f853feed578a4a51c"
+  version = "v0.3.3"
 
 [[projects]]
-  digest = "1:269d9336f94f48817bc0958dae75c285cb0d107cbfe3e1bc6b69d9105d427748"
   name = "github.com/gorilla/websocket"
   packages = ["."]
-  pruneopts = "UT"
-  revision = "4201258b820c74ac8e6922fc9e6b52f71fe46f8d"
+  revision = "66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d"
+  version = "v1.4.0"
 
 [[projects]]
-  digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
-  pruneopts = "UT"
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
 
 [[projects]]
-  digest = "1:ee4d4af67d93cc7644157882329023ce9a7bcfce956a079069a9405521c7cc8d"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
+  version = "v1.0.1"
+
+[[projects]]
   name = "github.com/opencontainers/go-digest"
   packages = ["."]
-  pruneopts = "UT"
   revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
   version = "v1.0.0-rc1"
 
 [[projects]]
-  digest = "1:11db38d694c130c800d0aefb502fb02519e514dc53d9804ce51d1ad25ec27db6"
   name = "github.com/opencontainers/image-spec"
   packages = [
     "specs-go",
-    "specs-go/v1",
+    "specs-go/v1"
   ]
-  pruneopts = "UT"
   revision = "d60099175f88c47cd379c4738d158884749ed235"
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:e1945a9a8aff7a8504d8e3143e40bc891ccadf9ba1b2f615e8227729ce828c34"
   name = "github.com/opencontainers/runc"
   packages = ["libcontainer/user"]
-  pruneopts = "UT"
-  revision = "4fc53a81fb7c994640722ac585fa9ca548971871"
-  version = "v1.0.0-rc5"
+  revision = "baf6536d6259209c3edfa2b22237af82942d3dfa"
+  version = "v0.1.1"
 
 [[projects]]
-  digest = "1:be5a31c22ef895e30d6123413a0bea6e1980dbf7d5c67d741d9a8cf267836186"
   name = "github.com/pkg/errors"
   packages = ["."]
-  pruneopts = "UT"
-  revision = "e881fd58d78e04cf6d0de1217f8707c8cc2249bc"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
-  digest = "1:5622116f2c79239f2d25d47b881e14f96a8b8c17b63b8a8326a38ee1a332b007"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  pruneopts = "UT"
-  revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
-  version = "v1.0.4"
+  revision = "e1e72e9de974bd926e5c56f83753fba2df402ce5"
+  version = "v1.3.0"
 
 [[projects]]
-  digest = "1:1b21a2b4058a779f290c7341cd93267492e0ecea6c8b54f64a4a5fd7ff131034"
   name = "github.com/spf13/pflag"
   packages = ["."]
-  pruneopts = "UT"
-  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
-  version = "v1.0.0"
+  revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
+  version = "v1.0.3"
 
 [[projects]]
   branch = "master"
-  digest = "1:240582918383d791b42343373992dae5e792973c46ee81ed87ede17e7beb59c1"
   name = "github.com/storageos/go-api"
   packages = [
     ".",
     "netutil",
     "serror",
     "types",
-    "types/versions",
+    "types/versions"
   ]
-  pruneopts = "UT"
-  revision = "bf45d0f3c5dae4bed2abf10592843892ffa64b3a"
+  revision = "9358f0990ff0bd94ce25cfa4dc942f1e2d99b42a"
 
 [[projects]]
-  digest = "1:f18cfce8b0cb8923d70a9050b211197629cb7e27efea064b4d6d3ee472d1243e"
+  branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  pruneopts = "UT"
-  revision = "9477e0b78b9ac3d0b03822fd95422e2fe07627cd"
+  revision = "74369b46fc6756741c016591724fd1cb8e26845f"
 
 [[projects]]
-  digest = "1:440999a0dde18af36177b1b484628e4554da68212b6e90fad915e28b9bee8b97"
+  branch = "master"
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows",
+    "windows"
   ]
-  pruneopts = "UT"
-  revision = "07c182904dbd53199946ba614a412c61d3c548f5"
+  revision = "983097b1a8a340cd1cc7df17d735154d89e10b1a"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/davecgh/go-spew/spew",
-    "github.com/dnephin/cobra",
-    "github.com/docker/docker/pkg/homedir",
-    "github.com/docker/docker/pkg/system",
-    "github.com/docker/docker/pkg/term",
-    "github.com/docker/go-connections/tlsconfig",
-    "github.com/docker/go-units",
-    "github.com/gorilla/websocket",
-    "github.com/sirupsen/logrus",
-    "github.com/spf13/pflag",
-    "github.com/storageos/go-api",
-    "github.com/storageos/go-api/serror",
-    "github.com/storageos/go-api/types",
-    "github.com/storageos/go-api/types/versions",
-    "golang.org/x/crypto/ssh/terminal",
-  ]
+  inputs-digest = "f1a6edf851324802ee72734f46a9c721f8121824a09d6c18ca17b003bbb7388c"
   solver-name = "gps-cdcl"
   solver-version = 1
