@@ -2,11 +2,14 @@ package cluster
 
 import (
 	"context"
+	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/dnephin/cobra"
 
+	apiTypes "github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
 	"github.com/storageos/go-cli/pkg/constants"
@@ -14,9 +17,10 @@ import (
 )
 
 type healthOpt struct {
-	quiet   bool
-	format  string
-	timeout int
+	errReturn bool
+	quiet     bool
+	format    string
+	timeout   int
 }
 
 func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
@@ -32,6 +36,7 @@ func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Display minimal cluster health info.  Can be used with format.")
+	flags.BoolVarP(&opt.errReturn, "err", "e", false, "Return zero exit code if, and only if, cluster is fully opperational")
 	flags.IntVarP(&opt.timeout, "timeout", "t", constants.DefaultAPITimeout, "Timeout in seconds.")
 	flags.StringVar(&opt.format, "format", "", "Pretty-print health with formats: table (default), detailed, cp, dp or raw.")
 
@@ -64,5 +69,45 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 		Output: storageosCli.Out(),
 		Format: formatter.NewClusterHealthFormat(format, opt.quiet),
 	}
-	return formatter.ClusterHealthWrite(clusterHealthCtx, status)
+	if err := formatter.ClusterHealthWrite(clusterHealthCtx, status); err != nil {
+		return err
+	} else if opt.errReturn {
+		for _, s := range status {
+			// Check for all the submodules that need to be alive for us to be
+			// functioning
+			if err := checkSubmodules(s); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func checkSubmodules(nodeSubmodules *apiTypes.ClusterHealthNode) error {
+	const desiredStatus = "alive"
+	const errTemplate = "\nnode: %s has unhealthy submodues:\n%s"
+	const submoduleTemplate = "name: %s, message: '%s'"
+
+	submoduleErrors := []string{}
+
+	submoduleStates := map[string]apiTypes.SubModuleStatus{
+		"DirectFSInitiator": nodeSubmodules.Submodules.DirectFSInitiator,
+		"Director":          nodeSubmodules.Submodules.Director,
+		"KV":                nodeSubmodules.Submodules.KV,
+		"KVWrite":           nodeSubmodules.Submodules.KVWrite,
+		"NATS":              nodeSubmodules.Submodules.NATS,
+		"Presentation":      nodeSubmodules.Submodules.Presentation,
+		"RDB":               nodeSubmodules.Submodules.RDB,
+	}
+
+	for name, state := range submoduleStates {
+		if state.Status != desiredStatus {
+			submoduleErrors = append(submoduleErrors, fmt.Sprintf(submoduleTemplate, name, state.Message))
+		}
+	}
+
+	if len(submoduleErrors) > 0 {
+		return fmt.Errorf(errTemplate, nodeSubmodules.NodeName, strings.Join(submoduleErrors, "\n"))
+	}
+	return nil
 }
