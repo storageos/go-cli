@@ -96,7 +96,7 @@ func newStorageOSCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 			// flags must be the top-level command flags, not cmd.Flags()
 			opts.Common.SetDefaultOptions(flags)
 			preRun(opts)
-			if err := storageosCli.Initialize(flags, opts); err != nil {
+			if err := storageosCli.Initialize(opts); err != nil {
 				return err
 			}
 			return isSupported(cmd, storageosCli.Client().ClientVersion(), storageosCli.HasExperimental())
@@ -188,7 +188,7 @@ func initializeStorageOSCli(storageosCli *command.StorageOSCli, flags *pflag.Fla
 		// flags must be the top-level command flags, not cmd.Flags()
 		opts.Common.SetDefaultOptions(flags)
 		preRun(opts)
-		storageosCli.Initialize(flags, opts)
+		storageosCli.Initialize(opts)
 	}
 }
 

@@ -7,10 +7,8 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/dnephin/cobra"
-	"github.com/spf13/pflag"
 
 	api "github.com/storageos/go-api"
 	"github.com/storageos/go-api/serror"
@@ -52,7 +50,6 @@ type StorageOSCli struct {
 	client          *api.Client
 	hasExperimental bool
 	defaultVersion  string
-	timeout         time.Duration
 }
 
 // GetHosts returns the client's endpoints
@@ -73,11 +70,6 @@ func (cli *StorageOSCli) GetUsername() string {
 // GetPassword returns the client's password
 func (cli *StorageOSCli) GetPassword() string {
 	return cli.password
-}
-
-// GetTimeout returns the client's timeout
-func (cli *StorageOSCli) GetTimeout() time.Duration {
-	return cli.timeout
 }
 
 // HasExperimental returns true if experimental features are accessible.
@@ -124,7 +116,7 @@ func (cli *StorageOSCli) ConfigFile() *configfile.ConfigFile {
 
 // Initialize the dockerCli runs initialization that must happen after command
 // line flags are parsed.
-func (cli *StorageOSCli) Initialize(flagset *pflag.FlagSet, opt *cliflags.ClientOptions) error {
+func (cli *StorageOSCli) Initialize(opt *cliflags.ClientOptions) error {
 	cli.configFile = LoadDefaultConfigFile(cli.err)
 
 	cli.discovery = getDiscovery(opt.Common.Discovery)
@@ -135,20 +127,10 @@ func (cli *StorageOSCli) Initialize(flagset *pflag.FlagSet, opt *cliflags.Client
 	}
 	cli.hosts = hosts
 
-	if flagset.Changed(cliflags.FlagTimeout) {
-		cli.timeout = opt.Common.Timeout
-	} else {
-		cli.timeout, err = getTimeout()
-		if err != nil {
-			return err
-		}
-	}
-
 	client, err := NewAPIClientFromFlags(hosts, opt.Common, cli.configFile)
 	if err != nil {
 		return err
 	}
-	client.SetTimeout(cli.GetTimeout())
 	cli.client = client
 
 	cli.defaultVersion = cli.client.ClientVersion()
@@ -248,15 +230,6 @@ func getDiscovery(discoveryFlag string) string {
 		discoveryHost = discoveryFlag
 	}
 	return discoveryHost
-}
-
-func getTimeout() (time.Duration, error) {
-	timeoutStr := os.Getenv(cliconfig.EnvStorageOSTimeout)
-
-	if timeoutStr == "" {
-		return cliconfig.DefaultTimeout, nil
-	}
-	return time.ParseDuration(timeoutStr)
 }
 
 func getServerHost(hosts string, tls bool, discoveryHost string) (host string, err error) {
