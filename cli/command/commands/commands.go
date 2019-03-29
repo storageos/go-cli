@@ -33,10 +33,10 @@ func AddCommands(cmd *cobra.Command, storageosCli *command.StorageOSCli) {
 		command.WithAlias(policy.NewPolicyCommand(storageosCli), "pol"),
 		command.WithAlias(volume.NewVolumeCommand(storageosCli), "v", "vol"),
 		command.WithAlias(node.NewNodeCommand(storageosCli), "n"),
+		command.WithAlias(licence.NewLicenceCommand(storageosCli), "license"),
 		login.NewLoginCommand(storageosCli),
 		logout.NewLogoutCommand(storageosCli),
 		logs.NewLogsCommand(storageosCli),
-		licence.NewLicenceCommand(storageosCli),
 
 		// system
 		// system.NewSystemCommand(storageosCli),
