@@ -177,35 +177,56 @@ func (c *clusterHealthContext) DPStatus() string {
 
 func (c *clusterHealthContext) NATS() string {
 	c.AddHeader(clusterHealthNATSHeader)
-	return c.v.Submodules.NATS.Status
+	if s := c.v.Submodules.NATS.Status; s != "" {
+		return s
+	}
+	return "unknown"
 }
 
 func (c *clusterHealthContext) KV() string {
 	c.AddHeader(clusterHealthKVHeader)
-	return c.v.Submodules.KV.Status
+	if s := c.v.Submodules.KV.Status; s != "" {
+		return s
+	}
+	return "unknown"
 }
 
 func (c *clusterHealthContext) KVWrite() string {
 	c.AddHeader(clusterHealthKVWriteHeader)
-	return c.v.Submodules.KVWrite.Status
+	if s := c.v.Submodules.KVWrite.Status; s != "" {
+		return s
+	}
+	return "unknown"
 }
 
 func (c *clusterHealthContext) DirectFSInitiator() string {
 	c.AddHeader(clusterHealthDirectFSInitiatorHeader)
-	return c.v.Submodules.DirectFSInitiator.Status
+	if s := c.v.Submodules.DirectFSInitiator.Status; s != "" {
+		return s
+	}
+	return "unknown"
 }
 
 func (c *clusterHealthContext) Director() string {
 	c.AddHeader(clusterHealthDirectorHeader)
-	return c.v.Submodules.Director.Status
+	if s := c.v.Submodules.Director.Status; s != "" {
+		return s
+	}
+	return "unknown"
 }
 
 func (c *clusterHealthContext) Presentation() string {
 	c.AddHeader(clusterHealthPresentationHeader)
-	return c.v.Submodules.Presentation.Status
+	if s := c.v.Submodules.Presentation.Status; s != "" {
+		return s
+	}
+	return "unknown"
 }
 
 func (c *clusterHealthContext) RDB() string {
 	c.AddHeader(clusterHealthRDBHeader)
-	return c.v.Submodules.RDB.Status
+	if s := c.v.Submodules.RDB.Status; s != "" {
+		return s
+	}
+	return "unknown"
 }
