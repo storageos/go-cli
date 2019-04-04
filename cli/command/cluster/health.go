@@ -36,7 +36,7 @@ func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Display minimal cluster health info.  Can be used with format.")
-	flags.BoolVarP(&opt.errReturn, "err", "e", false, "Return zero exit code if, and only if, cluster is fully opperational")
+	flags.BoolVarP(&opt.errReturn, "err", "e", false, "Return non-zero exit code if, and only if, cluster is fully operational")
 	flags.IntVarP(&opt.timeout, "timeout", "t", constants.DefaultAPITimeout, "Timeout in seconds.")
 	flags.StringVar(&opt.format, "format", "", "Pretty-print health with formats: table (default), detailed, cp, dp or raw.")
 
@@ -71,7 +71,8 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 	}
 	if err := formatter.ClusterHealthWrite(clusterHealthCtx, status); err != nil {
 		return err
-	} else if opt.errReturn {
+	}
+	if opt.errReturn {
 		for _, s := range status {
 			// Check for all the submodules that need to be alive for us to be
 			// functioning
@@ -84,10 +85,6 @@ func runHealth(storageosCli *command.StorageOSCli, opt *healthOpt) error {
 }
 
 func checkSubmodules(nodeSubmodules *apiTypes.ClusterHealthNode) error {
-	const desiredStatus = "alive"
-	const errTemplate = "\nnode: %s has unhealthy submodues:\n%s"
-	const submoduleTemplate = "name: %s, message: '%s'"
-
 	submoduleErrors := []string{}
 
 	submoduleStates := map[string]apiTypes.SubModuleStatus{
@@ -101,13 +98,13 @@ func checkSubmodules(nodeSubmodules *apiTypes.ClusterHealthNode) error {
 	}
 
 	for name, state := range submoduleStates {
-		if state.Status != desiredStatus {
-			submoduleErrors = append(submoduleErrors, fmt.Sprintf(submoduleTemplate, name, state.Message))
+		if state.Status != "alive" {
+			submoduleErrors = append(submoduleErrors, fmt.Sprintf("name: %q, message: '%q'", name, state.Message))
 		}
 	}
 
 	if len(submoduleErrors) > 0 {
-		return fmt.Errorf(errTemplate, nodeSubmodules.NodeName, strings.Join(submoduleErrors, "\n"))
+		return fmt.Errorf("\nnode: %q has unhealthy submodules:\n%q", nodeSubmodules.NodeName, strings.Join(submoduleErrors, "\n"))
 	}
 	return nil
 }
