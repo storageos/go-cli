@@ -109,11 +109,11 @@ func cliNodeSortFunc(sortBy nodeSortBy, nodes []*Node) (func(i, j int) bool, err
 }
 
 // HumanisedStringLess is a string compare function, useable for sorting that
-// attemps to detect expected humanised sorting e.g. hostnames with numeric
+// attempts to detect expected humanised sorting e.g. hostnames with numeric
 // postfixes.
 //
 // This function (for now) is quite basic, but could support more edge-cases as
-// they arrise.
+// they arise.
 func HumanisedStringLess(i, j string) bool {
 	name1, name2 := trimCommonPrefix(i, j)
 
