@@ -19,8 +19,7 @@ func NewClusterCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		command.WithAlias(newCreateCommand(storageosCli), command.CreateAliases...),
 		command.WithAlias(newInspectCommand(storageosCli), command.InspectAliases...),
 		command.WithAlias(newRemoveCommand(storageosCli), command.RemoveAliases...),
-		// TODO: re-enable after GA, with the required API changes
-		//command.WithAlias(newHealthCommand(storageosCli), command.HealthAliases...),
+		command.WithAlias(newHealthCommand(storageosCli), command.HealthAliases...),
 		newConnectivityCommand(storageosCli),
 		newMaintenanceCommand(storageosCli),
 	)

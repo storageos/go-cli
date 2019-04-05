@@ -117,7 +117,7 @@
     "types",
     "types/versions"
   ]
-  revision = "9358f0990ff0bd94ce25cfa4dc942f1e2d99b42a"
+  revision = "bf45d0f3c5dae4bed2abf10592843892ffa64b3a"
 
 [[projects]]
   name = "golang.org/x/crypto"

@@ -2,10 +2,10 @@ package formatter
 
 import (
 	"bytes"
+	"encoding/json"
 	"testing"
 
 	apiTypes "github.com/storageos/go-api/types"
-	"github.com/storageos/go-cli/types"
 )
 
 func TestClusterHealthWrite(t *testing.T) {
@@ -25,72 +25,73 @@ Not Ready
 		{
 			// Test default table format
 			Context{Format: NewClusterHealthFormat(defaultClusterHealthTableFormat, false)},
-			`NODE         ADDRESS    CP_STATUS            DP_STATUS
-storageos-1  127.0.0.1  Healthy              Healthy
-storageos-2  127.0.0.1  Degraded (KV_WRITE)  Healthy
-storageos-3  127.0.0.1  Healthy              Degraded (FS_DRIVER, FS)
+			`NODE         CP_STATUS            DP_STATUS
+storageos-1  Healthy              Healthy
+storageos-2  Degraded (KV_WRITE)  Healthy
+storageos-3  Healthy              Degraded (PRESENTATION, RDB)
 `,
 		},
 		{
 			// Test control plane table format
 			Context{Format: NewClusterHealthFormat(cpClusterHealthTableFormat, false)},
-			`NODE         ADDRESS    STATUS     KV     KV_WRITE  NATS
-storageos-1  127.0.0.1  Healthy    alive  alive     alive
-storageos-2  127.0.0.1  Not Ready  alive  unknown   alive
-storageos-3  127.0.0.1  Not Ready  alive  alive     alive
+			`NODE         STATUS     KV     KV_WRITE  NATS
+storageos-1  Healthy    alive  alive     alive
+storageos-2  Not Ready  alive  unknown   alive
+storageos-3  Not Ready  alive  alive     alive
 `,
 		},
 		{
 			// Test dataplane table format
 			Context{Format: NewClusterHealthFormat(dpClusterHealthTableFormat, false)},
-			`NODE         ADDRESS    STATUS     DFS_CLIENT  DIRECTOR  FS_DRIVER  FS
-storageos-1  127.0.0.1  Healthy    alive       alive     alive      alive
-storageos-2  127.0.0.1  Not Ready  alive       alive     alive      alive
-storageos-3  127.0.0.1  Not Ready  alive       alive     unknown    unknown
+			`NODE         STATUS     DFS_INITIATOR  DIRECTOR  PRESENTATION  RDB
+storageos-1  Healthy    alive          alive     alive         alive
+storageos-2  Not Ready  alive          alive     alive         alive
+storageos-3  Not Ready  alive          alive     unknown       unknown
 `,
 		},
 		{
 			// Test detailed table format
 			Context{Format: NewClusterHealthFormat(detailedClusterHealthTableFormat, false)},
-			`NODE         ADDRESS    STATUS     KV     NATS   DFS_CLIENT  DIRECTOR  FS_DRIVER  FS
-storageos-1  127.0.0.1  Healthy    alive  alive  alive       alive     alive      alive
-storageos-2  127.0.0.1  Not Ready  alive  alive  alive       alive     alive      alive
-storageos-3  127.0.0.1  Not Ready  alive  alive  alive       alive     unknown    unknown
+			`NODE         STATUS     KV     KV_WRITE  NATS   DFS_INITIATOR  DIRECTOR  PRESENTATION  RDB
+storageos-1  Healthy    alive  alive     alive  alive          alive     alive         alive
+storageos-2  Not Ready  alive  unknown   alive  alive          alive     alive         alive
+storageos-3  Not Ready  alive  alive     alive  alive          alive     unknown       unknown
 `,
 		},
 	}
 
-	aliveStatus := apiTypes.SubModuleStatus{Status: "alive"}
-	unknownStatus := apiTypes.SubModuleStatus{Status: "unknown"}
-
-	nodes := []*types.Node{
-		{Name: "storageos-1", AdvertiseAddress: "127.0.0.1",
-			Health: struct {
-				CP *apiTypes.CPHealthStatus
-				DP *apiTypes.DPHealthStatus
-			}{
-				&apiTypes.CPHealthStatus{KV: aliveStatus, KVWrite: aliveStatus, NATS: aliveStatus, Scheduler: aliveStatus},
-				&apiTypes.DPHealthStatus{DirectFSClient: aliveStatus, DirectFSServer: aliveStatus, Director: aliveStatus, FSDriver: aliveStatus, FS: aliveStatus},
-			},
+	nodes := []*apiTypes.ClusterHealthNode{}
+	err := json.Unmarshal([]byte(`[
+		{"nodeName": "storageos-1", "submodules": {
+			"directfs_initiator": {"status": "alive"},
+			"director": {"status": "alive"},
+			"kv": {"status": "alive"},
+			"kv_write": {"status": "alive"},
+			"nats": {"status": "alive"},
+			"presentation": {"status": "alive"},
+			"rdb": {"status": "alive"}}
 		},
-		{Name: "storageos-2", AdvertiseAddress: "127.0.0.1",
-			Health: struct {
-				CP *apiTypes.CPHealthStatus
-				DP *apiTypes.DPHealthStatus
-			}{
-				&apiTypes.CPHealthStatus{KV: aliveStatus, KVWrite: unknownStatus, NATS: aliveStatus, Scheduler: aliveStatus},
-				&apiTypes.DPHealthStatus{DirectFSClient: aliveStatus, DirectFSServer: aliveStatus, Director: aliveStatus, FSDriver: aliveStatus, FS: aliveStatus},
-			},
+		{"nodeName": "storageos-2", "submodules": {
+			"directfs_initiator": {"status": "alive"},
+			"director": {"status": "alive"},
+			"kv": {"status": "alive"},
+			"kv_write": {"status": "unknown"},
+			"nats": {"status": "alive"},
+			"presentation": {"status": "alive"},
+			"rdb": {"status": "alive"}}
 		},
-		{Name: "storageos-3", AdvertiseAddress: "127.0.0.1",
-			Health: struct {
-				CP *apiTypes.CPHealthStatus
-				DP *apiTypes.DPHealthStatus
-			}{
-				&apiTypes.CPHealthStatus{KV: aliveStatus, KVWrite: aliveStatus, NATS: aliveStatus, Scheduler: aliveStatus},
-				&apiTypes.DPHealthStatus{DirectFSClient: aliveStatus, DirectFSServer: aliveStatus, Director: aliveStatus, FSDriver: unknownStatus, FS: unknownStatus},
-			},
-		},
+		{"nodeName": "storageos-3", "submodules": {
+			"directfs_initiator": {"status": "alive"},
+			"director": {"status": "alive"},
+			"kv": {"status": "alive"},
+			"kv_write": {"status": "alive"},
+			"nats": {"status": "alive"},
+			"presentation": {"status": "unknown"},
+			"rdb": {"status": "unknown"}}
+		}
+	]`), &nodes)
+	if err != nil {
+		t.Fatalf("unexpected json error: %s", err.Error())
 	}
 
 	for _, test := range cases {
