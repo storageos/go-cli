@@ -2,31 +2,30 @@ package formatter
 
 import (
 	"fmt"
-	"net/url"
 	"strings"
 
-	"github.com/storageos/go-cli/types"
+	apiTypes "github.com/storageos/go-api/types"
 )
 
 const (
 	defaultClusterHealthQuietFormat  = "{{.Status}}"
-	defaultClusterHealthTableFormat  = "table {{.Node}}\t{{.Address}}\t{{.CPStatus}}\t{{.DPStatus}}"
-	detailedClusterHealthTableFormat = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.KV}}\t{{.NATS}}\t{{.DirectFSClient}}\t{{.Director}}\t{{.FSDriver}}\t{{.FS}}"
-	cpClusterHealthTableFormat       = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.KV}}\t{{.KVWrite}}\t{{.NATS}}"
-	dpClusterHealthTableFormat       = "table {{.Node}}\t{{.Address}}\t{{.Status}}\t{{.DirectFSClient}}\t{{.Director}}\t{{.FSDriver}}\t{{.FS}}"
+	defaultClusterHealthTableFormat  = "table {{.Node}}\t{{.CPStatus}}\t{{.DPStatus}}"
+	detailedClusterHealthTableFormat = "table {{.Node}}\t{{.Status}}\t{{.KV}}\t{{.KVWrite}}\t{{.NATS}}\t{{.DirectFSInitiator}}\t{{.Director}}\t{{.Presentation}}\t{{.RDB}}"
+	cpClusterHealthTableFormat       = "table {{.Node}}\t{{.Status}}\t{{.KV}}\t{{.KVWrite}}\t{{.NATS}}"
+	dpClusterHealthTableFormat       = "table {{.Node}}\t{{.Status}}\t{{.DirectFSInitiator}}\t{{.Director}}\t{{.Presentation}}\t{{.RDB}}"
 
-	clusterHealthNodeHeader           = "NODE"
-	clusterHealthAddressHeader        = "ADDRESS"
-	clusterHealthCPStatusHeader       = "CP_STATUS"
-	clusterHealthDPStatusHeader       = "DP_STATUS"
-	clusterHealthStatusHeader         = "STATUS"
-	clusterHealthNATSHeader           = "NATS"
-	clusterHealthKVHeader             = "KV"
-	clusterHealthKVWriteHeader        = "KV_WRITE"
-	clusterHealthDirectFSClientHeader = "DFS_CLIENT"
-	clusterHealthDirectorHeader       = "DIRECTOR"
-	clusterHealthFSDriverHeader       = "FS_DRIVER"
-	clusterHealthFSHeader             = "FS"
+	clusterHealthNodeHeader              = "NODE"
+	clusterHealthAddressHeader           = "ADDRESS"
+	clusterHealthCPStatusHeader          = "CP_STATUS"
+	clusterHealthDPStatusHeader          = "DP_STATUS"
+	clusterHealthStatusHeader            = "STATUS"
+	clusterHealthNATSHeader              = "NATS"
+	clusterHealthKVHeader                = "KV"
+	clusterHealthKVWriteHeader           = "KV_WRITE"
+	clusterHealthDirectFSInitiatorHeader = "DFS_INITIATOR"
+	clusterHealthDirectorHeader          = "DIRECTOR"
+	clusterHealthPresentationHeader      = "PRESENTATION"
+	clusterHealthRDBHeader               = "RDB"
 
 	clusterHealthUnknown = "unknown"
 )
@@ -55,19 +54,33 @@ func NewClusterHealthFormat(source string, quiet bool) Format {
 		if quiet {
 			return `{{.Node}}: {{.Status}}`
 		}
-		return `node: {{.Node}}\nstatus: {{.Status}}\nkv: {{.KV}}\nkv_write: {{.KVWrite}}\nnats: {{.NATS}}\ndfs_client: {{.DirectFSClient}}\ndirector: {{.Director}}\nfs_driver: {{.FSDriver}}\nfs: {{.FS}}\n`
+		return `node: {{.Node}}\nstatus: {{.Status}}\nkv: {{.KV}}\nkv_write: {{.KVWrite}}\nnats: {{.NATS}}\ndfs_initiator: {{.DirectFSInitiator}}\ndirector: {{.Director}}\npresentation: {{.Presentation}}\nrdb: {{.RDB}}\n`
 	}
 	return Format(source)
 }
 
 // ClusterHealthWrite writes formatted ClusterHealthhelements using the Context
-func ClusterHealthWrite(ctx Context, nodes []*types.Node) error {
-	if len(nodes) == 0 {
+func ClusterHealthWrite(ctx Context, status []*apiTypes.ClusterHealthNode) error {
+	TryFormatUnless(
+		string(ctx.Format),
+		status,
+		defaultClusterHealthQuietFormat,
+		defaultClusterHealthTableFormat,
+		detailedClusterHealthTableFormat,
+		cpClusterHealthTableFormat,
+		dpClusterHealthTableFormat,
+		`{{.CPStatus}}`,
+		`{{.DPStatus}}`,
+		`{{.Node}}: {{.Status}}`,
+		`node: {{.Node}}\nstatus: {{.Status}}\nkv: {{.KV}}\nkv_write: {{.KVWrite}}\nnats: {{.NATS}}\ndfs_client: {{.DirectFSClient}}\ndirector: {{.Director}}\nfs_driver: {{.FSDriver}}\nfs: {{.FS}}\n`,
+	)
+
+	if len(status) == 0 {
 		return fmt.Errorf("No cluster nodes found")
 	}
 	render := func(format func(subContext subContext) error) error {
-		for _, node := range nodes {
-			if err := format(&clusterHealthContext{v: node}); err != nil {
+		for _, s := range status {
+			if err := format(&clusterHealthContext{v: s}); err != nil {
 				return err
 			}
 		}
@@ -78,7 +91,7 @@ func ClusterHealthWrite(ctx Context, nodes []*types.Node) error {
 
 type clusterHealthContext struct {
 	HeaderContext
-	v *types.Node
+	v *apiTypes.ClusterHealthNode
 }
 
 func (c *clusterHealthContext) MarshalJSON() ([]byte, error) {
@@ -87,16 +100,7 @@ func (c *clusterHealthContext) MarshalJSON() ([]byte, error) {
 
 func (c *clusterHealthContext) Node() string {
 	c.AddHeader(clusterHealthNodeHeader)
-	return c.v.Name
-}
-
-func (c *clusterHealthContext) Address() string {
-	c.AddHeader(clusterHealthAddressHeader)
-	u, err := url.Parse(c.v.AdvertiseAddress)
-	if err == nil && u.Host != "" {
-		return u.Host
-	}
-	return c.v.AdvertiseAddress
+	return c.v.NodeName
 }
 
 func (c *clusterHealthContext) healthy() bool {
@@ -104,54 +108,51 @@ func (c *clusterHealthContext) healthy() bool {
 }
 
 func (c *clusterHealthContext) cpHealthy() bool {
-	return c.v.Health.CP.NATS.Status+
-		c.v.Health.CP.KV.Status+
-		c.v.Health.CP.KVWrite.Status == "alivealivealive"
+	return c.v.Submodules.KV.Status+
+		c.v.Submodules.KVWrite.Status+
+		c.v.Submodules.NATS.Status == "alivealivealive"
 }
 
 func (c *clusterHealthContext) cpDegraded() string {
 	degraded := []string{}
-	if c.v.Health.CP.KV.Status != "alive" {
+	if c.v.Submodules.KV.Status != "alive" {
 		degraded = append(degraded, clusterHealthKVHeader)
 	}
-	if c.v.Health.CP.KVWrite.Status != "alive" {
+	if c.v.Submodules.KVWrite.Status != "alive" {
 		degraded = append(degraded, clusterHealthKVWriteHeader)
 	}
-	if c.v.Health.CP.NATS.Status != "alive" {
+	if c.v.Submodules.NATS.Status != "alive" {
 		degraded = append(degraded, clusterHealthNATSHeader)
 	}
 	return "Degraded (" + strings.Join(degraded, ", ") + ")"
 }
 
 func (c *clusterHealthContext) dpHealthy() bool {
-	return c.v.Health.DP.DirectFSClient.Status+
-		c.v.Health.DP.Director.Status+
-		c.v.Health.DP.FSDriver.Status+
-		c.v.Health.DP.FS.Status == "alivealivealivealive"
+	return c.v.Submodules.DirectFSInitiator.Status+
+		c.v.Submodules.Director.Status+
+		c.v.Submodules.Presentation.Status+
+		c.v.Submodules.RDB.Status == "alivealivealivealive"
 }
 
 func (c *clusterHealthContext) dpDegraded() string {
 	degraded := []string{}
-	if c.v.Health.DP.DirectFSClient.Status != "alive" {
-		degraded = append(degraded, clusterHealthDirectFSClientHeader)
+	if c.v.Submodules.DirectFSInitiator.Status != "alive" {
+		degraded = append(degraded, clusterHealthDirectFSInitiatorHeader)
 	}
-	if c.v.Health.DP.Director.Status != "alive" {
+	if c.v.Submodules.Director.Status != "alive" {
 		degraded = append(degraded, clusterHealthDirectorHeader)
 	}
-	if c.v.Health.DP.FSDriver.Status != "alive" {
-		degraded = append(degraded, clusterHealthFSDriverHeader)
+	if c.v.Submodules.Presentation.Status != "alive" {
+		degraded = append(degraded, clusterHealthPresentationHeader)
 	}
-	if c.v.Health.DP.FS.Status != "alive" {
-		degraded = append(degraded, clusterHealthFSHeader)
+	if c.v.Submodules.RDB.Status != "alive" {
+		degraded = append(degraded, clusterHealthRDBHeader)
 	}
 	return "Degraded (" + strings.Join(degraded, ", ") + ")"
 }
 
 func (c *clusterHealthContext) Status() string {
 	c.AddHeader(clusterHealthStatusHeader)
-	if c.v.Health.CP == nil || c.v.Health.DP == nil {
-		return "Unreachable"
-	}
 	if c.healthy() {
 		return "Healthy"
 	}
@@ -160,9 +161,6 @@ func (c *clusterHealthContext) Status() string {
 
 func (c *clusterHealthContext) CPStatus() string {
 	c.AddHeader(clusterHealthCPStatusHeader)
-	if c.v.Health.CP == nil {
-		return "Unreachable"
-	}
 	if c.cpHealthy() {
 		return "Healthy"
 	}
@@ -171,9 +169,6 @@ func (c *clusterHealthContext) CPStatus() string {
 
 func (c *clusterHealthContext) DPStatus() string {
 	c.AddHeader(clusterHealthDPStatusHeader)
-	if c.v.Health.DP == nil {
-		return "Unreachable"
-	}
 	if c.dpHealthy() {
 		return "Healthy"
 	}
@@ -182,56 +177,56 @@ func (c *clusterHealthContext) DPStatus() string {
 
 func (c *clusterHealthContext) NATS() string {
 	c.AddHeader(clusterHealthNATSHeader)
-	if c.v.Health.CP == nil {
-		return clusterHealthUnknown
+	if s := c.v.Submodules.NATS.Status; s != "" {
+		return s
 	}
-	return c.v.Health.CP.NATS.Status
+	return "unknown"
 }
 
 func (c *clusterHealthContext) KV() string {
 	c.AddHeader(clusterHealthKVHeader)
-	if c.v.Health.CP == nil {
-		return clusterHealthUnknown
+	if s := c.v.Submodules.KV.Status; s != "" {
+		return s
 	}
-	return c.v.Health.CP.KV.Status
+	return "unknown"
 }
 
 func (c *clusterHealthContext) KVWrite() string {
 	c.AddHeader(clusterHealthKVWriteHeader)
-	if c.v.Health.CP == nil {
-		return clusterHealthUnknown
+	if s := c.v.Submodules.KVWrite.Status; s != "" {
+		return s
 	}
-	return c.v.Health.CP.KVWrite.Status
+	return "unknown"
 }
 
-func (c *clusterHealthContext) DirectFSClient() string {
-	c.AddHeader(clusterHealthDirectFSClientHeader)
-	if c.v.Health.DP == nil {
-		return clusterHealthUnknown
+func (c *clusterHealthContext) DirectFSInitiator() string {
+	c.AddHeader(clusterHealthDirectFSInitiatorHeader)
+	if s := c.v.Submodules.DirectFSInitiator.Status; s != "" {
+		return s
 	}
-	return c.v.Health.DP.DirectFSClient.Status
+	return "unknown"
 }
 
 func (c *clusterHealthContext) Director() string {
 	c.AddHeader(clusterHealthDirectorHeader)
-	if c.v.Health.DP == nil {
-		return clusterHealthUnknown
+	if s := c.v.Submodules.Director.Status; s != "" {
+		return s
 	}
-	return c.v.Health.DP.Director.Status
+	return "unknown"
 }
 
-func (c *clusterHealthContext) FSDriver() string {
-	c.AddHeader(clusterHealthFSDriverHeader)
-	if c.v.Health.DP == nil {
-		return clusterHealthUnknown
+func (c *clusterHealthContext) Presentation() string {
+	c.AddHeader(clusterHealthPresentationHeader)
+	if s := c.v.Submodules.Presentation.Status; s != "" {
+		return s
 	}
-	return c.v.Health.DP.FSDriver.Status
+	return "unknown"
 }
 
-func (c *clusterHealthContext) FS() string {
-	c.AddHeader(clusterHealthFSHeader)
-	if c.v.Health.DP == nil {
-		return clusterHealthUnknown
+func (c *clusterHealthContext) RDB() string {
+	c.AddHeader(clusterHealthRDBHeader)
+	if s := c.v.Submodules.RDB.Status; s != "" {
+		return s
 	}
-	return c.v.Health.DP.FS.Status
+	return "unknown"
 }

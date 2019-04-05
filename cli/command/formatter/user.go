@@ -8,9 +8,8 @@ import (
 
 const (
 	defaultUserQuietFormat = "{{.Username}}"
-	defaultUserTableFormat = "table {{.UUID}}\t{{.Username}}\t{{.Groups}}\t{{.Role}}"
+	defaultUserTableFormat = "table {{.Username}}\t{{.Groups}}\t{{.Role}}"
 
-	userUUIDHeader     = "ID"
 	userUsernameHeader = "USERNAME"
 	userGroupsHeader   = "GROUPS"
 	userRoleHeader     = "ROLE"
@@ -32,7 +31,7 @@ func NewUserFormat(source string, quiet bool) Format {
 		if quiet {
 			return `username: {{.Username}}`
 		}
-		return `id: {{.UUID}}\nusername: {{.Username}}\ngroups: {{.Groups}}\nrole: {{.Role}}\n`
+		return `username: {{.Username}}\ngroups: {{.Groups}}\nrole: {{.Role}}\n`
 	}
 	return Format(source)
 }
@@ -40,6 +39,16 @@ func NewUserFormat(source string, quiet bool) Format {
 // UserWrite writes the given usuers to the provided context,
 // using the format specified within the context.
 func UserWrite(ctx Context, users []*types.User) error {
+	// Try handle a custom format, excluding the predefined templates
+	TryFormatUnless(
+		string(ctx.Format),
+		users,
+		defaultUserQuietFormat,
+		defaultUserTableFormat,
+		`username: {{.Username}}`,
+		`username: {{.Username}}\ngroups: {{.Groups}}\nrole: {{.Role}}\n`,
+	)
+
 	render := func(format func(subContext subContext) error) error {
 		for _, user := range users {
 			if err := format(&userContext{v: *user}); err != nil {
@@ -58,11 +67,6 @@ type userContext struct {
 
 func (c *userContext) MarshalJSON() ([]byte, error) {
 	return marshalJSON(c)
-}
-
-func (c *userContext) UUID() string {
-	c.AddHeader(userUUIDHeader)
-	return c.v.UUID
 }
 
 func (c *userContext) Username() string {

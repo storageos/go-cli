@@ -40,6 +40,16 @@ func NewVolumeFormat(source string, quiet bool) Format {
 
 // VolumeWrite writes formatted volumes using the Context
 func VolumeWrite(ctx Context, volumes []*types.Volume, nodes []*types.Node) error {
+	// Try handle a custom format, excluding the predefined templates
+	TryFormatUnless(
+		string(ctx.Format),
+		nodes,
+		defaultVolumeQuietFormat,
+		defaultVolumeTableFormat,
+		`name: {{.Name}}`,
+		`name: {{.Name}}\ndriver: {{.Driver}}\n`,
+	)
+
 	render := func(format func(subContext subContext) error) error {
 		for _, volume := range volumes {
 			if err := format(&volumeContext{v: *volume, nodes: nodes}); err != nil {

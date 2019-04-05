@@ -39,7 +39,7 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display pool names")
-	flags.StringVar(&opt.format, "format", "", "Pretty-print pools using a Go template")
+	flags.StringVar(&opt.format, "format", "", "Format the output using a custom template (try \"help\" for more info)")
 	flags.StringVarP(&opt.selector, "selector", "s", "", "Provide selector (e.g. to list all pools with label app=cassandra ' --selector=app=cassandra')")
 
 	return cmd

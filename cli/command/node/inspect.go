@@ -1,11 +1,7 @@
 package node
 
 import (
-	"errors"
-	"strconv"
-
 	"github.com/dnephin/cobra"
-	// storageos "github.com/storageos/go-api"
 	"github.com/storageos/go-api/types"
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
@@ -30,7 +26,7 @@ func newInspectCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opt.format, "format", "f", "", "Format the output using the given Go template")
+	cmd.Flags().StringVarP(&opt.format, "format", "f", "", "Format the output using a custom template (try \"help\" for more info)")
 
 	return cmd
 }
@@ -38,35 +34,21 @@ func newInspectCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 func runInspect(storageosCli *command.StorageOSCli, opt inspectOptions) error {
 	client := storageosCli.Client()
 
-	getAll := func() (refs []string, getter func(ref string) (interface{}, []byte, error)) {
+	if len(opt.names) == 0 {
 		nodes, err := client.NodeList(types.ListOptions{})
-
-		for i := range nodes {
-			refs = append(refs, strconv.Itoa(i))
+		if err != nil {
+			return err
 		}
-
-		return refs, func(ref string) (interface{}, []byte, error) {
-			if err != nil {
-				return nil, nil, err
-			}
-
-			i, err := strconv.Atoi(ref)
-			if err != nil {
-				return nil, nil, errors.New("iteration error in node getter function")
-			}
-
-			return nodes[i], nil, nil
+		list := make([]interface{}, 0, len(nodes))
+		for _, node := range nodes {
+			list = append(list, node)
 		}
+		return inspect.List(storageosCli.Out(), list, opt.format)
 	}
 
 	getFunc := func(ref string) (interface{}, []byte, error) {
 		i, err := client.Node(ref)
 		return i, nil, err
-	}
-
-	if len(opt.names) == 0 {
-		refs, getter := getAll()
-		return inspect.Inspect(storageosCli.Out(), refs, opt.format, getter)
 	}
 
 	return inspect.Inspect(storageosCli.Out(), opt.names, opt.format, getFunc)

@@ -6,7 +6,7 @@ import (
 	"github.com/storageos/go-cli/cli"
 	"github.com/storageos/go-cli/cli/command"
 	"github.com/storageos/go-cli/cli/command/formatter"
-	clitypes "github.com/storageos/go-cli/types"
+	cliTypes "github.com/storageos/go-cli/types"
 )
 
 type listOptions struct {
@@ -30,7 +30,7 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display node names")
-	flags.StringVar(&opt.format, "format", "", "Pretty-print nodes using a Go template")
+	flags.StringVar(&opt.format, "format", "", "Format the output using a custom template (try \"help\" for more info)")
 	flags.StringVarP(&opt.selector, "selector", "s", "", "Provide selector (e.g. to list all nodes with label disk=ssd' --selector=disk=ssd')")
 
 	return cmd
@@ -57,7 +57,7 @@ func runList(storageosCli *command.StorageOSCli, opt listOptions) error {
 		}
 	}
 
-	if err := clitypes.SortAPINodes(clitypes.ByNodeName, nodes); err != nil {
+	if err := cliTypes.SortAPINodes(cliTypes.ByNodeName, nodes); err != nil {
 		return err
 	}
 

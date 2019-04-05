@@ -39,6 +39,7 @@ type Cluster struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 }
 
+// NodeHealth is a containter type for holding Node health information
 type NodeHealth struct {
 	CP *apiTypes.CPHealthStatus
 	DP *apiTypes.DPHealthStatus
@@ -58,10 +59,12 @@ type Node struct {
 
 type nodeSortBy int
 
+// Pre-defined sorting methods
 const (
 	ByNodeName nodeSortBy = iota
 )
 
+// SortAPINodes sorts the set of nodes by the provided scheme
 func SortAPINodes(by nodeSortBy, nodes []*apiTypes.Node) error {
 	lessfunc, err := apiNodeSortFunc(by, nodes)
 	if err != nil {
@@ -71,6 +74,7 @@ func SortAPINodes(by nodeSortBy, nodes []*apiTypes.Node) error {
 	return nil
 }
 
+// SortCLINodes sorts the set of nodes by the provided scheme
 func SortCLINodes(by nodeSortBy, nodes []*Node) error {
 	lessfunc, err := cliNodeSortFunc(by, nodes)
 	if err != nil {
@@ -84,18 +88,7 @@ func apiNodeSortFunc(sortBy nodeSortBy, nodes []*apiTypes.Node) (func(i, j int) 
 	switch sortBy {
 	case ByNodeName:
 		return func(i, j int) bool {
-			name1, name2 := trimCommonPrefix(nodes[i].Name, nodes[j].Name)
-
-			// Are the postfixes both numerical, if so sort as integers
-			n1, err1 := strconv.Atoi(name1)
-			n2, err2 := strconv.Atoi(name2)
-			if err1 == nil && err2 == nil {
-				return n1 < n2
-			}
-
-			// Postfixes don't appear to be numerical, sort them lexicographically
-			return name1 < name2
-
+			return HumanisedStringLess(nodes[i].Name, nodes[j].Name)
 		}, nil
 
 	default:
@@ -107,23 +100,32 @@ func cliNodeSortFunc(sortBy nodeSortBy, nodes []*Node) (func(i, j int) bool, err
 	switch sortBy {
 	case ByNodeName:
 		return func(i, j int) bool {
-			name1, name2 := trimCommonPrefix(nodes[i].Name, nodes[j].Name)
-
-			// Are the postfixes both numerical, if so sort as integers
-			n1, err1 := strconv.Atoi(name1)
-			n2, err2 := strconv.Atoi(name2)
-			if err1 == nil && err2 == nil {
-				return n1 < n2
-			}
-
-			// Postfixes don't appear to be numerical, sort them lexicographically
-			return name1 < name2
-
+			return HumanisedStringLess(nodes[i].Name, nodes[j].Name)
 		}, nil
 
 	default:
 		return nil, errors.New("sort method not implemented")
 	}
+}
+
+// HumanisedStringLess is a string compare function, useable for sorting that
+// attempts to detect expected humanised sorting e.g. hostnames with numeric
+// postfixes.
+//
+// This function (for now) is quite basic, but could support more edge-cases as
+// they arise.
+func HumanisedStringLess(i, j string) bool {
+	name1, name2 := trimCommonPrefix(i, j)
+
+	// Are the postfixes both numerical, if so sort as integers
+	n1, err1 := strconv.Atoi(name1)
+	n2, err2 := strconv.Atoi(name2)
+	if err1 == nil && err2 == nil {
+		return n1 < n2
+	}
+
+	// Postfixes don't appear to be numerical, sort them lexicographically
+	return name1 < name2
 }
 
 func trimCommonPrefix(a, b string) (string, string) {

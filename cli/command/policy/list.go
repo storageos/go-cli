@@ -28,7 +28,7 @@ func newListCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Only display policy ID")
-	flags.StringVar(&opt.format, "format", "", "Pretty-print rules using a Go template")
+	flags.StringVar(&opt.format, "format", "", "Format the output using a custom template (try \"help\" for more info)")
 
 	return cmd
 }
