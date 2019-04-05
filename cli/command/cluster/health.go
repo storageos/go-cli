@@ -99,7 +99,7 @@ func checkSubmodules(nodeSubmodules *apiTypes.ClusterHealthNode) error {
 
 	for name, state := range submoduleStates {
 		if state.Status != "alive" {
-			submoduleErrors = append(submoduleErrors, fmt.Sprintf("name: %q, message: '%q'", name, state.Message))
+			submoduleErrors = append(submoduleErrors, fmt.Sprintf("name: %q, message: %q", name, state.Message))
 		}
 	}
 
