@@ -6,6 +6,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/docker/go-units"
 	"github.com/storageos/go-cli/cli/command/inspect"
 	"github.com/storageos/go-cli/pkg/templates"
@@ -63,7 +65,9 @@ func TryFormatSpec(format string, in interface{}) {
 		os.Exit(1)
 	}
 
-	printer.Inspect(in, nil)
+	if err := printer.Inspect(in, nil); err != nil {
+		logrus.WithError(err).Debug("template error")
+	}
 	printer.Flush()
 	os.Exit(0)
 }
