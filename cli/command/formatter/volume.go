@@ -43,7 +43,7 @@ func VolumeWrite(ctx Context, volumes []*types.Volume, nodes []*types.Node) erro
 	// Try handle a custom format, excluding the predefined templates
 	TryFormatUnless(
 		string(ctx.Format),
-		nodes,
+		volumes,
 		defaultVolumeQuietFormat,
 		defaultVolumeTableFormat,
 		`name: {{.Name}}`,
