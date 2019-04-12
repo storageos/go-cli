@@ -2,6 +2,7 @@ package templates
 
 import (
 	"bytes"
+	"strings"
 	"text/template"
 )
 
@@ -80,17 +81,32 @@ func HelpText(in interface{}) string {
 		Description string
 	}
 
+	trimInitialSlice := func(ss []string) []string {
+		prefix := "{{ .[]"
+		for i, s := range ss {
+			if strings.HasPrefix(s, prefix) {
+				ss[i] = "{{ " + strings.TrimPrefix(s, prefix)
+			}
+		}
+		return ss
+	}
+
 	// Define all the available functions, and some usage info
 	data := struct {
 		Fields    []string
 		Functions []Func
 	}{
-		Fields: DescribeFields(in),
+		Fields: trimInitialSlice(DescribeFields(in)),
 		Functions: []Func{
 			{
 				Name:        "json",
 				Args:        ".Field",
 				Description: "JSON encode .Field",
+			},
+			{
+				Name:        "prettyjson",
+				Args:        ".Field",
+				Description: "JSON encode .Field, with whitespace indentation",
 			},
 			{
 				Name:        "split",
