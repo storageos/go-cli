@@ -22,7 +22,7 @@ Choose either the binary or Docker installation methods.  Once installed, usage 
 
 ```bash
 sudo -i
-curl -skSL https://github.com/storageos/go-cli/releases/download/1.0.0/storageos_linux_amd64 > /usr/local/bin/storageos
+curl -skSL https://github.com/storageos/go-cli/releases/download/1.2.0/storageos_linux_amd64 > /usr/local/bin/storageos
 chmod +x /usr/local/bin/storageos
 exit
 ```
@@ -31,7 +31,7 @@ exit
 
 ```bash
 sudo -i
-curl -skSL https://github.com/storageos/go-cli/releases/download/1.0.0/storageos_darwin_amd64 > /usr/local/bin/storageos
+curl -skSL https://github.com/storageos/go-cli/releases/download/1.2.0/storageos_darwin_amd64 > /usr/local/bin/storageos
 chmod +x /usr/local/bin/storageos
 exit
 ```
