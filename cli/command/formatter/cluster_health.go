@@ -61,18 +61,19 @@ func NewClusterHealthFormat(source string, quiet bool) Format {
 
 // ClusterHealthWrite writes formatted ClusterHealthhelements using the Context
 func ClusterHealthWrite(ctx Context, status []*apiTypes.ClusterHealthNode) error {
-	TryFormatUnless(
+	TryFormatUnlessMatches(
 		string(ctx.Format),
 		status,
-		defaultClusterHealthQuietFormat,
-		defaultClusterHealthTableFormat,
-		detailedClusterHealthTableFormat,
-		cpClusterHealthTableFormat,
-		dpClusterHealthTableFormat,
-		`{{.CPStatus}}`,
-		`{{.DPStatus}}`,
-		`{{.Node}}: {{.Status}}`,
-		`node: {{.Node}}\nstatus: {{.Status}}\nkv: {{.KV}}\nkv_write: {{.KVWrite}}\nnats: {{.NATS}}\ndfs_client: {{.DirectFSClient}}\ndirector: {{.Director}}\nfs_driver: {{.FSDriver}}\nfs: {{.FS}}\n`,
+		TableMatcher,
+		NewExactMatcher(defaultClusterHealthQuietFormat),
+		NewExactMatcher(defaultClusterHealthTableFormat),
+		NewExactMatcher(detailedClusterHealthTableFormat),
+		NewExactMatcher(cpClusterHealthTableFormat),
+		NewExactMatcher(dpClusterHealthTableFormat),
+		NewExactMatcher(`{{.CPStatus}}`),
+		NewExactMatcher(`{{.DPStatus}}`),
+		NewExactMatcher(`{{.Node}}: {{.Status}}`),
+		NewExactMatcher(`node: {{.Node}}\nstatus: {{.Status}}\nkv: {{.KV}}\nkv_write: {{.KVWrite}}\nnats: {{.NATS}}\ndfs_client: {{.DirectFSClient}}\ndirector: {{.Director}}\nfs_driver: {{.FSDriver}}\nfs: {{.FS}}\n`),
 	)
 
 	if len(status) == 0 {

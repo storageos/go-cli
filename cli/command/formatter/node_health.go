@@ -53,16 +53,17 @@ func NewNodeHealthFormat(source string, quiet bool) Format {
 // NodeHealthWrite writes formatted NamedSubModuleStatus elements using the Context
 func NodeHealthWrite(ctx Context, node *cliTypes.Node) error {
 	// Try handle a custom format, excluding the predefined templates
-	TryFormatUnless(
+	TryFormatUnlessMatches(
 		string(ctx.Format),
 		node,
-		defaultNodeSubmodulesQuietFormat,
-		defaultNodeSubmodulesTableFormat,
-		cpNodeSubmodulesTableFormat,
-		dpNodeSubmodulesTableFormat,
-		cpNodeSubmodulesQuietFormat,
-		dpNodeSubmodulesQuietFormat,
-		defaultNodeRawFormat,
+		TableMatcher,
+		NewExactMatcher(defaultNodeSubmodulesQuietFormat),
+		NewExactMatcher(defaultNodeSubmodulesTableFormat),
+		NewExactMatcher(cpNodeSubmodulesTableFormat),
+		NewExactMatcher(dpNodeSubmodulesTableFormat),
+		NewExactMatcher(cpNodeSubmodulesQuietFormat),
+		NewExactMatcher(dpNodeSubmodulesQuietFormat),
+		NewExactMatcher(defaultNodeRawFormat),
 	)
 
 	render := func(format func(subContext subContext) error) error {

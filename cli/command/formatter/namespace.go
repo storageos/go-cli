@@ -35,13 +35,14 @@ func NewNamespaceFormat(source string, quiet bool) Format {
 // NamespaceWrite writes formatted namespaces using the Context
 func NamespaceWrite(ctx Context, namespaces []*types.Namespace) error {
 	// Try handle a custom format, excluding the predefined templates
-	TryFormatUnless(
+	TryFormatUnlessMatches(
 		string(ctx.Format),
 		namespaces,
-		defaultNamespaceQuietFormat,
-		defaultNamespaceTableFormat,
-		`name: {{.Name}}`,
-		`name: {{.Name}}\ndisplay name: {{.DisplayName}}\n`,
+		TableMatcher,
+		NewExactMatcher(defaultNamespaceQuietFormat),
+		NewExactMatcher(defaultNamespaceTableFormat),
+		NewExactMatcher(`name: {{.Name}}`),
+		NewExactMatcher(`name: {{.Name}}\ndisplay name: {{.DisplayName}}\n`),
 	)
 
 	render := func(format func(subContext subContext) error) error {

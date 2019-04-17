@@ -44,14 +44,15 @@ func NewConnectivityFormat(source string, quiet bool) Format {
 // ConnectivityWrite writes formatted connectivity results using the Context
 func ConnectivityWrite(ctx Context, results types.ConnectivityResults) error {
 	// Try handle a custom format, excluding the predefined templates
-	TryFormatUnless(
+	TryFormatUnlessMatches(
 		string(ctx.Format),
 		results,
-		connectivityTableFormat,
-		connectivityTableQuietFormat,
-		connectivityRawFormat,
-		connectivityRawQuietFormat,
-		connectivitySummaryFormat,
+		TableMatcher,
+		NewExactMatcher(connectivityTableFormat),
+		NewExactMatcher(connectivityTableQuietFormat),
+		NewExactMatcher(connectivityRawFormat),
+		NewExactMatcher(connectivityRawQuietFormat),
+		NewExactMatcher(connectivitySummaryFormat),
 	)
 
 	render := func(format func(subContext subContext) error) error {

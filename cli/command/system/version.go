@@ -69,10 +69,11 @@ func runVersion(storageosCli *command.StorageOSCli, opts *versionOptions) error 
 		Client: version.GetStorageOSVersion(),
 	}
 
-	formatter.TryFormatUnless(
+	formatter.TryFormatUnlessMatches(
 		string(templateFormat),
 		vd,
-		versionTemplate,
+		formatter.TableMatcher,
+		formatter.NewExactMatcher(versionTemplate),
 	)
 
 	tmpl, err := templates.Parse(templateFormat)

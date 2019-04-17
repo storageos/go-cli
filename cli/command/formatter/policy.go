@@ -38,12 +38,13 @@ func NewPolicyFormat(source string, quiet bool) Format {
 // using the format specified within the context.
 func PolicyWrite(ctx Context, policies []*types.PolicyWithID) error {
 	// Try handle a custom format, excluding the predefined templates
-	TryFormatUnless(
+	TryFormatUnlessMatches(
 		string(ctx.Format),
 		policies,
-		defaultPolicyTableFormat,
-		defaultPolicyQuietFormat,
-		"name: {{.Name}}\nuser: {{.User}}\ngroup: {{.Group}}\nnamespace: {{.Namespace}}",
+		TableMatcher,
+		NewExactMatcher(defaultPolicyTableFormat),
+		NewExactMatcher(defaultPolicyQuietFormat),
+		NewExactMatcher("name: {{.Name}}\nuser: {{.User}}\ngroup: {{.Group}}\nnamespace: {{.Namespace}}"),
 	)
 
 	render := func(format func(subContext subContext) error) error {

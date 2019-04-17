@@ -41,13 +41,14 @@ func NewPoolFormat(source string, quiet bool) Format {
 // PoolWrite writes formatted pools using the Context
 func PoolWrite(ctx Context, pools []*types.Pool) error {
 	// Try handle a custom format, excluding the predefined templates
-	TryFormatUnless(
+	TryFormatUnlessMatches(
 		string(ctx.Format),
 		pools,
-		defaultPoolQuietFormat,
-		defaultPoolTableFormat,
-		`name: {{.Name}}`,
-		`name: {{.Name}}\n node selector: {{.NodeSelector}}\n`,
+		TableMatcher,
+		NewExactMatcher(defaultPoolQuietFormat),
+		NewExactMatcher(defaultPoolTableFormat),
+		NewExactMatcher(`name: {{.Name}}`),
+		NewExactMatcher(`name: {{.Name}}\n node selector: {{.NodeSelector}}\n`),
 	)
 
 	render := func(format func(subContext subContext) error) error {
