@@ -39,13 +39,14 @@ func NewRuleFormat(source string, quiet bool) Format {
 // RuleWrite writes formatted rules using the Context
 func RuleWrite(ctx Context, rules []*types.Rule) error {
 	// Try handle a custom format, excluding the predefined templates
-	TryFormatUnless(
+	TryFormatUnlessMatches(
 		string(ctx.Format),
 		rules,
-		defaultRuleQuietFormat,
-		defaultRuleTableFormat,
-		`name: {{.Name}}`,
-		`name: {{.Name}}\nselector: {{.Selector}}\noperator: {{.Operator}}\naction: {{.RuleAction}}\nlabels: {{.Labels}}\n`,
+		TableMatcher,
+		NewExactMatcher(defaultRuleQuietFormat),
+		NewExactMatcher(defaultRuleTableFormat),
+		NewExactMatcher(`name: {{.Name}}`),
+		NewExactMatcher(`name: {{.Name}}\nselector: {{.Selector}}\noperator: {{.Operator}}\naction: {{.RuleAction}}\nlabels: {{.Labels}}\n`),
 	)
 
 	render := func(format func(subContext subContext) error) error {

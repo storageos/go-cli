@@ -40,13 +40,14 @@ func NewUserFormat(source string, quiet bool) Format {
 // using the format specified within the context.
 func UserWrite(ctx Context, users []*types.User) error {
 	// Try handle a custom format, excluding the predefined templates
-	TryFormatUnless(
+	TryFormatUnlessMatches(
 		string(ctx.Format),
 		users,
-		defaultUserQuietFormat,
-		defaultUserTableFormat,
-		`username: {{.Username}}`,
-		`username: {{.Username}}\ngroups: {{.Groups}}\nrole: {{.Role}}\n`,
+		TableMatcher,
+		NewExactMatcher(defaultUserQuietFormat),
+		NewExactMatcher(defaultUserTableFormat),
+		NewExactMatcher(`username: {{.Username}}`),
+		NewExactMatcher(`username: {{.Username}}\ngroups: {{.Groups}}\nrole: {{.Role}}\n`),
 	)
 
 	render := func(format func(subContext subContext) error) error {
