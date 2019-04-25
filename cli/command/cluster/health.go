@@ -36,7 +36,7 @@ func newHealthCommand(storageosCli *command.StorageOSCli) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVarP(&opt.quiet, "quiet", "q", false, "Display minimal cluster health info.  Can be used with format.")
-	flags.BoolVarP(&opt.errReturn, "err", "e", false, "Return non-zero exit code if, and only if, cluster is fully operational")
+	flags.BoolVarP(&opt.errReturn, "err", "e", false, "Return a zero exit code if, and only if, cluster is fully operational")
 	flags.IntVarP(&opt.timeout, "timeout", "t", constants.DefaultAPITimeout, "Timeout in seconds.")
 	flags.StringVar(&opt.format, "format", "", "Pretty-print health with formats: table (default), detailed, cp, dp or raw.")
 
