@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"reflect"
 	"strings"
 	"text/template"
 
@@ -119,12 +120,28 @@ func list(out io.Writer, elements []elemRaw, tmplStr string) error {
 // This allows docker cli to parse inspect structs injected with Swarm fields.
 func (i *TemplateInspector) Inspect(typedElement interface{}, rawElement []byte) error {
 	buffer := new(bytes.Buffer)
-	if err := i.tmpl.Execute(buffer, typedElement); err != nil {
-		if rawElement == nil {
-			return fmt.Errorf("Template parsing error: %v", err)
+
+	switch reflect.TypeOf(typedElement).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(typedElement)
+
+		for n := 0; n < s.Len(); n++ {
+			if err := i.tmpl.Execute(buffer, s.Index(n)); err != nil {
+				return fmt.Errorf("Template parsing error: %v", err)
+			}
+			if (n + 1) < s.Len() {
+				buffer.WriteString("\n")
+			}
 		}
-		return i.tryRawInspectFallback(rawElement)
+	default:
+		if err := i.tmpl.Execute(buffer, typedElement); err != nil {
+			if len(rawElement) == 0 {
+				return fmt.Errorf("Template parsing error: %v", err)
+			}
+			return i.tryRawInspectFallback(rawElement)
+		}
 	}
+
 	i.buffer.Write(buffer.Bytes())
 	i.buffer.WriteByte('\n')
 	return nil

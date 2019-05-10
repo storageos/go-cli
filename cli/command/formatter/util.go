@@ -3,8 +3,11 @@ package formatter
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/docker/go-units"
 	"github.com/storageos/go-cli/cli/command/inspect"
@@ -63,19 +66,38 @@ func TryFormatSpec(format string, in interface{}) {
 		os.Exit(1)
 	}
 
-	printer.Inspect(in, nil)
+	if err := printer.Inspect(in, nil); err != nil {
+		logrus.WithError(err).Debug("template error")
+	}
 	printer.Flush()
 	os.Exit(0)
 }
 
-// TryFormatUnless calls TryFormatSpec unless format is byte-equivilent to one
-// of notIfMatch.
+// TableMatcher is a matcher used for TryFormatUnlessMatches, which matches any format starting
+// with a table function.
+var TableMatcher = regexp.MustCompile(`table.*`)
+
+// FormatMatcher is an interface that describes a type that can match on a format string
+type FormatMatcher interface {
+	MatchString(string) bool
+}
+
+type exactMatcher struct{ s string }
+
+func (f *exactMatcher) MatchString(s string) bool { return s == f.s }
+
+// NewExactMatcher returns a new format matcher that will only match if the provided strings are byte equivalent
+func NewExactMatcher(s string) FormatMatcher {
+	return &exactMatcher{s}
+}
+
+// TryFormatUnlessMatches calls TryFormatSpec unless format satisfies one of the FormatMatcher types return true
 //
 // This works around some of the formatters using templates that are
 // incompatible with the results (using a subformatter).
-func TryFormatUnless(format string, in interface{}, notIfMatch ...string) {
-	for _, f := range notIfMatch {
-		if string(format) == f {
+func TryFormatUnlessMatches(format string, in interface{}, notIfMatch ...FormatMatcher) {
+	for _, r := range notIfMatch {
+		if r.MatchString(format) {
 			return
 		}
 	}

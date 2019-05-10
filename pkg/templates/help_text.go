@@ -93,6 +93,11 @@ func HelpText(in interface{}) string {
 				Description: "JSON encode .Field",
 			},
 			{
+				Name:        "prettyjson",
+				Args:        ".Field",
+				Description: "JSON encode .Field, with whitespace indentation",
+			},
+			{
 				Name:        "split",
 				Args:        ".Field \"separator\"",
 				Description: "Split .Field content at separator",

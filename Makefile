@@ -14,12 +14,26 @@ install:
 	@echo "++ Installing storageos binary into \$GOPATH/bin"
 	touch version/client.go && go install -ldflags "$(LDFLAGS)" github.com/storageos/go-cli/cmd/storageos
 
-release:
+.PHONY: release
+release: release-binaries shasum
+
+.PHONY: release-binaries
+release-binaries:
 	@echo "++ Building storageos release binaries"
 	go get github.com/mitchellh/gox
 	cd cmd/storageos && gox -verbose -output="release/{{.Dir}}_{{.OS}}_{{.Arch}}" \
 		-ldflags "$(LDFLAGS)" -osarch="linux/amd64 darwin/amd64 windows/amd64"
+
+SHASUM := $(shell command -v shasum 2> /dev/null)
+.PHONY: shasum
+shasum:
 	@rm -f cmd/storageos/release/*.sha256
+ifndef SHASUM
+	@for filename in cmd/storageos/release/*; do \
+		sha256sum $$filename > $$filename.sha256; \
+	done;
+else
 	@for filename in cmd/storageos/release/*; do \
 		shasum -a 256 $$filename > $$filename.sha256; \
 	done;
+endif

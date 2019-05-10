@@ -41,13 +41,14 @@ func NewVolumeFormat(source string, quiet bool) Format {
 // VolumeWrite writes formatted volumes using the Context
 func VolumeWrite(ctx Context, volumes []*types.Volume, nodes []*types.Node) error {
 	// Try handle a custom format, excluding the predefined templates
-	TryFormatUnless(
+	TryFormatUnlessMatches(
 		string(ctx.Format),
-		nodes,
-		defaultVolumeQuietFormat,
-		defaultVolumeTableFormat,
-		`name: {{.Name}}`,
-		`name: {{.Name}}\ndriver: {{.Driver}}\n`,
+		volumes,
+		TableMatcher,
+		NewExactMatcher(defaultVolumeQuietFormat),
+		NewExactMatcher(defaultVolumeTableFormat),
+		NewExactMatcher(`name: {{.Name}}`),
+		NewExactMatcher(`name: {{.Name}}\ndriver: {{.Driver}}\n`),
 	)
 
 	render := func(format func(subContext subContext) error) error {
