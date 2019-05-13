@@ -125,10 +125,11 @@ func walkSlice(in reflect.Value, parent *field) []field {
 	v := reflect.New(elemType)
 	v = deref(v)
 
-	// If a slice is passed directly to walkFields, parent will be nil
-	// In this case we dont want to show the [] as the formatter will be called
-	// recursively with each element (how docker's cli behaves)
-	if parent == nil {
+	// If a slice is passed directly to walkFields, parent will be nil, or the
+	// path will have len of 0. In this case we dont want to show the [] as the
+	// formatter will be called recursively with each element (how docker's cli
+	// behaves)
+	if parent == nil || len(parent.Path) == 0 {
 		return walkFields(v, &field{
 			Path: []string{},
 		})
