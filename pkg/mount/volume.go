@@ -2,6 +2,7 @@ package mount
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/storageos/blockcheck"
 )
 
 // defaultTimeOut is the maximum time to wait for async volume operations.
@@ -124,6 +126,29 @@ func parseFileOutput(path string, out string) (string, error) {
 }
 
 func createFilesystem(ctx context.Context, fstype FSType, path string) error {
+	// At this point, the block device is about to be formatted after running
+	// "/usr/bin/file" on the device which has indicated there is no filesystem.
+	//
+	// As a failsafe, check that path is a path to a valid block device that
+	// contains no data.
+	empty, err := blockcheck.IsBlockDeviceEmpty(path)
+	if err != nil {
+		// An error occurred when trying to open and read the block device.
+		//
+		// As the state of the device cannot be determined, take the safest path
+		// and stop.
+		log.WithError(err).Error("unable to read device")
+		return err
+	}
+
+	// Ensure the device is empty before trying to do anything to it.
+	if !empty {
+		// The device contains data. Do not attempt to format the volume.
+		//
+		// Stop, returning the original mount error to the caller.
+		log.Warn("device contains data, aborting mkfs")
+		return errors.New("device contains data, aborting mkfs")
+	}
 
 	var retries int
 	start := time.Now()
