@@ -2,12 +2,17 @@ package mount
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"testing"
 )
 
 func TestRunCmdDeadline(t *testing.T) {
+	if os.Getenv("CI") != "" {
+		t.Skip("networking doesn't work correctly in circle ci")
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
