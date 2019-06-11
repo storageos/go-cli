@@ -1,9 +1,10 @@
 package types_test
 
 import (
+	"testing"
+
 	apiTypes "github.com/storageos/go-api/types"
 	cliTypes "github.com/storageos/go-cli/types"
-	"testing"
 )
 
 func TestSortableNodeTypeCLINodes(t *testing.T) {
@@ -130,6 +131,18 @@ func TestSortableNodeTypeAPINodes(t *testing.T) {
 			nodes:         ns("host-prefix3", "host-prefix2", "host-prefix1", "host-prefix0"),
 			expectError:   false,
 			expectedOrder: []string{"host-prefix0", "host-prefix1", "host-prefix2", "host-prefix3"},
+		},
+		{
+			name:          "caused panic",
+			nodes:         ns("kind-v1.14.3-worker", "kind-v1.14.3-worker2"),
+			expectError:   false,
+			expectedOrder: []string{"kind-v1.14.3-worker", "kind-v1.14.3-worker2"},
+		},
+		{
+			name:          "caused panic reversed",
+			nodes:         ns("kind-v1.14.3-worker2", "kind-v1.14.3-worker"),
+			expectError:   false,
+			expectedOrder: []string{"kind-v1.14.3-worker", "kind-v1.14.3-worker2"},
 		},
 	}
 

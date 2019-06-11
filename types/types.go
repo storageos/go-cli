@@ -134,10 +134,19 @@ func trimCommonPrefix(a, b string) (string, string) {
 	}
 
 	for i, r := range a {
+
+		// if we've reached the end of b, return empty string,
+		if len(b) <= i {
+			return a[i:], ""
+		}
+
+		// if we have a difference, return the suffixes of both
 		if r != []rune(b)[i] {
 			a, b = a[i:], b[i:]
 			break
 		}
+
+		// or keep looking for a difference
 	}
 
 	return a, b
