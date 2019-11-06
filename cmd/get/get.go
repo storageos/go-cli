@@ -19,6 +19,7 @@ type GetClient interface {
 	GetNode(id.Node) (*node.Resource, error)
 	GetListNodes(...id.Node) ([]*node.Resource, error)
 	GetVolume(id.Namespace, id.Volume) (*volume.Resource, error)
+	GetNamespaceVolumes(id.Namespace) ([]*volume.Resource, error)
 }
 
 // GetDisplayer defines the functionality required by the CLI application to
@@ -28,6 +29,7 @@ type GetDisplayer interface {
 	WriteGetNode(io.Writer, *node.Resource) error
 	WriteGetNodeList(io.Writer, []*node.Resource) error
 	WriteGetVolume(io.Writer, *volume.Resource) error
+	WriteGetVolumeList(io.Writer, []*volume.Resource) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "get" verb.

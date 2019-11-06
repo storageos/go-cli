@@ -21,6 +21,7 @@ type Client interface {
 	GetNode(id.Node) (*node.Resource, error)
 	GetListNodes(...id.Node) ([]*node.Resource, error)
 	GetVolume(id.Namespace, id.Volume) (*volume.Resource, error)
+	GetNamespaceVolumes(id.Namespace) ([]*volume.Resource, error)
 
 	DescribeCluster() (*cluster.Resource, error)
 	DescribeNode(id.Node) (*node.Resource, error)
@@ -35,6 +36,7 @@ type Displayer interface {
 	WriteGetNode(io.Writer, *node.Resource) error
 	WriteGetNodeList(io.Writer, []*node.Resource) error
 	WriteGetVolume(io.Writer, *volume.Resource) error
+	WriteGetVolumeList(io.Writer, []*volume.Resource) error
 
 	WriteDescribeCluster(io.Writer, *cluster.Resource) error
 	WriteDescribeNode(io.Writer, *node.Resource) error

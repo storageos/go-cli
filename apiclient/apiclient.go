@@ -31,11 +31,13 @@ type Transport interface {
 	GetNode(context.Context, id.Node) (*node.Resource, error)
 	GetListNodes(context.Context) ([]*node.Resource, error)
 	GetVolume(context.Context, id.Namespace, id.Volume) (*volume.Resource, error)
+	GetNamespaceVolumes(context.Context, id.Namespace) ([]*volume.Resource, error)
 
 	DescribeCluster(context.Context) (*cluster.Resource, error)
 	DescribeNode(context.Context, id.Node) (*node.Resource, error)
 	DescribeListNodes(context.Context) ([]*node.Resource, error)
 	DescribeVolume(context.Context, id.Namespace, id.Volume) (*volume.Resource, error)
+	DescribeNamespaceVolumes(context.Context, id.Namespace) ([]*volume.Resource, error)
 }
 
 // Client provides a collection of methods for consumers to interact with the
@@ -153,6 +155,23 @@ func (c *Client) GetVolume(namespace id.Namespace, uid id.Volume) (*volume.Resou
 	return v, nil
 }
 
+func (c *Client) GetNamespaceVolumes(namespace id.Namespace) ([]*volume.Resource, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+
+	err := c.transport.Authenticate(ctx, c.username, c.password)
+	if err != nil {
+		return nil, err
+	}
+
+	vs, err := c.transport.GetNamespaceVolumes(ctx, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	return vs, nil
+}
+
 // DescribeCluster requests basic information for the cluster resource from the
 // StorageOS API.
 func (c *Client) DescribeCluster() (*cluster.Resource, error) {
@@ -256,6 +275,23 @@ func (c *Client) DescribeVolume(namespace id.Namespace, uid id.Volume) (*volume.
 	}
 
 	return v, nil
+}
+
+func (c *Client) DescribeNamespaceVolumes(namespace id.Namespace) ([]*volume.Resource, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+
+	err := c.transport.Authenticate(ctx, c.username, c.password)
+	if err != nil {
+		return nil, err
+	}
+
+	vs, err := c.transport.DescribeNamespaceVolumes(ctx, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	return vs, nil
 }
 
 // New initialises a new Client configured from config, with transport

@@ -121,6 +121,28 @@ func (o *OpenAPI) GetVolume(ctx context.Context, namespace id.Namespace, uid id.
 	return v, nil
 }
 
+func (o *OpenAPI) GetNamespaceVolumes(ctx context.Context, namespace id.Namespace) ([]*volume.Resource, error) {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	models, _, err := o.client.DefaultApi.ListVolumes(ctx, namespace.String())
+	if err != nil {
+		return nil, err
+	}
+
+	volumes := make([]*volume.Resource, len(models))
+	for i, m := range models {
+		v, err := o.codec.decodeGetVolume(m)
+		if err != nil {
+			return nil, err
+		}
+
+		volumes[i] = v
+	}
+
+	return volumes, nil
+}
+
 // -----------------------------------------------------------------------------
 // 								DESCRIBE
 // -----------------------------------------------------------------------------
@@ -198,6 +220,28 @@ func (o *OpenAPI) DescribeVolume(ctx context.Context, namespace id.Namespace, ui
 	}
 
 	return v, nil
+}
+
+func (o *OpenAPI) DescribeNamespaceVolumes(ctx context.Context, namespace id.Namespace) ([]*volume.Resource, error) {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	models, _, err := o.client.DefaultApi.ListVolumes(ctx, namespace.String())
+	if err != nil {
+		return nil, err
+	}
+
+	volumes := make([]*volume.Resource, len(models))
+	for i, m := range models {
+		v, err := o.codec.decodeDescribeVolume(m)
+		if err != nil {
+			return nil, err
+		}
+
+		volumes[i] = v
+	}
+
+	return volumes, nil
 }
 
 func NewOpenAPI(apiEndpoint, userAgent string) *OpenAPI {

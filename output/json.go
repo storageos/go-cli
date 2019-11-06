@@ -37,6 +37,12 @@ func (d *JSONDisplayer) WriteGetVolume(w io.Writer, resource *volume.Resource) e
 	return enc.Encode(resource)
 }
 
+func (d *JSONDisplayer) WriteGetVolumeList(w io.Writer, resources []*volume.Resource) error {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", d.encoderIndent)
+	return enc.Encode(resources)
+}
+
 func (d *JSONDisplayer) WriteDescribeCluster(w io.Writer, resource *cluster.Resource) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
