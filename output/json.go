@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"code.storageos.net/storageos/c2-cli/pkg/node"
+	"code.storageos.net/storageos/c2-cli/pkg/volume"
 )
 
 type JSONDisplayer struct {
@@ -23,6 +24,12 @@ func (d *JSONDisplayer) WriteGetNodeList(w io.Writer, resources []*node.Resource
 	return enc.Encode(resources)
 }
 
+func (d *JSONDisplayer) WriteGetVolume(w io.Writer, resource *volume.Resource) error {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", d.encoderIndent)
+	return enc.Encode(resource)
+}
+
 func (d *JSONDisplayer) WriteDescribeNode(w io.Writer, resource *node.Resource) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
@@ -33,6 +40,12 @@ func (d *JSONDisplayer) WriteDescribeNodeList(w io.Writer, resources []*node.Res
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(resources)
+}
+
+func (d *JSONDisplayer) WriteDescribeVolume(w io.Writer, resource *volume.Resource) error {
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", d.encoderIndent)
+	return enc.Encode(resource)
 }
 
 func NewJSONDisplayer(encoderIndent string) *JSONDisplayer {

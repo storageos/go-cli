@@ -32,6 +32,7 @@ type Transport interface {
 
 	DescribeNode(ctx context.Context, uid id.Node) (*node.Resource, error)
 	DescribeListNodes(ctx context.Context) ([]*node.Resource, error)
+	DescribeVolume(context.Context, id.Namespace, id.Volume) (*volume.Resource, error)
 }
 
 // Client provides a collection of methods for consumers to interact with the
@@ -44,8 +45,8 @@ type Client struct {
 	timeout  time.Duration
 }
 
-// GetNode requests the node resource corresponding to uid from the StorageOS
-// API.
+// GetNode requests basic information for the node resource which
+// corresponds to uid from the StorageOS API.
 func (c *Client) GetNode(uid id.Node) (*node.Resource, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
@@ -64,11 +65,11 @@ func (c *Client) GetNode(uid id.Node) (*node.Resource, error) {
 	return n, nil
 }
 
-// GetListNodes requests the list of all node resources which are members of
-// the cluster, returning a list of node resources which have an ID present
-// in argument list.
+// GetListNodes requests a list containing basic information on each
+// node resource in the cluster.
 //
-// If no IDs are specified, all are returned.
+// The returned list is filtered using uids so that it contains only those
+// resources which have a matching ID. If none are specified, all are returned.
 func (c *Client) GetListNodes(uids ...id.Node) ([]*node.Resource, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
@@ -110,6 +111,8 @@ func (c *Client) GetListNodes(uids ...id.Node) ([]*node.Resource, error) {
 	return nodes, nil
 }
 
+// GetVolume requests basic information for the volume resource which
+// corresponds to uid in namespace from the StorageOS API.
 func (c *Client) GetVolume(namespace id.Namespace, uid id.Volume) (*volume.Resource, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
@@ -194,8 +197,28 @@ func (c *Client) DescribeListNodes(uids ...id.Node) ([]*node.Resource, error) {
 	return nodes, nil
 }
 
-// New initialises a new Client using timeout for each operation, with
-// transport providing the underlying implementation for encoding requests and
+// DescribeVolume requests detailed information for the volume resource which
+// corresponds to uid in namespace from the StorageOS API.
+func (c *Client) DescribeVolume(namespace id.Namespace, uid id.Volume) (*volume.Resource, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+
+	// Pre-authenticate request
+	err := c.transport.Authenticate(ctx, c.username, c.password)
+	if err != nil {
+		return nil, err
+	}
+
+	v, err := c.transport.DescribeVolume(ctx, namespace, uid)
+	if err != nil {
+		return nil, err
+	}
+
+	return v, nil
+}
+
+// New initialises a new Client configured from config, with transport
+// providing the underlying implementation for encoding requests and
 // decoding responses.
 func New(transport Transport, config ConfigProvider) (*Client, error) {
 	username, err := config.Username()

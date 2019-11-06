@@ -8,21 +8,27 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
 )
 
+type FsType string
+
+func FsTypeFromString(name string) FsType {
+	return FsType(name)
+}
+
 // Resource encapsulates a StorageOS volume as a data type.
 type Resource struct {
 	ID          id.Volume `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	AttachedOn  string    `json:"attachedOn"`
+	AttachedOn  id.Node   `json:"attachedOn"`
 
 	Namespace  id.Namespace `json:"namespaceID"`
 	Labels     labels.Set   `json:"labels"`
-	Filesystem string       `json:"filesystem"`
+	Filesystem FsType       `json:"filesystem"`
 	Inode      uint32       `json:"inode"`
 	SizeBytes  uint64       `json:"sizeBytes"`
 
-	Master   Deployment    `json:"master"`
-	Replicas *[]Deployment `json:"replicas"`
+	Master   *Deployment   `json:"master,omitempty"`
+	Replicas []*Deployment `json:"replicas,omitempty"`
 
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`

@@ -4,18 +4,19 @@ import (
 	"io"
 	"os"
 
-	"github.com/blang/semver"
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/node"
+	"code.storageos.net/storageos/c2-cli/pkg/volume"
 )
 
 // GetClient defines the functionality required by the CLI application to
 // reasonably implement the "get" verb commands.
 type GetClient interface {
-	GetNode(uid id.Node) (*node.Resource, error)
-	GetListNodes(uids ...id.Node) ([]*node.Resource, error)
+	GetNode(id.Node) (*node.Resource, error)
+	GetListNodes(...id.Node) ([]*node.Resource, error)
+	GetVolume(id.Namespace, id.Volume) (*volume.Resource, error)
 }
 
 // GetDisplayer defines the functionality required by the CLI application to
@@ -23,10 +24,11 @@ type GetClient interface {
 type GetDisplayer interface {
 	WriteGetNode(io.Writer, *node.Resource) error
 	WriteGetNodeList(io.Writer, []*node.Resource) error
+	WriteGetVolume(io.Writer, *volume.Resource) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "get" verb.
-func NewCommand(client GetClient, display GetDisplayer, version semver.Version) *cobra.Command {
+func NewCommand(client GetClient, display GetDisplayer) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "get",
 		Short: "get retrieves a StorageOS resource, displaying basic information about it",
@@ -34,6 +36,7 @@ func NewCommand(client GetClient, display GetDisplayer, version semver.Version) 
 
 	command.AddCommand(
 		newNode(os.Stdout, client, display),
+		newVolume(os.Stdout, client, display),
 	)
 
 	return command

@@ -8,7 +8,7 @@ import (
 	"github.com/blang/semver"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
-	"code.storageos.net/storageos/c2-cli/apiclient/transport"
+	"code.storageos.net/storageos/c2-cli/apiclient/openapi"
 	"code.storageos.net/storageos/c2-cli/cmd"
 	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/output"
@@ -43,7 +43,7 @@ func main() {
 	}
 
 	client, err := apiclient.New(
-		transport.NewOpenAPI(apiEndpoint, UserAgent),
+		openapi.NewOpenAPI(apiEndpoint, UserAgent),
 		cfg,
 	)
 	if err != nil {

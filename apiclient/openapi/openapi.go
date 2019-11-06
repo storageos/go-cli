@@ -1,4 +1,4 @@
-package transport
+package openapi
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"strings"
 	"sync"
 
-	"code.storageos.net/storageos/c2-cli/pkg/entity"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/node"
 	"code.storageos.net/storageos/c2-cli/pkg/volume"
@@ -14,56 +13,11 @@ import (
 	"code.storageos.net/storageos/openapi"
 )
 
-type openAPICodec struct{}
-
-func (c openAPICodec) decodeGetNode(model openapi.Node) (*node.Resource, error) {
-	node := &node.Resource{
-		ID:     id.Node(model.Id),
-		Name:   model.Name,
-		Health: entity.HealthFromString(string(model.Health)),
-
-		CreatedAt: model.CreatedAt,
-		UpdatedAt: model.UpdatedAt,
-
-		Labels:  map[string]string(model.Labels),
-		Version: entity.VersionFromString(model.Version),
-	}
-
-	return node, nil
-}
-
-func (c openAPICodec) decodeDescribeNode(model openapi.Node) (*node.Resource, error) {
-	n, err := c.decodeGetNode(model)
-	if err != nil {
-		return nil, err
-	}
-
-	n.Configuration = &node.Configuration{
-		IOAddr:         model.IoEndpoint,
-		SupervisorAddr: model.SupervisorEndpoint,
-		GossipAddr:     model.GossipEndpoint,
-		ClusteringAddr: model.ClusteringEndpoint,
-	}
-
-	return n, nil
-}
-
-func (c openAPICodec) decodeVolume(model openapi.Volume) (*volume.Resource, error) {
-
-	// TODO: Validate if fields ok? (complete fields too)
-	volume := &volume.Resource{
-		ID:   id.Volume(model.Id),
-		Name: model.Name,
-	}
-
-	return volume, nil
-}
-
 type OpenAPI struct {
 	mu *sync.RWMutex
 
 	client *openapi.APIClient
-	codec  openAPICodec
+	codec  codec
 }
 
 func (o *OpenAPI) Authenticate(ctx context.Context, username, password string) error {
@@ -138,9 +92,15 @@ func (o *OpenAPI) GetListNodes(ctx context.Context) ([]*node.Resource, error) {
 }
 
 func (o *OpenAPI) GetVolume(ctx context.Context, namespace id.Namespace, uid id.Volume) (*volume.Resource, error) {
-	model, _, err := o.client.DefaultApi.GetVolume(ctx, namespace.String(), uid.String())
+	o.mu.RLock()
+	defer o.mu.RUnlock()
 
-	v, err := o.codec.decodeVolume(model)
+	model, _, err := o.client.DefaultApi.GetVolume(ctx, namespace.String(), uid.String())
+	if err != nil {
+		return nil, err
+	}
+
+	v, err := o.codec.decodeGetVolume(model)
 	if err != nil {
 		return nil, err
 	}
@@ -198,6 +158,23 @@ func (o *OpenAPI) DescribeListNodes(ctx context.Context) ([]*node.Resource, erro
 	return nodes, nil
 }
 
+func (o *OpenAPI) DescribeVolume(ctx context.Context, namespace id.Namespace, uid id.Volume) (*volume.Resource, error) {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	model, _, err := o.client.DefaultApi.GetVolume(ctx, namespace.String(), uid.String())
+	if err != nil {
+		return nil, err
+	}
+
+	v, err := o.codec.decodeDescribeVolume(model)
+	if err != nil {
+		return nil, err
+	}
+
+	return v, nil
+}
+
 func NewOpenAPI(apiEndpoint, userAgent string) *OpenAPI {
 	// Init the OpenAPI client
 	cfg := &openapi.Configuration{
@@ -214,6 +191,6 @@ func NewOpenAPI(apiEndpoint, userAgent string) *OpenAPI {
 		mu: &sync.RWMutex{},
 
 		client: client,
-		codec:  openAPICodec{},
+		codec:  codec{},
 	}
 }

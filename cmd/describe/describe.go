@@ -8,13 +8,15 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/node"
+	"code.storageos.net/storageos/c2-cli/pkg/volume"
 )
 
 // DescribeClient describes the functionality required by the CLI application
 // to reasonably implement the "describe" verb commands.
 type DescribeClient interface {
-	DescribeNode(uid id.Node) (*node.Resource, error)
-	DescribeListNodes(uids ...id.Node) ([]*node.Resource, error)
+	DescribeNode(id.Node) (*node.Resource, error)
+	DescribeListNodes(...id.Node) ([]*node.Resource, error)
+	DescribeVolume(id.Namespace, id.Volume) (*volume.Resource, error)
 }
 
 // DescribeDisplayer defines the functionality required by the CLI application
@@ -22,6 +24,7 @@ type DescribeClient interface {
 type DescribeDisplayer interface {
 	WriteDescribeNode(io.Writer, *node.Resource) error
 	WriteDescribeNodeList(io.Writer, []*node.Resource) error
+	WriteDescribeVolume(io.Writer, *volume.Resource) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "describe" verb.
@@ -33,6 +36,7 @@ func NewCommand(client DescribeClient, display DescribeDisplayer) *cobra.Command
 
 	command.AddCommand(
 		newNode(os.Stdout, client, display),
+		newVolume(os.Stdout, client, display),
 	)
 
 	return command
