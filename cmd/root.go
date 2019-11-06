@@ -8,6 +8,7 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/cmd/describe"
 	"code.storageos.net/storageos/c2-cli/cmd/get"
+	"code.storageos.net/storageos/c2-cli/pkg/cluster"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/node"
 	"code.storageos.net/storageos/c2-cli/pkg/volume"
@@ -16,10 +17,12 @@ import (
 // Client defines the functionality required by the CLI application to
 // reasonably implement the commands it provides.
 type Client interface {
+	GetCluster() (*cluster.Resource, error)
 	GetNode(id.Node) (*node.Resource, error)
 	GetListNodes(...id.Node) ([]*node.Resource, error)
 	GetVolume(id.Namespace, id.Volume) (*volume.Resource, error)
 
+	DescribeCluster() (*cluster.Resource, error)
 	DescribeNode(id.Node) (*node.Resource, error)
 	DescribeListNodes(...id.Node) ([]*node.Resource, error)
 	DescribeVolume(id.Namespace, id.Volume) (*volume.Resource, error)
@@ -28,10 +31,12 @@ type Client interface {
 // Displayer defines the functionality required by the CLI application to
 // display the results of interaction with the StorageOS API.
 type Displayer interface {
+	WriteGetCluster(io.Writer, *cluster.Resource) error
 	WriteGetNode(io.Writer, *node.Resource) error
 	WriteGetNodeList(io.Writer, []*node.Resource) error
 	WriteGetVolume(io.Writer, *volume.Resource) error
 
+	WriteDescribeCluster(io.Writer, *cluster.Resource) error
 	WriteDescribeNode(io.Writer, *node.Resource) error
 	WriteDescribeNodeList(io.Writer, []*node.Resource) error
 	WriteDescribeVolume(io.Writer, *volume.Resource) error

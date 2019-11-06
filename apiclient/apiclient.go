@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"code.storageos.net/storageos/c2-cli/pkg/cluster"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/node"
 	"code.storageos.net/storageos/c2-cli/pkg/volume"
@@ -26,12 +27,14 @@ type ConfigProvider interface {
 type Transport interface {
 	Authenticate(ctx context.Context, username, password string) error
 
-	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
-	GetListNodes(ctx context.Context) ([]*node.Resource, error)
+	GetCluster(context.Context) (*cluster.Resource, error)
+	GetNode(context.Context, id.Node) (*node.Resource, error)
+	GetListNodes(context.Context) ([]*node.Resource, error)
 	GetVolume(context.Context, id.Namespace, id.Volume) (*volume.Resource, error)
 
-	DescribeNode(ctx context.Context, uid id.Node) (*node.Resource, error)
-	DescribeListNodes(ctx context.Context) ([]*node.Resource, error)
+	DescribeCluster(context.Context) (*cluster.Resource, error)
+	DescribeNode(context.Context, id.Node) (*node.Resource, error)
+	DescribeListNodes(context.Context) ([]*node.Resource, error)
 	DescribeVolume(context.Context, id.Namespace, id.Volume) (*volume.Resource, error)
 }
 
@@ -43,6 +46,25 @@ type Client struct {
 	username string
 	password string
 	timeout  time.Duration
+}
+
+// GetCluster requests basic information for the cluster resource from the
+// StorageOS API.
+func (c *Client) GetCluster() (*cluster.Resource, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+
+	err := c.transport.Authenticate(ctx, c.username, c.password)
+	if err != nil {
+		return nil, err
+	}
+
+	cluster, err := c.transport.GetCluster(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return cluster, nil
 }
 
 // GetNode requests basic information for the node resource which
@@ -129,6 +151,25 @@ func (c *Client) GetVolume(namespace id.Namespace, uid id.Volume) (*volume.Resou
 	}
 
 	return v, nil
+}
+
+// DescribeCluster requests basic information for the cluster resource from the
+// StorageOS API.
+func (c *Client) DescribeCluster() (*cluster.Resource, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+
+	err := c.transport.Authenticate(ctx, c.username, c.password)
+	if err != nil {
+		return nil, err
+	}
+
+	cluster, err := c.transport.DescribeCluster(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return cluster, nil
 }
 
 // DescribeNode requests detailed information for the node resource which

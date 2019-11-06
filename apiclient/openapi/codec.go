@@ -1,6 +1,7 @@
 package openapi
 
 import (
+	"code.storageos.net/storageos/c2-cli/pkg/cluster"
 	"code.storageos.net/storageos/c2-cli/pkg/entity"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/node"
@@ -11,8 +12,36 @@ import (
 
 type codec struct{}
 
+func (c codec) decodeGetCluster(model openapi.Cluster) (*cluster.Resource, error) {
+	return &cluster.Resource{
+		ID: id.Cluster(model.Id),
+
+		DisableTelemetry:      model.DisableTelemetry,
+		DisableCrashReporting: model.DisableCrashReporting,
+		DisableVersionCheck:   model.DisableVersionCheck,
+
+		LogLevel:  cluster.LogLevelFromString(string(model.LogLevel)),
+		LogFormat: cluster.LogFormatFromString(string(model.LogFormat)),
+
+		CreatedAt: model.CreatedAt,
+		UpdatedAt: model.UpdatedAt,
+		Version:   entity.VersionFromString(model.Version),
+	}, nil
+}
+
+func (c codec) decodeDescribeCluster(model openapi.Cluster) (*cluster.Resource, error) {
+	resource, err := c.decodeGetCluster(model)
+	if err != nil {
+		return nil, err
+	}
+
+	resource.Licence = &cluster.Licence{} // TODO: This needs data when we have it
+
+	return resource, nil
+}
+
 func (c codec) decodeGetNode(model openapi.Node) (*node.Resource, error) {
-	node := &node.Resource{
+	return &node.Resource{
 		ID:     id.Node(model.Id),
 		Name:   model.Name,
 		Health: entity.HealthFromString(string(model.Health)),
@@ -22,9 +51,7 @@ func (c codec) decodeGetNode(model openapi.Node) (*node.Resource, error) {
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
 		Version:   entity.VersionFromString(model.Version),
-	}
-
-	return node, nil
+	}, nil
 }
 
 func (c codec) decodeDescribeNode(model openapi.Node) (*node.Resource, error) {
@@ -44,8 +71,7 @@ func (c codec) decodeDescribeNode(model openapi.Node) (*node.Resource, error) {
 }
 
 func (c codec) decodeGetVolume(model openapi.Volume) (*volume.Resource, error) {
-
-	volume := &volume.Resource{
+	return &volume.Resource{
 		ID:          id.Volume(model.Id),
 		Name:        model.Name,
 		Description: model.Description,
@@ -60,9 +86,7 @@ func (c codec) decodeGetVolume(model openapi.Volume) (*volume.Resource, error) {
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
 		Version:   entity.VersionFromString(model.Version),
-	}
-
-	return volume, nil
+	}, nil
 }
 
 func (c codec) decodeDescribeVolume(model openapi.Volume) (*volume.Resource, error) {

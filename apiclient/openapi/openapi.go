@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"code.storageos.net/storageos/c2-cli/pkg/cluster"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/node"
 	"code.storageos.net/storageos/c2-cli/pkg/volume"
@@ -44,6 +45,18 @@ func (o *OpenAPI) Authenticate(ctx context.Context, username, password string) e
 // -----------------------------------------------------------------------------
 // 								GET
 // -----------------------------------------------------------------------------
+
+func (o *OpenAPI) GetCluster(ctx context.Context) (*cluster.Resource, error) {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	model, _, err := o.client.DefaultApi.GetCluster(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return o.codec.decodeGetCluster(model)
+}
 
 func (o *OpenAPI) GetNode(ctx context.Context, uid id.Node) (*node.Resource, error) {
 	o.mu.RLock()
@@ -111,6 +124,18 @@ func (o *OpenAPI) GetVolume(ctx context.Context, namespace id.Namespace, uid id.
 // -----------------------------------------------------------------------------
 // 								DESCRIBE
 // -----------------------------------------------------------------------------
+
+func (o *OpenAPI) DescribeCluster(ctx context.Context) (*cluster.Resource, error) {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	model, _, err := o.client.DefaultApi.GetCluster(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return o.codec.decodeDescribeCluster(model)
+}
 
 func (o *OpenAPI) DescribeNode(ctx context.Context, uid id.Node) (*node.Resource, error) {
 	o.mu.RLock()
