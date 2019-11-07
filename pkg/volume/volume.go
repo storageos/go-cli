@@ -14,7 +14,7 @@ func FsTypeFromString(name string) FsType {
 	return FsType(name)
 }
 
-// Resource encapsulates a StorageOS volume as a data type.
+// Resource encapsulates a StorageOS volume API resource as a data type.
 type Resource struct {
 	ID          id.Volume `json:"id"`
 	Name        string    `json:"name"`
@@ -27,8 +27,8 @@ type Resource struct {
 	Inode      uint32       `json:"inode"`
 	SizeBytes  uint64       `json:"sizeBytes"`
 
-	Master   *Deployment   `json:"master,omitempty"`
-	Replicas []*Deployment `json:"replicas,omitempty"`
+	Master   *Deployment   `json:"master"`
+	Replicas []*Deployment `json:"replicas"`
 
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`

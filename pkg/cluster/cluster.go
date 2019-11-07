@@ -27,11 +27,11 @@ func (l LogFormat) String() string {
 	return string(l)
 }
 
-// Resource encapsulate a StorageOS cluster as a data type.
+// Resource encapsulate a StorageOS cluster api resource as a data type.
 type Resource struct {
 	ID id.Cluster `json:"id"`
 
-	Licence *Licence `json:"licence,omitempty"`
+	Licence *Licence `json:"licence"`
 
 	DisableTelemetry      bool `json:"disableTelemetry"`
 	DisableCrashReporting bool `json:"disableCrashReporting"`
@@ -45,6 +45,6 @@ type Resource struct {
 	Version   entity.Version `json:"version"`
 }
 
-// Licence encapsulates a StorageOS cluster product licence and the features
-// included with it.
+// Licence describes a StorageOS product licence and the features included with
+// it.
 type Licence struct{}

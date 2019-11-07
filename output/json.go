@@ -43,28 +43,16 @@ func (d *JSONDisplayer) WriteGetVolumeList(w io.Writer, resources []*volume.Reso
 	return enc.Encode(resources)
 }
 
-func (d *JSONDisplayer) WriteDescribeCluster(w io.Writer, resource *cluster.Resource) error {
+func (d *JSONDisplayer) WriteDescribeNode(w io.Writer, state *node.State) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
-	return enc.Encode(resource)
+	return enc.Encode(state)
 }
 
-func (d *JSONDisplayer) WriteDescribeNode(w io.Writer, resource *node.Resource) error {
+func (d *JSONDisplayer) WriteDescribeNodeList(w io.Writer, states []*node.State) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
-	return enc.Encode(resource)
-}
-
-func (d *JSONDisplayer) WriteDescribeNodeList(w io.Writer, resources []*node.Resource) error {
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", d.encoderIndent)
-	return enc.Encode(resources)
-}
-
-func (d *JSONDisplayer) WriteDescribeVolume(w io.Writer, resource *volume.Resource) error {
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", d.encoderIndent)
-	return enc.Encode(resource)
+	return enc.Encode(states)
 }
 
 func NewJSONDisplayer(encoderIndent string) *JSONDisplayer {

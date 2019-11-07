@@ -8,6 +8,7 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/pkg/cluster"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/namespace"
 	"code.storageos.net/storageos/c2-cli/pkg/node"
 	"code.storageos.net/storageos/c2-cli/pkg/volume"
 
@@ -42,10 +43,6 @@ func (o *OpenAPI) Authenticate(ctx context.Context, username, password string) e
 	return nil
 }
 
-// -----------------------------------------------------------------------------
-// 								GET
-// -----------------------------------------------------------------------------
-
 func (o *OpenAPI) GetCluster(ctx context.Context) (*cluster.Resource, error) {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
@@ -55,7 +52,7 @@ func (o *OpenAPI) GetCluster(ctx context.Context) (*cluster.Resource, error) {
 		return nil, err
 	}
 
-	return o.codec.decodeGetCluster(model)
+	return o.codec.decodeCluster(model)
 }
 
 func (o *OpenAPI) GetNode(ctx context.Context, uid id.Node) (*node.Resource, error) {
@@ -71,37 +68,12 @@ func (o *OpenAPI) GetNode(ctx context.Context, uid id.Node) (*node.Resource, err
 		return nil, err
 	}
 
-	n, err := o.codec.decodeGetNode(model)
+	n, err := o.codec.decodeNode(model)
 	if err != nil {
 		return nil, err
 	}
 
 	return n, nil
-}
-
-func (o *OpenAPI) GetListNodes(ctx context.Context) ([]*node.Resource, error) {
-	o.mu.RLock()
-	defer o.mu.RUnlock()
-
-	models, _, err := o.client.DefaultApi.ListNodes(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	nodes := make([]*node.Resource, len(models))
-	for i, m := range models {
-
-		// → If we error here then there's an incompatibility somewhere so
-		// aborting is probably a good shout.
-		n, err := o.codec.decodeGetNode(m)
-		if err != nil {
-			return nil, err
-		}
-
-		nodes[i] = n
-	}
-
-	return nodes, nil
 }
 
 func (o *OpenAPI) GetVolume(ctx context.Context, namespace id.Namespace, uid id.Volume) (*volume.Resource, error) {
@@ -113,7 +85,7 @@ func (o *OpenAPI) GetVolume(ctx context.Context, namespace id.Namespace, uid id.
 		return nil, err
 	}
 
-	v, err := o.codec.decodeGetVolume(model)
+	v, err := o.codec.decodeVolume(model)
 	if err != nil {
 		return nil, err
 	}
@@ -121,66 +93,7 @@ func (o *OpenAPI) GetVolume(ctx context.Context, namespace id.Namespace, uid id.
 	return v, nil
 }
 
-func (o *OpenAPI) GetNamespaceVolumes(ctx context.Context, namespace id.Namespace) ([]*volume.Resource, error) {
-	o.mu.RLock()
-	defer o.mu.RUnlock()
-
-	models, _, err := o.client.DefaultApi.ListVolumes(ctx, namespace.String())
-	if err != nil {
-		return nil, err
-	}
-
-	volumes := make([]*volume.Resource, len(models))
-	for i, m := range models {
-		v, err := o.codec.decodeGetVolume(m)
-		if err != nil {
-			return nil, err
-		}
-
-		volumes[i] = v
-	}
-
-	return volumes, nil
-}
-
-// -----------------------------------------------------------------------------
-// 								DESCRIBE
-// -----------------------------------------------------------------------------
-
-func (o *OpenAPI) DescribeCluster(ctx context.Context) (*cluster.Resource, error) {
-	o.mu.RLock()
-	defer o.mu.RUnlock()
-
-	model, _, err := o.client.DefaultApi.GetCluster(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return o.codec.decodeDescribeCluster(model)
-}
-
-func (o *OpenAPI) DescribeNode(ctx context.Context, uid id.Node) (*node.Resource, error) {
-	o.mu.RLock()
-	defer o.mu.RUnlock()
-
-	model, _, err := o.client.DefaultApi.GetNode(ctx, uid.String())
-	if err != nil {
-		// TODO: Maybe do the error mapping at the transport level?
-		// → if so change below as well.
-		// → Error mapping could use the resp object to be a bit
-		// intelligent?
-		return nil, err
-	}
-
-	n, err := o.codec.decodeDescribeNode(model)
-	if err != nil {
-		return nil, err
-	}
-
-	return n, nil
-}
-
-func (o *OpenAPI) DescribeListNodes(ctx context.Context) ([]*node.Resource, error) {
+func (o *OpenAPI) ListNodes(ctx context.Context) ([]*node.Resource, error) {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 
@@ -194,7 +107,7 @@ func (o *OpenAPI) DescribeListNodes(ctx context.Context) ([]*node.Resource, erro
 
 		// → If we error here then there's an incompatibility somewhere so
 		// aborting is probably a good shout.
-		n, err := o.codec.decodeDescribeNode(m)
+		n, err := o.codec.decodeNode(m)
 		if err != nil {
 			return nil, err
 		}
@@ -205,24 +118,7 @@ func (o *OpenAPI) DescribeListNodes(ctx context.Context) ([]*node.Resource, erro
 	return nodes, nil
 }
 
-func (o *OpenAPI) DescribeVolume(ctx context.Context, namespace id.Namespace, uid id.Volume) (*volume.Resource, error) {
-	o.mu.RLock()
-	defer o.mu.RUnlock()
-
-	model, _, err := o.client.DefaultApi.GetVolume(ctx, namespace.String(), uid.String())
-	if err != nil {
-		return nil, err
-	}
-
-	v, err := o.codec.decodeDescribeVolume(model)
-	if err != nil {
-		return nil, err
-	}
-
-	return v, nil
-}
-
-func (o *OpenAPI) DescribeNamespaceVolumes(ctx context.Context, namespace id.Namespace) ([]*volume.Resource, error) {
+func (o *OpenAPI) ListVolumes(ctx context.Context, namespace id.Namespace) ([]*volume.Resource, error) {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 
@@ -233,7 +129,7 @@ func (o *OpenAPI) DescribeNamespaceVolumes(ctx context.Context, namespace id.Nam
 
 	volumes := make([]*volume.Resource, len(models))
 	for i, m := range models {
-		v, err := o.codec.decodeDescribeVolume(m)
+		v, err := o.codec.decodeVolume(m)
 		if err != nil {
 			return nil, err
 		}
@@ -242,6 +138,28 @@ func (o *OpenAPI) DescribeNamespaceVolumes(ctx context.Context, namespace id.Nam
 	}
 
 	return volumes, nil
+}
+
+func (o *OpenAPI) ListNamespaces(ctx context.Context) ([]*namespace.Resource, error) {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	models, _, err := o.client.DefaultApi.ListNamespaces(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaces := make([]*namespace.Resource, len(models))
+	for i, m := range models {
+		ns, err := o.codec.decodeNamespace(m)
+		if err != nil {
+			return nil, err
+		}
+
+		namespaces[i] = ns
+	}
+
+	return namespaces, nil
 }
 
 func NewOpenAPI(apiEndpoint, userAgent string) *OpenAPI {

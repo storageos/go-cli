@@ -1,7 +1,6 @@
 package get
 
 import (
-	"errors"
 	"io"
 
 	"github.com/spf13/cobra"
@@ -14,13 +13,13 @@ type volumeCommand struct {
 	client  GetClient
 	display GetDisplayer
 
+	namespaceID string
+
 	writer io.Writer
 }
 
 func (c *volumeCommand) run(cmd *cobra.Command, args []string) error {
 	switch len(args) {
-	case 0:
-		return errors.New("not implemented")
 	case 1:
 		return c.getVolume(cmd, args)
 	default:
@@ -29,12 +28,12 @@ func (c *volumeCommand) run(cmd *cobra.Command, args []string) error {
 }
 
 func (c *volumeCommand) getVolume(_ *cobra.Command, args []string) error {
-	ns, uid, err := id.ParseFQVN(args[0])
-	if err != nil {
-		return err
-	}
+	uid := id.Volume(args[0])
 
-	volume, err := c.client.GetVolume(ns, uid)
+	volume, err := c.client.GetVolume(
+		id.Namespace(c.namespaceID),
+		uid,
+	)
 	if err != nil {
 		return err
 	}
@@ -43,35 +42,28 @@ func (c *volumeCommand) getVolume(_ *cobra.Command, args []string) error {
 }
 
 func (c *volumeCommand) listVolumes(_ *cobra.Command, args []string) error {
-	requestedMap := map[id.Namespace]map[id.Volume]bool{}
-	for _, a := range args {
-		ns, uid, err := id.ParseFQVN(a)
-		if err != nil {
-			return err
-		}
+	var volumes []*volume.Resource
+	var err error
 
-		if _, ok := requestedMap[ns]; !ok {
-			requestedMap[ns] = map[id.Volume]bool{}
-		}
-
-		requestedMap[ns][uid] = true
+	uids := make([]id.Volume, len(args))
+	for i, a := range args {
+		uids[i] = id.Volume(a)
 	}
 
-	requestedVolumes := []*volume.Resource{}
-	for ns := range requestedMap {
-		nsVolumes, err := c.client.GetNamespaceVolumes(ns)
-		if err != nil {
-			return err
-		}
-
-		for _, v := range nsVolumes {
-			if _, ok := requestedMap[ns][v.ID]; ok {
-				requestedVolumes = append(requestedVolumes, v)
-			}
-		}
+	if c.namespaceID != "" {
+		volumes, err = c.client.GetNamespaceVolumes(
+			id.Namespace(c.namespaceID),
+			uids...,
+		)
+	} else {
+		volumes, err = c.client.GetAllVolumes()
 	}
 
-	return c.display.WriteGetVolumeList(c.writer, requestedVolumes)
+	if err != nil {
+		return err
+	}
+
+	return c.display.WriteGetVolumeList(c.writer, volumes)
 }
 
 func newVolume(w io.Writer, client GetClient, display GetDisplayer) *cobra.Command {
@@ -85,13 +77,15 @@ func newVolume(w io.Writer, client GetClient, display GetDisplayer) *cobra.Comma
 	cobraCommand := &cobra.Command{
 		Aliases: []string{"volumes"},
 		Use:     "volume [volume ids...]",
-		Short:   "volume retrieves basic information about StorageOS nodes",
+		Short:   "volume retrieves basic information about StorageOS volumes",
 		Example: `
 $ storageos get volume banana
 `,
 
 		RunE: c.run,
 	}
+
+	cobraCommand.Flags().StringVarP(&c.namespaceID, "namespace", "n", "", "the id of the namespace to retrieve the volume resources from")
 
 	return cobraCommand
 }

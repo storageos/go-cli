@@ -21,12 +21,11 @@ type Client interface {
 	GetNode(id.Node) (*node.Resource, error)
 	GetListNodes(...id.Node) ([]*node.Resource, error)
 	GetVolume(id.Namespace, id.Volume) (*volume.Resource, error)
-	GetNamespaceVolumes(id.Namespace) ([]*volume.Resource, error)
+	GetAllVolumes() ([]*volume.Resource, error)
+	GetNamespaceVolumes(id.Namespace, ...id.Volume) ([]*volume.Resource, error)
 
-	DescribeCluster() (*cluster.Resource, error)
-	DescribeNode(id.Node) (*node.Resource, error)
-	DescribeListNodes(...id.Node) ([]*node.Resource, error)
-	DescribeVolume(id.Namespace, id.Volume) (*volume.Resource, error)
+	DescribeNode(id.Node) (*node.State, error)
+	DescribeListNodes(...id.Node) ([]*node.State, error)
 }
 
 // Displayer defines the functionality required by the CLI application to
@@ -38,10 +37,8 @@ type Displayer interface {
 	WriteGetVolume(io.Writer, *volume.Resource) error
 	WriteGetVolumeList(io.Writer, []*volume.Resource) error
 
-	WriteDescribeCluster(io.Writer, *cluster.Resource) error
-	WriteDescribeNode(io.Writer, *node.Resource) error
-	WriteDescribeNodeList(io.Writer, []*node.Resource) error
-	WriteDescribeVolume(io.Writer, *volume.Resource) error
+	WriteDescribeNode(io.Writer, *node.State) error
+	WriteDescribeNodeList(io.Writer, []*node.State) error
 }
 
 // Init configures the CLI application's commands from the root down, using

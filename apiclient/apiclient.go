@@ -9,6 +9,7 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/pkg/cluster"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/namespace"
 	"code.storageos.net/storageos/c2-cli/pkg/node"
 	"code.storageos.net/storageos/c2-cli/pkg/volume"
 )
@@ -24,20 +25,20 @@ type ConfigProvider interface {
 
 // Transport describes the set of methods required by an API client to use a
 // given transport implementation provider.
+//
+// A Transport implementation only needs to provide a direct mapping to the
+// StorageOS API - it is the responsibility of the client to compose
+// functionality for complex operations.
 type Transport interface {
 	Authenticate(ctx context.Context, username, password string) error
 
 	GetCluster(context.Context) (*cluster.Resource, error)
 	GetNode(context.Context, id.Node) (*node.Resource, error)
-	GetListNodes(context.Context) ([]*node.Resource, error)
 	GetVolume(context.Context, id.Namespace, id.Volume) (*volume.Resource, error)
-	GetNamespaceVolumes(context.Context, id.Namespace) ([]*volume.Resource, error)
 
-	DescribeCluster(context.Context) (*cluster.Resource, error)
-	DescribeNode(context.Context, id.Node) (*node.Resource, error)
-	DescribeListNodes(context.Context) ([]*node.Resource, error)
-	DescribeVolume(context.Context, id.Namespace, id.Volume) (*volume.Resource, error)
-	DescribeNamespaceVolumes(context.Context, id.Namespace) ([]*volume.Resource, error)
+	ListNodes(context.Context) ([]*node.Resource, error)
+	ListVolumes(context.Context, id.Namespace) ([]*volume.Resource, error)
+	ListNamespaces(context.Context) ([]*namespace.Resource, error)
 }
 
 // Client provides a collection of methods for consumers to interact with the
@@ -93,7 +94,7 @@ func (c *Client) GetNode(uid id.Node) (*node.Resource, error) {
 // node resource in the cluster.
 //
 // The returned list is filtered using uids so that it contains only those
-// resources which have a matching ID. If none are specified, all are returned.
+// resources which have a matching ID. Omitting uids will skip the filtering.
 func (c *Client) GetListNodes(uids ...id.Node) ([]*node.Resource, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
@@ -104,7 +105,7 @@ func (c *Client) GetListNodes(uids ...id.Node) ([]*node.Resource, error) {
 		return nil, err
 	}
 
-	nodes, err := c.transport.GetListNodes(ctx)
+	nodes, err := c.transport.ListNodes(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -113,6 +114,7 @@ func (c *Client) GetListNodes(uids ...id.Node) ([]*node.Resource, error) {
 		return nodes, nil
 	}
 
+	// Filter uids have been provided:
 	retrieved := map[id.Node]*node.Resource{}
 
 	for _, n := range nodes {
@@ -155,7 +157,12 @@ func (c *Client) GetVolume(namespace id.Namespace, uid id.Volume) (*volume.Resou
 	return v, nil
 }
 
-func (c *Client) GetNamespaceVolumes(namespace id.Namespace) ([]*volume.Resource, error) {
+// GetNamespaceVolumes requests basic information for each volume resource in
+// namespace from the StorageOS API.
+//
+// The returned list is filtered using uids so that it contains only those
+// resources which have a matching ID. Omitting uids will skip the filtering.
+func (c *Client) GetNamespaceVolumes(namespace id.Namespace, uids ...id.Volume) ([]*volume.Resource, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 
@@ -164,17 +171,46 @@ func (c *Client) GetNamespaceVolumes(namespace id.Namespace) ([]*volume.Resource
 		return nil, err
 	}
 
-	vs, err := c.transport.GetNamespaceVolumes(ctx, namespace)
+	volumes, err := c.transport.ListVolumes(ctx, namespace)
 	if err != nil {
 		return nil, err
 	}
 
-	return vs, nil
+	if len(uids) == 0 {
+		return volumes, nil
+	}
+
+	// Filter uids have been provided:
+	retrieved := map[id.Volume]*volume.Resource{}
+
+	for _, v := range volumes {
+		retrieved[v.ID] = v
+	}
+
+	filtered := make([]*volume.Resource, len(uids))
+
+	i := 0
+	for _, id := range uids {
+		v, ok := retrieved[id]
+		if ok {
+			filtered[i] = v
+			i++
+		} else {
+			return nil, fmt.Errorf("volume not found: %v", id)
+		}
+	}
+
+	return filtered, nil
 }
 
-// DescribeCluster requests basic information for the cluster resource from the
-// StorageOS API.
-func (c *Client) DescribeCluster() (*cluster.Resource, error) {
+// GetAllVolumes requests basic information for each volume resource in every
+// namespace exposed by the StorageOS API.
+//
+// TODO:
+// If access is not granted when listing volumes for a retrieved namespace it
+// is noted but will not return an error. Only if access is denied for all
+// attempts will this return a permissions error.
+func (c *Client) GetAllVolumes() ([]*volume.Resource, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 
@@ -183,17 +219,27 @@ func (c *Client) DescribeCluster() (*cluster.Resource, error) {
 		return nil, err
 	}
 
-	cluster, err := c.transport.DescribeCluster(ctx)
+	namespaces, err := c.transport.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return cluster, nil
+	var volumes []*volume.Resource
+
+	for _, ns := range namespaces {
+		nsvols, err := c.transport.ListVolumes(ctx, ns.ID)
+		if err != nil {
+			return nil, err
+		}
+		volumes = append(volumes, nsvols...)
+	}
+
+	return volumes, nil
 }
 
 // DescribeNode requests detailed information for the node resource which
 // corresponds to uid from the StorageOS API.
-func (c *Client) DescribeNode(uid id.Node) (*node.Resource, error) {
+func (c *Client) DescribeNode(uid id.Node) (*node.State, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 
@@ -203,9 +249,15 @@ func (c *Client) DescribeNode(uid id.Node) (*node.Resource, error) {
 		return nil, err
 	}
 
-	n, err := c.transport.DescribeNode(ctx, uid)
+	resource, err := c.transport.GetNode(ctx, uid)
 	if err != nil {
 		return nil, err
+	}
+
+	// TODO: For the retrieved node we then need to build the detailed
+	// information by performing other API requests.
+	n := &node.State{
+		Resource: resource,
 	}
 
 	return n, nil
@@ -216,7 +268,7 @@ func (c *Client) DescribeNode(uid id.Node) (*node.Resource, error) {
 //
 // The returned list is filtered using uids so that it contains only those
 // resources which have a matching ID. If none are specified, all are returned.
-func (c *Client) DescribeListNodes(uids ...id.Node) ([]*node.Resource, error) {
+func (c *Client) DescribeListNodes(uids ...id.Node) ([]*node.State, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 
@@ -226,72 +278,45 @@ func (c *Client) DescribeListNodes(uids ...id.Node) ([]*node.Resource, error) {
 		return nil, err
 	}
 
-	nodes, err := c.transport.DescribeListNodes(ctx)
+	resources, err := c.transport.ListNodes(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(uids) == 0 {
-		return nodes, nil
+	if len(uids) > 0 {
+		retrieved := map[id.Node]*node.Resource{}
+
+		for _, n := range resources {
+			retrieved[n.ID] = n
+		}
+
+		filtered := make([]*node.Resource, len(uids))
+
+		i := 0
+		for _, id := range uids {
+			n, ok := retrieved[id]
+			if ok {
+				filtered[i] = n
+				i++
+			} else {
+				return nil, fmt.Errorf("node not found: %v", id)
+			}
+		}
+
+		resources = filtered
 	}
 
-	retrieved := map[id.Node]*node.Resource{}
+	nodes := make([]*node.State, len(resources))
 
-	for _, n := range nodes {
-		retrieved[n.ID] = n
-	}
-
-	filtered := make([]*node.Resource, len(uids))
-
-	i := 0
-	for _, id := range uids {
-		n, ok := retrieved[id]
-		if ok {
-			filtered[i] = n
-			i++
-		} else {
-			return nil, fmt.Errorf("node not found: %v", id)
+	// TODO: For each node resource we then need to build the detailed
+	// information by performing other API requests.
+	for i, r := range resources {
+		nodes[i] = &node.State{
+			Resource: r,
 		}
 	}
 
 	return nodes, nil
-}
-
-// DescribeVolume requests detailed information for the volume resource which
-// corresponds to uid in namespace from the StorageOS API.
-func (c *Client) DescribeVolume(namespace id.Namespace, uid id.Volume) (*volume.Resource, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
-	defer cancel()
-
-	// Pre-authenticate request
-	err := c.transport.Authenticate(ctx, c.username, c.password)
-	if err != nil {
-		return nil, err
-	}
-
-	v, err := c.transport.DescribeVolume(ctx, namespace, uid)
-	if err != nil {
-		return nil, err
-	}
-
-	return v, nil
-}
-
-func (c *Client) DescribeNamespaceVolumes(namespace id.Namespace) ([]*volume.Resource, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
-	defer cancel()
-
-	err := c.transport.Authenticate(ctx, c.username, c.password)
-	if err != nil {
-		return nil, err
-	}
-
-	vs, err := c.transport.DescribeNamespaceVolumes(ctx, namespace)
-	if err != nil {
-		return nil, err
-	}
-
-	return vs, nil
 }
 
 // New initialises a new Client configured from config, with transport
