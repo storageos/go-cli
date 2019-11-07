@@ -38,11 +38,6 @@ func (e *Environment) APIEndpoint() (string, error) {
 	return endpoint, nil
 }
 
-func (e *Environment) CommandTimeout() (time.Duration, error) {
-	// TODO: Parse/default?
-	return DefaultCommandTimeout, nil
-}
-
 func (e *Environment) Username() (string, error) {
 	endpoint := os.Getenv(UsernameEnvVar)
 	if endpoint == "" {

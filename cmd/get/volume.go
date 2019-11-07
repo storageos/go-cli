@@ -1,10 +1,12 @@
 package get
 
 import (
+	"context"
 	"io"
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/volume"
 )
@@ -19,18 +21,22 @@ type volumeCommand struct {
 }
 
 func (c *volumeCommand) run(cmd *cobra.Command, args []string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultCommandTimeout)
+	defer cancel()
+
 	switch len(args) {
 	case 1:
-		return c.getVolume(cmd, args)
+		return c.getVolume(ctx, cmd, args)
 	default:
-		return c.listVolumes(cmd, args)
+		return c.listVolumes(ctx, cmd, args)
 	}
 }
 
-func (c *volumeCommand) getVolume(_ *cobra.Command, args []string) error {
+func (c *volumeCommand) getVolume(ctx context.Context, _ *cobra.Command, args []string) error {
 	uid := id.Volume(args[0])
 
 	volume, err := c.client.GetVolume(
+		ctx,
 		id.Namespace(c.namespaceID),
 		uid,
 	)
@@ -41,7 +47,7 @@ func (c *volumeCommand) getVolume(_ *cobra.Command, args []string) error {
 	return c.display.WriteGetVolume(c.writer, volume)
 }
 
-func (c *volumeCommand) listVolumes(_ *cobra.Command, args []string) error {
+func (c *volumeCommand) listVolumes(ctx context.Context, _ *cobra.Command, args []string) error {
 	var volumes []*volume.Resource
 	var err error
 
@@ -52,11 +58,12 @@ func (c *volumeCommand) listVolumes(_ *cobra.Command, args []string) error {
 
 	if c.namespaceID != "" {
 		volumes, err = c.client.GetNamespaceVolumes(
+			ctx,
 			id.Namespace(c.namespaceID),
 			uids...,
 		)
 	} else {
-		volumes, err = c.client.GetAllVolumes()
+		volumes, err = c.client.GetAllVolumes(ctx)
 	}
 
 	if err != nil {

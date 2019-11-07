@@ -5,7 +5,6 @@ package apiclient
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"code.storageos.net/storageos/c2-cli/pkg/cluster"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
@@ -18,7 +17,6 @@ import (
 // the apiclient package.
 type ConfigProvider interface {
 	APIEndpoint() (string, error)
-	CommandTimeout() (time.Duration, error)
 	Username() (string, error)
 	Password() (string, error)
 }
@@ -48,15 +46,11 @@ type Client struct {
 	// TODO: Config options?
 	username string
 	password string
-	timeout  time.Duration
 }
 
 // GetCluster requests basic information for the cluster resource from the
 // StorageOS API.
-func (c *Client) GetCluster() (*cluster.Resource, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
-	defer cancel()
-
+func (c *Client) GetCluster(ctx context.Context) (*cluster.Resource, error) {
 	err := c.transport.Authenticate(ctx, c.username, c.password)
 	if err != nil {
 		return nil, err
@@ -72,11 +66,7 @@ func (c *Client) GetCluster() (*cluster.Resource, error) {
 
 // GetNode requests basic information for the node resource which
 // corresponds to uid from the StorageOS API.
-func (c *Client) GetNode(uid id.Node) (*node.Resource, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
-	defer cancel()
-
-	// Pre-authenticate request
+func (c *Client) GetNode(ctx context.Context, uid id.Node) (*node.Resource, error) {
 	err := c.transport.Authenticate(ctx, c.username, c.password)
 	if err != nil {
 		return nil, err
@@ -95,11 +85,7 @@ func (c *Client) GetNode(uid id.Node) (*node.Resource, error) {
 //
 // The returned list is filtered using uids so that it contains only those
 // resources which have a matching ID. Omitting uids will skip the filtering.
-func (c *Client) GetListNodes(uids ...id.Node) ([]*node.Resource, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
-	defer cancel()
-
-	// Pre-authenticate request
+func (c *Client) GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error) {
 	err := c.transport.Authenticate(ctx, c.username, c.password)
 	if err != nil {
 		return nil, err
@@ -139,11 +125,7 @@ func (c *Client) GetListNodes(uids ...id.Node) ([]*node.Resource, error) {
 
 // GetVolume requests basic information for the volume resource which
 // corresponds to uid in namespace from the StorageOS API.
-func (c *Client) GetVolume(namespace id.Namespace, uid id.Volume) (*volume.Resource, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
-	defer cancel()
-
-	// Pre-authenticate request
+func (c *Client) GetVolume(ctx context.Context, namespace id.Namespace, uid id.Volume) (*volume.Resource, error) {
 	err := c.transport.Authenticate(ctx, c.username, c.password)
 	if err != nil {
 		return nil, err
@@ -162,10 +144,7 @@ func (c *Client) GetVolume(namespace id.Namespace, uid id.Volume) (*volume.Resou
 //
 // The returned list is filtered using uids so that it contains only those
 // resources which have a matching ID. Omitting uids will skip the filtering.
-func (c *Client) GetNamespaceVolumes(namespace id.Namespace, uids ...id.Volume) ([]*volume.Resource, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
-	defer cancel()
-
+func (c *Client) GetNamespaceVolumes(ctx context.Context, namespace id.Namespace, uids ...id.Volume) ([]*volume.Resource, error) {
 	err := c.transport.Authenticate(ctx, c.username, c.password)
 	if err != nil {
 		return nil, err
@@ -210,10 +189,7 @@ func (c *Client) GetNamespaceVolumes(namespace id.Namespace, uids ...id.Volume) 
 // If access is not granted when listing volumes for a retrieved namespace it
 // is noted but will not return an error. Only if access is denied for all
 // attempts will this return a permissions error.
-func (c *Client) GetAllVolumes() ([]*volume.Resource, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
-	defer cancel()
-
+func (c *Client) GetAllVolumes(ctx context.Context) ([]*volume.Resource, error) {
 	err := c.transport.Authenticate(ctx, c.username, c.password)
 	if err != nil {
 		return nil, err
@@ -243,11 +219,7 @@ func (c *Client) fetchAllVolumes(ctx context.Context) ([]*volume.Resource, error
 
 // DescribeNode requests detailed information for the node resource which
 // corresponds to uid from the StorageOS API.
-func (c *Client) DescribeNode(uid id.Node) (*node.State, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
-	defer cancel()
-
-	// Pre-authenticate request
+func (c *Client) DescribeNode(ctx context.Context, uid id.Node) (*node.State, error) {
 	err := c.transport.Authenticate(ctx, c.username, c.password)
 	if err != nil {
 		return nil, err
@@ -280,11 +252,7 @@ func (c *Client) DescribeNode(uid id.Node) (*node.State, error) {
 //
 // The returned list is filtered using uids so that it contains only those
 // resources which have a matching ID. If none are specified, all are returned.
-func (c *Client) DescribeListNodes(uids ...id.Node) ([]*node.State, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
-	defer cancel()
-
-	// Pre-authenticate request
+func (c *Client) DescribeListNodes(ctx context.Context, uids ...id.Node) ([]*node.State, error) {
 	err := c.transport.Authenticate(ctx, c.username, c.password)
 	if err != nil {
 		return nil, err
@@ -353,15 +321,9 @@ func New(transport Transport, config ConfigProvider) (*Client, error) {
 		return nil, err
 	}
 
-	requestTimeout, err := config.CommandTimeout()
-	if err != nil {
-		return nil, err
-	}
-
 	return &Client{
 		transport: transport,
 		username:  username,
 		password:  password,
-		timeout:   requestTimeout,
 	}, nil
 }

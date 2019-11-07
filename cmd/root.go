@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"io"
 
 	"github.com/blang/semver"
@@ -17,15 +18,15 @@ import (
 // Client defines the functionality required by the CLI application to
 // reasonably implement the commands it provides.
 type Client interface {
-	GetCluster() (*cluster.Resource, error)
-	GetNode(id.Node) (*node.Resource, error)
-	GetListNodes(...id.Node) ([]*node.Resource, error)
-	GetVolume(id.Namespace, id.Volume) (*volume.Resource, error)
-	GetAllVolumes() ([]*volume.Resource, error)
-	GetNamespaceVolumes(id.Namespace, ...id.Volume) ([]*volume.Resource, error)
+	GetCluster(context.Context) (*cluster.Resource, error)
+	GetNode(context.Context, id.Node) (*node.Resource, error)
+	GetListNodes(context.Context, ...id.Node) ([]*node.Resource, error)
+	GetVolume(context.Context, id.Namespace, id.Volume) (*volume.Resource, error)
+	GetAllVolumes(context.Context) ([]*volume.Resource, error)
+	GetNamespaceVolumes(context.Context, id.Namespace, ...id.Volume) ([]*volume.Resource, error)
 
-	DescribeNode(id.Node) (*node.State, error)
-	DescribeListNodes(...id.Node) ([]*node.State, error)
+	DescribeNode(context.Context, id.Node) (*node.State, error)
+	DescribeListNodes(context.Context, ...id.Node) ([]*node.State, error)
 }
 
 // Displayer defines the functionality required by the CLI application to

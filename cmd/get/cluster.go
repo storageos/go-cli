@@ -1,9 +1,12 @@
 package get
 
 import (
+	"context"
 	"io"
 
 	"github.com/spf13/cobra"
+
+	"code.storageos.net/storageos/c2-cli/config"
 )
 
 type clusterCommand struct {
@@ -14,7 +17,10 @@ type clusterCommand struct {
 }
 
 func (c *clusterCommand) run(cmd *cobra.Command, _ []string) error {
-	cluster, err := c.client.GetCluster()
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultCommandTimeout)
+	defer cancel()
+
+	cluster, err := c.client.GetCluster(ctx)
 	if err != nil {
 		return err
 	}

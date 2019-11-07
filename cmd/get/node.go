@@ -1,10 +1,12 @@
 package get
 
 import (
+	"context"
 	"io"
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 )
 
@@ -16,18 +18,21 @@ type nodeCommand struct {
 }
 
 func (c *nodeCommand) run(cmd *cobra.Command, args []string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultCommandTimeout)
+	defer cancel()
+
 	switch len(args) {
 	case 1:
-		return c.getNode(cmd, args)
+		return c.getNode(ctx, cmd, args)
 	default:
-		return c.listNodes(cmd, args)
+		return c.listNodes(ctx, cmd, args)
 	}
 }
 
-func (c *nodeCommand) getNode(_ *cobra.Command, args []string) error {
+func (c *nodeCommand) getNode(ctx context.Context, _ *cobra.Command, args []string) error {
 	uid := id.Node(args[0])
 
-	node, err := c.client.GetNode(uid)
+	node, err := c.client.GetNode(ctx, uid)
 	if err != nil {
 		return err
 	}
@@ -35,13 +40,13 @@ func (c *nodeCommand) getNode(_ *cobra.Command, args []string) error {
 	return c.display.WriteGetNode(c.writer, node)
 }
 
-func (c *nodeCommand) listNodes(_ *cobra.Command, args []string) error {
+func (c *nodeCommand) listNodes(ctx context.Context, _ *cobra.Command, args []string) error {
 	uids := make([]id.Node, len(args))
 	for i, a := range args {
 		uids[i] = id.Node(a)
 	}
 
-	nodes, err := c.client.GetListNodes(uids...)
+	nodes, err := c.client.GetListNodes(ctx, uids...)
 	if err != nil {
 		return err
 	}

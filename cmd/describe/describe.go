@@ -1,6 +1,7 @@
 package describe
 
 import (
+	"context"
 	"io"
 	"os"
 
@@ -13,8 +14,8 @@ import (
 // DescribeClient describes the functionality required by the CLI application
 // to reasonably implement the "describe" verb commands.
 type DescribeClient interface {
-	DescribeNode(id.Node) (*node.State, error)
-	DescribeListNodes(...id.Node) ([]*node.State, error)
+	DescribeNode(context.Context, id.Node) (*node.State, error)
+	DescribeListNodes(context.Context, ...id.Node) ([]*node.State, error)
 }
 
 // DescribeDisplayer defines the functionality required by the CLI application

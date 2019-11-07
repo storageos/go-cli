@@ -1,6 +1,7 @@
 package get
 
 import (
+	"context"
 	"io"
 	"os"
 
@@ -15,14 +16,14 @@ import (
 // GetClient defines the functionality required by the CLI application to
 // reasonably implement the "get" verb commands.
 type GetClient interface {
-	GetCluster() (*cluster.Resource, error)
+	GetCluster(context.Context) (*cluster.Resource, error)
 
-	GetNode(id.Node) (*node.Resource, error)
-	GetListNodes(...id.Node) ([]*node.Resource, error)
+	GetNode(context.Context, id.Node) (*node.Resource, error)
+	GetListNodes(context.Context, ...id.Node) ([]*node.Resource, error)
 
-	GetVolume(id.Namespace, id.Volume) (*volume.Resource, error)
-	GetAllVolumes() ([]*volume.Resource, error)
-	GetNamespaceVolumes(id.Namespace, ...id.Volume) ([]*volume.Resource, error)
+	GetVolume(context.Context, id.Namespace, id.Volume) (*volume.Resource, error)
+	GetAllVolumes(context.Context) ([]*volume.Resource, error)
+	GetNamespaceVolumes(context.Context, id.Namespace, ...id.Volume) ([]*volume.Resource, error)
 }
 
 // GetDisplayer defines the functionality required by the CLI application to
