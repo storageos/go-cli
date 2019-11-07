@@ -219,6 +219,10 @@ func (c *Client) GetAllVolumes() ([]*volume.Resource, error) {
 		return nil, err
 	}
 
+	return c.fetchAllVolumes(ctx)
+}
+
+func (c *Client) fetchAllVolumes(ctx context.Context) ([]*volume.Resource, error) {
 	namespaces, err := c.transport.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
@@ -256,8 +260,16 @@ func (c *Client) DescribeNode(uid id.Node) (*node.State, error) {
 
 	// TODO: For the retrieved node we then need to build the detailed
 	// information by performing other API requests.
+	volumes, err := c.fetchAllVolumes(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	deployments := deploymentsForNode(resource.ID, volumes)
+
 	n := &node.State{
-		Resource: resource,
+		Resource:    resource,
+		Deployments: deployments,
 	}
 
 	return n, nil
@@ -310,9 +322,17 @@ func (c *Client) DescribeListNodes(uids ...id.Node) ([]*node.State, error) {
 
 	// TODO: For each node resource we then need to build the detailed
 	// information by performing other API requests.
+	volumes, err := c.fetchAllVolumes(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	deploymentMap := mapNodeDeployments(volumes)
+
 	for i, r := range resources {
 		nodes[i] = &node.State{
-			Resource: r,
+			Resource:    r,
+			Deployments: deploymentMap[r.ID], // No need to check - zero value is ok.
 		}
 	}
 
