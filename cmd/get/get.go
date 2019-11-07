@@ -37,16 +37,16 @@ type GetDisplayer interface {
 }
 
 // NewCommand configures the set of commands which are grouped by the "get" verb.
-func NewCommand(client GetClient, display GetDisplayer) *cobra.Command {
+func NewCommand(client GetClient) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "get",
 		Short: "get retrieves a StorageOS resource, displaying basic information about it",
 	}
 
 	command.AddCommand(
-		newCluster(os.Stdout, client, display),
-		newNode(os.Stdout, client, display),
-		newVolume(os.Stdout, client, display),
+		newCluster(os.Stdout, client),
+		newNode(os.Stdout, client),
+		newVolume(os.Stdout, client),
 	)
 
 	return command

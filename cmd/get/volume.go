@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/config"
+	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/volume"
 )
@@ -26,7 +27,10 @@ func (c *volumeCommand) run(cmd *cobra.Command, args []string) error {
 
 	switch len(args) {
 	case 1:
-		return c.getVolume(ctx, cmd, args)
+		if c.namespaceID != "" {
+			return c.getVolume(ctx, cmd, args)
+		}
+		fallthrough
 	default:
 		return c.listVolumes(ctx, cmd, args)
 	}
@@ -73,10 +77,12 @@ func (c *volumeCommand) listVolumes(ctx context.Context, _ *cobra.Command, args 
 	return c.display.WriteGetVolumeList(c.writer, volumes)
 }
 
-func newVolume(w io.Writer, client GetClient, display GetDisplayer) *cobra.Command {
+func newVolume(w io.Writer, client GetClient) *cobra.Command {
 	c := &volumeCommand{
-		client:  client,
-		display: display,
+		client: client,
+		display: output.NewJSONDisplayer(
+			output.DefaultEncodingIndent,
+		),
 
 		writer: w,
 	}
@@ -92,7 +98,7 @@ $ storageos get volume banana
 		RunE: c.run,
 	}
 
-	cobraCommand.Flags().StringVarP(&c.namespaceID, "namespace", "n", "", "the id of the namespace to retrieve the volume resources from")
+	cobraCommand.Flags().StringVarP(&c.namespaceID, "namespace", "n", "", "the id of the namespace to retrieve the volume resources from. if not set all namespaces are included")
 
 	return cobraCommand
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/config"
+	"code.storageos.net/storageos/c2-cli/output"
 )
 
 type clusterCommand struct {
@@ -28,10 +29,12 @@ func (c *clusterCommand) run(cmd *cobra.Command, _ []string) error {
 	return c.display.WriteGetCluster(c.writer, cluster)
 }
 
-func newCluster(w io.Writer, client GetClient, display GetDisplayer) *cobra.Command {
+func newCluster(w io.Writer, client GetClient) *cobra.Command {
 	c := &clusterCommand{
-		client:  client,
-		display: display,
+		client: client,
+		display: output.NewJSONDisplayer(
+			output.DefaultEncodingIndent,
+		),
 
 		writer: w,
 	}

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"io"
 
 	"github.com/blang/semver"
 	"github.com/spf13/cobra"
@@ -29,23 +28,10 @@ type Client interface {
 	DescribeListNodes(context.Context, ...id.Node) ([]*node.State, error)
 }
 
-// Displayer defines the functionality required by the CLI application to
-// display the results of interaction with the StorageOS API.
-type Displayer interface {
-	WriteGetCluster(io.Writer, *cluster.Resource) error
-	WriteGetNode(io.Writer, *node.Resource) error
-	WriteGetNodeList(io.Writer, []*node.Resource) error
-	WriteGetVolume(io.Writer, *volume.Resource) error
-	WriteGetVolumeList(io.Writer, []*volume.Resource) error
-
-	WriteDescribeNode(io.Writer, *node.State) error
-	WriteDescribeNodeList(io.Writer, []*node.State) error
-}
-
 // Init configures the CLI application's commands from the root down, using
 // client as the method of communicating with the StorageOS API and display
 // as the method for formatting and writing the results.
-func Init(client Client, display Displayer, version semver.Version) *cobra.Command {
+func Init(client Client, version semver.Version) *cobra.Command {
 	app := &cobra.Command{
 		Use: "storageos <command>",
 		Short: `Converged storage for containers.
@@ -59,8 +45,8 @@ To be notified about stable releases and latest features, sign up at https://my.
 	}
 
 	app.AddCommand(
-		get.NewCommand(client, display),
-		describe.NewCommand(client, display),
+		get.NewCommand(client),
+		describe.NewCommand(client),
 	)
 
 	return app

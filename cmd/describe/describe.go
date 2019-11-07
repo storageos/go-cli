@@ -26,14 +26,14 @@ type DescribeDisplayer interface {
 }
 
 // NewCommand configures the set of commands which are grouped by the "describe" verb.
-func NewCommand(client DescribeClient, display DescribeDisplayer) *cobra.Command {
+func NewCommand(client DescribeClient) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "describe",
 		Short: "describe retrieves a StorageOS resource, displaying detailed information about it",
 	}
 
 	command.AddCommand(
-		newNode(os.Stdout, client, display),
+		newNode(os.Stdout, client),
 	)
 
 	return command

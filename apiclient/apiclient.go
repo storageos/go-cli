@@ -43,7 +43,7 @@ type Transport interface {
 // StorageOS API.
 type Client struct {
 	transport Transport
-	// TODO: Config options?
+	// TODO: More Config options?
 	username string
 	password string
 }
@@ -185,7 +185,8 @@ func (c *Client) GetNamespaceVolumes(ctx context.Context, namespace id.Namespace
 // GetAllVolumes requests basic information for each volume resource in every
 // namespace exposed by the StorageOS API.
 //
-// TODO:
+// ↓↓↓↓ TODO: This seems like a sensible addition? ↓↓↓↓
+//
 // If access is not granted when listing volumes for a retrieved namespace it
 // is noted but will not return an error. Only if access is denied for all
 // attempts will this return a permissions error.
@@ -230,8 +231,6 @@ func (c *Client) DescribeNode(ctx context.Context, uid id.Node) (*node.State, er
 		return nil, err
 	}
 
-	// TODO: For the retrieved node we then need to build the detailed
-	// information by performing other API requests.
 	volumes, err := c.fetchAllVolumes(ctx)
 	if err != nil {
 		return nil, err
@@ -288,8 +287,6 @@ func (c *Client) DescribeListNodes(ctx context.Context, uids ...id.Node) ([]*nod
 
 	nodes := make([]*node.State, len(resources))
 
-	// TODO: For each node resource we then need to build the detailed
-	// information by performing other API requests.
 	volumes, err := c.fetchAllVolumes(ctx)
 	if err != nil {
 		return nil, err

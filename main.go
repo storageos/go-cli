@@ -11,13 +11,14 @@ import (
 	"code.storageos.net/storageos/c2-cli/apiclient/openapi"
 	"code.storageos.net/storageos/c2-cli/cmd"
 	"code.storageos.net/storageos/c2-cli/config"
-	"code.storageos.net/storageos/c2-cli/output"
 )
 
 var (
 	// Version is the semantic version string which has been assigned to the
 	// cli application.
-	// TODO: Doesn't seem to be set
+	//
+	// TODO: Don't think that ldflags work for variables in main - may have to
+	// try something else here.
 	Version string
 	// UserAgent is used by the CLI application to identify itself to
 	// StorageOS.
@@ -52,7 +53,6 @@ func main() {
 
 	app := cmd.Init(
 		client,
-		output.NewJSONDisplayer("\t"), // TODO: Use this output display for now
 		version,
 	)
 
