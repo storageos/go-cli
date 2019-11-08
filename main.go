@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
+	"strings"
 
 	"github.com/blang/semver"
 
@@ -16,22 +16,18 @@ import (
 var (
 	// Version is the semantic version string which has been assigned to the
 	// cli application.
-	//
-	// TODO: Don't think that ldflags work for variables in main - may have to
-	// try something else here.
 	Version string
-	// UserAgent is used by the CLI application to identify itself to
+	// UserAgentPrefix is used by the CLI application to identify itself to
 	// StorageOS.
-	UserAgent string = "storageos-cli-unknown"
+	UserAgentPrefix string = "storageos-cli"
 )
-
-// defaultTimeout is the standard timeout for a single request to the CLI's API
-// client.
-const defaultTimeout = 5 * time.Second
 
 func main() {
 	// Determine the cli app version from the embedded semver.
-	version, err := semver.Make(Version)
+	// If it errors 0.0.0 is returned
+	version, _ := semver.Make(Version)
+
+	userAgent := strings.Join([]string{UserAgentPrefix, version.String()}, "/")
 
 	// Initialise the configuration providers
 	cfg := &config.Environment{}
@@ -39,16 +35,16 @@ func main() {
 	// Construct the API client.
 	apiEndpoint, err := cfg.APIEndpoint()
 	if err != nil {
-		fmt.Printf("failure occurred during initialisation: %v", err)
+		fmt.Printf("failure occurred during initialisation: %v\n", err)
 		os.Exit(1)
 	}
 
 	client, err := apiclient.New(
-		openapi.NewOpenAPI(apiEndpoint, UserAgent),
+		openapi.NewOpenAPI(apiEndpoint, userAgent),
 		cfg,
 	)
 	if err != nil {
-		fmt.Printf("failure occurred during initialisation: %v", err)
+		fmt.Printf("failure occurred during initialisation: %v\n", err)
 	}
 
 	app := cmd.Init(

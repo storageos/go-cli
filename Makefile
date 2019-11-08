@@ -1,6 +1,6 @@
 VERSION		?= $(shell git describe --tags --abbrev=0)
 
-LDFLAGS		+= -X code.storageos.net/storageos/c2-cli/main.Version=$(VERSION)
+LDFLAGS		+= -X main.Version=$(VERSION)
 
 build:
 	@echo "++ Building storageos binary"
