@@ -1,4 +1,4 @@
-package output
+package jsonformat
 
 import (
 	"encoding/json"
@@ -9,54 +9,58 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/volume"
 )
 
-type JSONDisplayer struct {
+// DefaultEncodingIndent is the encoding indent string which consumers of the
+// output package can default to when initialising Displayer types.
+const DefaultEncodingIndent = "\t"
+
+type Displayer struct {
 	encoderIndent string
 }
 
-func (d *JSONDisplayer) WriteGetCluster(w io.Writer, resource *cluster.Resource) error {
+func (d *Displayer) GetCluster(w io.Writer, resource *cluster.Resource) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(resource)
 }
 
-func (d *JSONDisplayer) WriteGetNode(w io.Writer, resource *node.Resource) error {
+func (d *Displayer) GetNode(w io.Writer, resource *node.Resource) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(resource)
 }
 
-func (d *JSONDisplayer) WriteGetNodeList(w io.Writer, resources []*node.Resource) error {
+func (d *Displayer) GetNodeList(w io.Writer, resources []*node.Resource) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(resources)
 }
 
-func (d *JSONDisplayer) WriteGetVolume(w io.Writer, resource *volume.Resource) error {
+func (d *Displayer) GetVolume(w io.Writer, resource *volume.Resource) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(resource)
 }
 
-func (d *JSONDisplayer) WriteGetVolumeList(w io.Writer, resources []*volume.Resource) error {
+func (d *Displayer) GetVolumeList(w io.Writer, resources []*volume.Resource) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(resources)
 }
 
-func (d *JSONDisplayer) WriteDescribeNode(w io.Writer, state *node.State) error {
+func (d *Displayer) DescribeNode(w io.Writer, state *node.State) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(state)
 }
 
-func (d *JSONDisplayer) WriteDescribeNodeList(w io.Writer, states []*node.State) error {
+func (d *Displayer) DescribeNodeList(w io.Writer, states []*node.State) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(states)
 }
 
-func NewJSONDisplayer(encoderIndent string) *JSONDisplayer {
-	return &JSONDisplayer{
+func NewDisplayer(encoderIndent string) *Displayer {
+	return &Displayer{
 		encoderIndent: encoderIndent,
 	}
 }

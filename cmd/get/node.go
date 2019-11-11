@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/config"
-	"code.storageos.net/storageos/c2-cli/output"
+	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 )
 
@@ -38,7 +38,7 @@ func (c *nodeCommand) getNode(ctx context.Context, _ *cobra.Command, args []stri
 		return err
 	}
 
-	return c.display.WriteGetNode(c.writer, node)
+	return c.display.GetNode(c.writer, node)
 }
 
 func (c *nodeCommand) listNodes(ctx context.Context, _ *cobra.Command, args []string) error {
@@ -52,14 +52,14 @@ func (c *nodeCommand) listNodes(ctx context.Context, _ *cobra.Command, args []st
 		return err
 	}
 
-	return c.display.WriteGetNodeList(c.writer, nodes)
+	return c.display.GetNodeList(c.writer, nodes)
 }
 
 func newNode(w io.Writer, client GetClient) *cobra.Command {
 	c := &nodeCommand{
 		client: client,
-		display: output.NewJSONDisplayer(
-			output.DefaultEncodingIndent,
+		display: jsonformat.NewDisplayer(
+			jsonformat.DefaultEncodingIndent,
 		),
 
 		writer: w,

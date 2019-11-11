@@ -29,11 +29,11 @@ type GetClient interface {
 // GetDisplayer defines the functionality required by the CLI application to
 // display the results gathered by the "get" verb commands.
 type GetDisplayer interface {
-	WriteGetCluster(io.Writer, *cluster.Resource) error
-	WriteGetNode(io.Writer, *node.Resource) error
-	WriteGetNodeList(io.Writer, []*node.Resource) error
-	WriteGetVolume(io.Writer, *volume.Resource) error
-	WriteGetVolumeList(io.Writer, []*volume.Resource) error
+	GetCluster(io.Writer, *cluster.Resource) error
+	GetNode(io.Writer, *node.Resource) error
+	GetNodeList(io.Writer, []*node.Resource) error
+	GetVolume(io.Writer, *volume.Resource) error
+	GetVolumeList(io.Writer, []*volume.Resource) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "get" verb.

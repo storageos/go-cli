@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/config"
-	"code.storageos.net/storageos/c2-cli/output"
+	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/volume"
 )
@@ -48,7 +48,7 @@ func (c *volumeCommand) getVolume(ctx context.Context, _ *cobra.Command, args []
 		return err
 	}
 
-	return c.display.WriteGetVolume(c.writer, volume)
+	return c.display.GetVolume(c.writer, volume)
 }
 
 func (c *volumeCommand) listVolumes(ctx context.Context, _ *cobra.Command, args []string) error {
@@ -74,14 +74,14 @@ func (c *volumeCommand) listVolumes(ctx context.Context, _ *cobra.Command, args 
 		return err
 	}
 
-	return c.display.WriteGetVolumeList(c.writer, volumes)
+	return c.display.GetVolumeList(c.writer, volumes)
 }
 
 func newVolume(w io.Writer, client GetClient) *cobra.Command {
 	c := &volumeCommand{
 		client: client,
-		display: output.NewJSONDisplayer(
-			output.DefaultEncodingIndent,
+		display: jsonformat.NewDisplayer(
+			jsonformat.DefaultEncodingIndent,
 		),
 
 		writer: w,
