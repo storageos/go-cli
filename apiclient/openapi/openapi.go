@@ -10,6 +10,8 @@ import (
 	"code.storageos.net/storageos/openapi"
 )
 
+const IgnoreVersionHeader = "ignore-version"
+
 type ConfigProvider interface {
 	APIEndpoints() ([]string, error)
 }
@@ -74,8 +76,10 @@ func NewOpenAPI(config ConfigProvider, userAgent string) (*OpenAPI, error) {
 	// Create the OpenAPI client configuration
 	// and initialise.
 	apiCfg := &openapi.Configuration{
-		BasePath:      "v2",
-		DefaultHeader: map[string]string{},
+		BasePath: "v2",
+		DefaultHeader: map[string]string{
+			IgnoreVersionHeader: "true", // Set the default header to include ignore-version=true
+		},
 		// TODO(CP-3924): For now the CLI supports only sending requests to the
 		// first host provided. There should be a way to utilise multiple
 		// hosts.
