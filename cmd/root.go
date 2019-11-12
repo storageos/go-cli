@@ -53,22 +53,22 @@ To be notified about stable releases and latest features, sign up at https://my.
 		describe.NewCommand(client),
 	)
 
-	app.Flags().StringArray(
+	app.PersistentFlags().StringArray(
 		flags.APIEndpointsFlag,
 		[]string{config.DefaultAPIEndpoint},
 		"set the list of endpoints which are used when connecting to the StorageOS API",
 	)
-	app.Flags().Duration(
+	app.PersistentFlags().Duration(
 		flags.DialTimeoutFlag,
 		config.DefaultDialTimeout,
 		"set the timeout duration to use for execution of the command",
 	)
-	app.Flags().String(
+	app.PersistentFlags().String(
 		flags.UsernameFlag,
 		config.DefaultUsername,
 		"set the StorageOS account username to authenticate as",
 	)
-	app.Flags().String(
+	app.PersistentFlags().String(
 		flags.PasswordFlag,
 		config.DefaultPassword,
 		"set the StorageOS account password to authenticate with",
