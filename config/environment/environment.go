@@ -1,58 +1,89 @@
+// Package
 package environment
 
 import (
-	"errors"
-	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 const (
-	// APIEndpointEnvVar is the
-	APIEndpointEnvVar = "STORAGEOS_HOST"
-
-	UsernameEnvVar = "STORAGEOS_USERNAME"
-
-	PasswordEnvVar = "STORAGEOS_PASSWORD"
+	// APIEndpointsVar keys the environment variable from which we source the
+	// API host endpoints.
+	APIEndpointsVar = "STORAGEOS_HOST"
+	// DialTimeoutVar keys the environment variable from which we source the
+	// timeout for API operations. TODO: This isn't really a "dial" timeout but
+	// more an operation timeout, rename?
+	DialTimeoutVar = "STORAGEOS_DIAL_TIMEOUT"
+	// UsernameVar keys the environment variable from which we source the
+	// username of the StorageOS account to authenticate with.
+	UsernameVar = "STORAGEOS_USER_NAME"
+	// PasswordVar keys the environment variable from which we source the
+	// password of the StorageOS account to authenticate with.
+	PasswordVar = "STORAGEOS_PASSWORD"
+	// TODO(CP-3919):
+	//
+	// PasswordCommandVar keys the environment variable from which we optionally
+	// source the password of the StorageOS account to authenticate with through
+	// command execution.
+	PasswordCommandVar = "STORAGEOS_PASSWORD_COMMAND"
 )
 
-var (
-	ErrMissingConfigFromEnv = errors.New("missing configuration setting from environment")
-)
+type FallbackProvider interface {
+	APIEndpoints() ([]string, error)
+	DialTimeout() (time.Duration, error)
+	Username() (string, error)
+	Password() (string, error)
+}
 
-type Provider struct{}
+// Provider exports functionality to retrieve global configuration values from
+// environment variables if available. When a configuration value is not
+// available from the environment, the configured FallbackProvider is used.
+type Provider struct {
+	fallback FallbackProvider
+}
 
-func (e *Provider) APIEndpoints() ([]string, error) {
-	hostString := os.Getenv(APIEndpointEnvVar)
+func (env *Provider) APIEndpoints() ([]string, error) {
+	hostString := os.Getenv(APIEndpointsVar)
 	if hostString == "" {
-		return nil, fmt.Errorf("%w: %s", ErrMissingConfigFromEnv, APIEndpointEnvVar)
+		// If there is no value to parse then fall back
+		return env.fallback.APIEndpoints()
 	}
-
 	endpoints := strings.Split(hostString, ",")
 
 	return endpoints, nil
 }
 
-func (e *Provider) Username() (string, error) {
-	endpoint := os.Getenv(UsernameEnvVar)
-	if endpoint == "" {
-		return "", fmt.Errorf("%w: %s", ErrMissingConfigFromEnv, UsernameEnvVar)
+func (env *Provider) DialTimeout() (time.Duration, error) {
+	timeoutString := os.Getenv(DialTimeoutVar)
+	if timeoutString == "" {
+		return env.fallback.DialTimeout()
 	}
 
-	return endpoint, nil
+	return time.ParseDuration(timeoutString)
 }
 
-func (e *Provider) Password() (string, error) {
-	endpoint := os.Getenv(PasswordEnvVar)
-	if endpoint == "" {
-		return "", fmt.Errorf("%w: %s", ErrMissingConfigFromEnv, PasswordEnvVar)
+func (env *Provider) Username() (string, error) {
+	username := os.Getenv(UsernameVar)
+	if username == "" {
+		return env.fallback.Username()
 	}
 
-	return endpoint, nil
+	return username, nil
+}
+
+func (env *Provider) Password() (string, error) {
+	password := os.Getenv(PasswordVar)
+	if password == "" {
+		return env.fallback.Password()
+	}
+
+	return password, nil
 
 }
 
-func NewProvider() *Provider {
-	// TODO: Need to use the config provider priority chain etc.
-	return &Provider{}
+func NewProvider(fallback FallbackProvider) *Provider {
+	return &Provider{
+		fallback: fallback,
+	}
 }

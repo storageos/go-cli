@@ -10,6 +10,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/apiclient/openapi"
 	"code.storageos.net/storageos/c2-cli/cmd"
+	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/config/environment"
 )
 
@@ -30,7 +31,7 @@ func main() {
 	userAgent := strings.Join([]string{UserAgentPrefix, version.String()}, "/")
 
 	// Initialise the configuration providers
-	cfg := environment.NewProvider()
+	cfg := environment.NewProvider(config.NewDefaulter())
 
 	// Construct the API client.
 	transport, err := openapi.NewOpenAPI(cfg, userAgent)

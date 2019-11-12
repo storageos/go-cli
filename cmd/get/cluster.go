@@ -18,7 +18,7 @@ type clusterCommand struct {
 }
 
 func (c *clusterCommand) run(cmd *cobra.Command, _ []string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultCommandTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultDialTimeout)
 	defer cancel()
 
 	cluster, err := c.client.GetCluster(ctx)

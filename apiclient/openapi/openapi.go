@@ -60,6 +60,13 @@ func NewOpenAPI(config ConfigProvider, userAgent string) (*OpenAPI, error) {
 		return nil, errors.New("unable to determine target host")
 	}
 
+	// TODO: This is not good - fix how we get API endpoints from the config.
+	// Also only does on first one.
+	parts := strings.Split(hosts[0], "://")
+	if len(parts) != 2 {
+		return nil, errors.New("unable to parse target host")
+	}
+
 	// Create the OpenAPI client configuration
 	// and initialise.
 	apiCfg := &openapi.Configuration{
@@ -68,9 +75,9 @@ func NewOpenAPI(config ConfigProvider, userAgent string) (*OpenAPI, error) {
 		// TODO(CP-3924): For now the CLI supports only sending requests to the
 		// first host provided. There should be a way to utilise multiple
 		// hosts.
-		Host: hosts[0],
+		Host: parts[1],
 		// TODO(CP-3913): Support TLS.
-		Scheme:    "http",
+		Scheme:    parts[0],
 		UserAgent: userAgent,
 	}
 
@@ -79,6 +86,7 @@ func NewOpenAPI(config ConfigProvider, userAgent string) (*OpenAPI, error) {
 	return &OpenAPI{
 		mu: &sync.RWMutex{},
 
+		config: config,
 		client: client,
 		codec:  codec{},
 	}, nil

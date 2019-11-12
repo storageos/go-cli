@@ -22,7 +22,7 @@ type volumeCommand struct {
 }
 
 func (c *volumeCommand) run(cmd *cobra.Command, args []string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultCommandTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultDialTimeout)
 	defer cancel()
 
 	switch len(args) {

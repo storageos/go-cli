@@ -19,7 +19,7 @@ type nodeCommand struct {
 }
 
 func (c *nodeCommand) run(cmd *cobra.Command, args []string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultCommandTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultDialTimeout)
 	defer cancel()
 
 	switch len(args) {
