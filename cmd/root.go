@@ -34,7 +34,7 @@ type Client interface {
 func Init(client Client, version semver.Version) *cobra.Command {
 	app := &cobra.Command{
 		Use: "storageos <command>",
-		Short: `Converged storage for containers.
+		Short: `Storage for Cloud Native Applications.
 
 By using this product, you are agreeing to the terms of the the StorageOS Ltd. End
 User Subscription Agreement (EUSA) found at: https://storageos.com/legal/#eusa
