@@ -12,6 +12,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd"
 	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/config/environment"
+	"code.storageos.net/storageos/c2-cli/config/flags"
 )
 
 var (
@@ -30,32 +31,40 @@ func main() {
 
 	userAgent := strings.Join([]string{UserAgentPrefix, version.String()}, "/")
 
-	// Initialise the configuration providers
-	cfg := environment.NewProvider(config.NewDefaulter())
+	// Initialise the configuration provider stack.
+	// flags → env → TODO(CP-3918) config file → default
+	globalFlags := cmd.InitPersistentFlags()
+	configProvider := flags.NewProvider(
+		globalFlags,
+		environment.NewProvider(
+			config.NewDefaulter(),
+		),
+	)
 
-	// Construct the API client.
-	transport, err := openapi.NewOpenAPI(cfg, userAgent)
+	// Construct the API client with OpenAPI "transport".
+	transport, err := openapi.NewOpenAPI(configProvider, userAgent)
 	if err != nil {
-		fmt.Printf("failure occurred during initialisation of transport: %v\n", err)
+		fmt.Printf("failure occurred during initialisation of api client transport: %v\n", err)
 		os.Exit(1)
 	}
 
 	client := apiclient.New(
 		transport,
-		cfg,
+		configProvider,
 	)
 	if err != nil {
 		fmt.Printf("failure occurred during initialisation of api client: %v\n", err)
 		os.Exit(1)
 	}
 
-	app := cmd.Init(
+	app := cmd.InitCommand(
 		client,
+		globalFlags,
 		version,
 	)
 
-	err = app.Execute()
-	if err != nil {
+	if err := app.Execute(); err != nil {
+		// TODO: Map err to useful exit code
 		os.Exit(1)
 	}
 }
