@@ -63,7 +63,11 @@ func NewOpenAPI(config ConfigProvider, userAgent string) (*OpenAPI, error) {
 	// TODO: This is not good - fix how we get API endpoints from the config.
 	// Also only does on first one.
 	parts := strings.Split(hosts[0], "://")
-	if len(parts) != 2 {
+	switch len(parts) {
+	case 1:
+		parts = []string{"http", parts[0]}
+	case 2:
+	default:
 		return nil, errors.New("unable to parse target host")
 	}
 
