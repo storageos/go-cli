@@ -10,7 +10,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/apiclient/openapi"
 	"code.storageos.net/storageos/c2-cli/cmd"
-	"code.storageos.net/storageos/c2-cli/config"
+	"code.storageos.net/storageos/c2-cli/config/environment"
 )
 
 var (
@@ -30,21 +30,22 @@ func main() {
 	userAgent := strings.Join([]string{UserAgentPrefix, version.String()}, "/")
 
 	// Initialise the configuration providers
-	cfg := &config.Environment{}
+	cfg := environment.NewProvider()
 
 	// Construct the API client.
-	apiEndpoint, err := cfg.APIEndpoint()
+	transport, err := openapi.NewOpenAPI(cfg, userAgent)
 	if err != nil {
-		fmt.Printf("failure occurred during initialisation: %v\n", err)
+		fmt.Printf("failure occurred during initialisation of transport: %v\n", err)
 		os.Exit(1)
 	}
 
-	client, err := apiclient.New(
-		openapi.NewOpenAPI(apiEndpoint, userAgent),
+	client := apiclient.New(
+		transport,
 		cfg,
 	)
 	if err != nil {
-		fmt.Printf("failure occurred during initialisation: %v\n", err)
+		fmt.Printf("failure occurred during initialisation of api client: %v\n", err)
+		os.Exit(1)
 	}
 
 	app := cmd.Init(
@@ -53,7 +54,6 @@ func main() {
 	)
 
 	err = app.Execute()
-
 	if err != nil {
 		os.Exit(1)
 	}

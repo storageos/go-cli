@@ -9,7 +9,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
-	"code.storageos.net/storageos/c2-cli/pkg/volume"
+	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 type volumeCommand struct {

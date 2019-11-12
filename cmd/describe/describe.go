@@ -7,8 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
-	"code.storageos.net/storageos/c2-cli/pkg/node"
 )
 
 // DescribeClient describes the functionality required by the CLI application

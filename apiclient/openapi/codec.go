@@ -1,16 +1,19 @@
 package openapi
 
 import (
-	"code.storageos.net/storageos/c2-cli/pkg/cluster"
+	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/namespace"
+	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/entity"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
-	"code.storageos.net/storageos/c2-cli/pkg/namespace"
-	"code.storageos.net/storageos/c2-cli/pkg/node"
-	"code.storageos.net/storageos/c2-cli/pkg/volume"
+	"code.storageos.net/storageos/c2-cli/user"
+	"code.storageos.net/storageos/c2-cli/volume"
 
 	"code.storageos.net/storageos/openapi"
 )
 
+// codec provides functionality to "decode" openapi models, translating them to
+// internal types.
 type codec struct{}
 
 func (c codec) decodeCluster(model openapi.Cluster) (*cluster.Resource, error) {
@@ -97,6 +100,24 @@ func (c codec) decodeNamespace(model openapi.Namespace) (*namespace.Resource, er
 		ID:     id.Namespace(model.Id),
 		Name:   model.Name,
 		Labels: model.Labels,
+
+		CreatedAt: model.CreatedAt,
+		UpdatedAt: model.UpdatedAt,
+		Version:   entity.VersionFromString(model.Version),
+	}, nil
+}
+
+func (c codec) decodeUser(model openapi.User) (*user.Resource, error) {
+	groups := make([]id.PolicyGroup, len(*model.Groups))
+	for i, groupID := range *model.Groups {
+		groups[i] = id.PolicyGroup(groupID)
+	}
+	return &user.Resource{
+		ID:       id.User(model.Id),
+		Username: model.Username,
+
+		IsAdmin: model.IsAdmin,
+		Groups:  groups,
 
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,

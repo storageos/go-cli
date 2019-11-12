@@ -6,13 +6,14 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/entity"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
-	"code.storageos.net/storageos/c2-cli/pkg/volume"
+	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 // State aggregates information that can be used to provide a detailed picture
 // of a node's state.
 type State struct {
-	Resource    *Resource            `json:"resource"`
+	Resource *Resource `json:"resource"`
+	// TODO: The deployment API resource doesn't include the ID of the volume it belongs to, but is implicit: maybe extend the display to include the volume ID/name etc.
 	Deployments []*volume.Deployment `json:"deployments"`
 }
 

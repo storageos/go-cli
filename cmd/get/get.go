@@ -7,10 +7,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"code.storageos.net/storageos/c2-cli/pkg/cluster"
+	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
-	"code.storageos.net/storageos/c2-cli/pkg/node"
-	"code.storageos.net/storageos/c2-cli/pkg/volume"
+	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 // GetClient defines the functionality required by the CLI application to

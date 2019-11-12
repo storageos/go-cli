@@ -2,7 +2,7 @@ package apiclient
 
 import (
 	"code.storageos.net/storageos/c2-cli/pkg/id"
-	"code.storageos.net/storageos/c2-cli/pkg/volume"
+	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 // TODO: This is a temp file - should live somewhere else - maybe not be funcs?
