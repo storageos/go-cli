@@ -4,8 +4,9 @@ import (
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
-	"code.storageos.net/storageos/c2-cli/pkg/entity"
+	"code.storageos.net/storageos/c2-cli/pkg/health"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 
@@ -31,7 +32,7 @@ func (c codec) decodeCluster(model openapi.Cluster) (*cluster.Resource, error) {
 
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
-		Version:   entity.VersionFromString(model.Version),
+		Version:   version.FromString(model.Version),
 	}, nil
 }
 
@@ -39,7 +40,7 @@ func (c codec) decodeNode(model openapi.Node) (*node.Resource, error) {
 	return &node.Resource{
 		ID:     id.Node(model.Id),
 		Name:   model.Name,
-		Health: entity.HealthFromString(string(model.Health)),
+		Health: health.FromString(string(model.Health)),
 
 		Labels: model.Labels,
 
@@ -50,7 +51,7 @@ func (c codec) decodeNode(model openapi.Node) (*node.Resource, error) {
 
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
-		Version:   entity.VersionFromString(model.Version),
+		Version:   version.FromString(model.Version),
 	}, nil
 }
 
@@ -69,7 +70,7 @@ func (c codec) decodeVolume(model openapi.Volume) (*volume.Resource, error) {
 
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
-		Version:   entity.VersionFromString(model.Version),
+		Version:   version.FromString(model.Version),
 	}
 
 	m := model.Master
@@ -77,7 +78,7 @@ func (c codec) decodeVolume(model openapi.Volume) (*volume.Resource, error) {
 		ID:      id.Deployment(m.Id),
 		Node:    id.Node(m.NodeID),
 		Inode:   m.Inode,
-		Health:  entity.HealthFromString(string(m.Health)),
+		Health:  health.FromString(string(m.Health)),
 		Syncing: m.Syncing,
 	}
 
@@ -87,7 +88,7 @@ func (c codec) decodeVolume(model openapi.Volume) (*volume.Resource, error) {
 			ID:      id.Deployment(r.Id),
 			Node:    id.Node(r.NodeID),
 			Inode:   r.Inode,
-			Health:  entity.HealthFromString(string(r.Health)),
+			Health:  health.FromString(string(r.Health)),
 			Syncing: r.Syncing,
 		}
 	}
@@ -103,7 +104,7 @@ func (c codec) decodeNamespace(model openapi.Namespace) (*namespace.Resource, er
 
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
-		Version:   entity.VersionFromString(model.Version),
+		Version:   version.FromString(model.Version),
 	}, nil
 }
 
@@ -121,6 +122,6 @@ func (c codec) decodeUser(model openapi.User) (*user.Resource, error) {
 
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
-		Version:   entity.VersionFromString(model.Version),
+		Version:   version.FromString(model.Version),
 	}, nil
 }

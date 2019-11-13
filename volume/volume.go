@@ -3,9 +3,10 @@ package volume
 import (
 	"time"
 
-	"code.storageos.net/storageos/c2-cli/pkg/entity"
+	"code.storageos.net/storageos/c2-cli/pkg/health"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
 
 type FsType string
@@ -30,9 +31,9 @@ type Resource struct {
 	Master   *Deployment   `json:"master"`
 	Replicas []*Deployment `json:"replicas"`
 
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
-	Version   entity.Version `json:"version"`
+	CreatedAt time.Time       `json:"createdAt"`
+	UpdatedAt time.Time       `json:"updatedAt"`
+	Version   version.Version `json:"version"`
 }
 
 // Deployment encapsulates a deployment instance for a
@@ -41,6 +42,6 @@ type Deployment struct {
 	ID      id.Deployment `json:"id"`
 	Node    id.Node       `json:"nodeID"`
 	Inode   uint32        `json:"inode"`
-	Health  entity.Health `json:"health"`
+	Health  health.State  `json:"health"`
 	Syncing bool          `json:"syncing"`
 }

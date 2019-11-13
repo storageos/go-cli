@@ -3,9 +3,10 @@ package node
 import (
 	"time"
 
-	"code.storageos.net/storageos/c2-cli/pkg/entity"
+	"code.storageos.net/storageos/c2-cli/pkg/health"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
@@ -19,9 +20,9 @@ type State struct {
 
 // Resource encapsulates a StorageOS node API resource as a data type.
 type Resource struct {
-	ID     id.Node       `json:"id"`
-	Name   string        `json:"name"`
-	Health entity.Health `json:"health"`
+	ID     id.Node      `json:"id"`
+	Name   string       `json:"name"`
+	Health health.State `json:"health"`
 
 	IOAddr         string `json:"ioAddress"`
 	SupervisorAddr string `json:"supervisorAddress"`
@@ -30,7 +31,7 @@ type Resource struct {
 
 	Labels labels.Set `json:"labels"`
 
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
-	Version   entity.Version `json:"version"`
+	CreatedAt time.Time       `json:"createdAt"`
+	UpdatedAt time.Time       `json:"updatedAt"`
+	Version   version.Version `json:"version"`
 }

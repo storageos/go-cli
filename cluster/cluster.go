@@ -3,8 +3,8 @@ package cluster
 import (
 	"time"
 
-	"code.storageos.net/storageos/c2-cli/pkg/entity"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
 
 type LogLevel string
@@ -40,9 +40,9 @@ type Resource struct {
 	LogLevel  LogLevel  `json:"logLevel"`
 	LogFormat LogFormat `json:"logFormat"`
 
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
-	Version   entity.Version `json:"version"`
+	CreatedAt time.Time       `json:"createdAt"`
+	UpdatedAt time.Time       `json:"updatedAt"`
+	Version   version.Version `json:"version"`
 }
 
 // Licence describes a StorageOS product licence and the features included with

@@ -3,8 +3,8 @@ package user
 import (
 	"time"
 
-	"code.storageos.net/storageos/c2-cli/pkg/entity"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
 
 // Resource encapsulates a StorageOS user API resource as data type.
@@ -15,7 +15,7 @@ type Resource struct {
 	IsAdmin bool             `json:"isAdmin"`
 	Groups  []id.PolicyGroup `json:"groups"`
 
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
-	Version   entity.Version `json:"version"`
+	CreatedAt time.Time       `json:"createdAt"`
+	UpdatedAt time.Time       `json:"updatedAt"`
+	Version   version.Version `json:"version"`
 }
