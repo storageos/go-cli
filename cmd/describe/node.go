@@ -78,6 +78,8 @@ $ storageos describe node banana
 `,
 
 		RunE: c.run,
+
+		SilenceUsage: true,
 	}
 
 	return cobraCommand

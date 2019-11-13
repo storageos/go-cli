@@ -101,6 +101,10 @@ $ storageos get volume banana
 `,
 
 		RunE: c.run,
+
+		// If a legitimate error occurs as part of the VERB volume command
+		// we don't need to barf the usage template.
+		SilenceUsage: true,
 	}
 
 	cobraCommand.Flags().StringVarP(&c.namespaceID, "namespace", "n", "", "the id of the namespace to retrieve the volume resources from. if not set all namespaces are included")

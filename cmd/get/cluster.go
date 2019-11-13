@@ -51,6 +51,10 @@ $ storageos get cluster
 `,
 
 		RunE: c.run,
+
+		// If a legitimate error occurs as part of the VERB cluster command
+		// we don't need to barf the usage template.
+		SilenceUsage: true,
 	}
 
 	return cobraCommand
