@@ -2,6 +2,7 @@ package get
 
 import (
 	"context"
+	"errors"
 	"io"
 
 	"github.com/spf13/cobra"
@@ -10,6 +11,8 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
+
+var errRequiresNamespace = errors.New("namespace not specified")
 
 type volumeCommand struct {
 	config  ConfigProvider
@@ -31,10 +34,7 @@ func (c *volumeCommand) run(cmd *cobra.Command, args []string) error {
 
 	switch len(args) {
 	case 1:
-		if c.namespaceID != "" {
-			return c.getVolume(ctx, args)
-		}
-		fallthrough
+		return c.getVolume(ctx, args)
 	default:
 		return c.listVolumes(ctx, args)
 	}
@@ -42,6 +42,10 @@ func (c *volumeCommand) run(cmd *cobra.Command, args []string) error {
 
 func (c *volumeCommand) getVolume(ctx context.Context, args []string) error {
 	uid := id.Volume(args[0])
+
+	if c.namespaceID == "" {
+		return errRequiresNamespace
+	}
 
 	volume, err := c.client.GetVolume(
 		ctx,
@@ -71,6 +75,9 @@ func (c *volumeCommand) listVolumes(ctx context.Context, args []string) error {
 			uids...,
 		)
 	} else {
+		if len(uids) > 0 {
+			return errRequiresNamespace
+		}
 		volumes, err = c.client.GetAllVolumes(ctx)
 	}
 
