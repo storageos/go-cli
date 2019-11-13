@@ -64,6 +64,8 @@ func mapOpenAPIError(err error, resp *http.Response) error {
 	case http.StatusUnprocessableEntity:
 		return apiclient.NewInvalidStateTransitionError(details)
 
+	// TODO(CP-3925): This may need changing to present a friendly error, or
+	// it may be done up the call stack.
 	case http.StatusUnavailableForLegalReasons:
 		return apiclient.NewLicenceCapabilityError(details)
 

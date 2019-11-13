@@ -128,6 +128,7 @@ type LicenceCapabilityError struct {
 	msg string
 }
 
+// TODO(CP-3925): This should be smarter.
 func (e LicenceCapabilityError) Error() string {
 	if e.msg == "" {
 		return "licence capability error"
