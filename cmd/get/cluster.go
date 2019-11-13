@@ -6,11 +6,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 )
 
 type clusterCommand struct {
+	config  ConfigProvider
 	client  GetClient
 	display GetDisplayer
 
@@ -18,7 +18,11 @@ type clusterCommand struct {
 }
 
 func (c *clusterCommand) run(cmd *cobra.Command, _ []string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultDialTimeout)
+	timeout, err := c.config.DialTimeout()
+	if err != nil {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	cluster, err := c.client.GetCluster(ctx)
@@ -29,8 +33,9 @@ func (c *clusterCommand) run(cmd *cobra.Command, _ []string) error {
 	return c.display.GetCluster(c.writer, cluster)
 }
 
-func newCluster(w io.Writer, client GetClient) *cobra.Command {
+func newCluster(w io.Writer, client GetClient, config ConfigProvider) *cobra.Command {
 	c := &clusterCommand{
+		config: config,
 		client: client,
 		display: jsonformat.NewDisplayer(
 			jsonformat.DefaultEncodingIndent,

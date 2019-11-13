@@ -6,12 +6,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 )
 
 type nodeCommand struct {
+	config  ConfigProvider
 	client  DescribeClient
 	display DescribeDisplayer
 
@@ -19,7 +19,11 @@ type nodeCommand struct {
 }
 
 func (c *nodeCommand) run(cmd *cobra.Command, args []string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultDialTimeout)
+	timeout, err := c.config.DialTimeout()
+	if err != nil {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	switch len(args) {
@@ -55,8 +59,9 @@ func (c *nodeCommand) listNodes(ctx context.Context, _ *cobra.Command, args []st
 	return c.display.DescribeNodeList(c.writer, nodes)
 }
 
-func newNode(w io.Writer, client DescribeClient) *cobra.Command {
+func newNode(w io.Writer, client DescribeClient, config ConfigProvider) *cobra.Command {
 	c := &nodeCommand{
+		config: config,
 		client: client,
 		display: jsonformat.NewDisplayer(
 			jsonformat.DefaultEncodingIndent,

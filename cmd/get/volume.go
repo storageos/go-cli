@@ -6,13 +6,13 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 type volumeCommand struct {
+	config  ConfigProvider
 	client  GetClient
 	display GetDisplayer
 
@@ -22,7 +22,11 @@ type volumeCommand struct {
 }
 
 func (c *volumeCommand) run(cmd *cobra.Command, args []string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultDialTimeout)
+	timeout, err := c.config.DialTimeout()
+	if err != nil {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	switch len(args) {
@@ -77,8 +81,9 @@ func (c *volumeCommand) listVolumes(ctx context.Context, _ *cobra.Command, args 
 	return c.display.GetVolumeList(c.writer, volumes)
 }
 
-func newVolume(w io.Writer, client GetClient) *cobra.Command {
+func newVolume(w io.Writer, client GetClient, config ConfigProvider) *cobra.Command {
 	c := &volumeCommand{
+		config: config,
 		client: client,
 		display: jsonformat.NewDisplayer(
 			jsonformat.DefaultEncodingIndent,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -12,6 +13,12 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
+
+// ConfigProvider specifies the configuration settings which commands require
+// access to.
+type ConfigProvider interface {
+	DialTimeout() (time.Duration, error)
+}
 
 // GetClient defines the functionality required by the CLI application to
 // reasonably implement the "get" verb commands.
@@ -37,16 +44,16 @@ type GetDisplayer interface {
 }
 
 // NewCommand configures the set of commands which are grouped by the "get" verb.
-func NewCommand(client GetClient) *cobra.Command {
+func NewCommand(client GetClient, config ConfigProvider) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "get",
 		Short: "get retrieves a StorageOS resource, displaying basic information about it",
 	}
 
 	command.AddCommand(
-		newCluster(os.Stdout, client),
-		newNode(os.Stdout, client),
-		newVolume(os.Stdout, client),
+		newCluster(os.Stdout, client, config),
+		newNode(os.Stdout, client, config),
+		newVolume(os.Stdout, client, config),
 	)
 
 	return command

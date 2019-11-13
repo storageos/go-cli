@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"time"
 
 	"github.com/blang/semver"
 	"github.com/spf13/cobra"
@@ -16,6 +17,12 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
+
+// ConfigProvider specifies the configuration settings which commands require
+// access to.
+type ConfigProvider interface {
+	DialTimeout() (time.Duration, error)
+}
 
 // Client defines the functionality required by the CLI application to
 // reasonably implement the commands it provides.
@@ -64,7 +71,7 @@ func InitPersistentFlags() *pflag.FlagSet {
 // client as the method of communicating with the StorageOS API.
 //
 // The returned Command is configured with a flag set containing global configuration settings.
-func InitCommand(client Client, globalFlags *pflag.FlagSet, version semver.Version) *cobra.Command {
+func InitCommand(client Client, config ConfigProvider, globalFlags *pflag.FlagSet, version semver.Version) *cobra.Command {
 	app := &cobra.Command{
 		Use: "storageos <command>",
 		Short: `Storage for Cloud Native Applications.
@@ -78,8 +85,8 @@ To be notified about stable releases and latest features, sign up at https://my.
 	}
 
 	app.AddCommand(
-		get.NewCommand(client),
-		describe.NewCommand(client),
+		get.NewCommand(client, config),
+		describe.NewCommand(client, config),
 	)
 
 	app.PersistentFlags().AddFlagSet(globalFlags)

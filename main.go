@@ -59,6 +59,7 @@ func main() {
 
 	app := cmd.InitCommand(
 		client,
+		configProvider,
 		globalFlags,
 		version,
 	)
