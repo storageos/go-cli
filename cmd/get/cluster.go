@@ -30,7 +30,7 @@ func (c *clusterCommand) run(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	return c.display.GetCluster(c.writer, cluster)
+	return c.display.GetCluster(ctx, c.writer, cluster)
 }
 
 func newCluster(w io.Writer, client GetClient, config ConfigProvider) *cobra.Command {

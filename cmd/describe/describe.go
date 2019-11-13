@@ -28,8 +28,8 @@ type DescribeClient interface {
 // DescribeDisplayer defines the functionality required by the CLI application
 // to display the results gathered by the "describe" verb commands.
 type DescribeDisplayer interface {
-	DescribeNode(io.Writer, *node.State) error
-	DescribeNodeList(io.Writer, []*node.State) error
+	DescribeNode(context.Context, io.Writer, *node.State) error
+	DescribeNodeList(context.Context, io.Writer, []*node.State) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "describe" verb.

@@ -28,13 +28,13 @@ func (c *nodeCommand) run(cmd *cobra.Command, args []string) error {
 
 	switch len(args) {
 	case 1:
-		return c.getNode(ctx, cmd, args)
+		return c.getNode(ctx, args)
 	default:
-		return c.listNodes(ctx, cmd, args)
+		return c.listNodes(ctx, args)
 	}
 }
 
-func (c *nodeCommand) getNode(ctx context.Context, _ *cobra.Command, args []string) error {
+func (c *nodeCommand) getNode(ctx context.Context, args []string) error {
 	uid := id.Node(args[0])
 
 	node, err := c.client.GetNode(ctx, uid)
@@ -42,10 +42,10 @@ func (c *nodeCommand) getNode(ctx context.Context, _ *cobra.Command, args []stri
 		return err
 	}
 
-	return c.display.GetNode(c.writer, node)
+	return c.display.GetNode(ctx, c.writer, node)
 }
 
-func (c *nodeCommand) listNodes(ctx context.Context, _ *cobra.Command, args []string) error {
+func (c *nodeCommand) listNodes(ctx context.Context, args []string) error {
 	uids := make([]id.Node, len(args))
 	for i, a := range args {
 		uids[i] = id.Node(a)
@@ -56,7 +56,7 @@ func (c *nodeCommand) listNodes(ctx context.Context, _ *cobra.Command, args []st
 		return err
 	}
 
-	return c.display.GetNodeList(c.writer, nodes)
+	return c.display.GetNodeList(ctx, c.writer, nodes)
 }
 
 func newNode(w io.Writer, client GetClient, config ConfigProvider) *cobra.Command {

@@ -1,6 +1,7 @@
 package jsonformat
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 
@@ -17,43 +18,43 @@ type Displayer struct {
 	encoderIndent string
 }
 
-func (d *Displayer) GetCluster(w io.Writer, resource *cluster.Resource) error {
+func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *cluster.Resource) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(resource)
 }
 
-func (d *Displayer) GetNode(w io.Writer, resource *node.Resource) error {
+func (d *Displayer) GetNode(ctx context.Context, w io.Writer, resource *node.Resource) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(resource)
 }
 
-func (d *Displayer) GetNodeList(w io.Writer, resources []*node.Resource) error {
+func (d *Displayer) GetNodeList(ctx context.Context, w io.Writer, resources []*node.Resource) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(resources)
 }
 
-func (d *Displayer) GetVolume(w io.Writer, resource *volume.Resource) error {
+func (d *Displayer) GetVolume(ctx context.Context, w io.Writer, resource *volume.Resource) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(resource)
 }
 
-func (d *Displayer) GetVolumeList(w io.Writer, resources []*volume.Resource) error {
+func (d *Displayer) GetVolumeList(ctx context.Context, w io.Writer, resources []*volume.Resource) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(resources)
 }
 
-func (d *Displayer) DescribeNode(w io.Writer, state *node.State) error {
+func (d *Displayer) DescribeNode(ctx context.Context, w io.Writer, state *node.State) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(state)
 }
 
-func (d *Displayer) DescribeNodeList(w io.Writer, states []*node.State) error {
+func (d *Displayer) DescribeNodeList(ctx context.Context, w io.Writer, states []*node.State) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", d.encoderIndent)
 	return enc.Encode(states)

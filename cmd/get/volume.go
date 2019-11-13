@@ -32,15 +32,15 @@ func (c *volumeCommand) run(cmd *cobra.Command, args []string) error {
 	switch len(args) {
 	case 1:
 		if c.namespaceID != "" {
-			return c.getVolume(ctx, cmd, args)
+			return c.getVolume(ctx, args)
 		}
 		fallthrough
 	default:
-		return c.listVolumes(ctx, cmd, args)
+		return c.listVolumes(ctx, args)
 	}
 }
 
-func (c *volumeCommand) getVolume(ctx context.Context, _ *cobra.Command, args []string) error {
+func (c *volumeCommand) getVolume(ctx context.Context, args []string) error {
 	uid := id.Volume(args[0])
 
 	volume, err := c.client.GetVolume(
@@ -52,10 +52,10 @@ func (c *volumeCommand) getVolume(ctx context.Context, _ *cobra.Command, args []
 		return err
 	}
 
-	return c.display.GetVolume(c.writer, volume)
+	return c.display.GetVolume(ctx, c.writer, volume)
 }
 
-func (c *volumeCommand) listVolumes(ctx context.Context, _ *cobra.Command, args []string) error {
+func (c *volumeCommand) listVolumes(ctx context.Context, args []string) error {
 	var volumes []*volume.Resource
 	var err error
 
@@ -78,7 +78,7 @@ func (c *volumeCommand) listVolumes(ctx context.Context, _ *cobra.Command, args 
 		return err
 	}
 
-	return c.display.GetVolumeList(c.writer, volumes)
+	return c.display.GetVolumeList(ctx, c.writer, volumes)
 }
 
 func newVolume(w io.Writer, client GetClient, config ConfigProvider) *cobra.Command {
