@@ -11,10 +11,9 @@ const (
 	// APIEndpointsVar keys the environment variable from which we source the
 	// API host endpoints.
 	APIEndpointsVar = "STORAGEOS_HOST"
-	// DialTimeoutVar keys the environment variable from which we source the
-	// timeout for API operations. TODO: This isn't really a "dial" timeout but
-	// more an operation timeout, rename?
-	DialTimeoutVar = "STORAGEOS_DIAL_TIMEOUT"
+	// CommandTimeoutVar keys the environment variable from which we source the
+	// timeout for API operations.
+	CommandTimeoutVar = "STORAGEOS_TIMEOUT"
 	// UsernameVar keys the environment variable from which we source the
 	// username of the StorageOS account to authenticate with.
 	UsernameVar = "STORAGEOS_USER_NAME"
@@ -31,7 +30,7 @@ const (
 
 type FallbackProvider interface {
 	APIEndpoints() ([]string, error)
-	DialTimeout() (time.Duration, error)
+	CommandTimeout() (time.Duration, error)
 	Username() (string, error)
 	Password() (string, error)
 }
@@ -54,10 +53,10 @@ func (env *Provider) APIEndpoints() ([]string, error) {
 	return endpoints, nil
 }
 
-func (env *Provider) DialTimeout() (time.Duration, error) {
-	timeoutString := os.Getenv(DialTimeoutVar)
+func (env *Provider) CommandTimeout() (time.Duration, error) {
+	timeoutString := os.Getenv(CommandTimeoutVar)
 	if timeoutString == "" {
-		return env.fallback.DialTimeout()
+		return env.fallback.CommandTimeout()
 	}
 
 	return time.ParseDuration(timeoutString)

@@ -5,7 +5,7 @@ import "time"
 const (
 	DefaultAPIEndpoint = "http://localhost:5705"
 
-	DefaultDialTimeout = 5 * time.Second
+	DefaultCommandTimeout = 5 * time.Second
 
 	DefaultUsername = "storageos"
 
@@ -22,9 +22,9 @@ func (d *Defaulter) APIEndpoints() ([]string, error) {
 	return []string{DefaultAPIEndpoint}, nil
 }
 
-// DialTimeout returns the standard timeout for a single command, 5 seconds.
-func (d *Defaulter) DialTimeout() (time.Duration, error) {
-	return DefaultDialTimeout, nil
+// CommandTimeout returns the standard timeout for a single command, 5 seconds.
+func (d *Defaulter) CommandTimeout() (time.Duration, error) {
+	return DefaultCommandTimeout, nil
 }
 
 // Username returns a username to default to. // TODO: Probably not grand, error or something?

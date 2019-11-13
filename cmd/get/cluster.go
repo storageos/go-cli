@@ -18,7 +18,7 @@ type clusterCommand struct {
 }
 
 func (c *clusterCommand) run(cmd *cobra.Command, _ []string) error {
-	timeout, err := c.config.DialTimeout()
+	timeout, err := c.config.CommandTimeout()
 	if err != nil {
 		return err
 	}

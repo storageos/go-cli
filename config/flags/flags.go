@@ -6,9 +6,9 @@ const (
 	// APIEndpointsFlags keys the long flag from which we source the API host
 	// endpoints.
 	APIEndpointsFlag = "endpoints"
-	// DialTimeoutFlag keys the long flag from which we source the timeout for
+	// CommandTimeoutFlag keys the long flag from which we source the timeout for
 	// API operations.
-	DialTimeoutFlag = "timeout"
+	CommandTimeoutFlag = "timeout"
 	// TODO: Maybe these don't belong here?
 	UsernameFlag = "username"
 	PasswordFlag = "password"
@@ -22,7 +22,7 @@ type FlagSet interface {
 
 type FallbackProvider interface {
 	APIEndpoints() ([]string, error)
-	DialTimeout() (time.Duration, error)
+	CommandTimeout() (time.Duration, error)
 	Username() (string, error)
 	Password() (string, error)
 }
@@ -48,14 +48,14 @@ func (flag *Provider) APIEndpoints() ([]string, error) {
 	return hosts, nil
 }
 
-func (flag *Provider) DialTimeout() (time.Duration, error) {
-	timeout, err := flag.set.GetDuration(DialTimeoutFlag)
+func (flag *Provider) CommandTimeout() (time.Duration, error) {
+	timeout, err := flag.set.GetDuration(CommandTimeoutFlag)
 	if err != nil {
 		return 0, err
 	}
 
 	if timeout == 0 {
-		return flag.fallback.DialTimeout()
+		return flag.fallback.CommandTimeout()
 	}
 
 	return timeout, nil

@@ -15,7 +15,7 @@ import (
 // ConfigProvider specifies the configuration settings which commands require
 // access to.
 type ConfigProvider interface {
-	DialTimeout() (time.Duration, error)
+	CommandTimeout() (time.Duration, error)
 }
 
 // DescribeClient describes the functionality required by the CLI application

@@ -25,7 +25,7 @@ type volumeCommand struct {
 }
 
 func (c *volumeCommand) run(cmd *cobra.Command, args []string) error {
-	timeout, err := c.config.DialTimeout()
+	timeout, err := c.config.CommandTimeout()
 	if err != nil {
 		return err
 	}

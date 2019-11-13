@@ -21,7 +21,7 @@ import (
 // ConfigProvider specifies the configuration settings which commands require
 // access to.
 type ConfigProvider interface {
-	DialTimeout() (time.Duration, error)
+	CommandTimeout() (time.Duration, error)
 }
 
 // Client defines the functionality required by the CLI application to
@@ -49,8 +49,8 @@ func InitPersistentFlags() *pflag.FlagSet {
 		"set the list of endpoints which are used when connecting to the StorageOS API",
 	)
 	flagSet.Duration(
-		flags.DialTimeoutFlag,
-		config.DefaultDialTimeout,
+		flags.CommandTimeoutFlag,
+		config.DefaultCommandTimeout,
 		"set the timeout duration to use for execution of the command",
 	)
 	flagSet.String(
