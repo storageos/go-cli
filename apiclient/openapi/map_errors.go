@@ -1,40 +1,90 @@
 package openapi
 
 import (
+	"encoding/json"
+	"errors"
 	"net/http"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
+	"code.storageos.net/storageos/openapi"
 )
 
-func mapResponseToError(resp *http.Response) error {
+// TODO: Surely there's a better way?
+// apiErr defines a JSON encodable struct with an error field.
+type apiErr struct {
+	Error string `json:"error"`
+}
+
+// mapOpenAPIError will given err and the corresponding resp attempt to map the
+// error value to an apiclient error type.
+//
+// err is returned as is when any of the following are true:
+// 	→ resp is nil
+// 	→ err is not a GenericOpenAPIError
+func mapOpenAPIError(err error, resp *http.Response) error {
+	if resp == nil {
+		return err
+	}
+
+	var oerr openapi.GenericOpenAPIError
+	if ok := errors.As(err, &oerr); !ok {
+		return err
+	}
+
+	var details string
+	switch resp.Header.Get("Content-Type") {
+	case "application/json":
+		// TODO: the error doesn't do anything useful here, as we default
+		// to an empty string.
+		details, _ = extractErrorStringJSON(oerr.Body())
+	default:
+	}
+
 	switch resp.StatusCode {
-	// 2XX
-	case http.StatusOK, http.StatusAccepted:
-		return nil
+
 	// 4XX
 	case http.StatusBadRequest:
-		return apiclient.ErrBadRequest
+		return apiclient.NewBadRequestError(details)
+
 	case http.StatusUnauthorized:
-		return apiclient.ErrAuthenticationRequired
+		return apiclient.NewAuthenticationError(details)
+
 	case http.StatusForbidden:
-		return apiclient.ErrUnauthorised
+		return apiclient.NewUnauthorisedError(details)
+
 	case http.StatusNotFound:
-		return apiclient.ErrNotFound
-	// TODO: StatusConflict maps to ErrAlreadyExists and ErrInUse
+		return apiclient.NewNotFoundError(details)
+
 	case http.StatusConflict:
-		return apiclient.ErrInUse
+		return apiclient.NewConflictError(details)
+
 	case http.StatusPreconditionFailed:
-		return apiclient.ErrStaleWrite
+		return apiclient.NewStaleWriteError(details)
+
 	case http.StatusUnprocessableEntity:
-		return apiclient.ErrInvalidStateTransition
+		return apiclient.NewInvalidStateTransitionError(details)
+
 	case http.StatusUnavailableForLegalReasons:
-		return apiclient.ErrLicenceCapacityExceeded
+		return apiclient.NewLicenceCapabilityError(details)
+
 	// 5XX
-	case http.StatusInternalServerError: // 500
-		return apiclient.ErrServerError
-	case http.StatusServiceUnavailable: // 503
-		return apiclient.ErrStoreError
+	case http.StatusInternalServerError:
+		return apiclient.NewServerError(details)
+
+	case http.StatusServiceUnavailable:
+
+		return apiclient.NewStoreError(details)
 	default:
-		return apiclient.ErrUnknown
+		return err
 	}
+}
+
+func extractErrorStringJSON(body []byte) (string, error) {
+	var e apiErr
+
+	if err := json.Unmarshal(body, &e); err != nil {
+		return "", err
+	}
+
+	return e.Error, nil
 }

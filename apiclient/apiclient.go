@@ -4,6 +4,7 @@ package apiclient
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
@@ -120,7 +121,7 @@ func (c *Client) GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Res
 			filtered[i] = n
 			i++
 		} else {
-			return nil, fmt.Errorf("node %w: %v", ErrNotFound, id)
+			return nil, NewNotFoundError(fmt.Sprintf("node %v not found", id))
 		}
 	}
 
@@ -174,7 +175,7 @@ func (c *Client) GetNamespaceVolumes(ctx context.Context, namespace id.Namespace
 			filtered[i] = v
 			i++
 		} else {
-			return nil, fmt.Errorf("volume %w: %v", ErrNotFound, id)
+			return nil, NewNotFoundError(fmt.Sprintf("volume %v not found", id))
 		}
 	}
 
@@ -209,8 +210,8 @@ func (c *Client) fetchAllVolumes(ctx context.Context) ([]*volume.Resource, error
 
 	for _, ns := range namespaces {
 		nsvols, err := c.transport.ListVolumes(ctx, ns.ID)
-		switch err {
-		case nil, ErrUnauthorised:
+		switch {
+		case err == nil, errors.Is(err, UnauthorisedError{}):
 			// For these two errors, ignore - they're not fatal to the operation.
 		default:
 			return nil, err
@@ -279,7 +280,7 @@ func (c *Client) DescribeListNodes(ctx context.Context, uids ...id.Node) ([]*nod
 				filtered[i] = n
 				i++
 			} else {
-				return nil, fmt.Errorf("node %w: %v", ErrNotFound, id)
+				return nil, NewNotFoundError(fmt.Sprintf("node %v not found", id))
 			}
 		}
 

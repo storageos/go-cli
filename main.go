@@ -65,7 +65,6 @@ func main() {
 	)
 
 	if err := app.Execute(); err != nil {
-		// TODO: Map err to useful exit code
 		os.Exit(1)
 	}
 }

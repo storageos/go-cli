@@ -43,11 +43,7 @@ func (o *OpenAPI) Authenticate(ctx context.Context, username, password string) (
 		},
 	)
 	if err != nil {
-		if resp != nil {
-			return nil, mapResponseToError(resp)
-		} else {
-			return nil, err
-		}
+		return nil, mapOpenAPIError(err, resp)
 	}
 
 	token := strings.TrimPrefix(resp.Header.Get("Authorization"), "Bearer ")

@@ -28,11 +28,7 @@ func (o *OpenAPI) GetNode(ctx context.Context, uid id.Node) (*node.Resource, err
 
 	model, resp, err := o.client.DefaultApi.GetNode(ctx, uid.String())
 	if err != nil {
-		if resp != nil {
-			return nil, mapResponseToError(resp)
-		} else {
-			return nil, err
-		}
+		return nil, mapOpenAPIError(err, resp)
 	}
 
 	return o.codec.decodeNode(model)
@@ -44,11 +40,7 @@ func (o *OpenAPI) GetVolume(ctx context.Context, namespace id.Namespace, uid id.
 
 	model, resp, err := o.client.DefaultApi.GetVolume(ctx, namespace.String(), uid.String())
 	if err != nil {
-		if resp != nil {
-			return nil, mapResponseToError(resp)
-		} else {
-			return nil, err
-		}
+		return nil, mapOpenAPIError(err, resp)
 	}
 
 	return o.codec.decodeVolume(model)
@@ -60,11 +52,7 @@ func (o *OpenAPI) ListNodes(ctx context.Context) ([]*node.Resource, error) {
 
 	models, resp, err := o.client.DefaultApi.ListNodes(ctx)
 	if err != nil {
-		if resp != nil {
-			return nil, mapResponseToError(resp)
-		} else {
-			return nil, err
-		}
+		return nil, mapOpenAPIError(err, resp)
 	}
 
 	nodes := make([]*node.Resource, len(models))
@@ -86,11 +74,7 @@ func (o *OpenAPI) ListVolumes(ctx context.Context, namespace id.Namespace) ([]*v
 
 	models, resp, err := o.client.DefaultApi.ListVolumes(ctx, namespace.String())
 	if err != nil {
-		if resp != nil {
-			return nil, mapResponseToError(resp)
-		} else {
-			return nil, err
-		}
+		return nil, mapOpenAPIError(err, resp)
 	}
 
 	volumes := make([]*volume.Resource, len(models))
@@ -112,11 +96,7 @@ func (o *OpenAPI) ListNamespaces(ctx context.Context) ([]*namespace.Resource, er
 
 	models, resp, err := o.client.DefaultApi.ListNamespaces(ctx)
 	if err != nil {
-		if resp != nil {
-			return nil, mapResponseToError(resp)
-		} else {
-			return nil, err
-		}
+		return nil, mapOpenAPIError(err, resp)
 	}
 
 	namespaces := make([]*namespace.Resource, len(models))
