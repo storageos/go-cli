@@ -5,7 +5,6 @@ package apiclient
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -38,6 +37,8 @@ type Transport interface {
 	ListNodes(context.Context) ([]*node.Resource, error)
 	ListVolumes(context.Context, id.Namespace) ([]*volume.Resource, error)
 	ListNamespaces(context.Context) ([]*namespace.Resource, error)
+
+	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
 }
 
 // Client provides a collection of methods for consumers to interact with the
@@ -61,136 +62,6 @@ func (c *Client) authenticate(ctx context.Context) (*user.Resource, error) {
 	}
 
 	return c.transport.Authenticate(ctx, username, password)
-}
-
-// GetCluster requests basic information for the cluster resource from the
-// StorageOS API.
-func (c *Client) GetCluster(ctx context.Context) (*cluster.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.transport.GetCluster(ctx)
-}
-
-// GetNode requests basic information for the node resource which
-// corresponds to uid from the StorageOS API.
-func (c *Client) GetNode(ctx context.Context, uid id.Node) (*node.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.transport.GetNode(ctx, uid)
-}
-
-// GetListNodes requests a list containing basic information on each
-// node resource in the cluster.
-//
-// The returned list is filtered using uids so that it contains only those
-// resources which have a matching ID. Omitting uids will skip the filtering.
-func (c *Client) GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	nodes, err := c.transport.ListNodes(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(uids) == 0 {
-		return nodes, nil
-	}
-
-	// Filter uids have been provided:
-	retrieved := map[id.Node]*node.Resource{}
-
-	for _, n := range nodes {
-		retrieved[n.ID] = n
-	}
-
-	filtered := make([]*node.Resource, len(uids))
-
-	i := 0
-	for _, id := range uids {
-		n, ok := retrieved[id]
-		if ok {
-			filtered[i] = n
-			i++
-		} else {
-			return nil, NewNotFoundError(fmt.Sprintf("node %v not found", id))
-		}
-	}
-
-	return nodes, nil
-}
-
-// GetVolume requests basic information for the volume resource which
-// corresponds to uid in namespace from the StorageOS API.
-func (c *Client) GetVolume(ctx context.Context, namespace id.Namespace, uid id.Volume) (*volume.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.transport.GetVolume(ctx, namespace, uid)
-}
-
-// GetNamespaceVolumes requests basic information for each volume resource in
-// namespace from the StorageOS API.
-//
-// The returned list is filtered using uids so that it contains only those
-// resources which have a matching ID. Omitting uids will skip the filtering.
-func (c *Client) GetNamespaceVolumes(ctx context.Context, namespace id.Namespace, uids ...id.Volume) ([]*volume.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	volumes, err := c.transport.ListVolumes(ctx, namespace)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(uids) == 0 {
-		return volumes, nil
-	}
-
-	// Filter uids have been provided:
-	retrieved := map[id.Volume]*volume.Resource{}
-
-	for _, v := range volumes {
-		retrieved[v.ID] = v
-	}
-
-	filtered := make([]*volume.Resource, len(uids))
-
-	i := 0
-	for _, id := range uids {
-		v, ok := retrieved[id]
-		if ok {
-			filtered[i] = v
-			i++
-		} else {
-			return nil, NewNotFoundError(fmt.Sprintf("volume %v not found", id))
-		}
-	}
-
-	return filtered, nil
-}
-
-// GetAllVolumes requests basic information for each volume resource in every
-// namespace exposed by the StorageOS API to the authenticated user.
-func (c *Client) GetAllVolumes(ctx context.Context) ([]*volume.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.fetchAllVolumes(ctx)
 }
 
 // fetchAllVolumes requests the list of all namespaces from the StorageOS API,
@@ -220,90 +91,6 @@ func (c *Client) fetchAllVolumes(ctx context.Context) ([]*volume.Resource, error
 	}
 
 	return volumes, nil
-}
-
-// DescribeNode requests detailed information for the node resource which
-// corresponds to uid from the StorageOS API.
-func (c *Client) DescribeNode(ctx context.Context, uid id.Node) (*node.State, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	resource, err := c.transport.GetNode(ctx, uid)
-	if err != nil {
-		return nil, err
-	}
-
-	volumes, err := c.fetchAllVolumes(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	deployments := deploymentsForNode(resource.ID, volumes)
-
-	return &node.State{
-		Resource:    resource,
-		Deployments: deployments,
-	}, nil
-}
-
-// DescribeListNodes requests a list containing detailed information on each
-// node resource in the cluster.
-//
-// The returned list is filtered using uids so that it contains only those
-// resources which have a matching ID. If none are specified, all are returned.
-func (c *Client) DescribeListNodes(ctx context.Context, uids ...id.Node) ([]*node.State, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	resources, err := c.transport.ListNodes(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(uids) > 0 {
-		retrieved := map[id.Node]*node.Resource{}
-
-		for _, n := range resources {
-			retrieved[n.ID] = n
-		}
-
-		filtered := make([]*node.Resource, len(uids))
-
-		i := 0
-		for _, id := range uids {
-			n, ok := retrieved[id]
-			if ok {
-				filtered[i] = n
-				i++
-			} else {
-				return nil, NewNotFoundError(fmt.Sprintf("node %v not found", id))
-			}
-		}
-
-		resources = filtered
-	}
-
-	nodes := make([]*node.State, len(resources))
-
-	volumes, err := c.fetchAllVolumes(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	deploymentMap := mapNodeDeployments(volumes)
-
-	for i, r := range resources {
-		nodes[i] = &node.State{
-			Resource:    r,
-			Deployments: deploymentMap[r.ID], // No need to check - zero value is ok.
-		}
-	}
-
-	return nodes, nil
 }
 
 // New initialises a new Client using config for configuration settings,

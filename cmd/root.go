@@ -9,12 +9,14 @@ import (
 	"github.com/spf13/pflag"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/cmd/create"
 	"code.storageos.net/storageos/c2-cli/cmd/describe"
 	"code.storageos.net/storageos/c2-cli/cmd/get"
 	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/config/flags"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
@@ -27,6 +29,8 @@ type ConfigProvider interface {
 // Client defines the functionality required by the CLI application to
 // reasonably implement the commands it provides.
 type Client interface {
+	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
+
 	GetCluster(context.Context) (*cluster.Resource, error)
 	GetNode(context.Context, id.Node) (*node.Resource, error)
 	GetListNodes(context.Context, ...id.Node) ([]*node.Resource, error)
@@ -85,6 +89,7 @@ To be notified about stable releases and latest features, sign up at https://my.
 	}
 
 	app.AddCommand(
+		create.NewCommand(client, config),
 		get.NewCommand(client, config),
 		describe.NewCommand(client, config),
 	)
