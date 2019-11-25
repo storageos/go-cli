@@ -13,9 +13,15 @@ import (
 // State aggregates information that can be used to provide a detailed picture
 // of a node's state.
 type State struct {
-	Resource *Resource `json:"resource"`
-	// TODO: The deployment API resource doesn't include the ID of the volume it belongs to, but is implicit: maybe extend the display to include the volume ID/name etc.
-	Deployments []*volume.Deployment `json:"deployments"`
+	Resource    *Resource     `json:"resource"`
+	Deployments []*Deployment `json:"deployments"`
+}
+
+// Deployment augments a volume.Deployment with the ID of the volume it
+// belongs to.
+type Deployment struct {
+	VolumeID   id.Volume          `json:"volumeID"`
+	Deployment *volume.Deployment `json:"deployment"`
 }
 
 // Resource encapsulates a StorageOS node API resource as a data type.
