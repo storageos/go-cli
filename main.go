@@ -65,7 +65,13 @@ func main() {
 	)
 
 	if err := app.Execute(); err != nil {
+		// Attempt to map err to a command error.
+		err = cmd.MapCommandError(err)
+		// Get the appropriate exit code for the error.
 		code := cmd.ExitCodeForError(err)
+
+		fmt.Fprintf(app.OutOrStderr(), "Error: %v\n", err)
+
 		os.Exit(code)
 	}
 }

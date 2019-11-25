@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -87,7 +88,7 @@ func (c *userCommand) createUser(ctx context.Context) error {
 // rejecting blank responses.
 func (c *userCommand) promptForPassword() (string, error) {
 	fmt.Fprint(c.writer, "Password: ")
-	password, err := terminal.ReadPassword(int(syscall.Stdin))
+	password, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 	fmt.Fprintln(c.writer)
 	if err != nil {
 		return "", err

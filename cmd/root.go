@@ -75,6 +75,8 @@ func InitPersistentFlags() *pflag.FlagSet {
 // client as the method of communicating with the StorageOS API.
 //
 // The returned Command is configured with a flag set containing global configuration settings.
+//
+// Downstream errors are suppressed, so the caller is responsible for displaying messages.
 func InitCommand(client Client, config ConfigProvider, globalFlags *pflag.FlagSet, version semver.Version) *cobra.Command {
 	app := &cobra.Command{
 		Use: "storageos <command>",
@@ -86,6 +88,8 @@ User Subscription Agreement (EUSA) found at: https://storageos.com/legal/#eusa
 To be notified about stable releases and latest features, sign up at https://my.storageos.com.
 `,
 		Version: version.String(),
+
+		SilenceErrors: true,
 	}
 
 	app.AddCommand(

@@ -1,11 +1,5 @@
 package apiclient
 
-import "errors"
-
-// ErrCommandTimedOut is returned when a command's execution deadline is
-// exceeded.
-var ErrCommandTimedOut = errors.New("timed out performing command")
-
 // BadRequestError indicates that the request made by the client is invalid.
 type BadRequestError struct {
 	msg string

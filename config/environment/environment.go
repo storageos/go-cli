@@ -13,7 +13,7 @@ const (
 	APIEndpointsVar = "STORAGEOS_HOST"
 	// CommandTimeoutVar keys the environment variable from which we source the
 	// timeout for API operations.
-	CommandTimeoutVar = "STORAGEOS_TIMEOUT"
+	CommandTimeoutVar = "STORAGEOS_API_TIMEOUT"
 	// UsernameVar keys the environment variable from which we source the
 	// username of the StorageOS account to authenticate with.
 	UsernameVar = "STORAGEOS_USER_NAME"
