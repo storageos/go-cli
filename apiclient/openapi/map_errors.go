@@ -1,6 +1,7 @@
 package openapi
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -22,6 +23,10 @@ type apiErr struct {
 // 	→ resp is nil
 // 	→ err is not a GenericOpenAPIError
 func mapOpenAPIError(err error, resp *http.Response) error {
+	if errors.Is(err, context.DeadlineExceeded) {
+		return apiclient.ErrCommandTimedOut
+	}
+
 	if resp == nil {
 		return err
 	}
@@ -74,8 +79,8 @@ func mapOpenAPIError(err error, resp *http.Response) error {
 		return apiclient.NewServerError(details)
 
 	case http.StatusServiceUnavailable:
-
 		return apiclient.NewStoreError(details)
+
 	default:
 		return err
 	}

@@ -1,5 +1,12 @@
 package apiclient
 
+import "errors"
+
+// ErrCommandTimedOut is returned when a command's execution deadline is
+// exceeded.
+var ErrCommandTimedOut = errors.New("timed out performing command")
+
+// BadRequestError indicates that the request made by the client is invalid.
 type BadRequestError struct {
 	msg string
 }
@@ -17,6 +24,9 @@ func NewBadRequestError(msg string) BadRequestError {
 	}
 }
 
+// AuthenticationError indicates that the requested operation could not be
+// performed for the client due to an issue with the authentication credentials
+// provided by the client.
 type AuthenticationError struct {
 	msg string
 }
@@ -34,6 +44,8 @@ func NewAuthenticationError(msg string) AuthenticationError {
 	}
 }
 
+// UnauthorisedError indicates that the requested operation is disallowed
+// for the user which the client is authenticated as.
 type UnauthorisedError struct {
 	msg string
 }
@@ -72,7 +84,6 @@ func NewNotFoundError(msg string) NotFoundError {
 
 // ConflictError indicates that the requested operation could not be carried
 // out due to a conflict between the current state and the desired state.
-// TODO: Difference between invalid state transition
 type ConflictError struct {
 	msg string
 }
@@ -90,6 +101,10 @@ func NewConflictError(msg string) ConflictError {
 	}
 }
 
+// StaleWriteError indicates that the target resource for the requested
+// operation has been concurrently updated, invalidating the request. The client
+// should fetch the latest version of the resource before attempting to perform
+// another update.
 type StaleWriteError struct {
 	msg string
 }
@@ -107,6 +122,8 @@ func NewStaleWriteError(msg string) StaleWriteError {
 	}
 }
 
+// InvalidStateTransitionError indicates that the requested operation cannot
+// be performed for the target resource in its current state.
 type InvalidStateTransitionError struct {
 	msg string
 }
@@ -124,11 +141,14 @@ func NewInvalidStateTransitionError(msg string) InvalidStateTransitionError {
 	}
 }
 
+// LicenceCapabilityError indicates that the requested operation cannot be
+// carried out due to a licensing issue with the cluster.
 type LicenceCapabilityError struct {
 	msg string
 }
 
-// TODO(CP-3925): This should be smarter.
+// TODO(CP-3925): This should be more helpful. Maybe decorate with upgrade
+// links or suggested actions.
 func (e LicenceCapabilityError) Error() string {
 	if e.msg == "" {
 		return "licence capability error"
@@ -142,6 +162,8 @@ func NewLicenceCapabilityError(msg string) LicenceCapabilityError {
 	}
 }
 
+// ServerError indicates that an unrecoverable error occurred while attempting
+// to perform the requested operation.
 type ServerError struct {
 	msg string
 }
@@ -159,6 +181,8 @@ func NewServerError(msg string) ServerError {
 	}
 }
 
+// StoreError indicates that the requested operation could not be performed due
+// to a store outage.
 type StoreError struct {
 	msg string
 }

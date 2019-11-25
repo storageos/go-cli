@@ -65,8 +65,7 @@ func main() {
 	)
 
 	if err := app.Execute(); err != nil {
-		// TODO(CP-3916): Context deadline exceeded errors need to be mapped here
-		// and the appropriate exit code set
-		os.Exit(1)
+		code := cmd.ExitCodeForError(err)
+		os.Exit(code)
 	}
 }
