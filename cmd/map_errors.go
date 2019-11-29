@@ -27,25 +27,25 @@ func MapCommandError(err error) error {
 func ExitCodeForError(err error) int {
 	switch {
 	case errors.Is(err, apiclient.BadRequestError{}):
-		return 1 // TODO: Pick code
+		return 1 // TODO(CP-3973): Pick code
 	case errors.Is(err, apiclient.AuthenticationError{}):
-		return 1 // TODO: Pick code
+		return 1 // TODO(CP-3973): Pick code
 	case errors.Is(err, apiclient.UnauthorisedError{}):
-		return 1 // TODO: Pick code
+		return 1 // TODO(CP-3973): Pick code
 	case errors.Is(err, apiclient.NotFoundError{}):
-		return 1 // TODO: Pick code
+		return 1 // TODO(CP-3973): Pick code
 	case errors.Is(err, apiclient.ConflictError{}):
-		return 1 // TODO: Pick code
+		return 1 // TODO(CP-3973): Pick code
 	case errors.Is(err, apiclient.StaleWriteError{}):
-		return 1 // TODO: Pick code
+		return 1 // TODO(CP-3973): Pick code
 	case errors.Is(err, apiclient.InvalidStateTransitionError{}):
-		return 1 // TODO: Pick code
+		return 1 // TODO(CP-3973): Pick code
 	case errors.Is(err, apiclient.LicenceCapabilityError{}):
-		return 1 // TODO: Pick code
+		return 1 // TODO(CP-3973): Pick code
 	case errors.Is(err, apiclient.ServerError{}):
-		return 1 // TODO: Pick code
+		return 1 // TODO(CP-3973): Pick code
 	case errors.Is(err, apiclient.StoreError{}):
-		return 1 // TODO: Pick code
+		return 1 // TODO(CP-3973): Pick code
 	case errors.Is(err, context.DeadlineExceeded),
 		errors.Is(err, ErrCommandTimedOut):
 		return 124

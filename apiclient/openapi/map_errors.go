@@ -9,7 +9,6 @@ import (
 	"code.storageos.net/storageos/openapi"
 )
 
-// TODO: Surely there's a better way?
 // apiErr defines a JSON encodable struct with an error field.
 type apiErr struct {
 	Error string `json:"error"`
@@ -34,8 +33,6 @@ func mapOpenAPIError(err error, resp *http.Response) error {
 	var details string
 	switch resp.Header.Get("Content-Type") {
 	case "application/json":
-		// TODO: the error doesn't do anything useful here, as we default
-		// to an empty string.
 		details, _ = extractErrorStringJSON(oerr.Body())
 	default:
 	}

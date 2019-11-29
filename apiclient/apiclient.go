@@ -49,7 +49,7 @@ type Client struct {
 }
 
 // TODO: I think maybe this authenticate boiler plate should be moved down into
-// the OpenAPI layer? That way we can be smart and avoid re-authing etcd without
+// the OpenAPI layer? That way we can be smart and avoid re-authing etc without
 // breaking abstraction layers.
 func (c *Client) authenticate(ctx context.Context) (*user.Resource, error) {
 	username, err := c.config.Username()

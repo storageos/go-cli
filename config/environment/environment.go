@@ -1,4 +1,4 @@
-// Package
+// Package environment
 package environment
 
 import (
@@ -28,6 +28,8 @@ const (
 	PasswordCommandVar = "STORAGEOS_PASSWORD_COMMAND"
 )
 
+// FallbackProvider defines the set of methods which need to be implemented
+// by a type to be used as a fallback configuration provider.
 type FallbackProvider interface {
 	APIEndpoints() ([]string, error)
 	CommandTimeout() (time.Duration, error)

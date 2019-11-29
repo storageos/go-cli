@@ -3,23 +3,30 @@ package flags
 import "time"
 
 const (
-	// APIEndpointsFlags keys the long flag from which we source the API host
-	// endpoints.
+	// APIEndpointsFlags keys the long flag from which the list of API host
+	// endpoints are sourced, if set.
 	APIEndpointsFlag = "endpoints"
-	// CommandTimeoutFlag keys the long flag from which we source the timeout for
-	// API operations.
+	// CommandTimeoutFlag keys the long flag from which the timeout for API
+	// operations is sourced, if set.
 	CommandTimeoutFlag = "timeout"
-	// TODO: Maybe these don't belong here?
+	// UsernameFlag keys the long flag from which the username part of the
+	// credentials used for authentication is sourced, if set.
 	UsernameFlag = "username"
+	// PasswordFlag keys the long flag from which the password part of the
+	// credentials used for authentication is sourced, if set.
 	PasswordFlag = "password"
 )
 
+// FlagSet describes a set of typed flag set accessors required by the
+// Provider.
 type FlagSet interface {
 	GetDuration(name string) (time.Duration, error)
 	GetString(name string) (string, error)
 	GetStringArray(name string) ([]string, error)
 }
 
+// FallbackProvider defines the set of methods which need to be implemented
+// by a type to be used as a fallback configuration provider.
 type FallbackProvider interface {
 	APIEndpoints() ([]string, error)
 	CommandTimeout() (time.Duration, error)
@@ -87,6 +94,9 @@ func (flag *Provider) Password() (string, error) {
 	return password, nil
 }
 
+// NewProvider initialises a new flag based configuration provider sourcing its
+// values from flagset, falling back on the provided fallback if the value can
+// not be sourced from flagset.
 func NewProvider(flagset FlagSet, fallback FallbackProvider) *Provider {
 	return &Provider{
 		set:      flagset,
