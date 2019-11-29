@@ -48,6 +48,8 @@ func (d *Defaulter) Password() (string, error) {
 	return DefaultPassword, nil
 }
 
+var _ Provider = (*Defaulter)(nil) // Ensure that the defaulter satisfies the exported interface
+
 // NewDefaulter returns an initialised default config provider.
 func NewDefaulter() *Defaulter {
 	return &Defaulter{}

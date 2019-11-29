@@ -1,10 +1,13 @@
-// Package environment
+// Package environment exports an implementation of a configuration settings
+// provider which operates using the operating systems environment.
 package environment
 
 import (
 	"os"
 	"strings"
 	"time"
+
+	"code.storageos.net/storageos/c2-cli/config"
 )
 
 const (
@@ -28,20 +31,11 @@ const (
 	PasswordCommandVar = "STORAGEOS_PASSWORD_COMMAND"
 )
 
-// FallbackProvider defines the set of methods which need to be implemented
-// by a type to be used as a fallback configuration provider.
-type FallbackProvider interface {
-	APIEndpoints() ([]string, error)
-	CommandTimeout() (time.Duration, error)
-	Username() (string, error)
-	Password() (string, error)
-}
-
 // Provider exports functionality to retrieve global configuration values from
 // environment variables if available. When a configuration value is not
-// available from the environment, the configured FallbackProvider is used.
+// available from the environment, the configured fallback is used.
 type Provider struct {
-	fallback FallbackProvider
+	fallback config.Provider
 }
 
 func (env *Provider) APIEndpoints() ([]string, error) {
@@ -83,7 +77,10 @@ func (env *Provider) Password() (string, error) {
 
 }
 
-func NewProvider(fallback FallbackProvider) *Provider {
+// NewProvider returns a configuration provider which sources
+// its configuration setting values from the OS environment if
+// available.
+func NewProvider(fallback config.Provider) *Provider {
 	return &Provider{
 		fallback: fallback,
 	}

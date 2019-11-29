@@ -1,6 +1,12 @@
+// Package flags exports an implementation of a configuration settings provider
+// which operates using a set of flags.
 package flags
 
-import "time"
+import (
+	"time"
+
+	"code.storageos.net/storageos/c2-cli/config"
+)
 
 const (
 	// APIEndpointsFlags keys the long flag from which the list of API host
@@ -25,21 +31,12 @@ type FlagSet interface {
 	GetStringArray(name string) ([]string, error)
 }
 
-// FallbackProvider defines the set of methods which need to be implemented
-// by a type to be used as a fallback configuration provider.
-type FallbackProvider interface {
-	APIEndpoints() ([]string, error)
-	CommandTimeout() (time.Duration, error)
-	Username() (string, error)
-	Password() (string, error)
-}
-
 // Provider exports functionality to retrieve global configuration values from
 // the global flag set if available. When a configuration value is not
-// available from the flag set, the configured FallbackProvider is used.
+// available from the flag set, the configured fallback is used.
 type Provider struct {
 	set      FlagSet
-	fallback FallbackProvider
+	fallback config.Provider
 }
 
 func (flag *Provider) APIEndpoints() ([]string, error) {
@@ -97,7 +94,7 @@ func (flag *Provider) Password() (string, error) {
 // NewProvider initialises a new flag based configuration provider sourcing its
 // values from flagset, falling back on the provided fallback if the value can
 // not be sourced from flagset.
-func NewProvider(flagset FlagSet, fallback FallbackProvider) *Provider {
+func NewProvider(flagset FlagSet, fallback config.Provider) *Provider {
 	return &Provider{
 		set:      flagset,
 		fallback: fallback,
