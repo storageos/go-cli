@@ -52,8 +52,10 @@ type Client interface {
 	GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error)
 	GetAllVolumes(ctx context.Context) ([]*volume.Resource, error)
 	GetNamespaceVolumes(ctx context.Context, namespaceID id.Namespace, uids ...id.Volume) ([]*volume.Resource, error)
+	GetNamespaceVolumesByName(ctx context.Context, namespaceID id.Namespace, names ...string) ([]*volume.Resource, error)
 
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
+	GetAllNamespaces(ctx context.Context) ([]*namespace.Resource, error)
 
 	// --------
 	// Describe

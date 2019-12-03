@@ -4,7 +4,6 @@ package apiclient
 
 import (
 	"context"
-	"errors"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -30,12 +29,13 @@ type ConfigProvider interface {
 type Transport interface {
 	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
 
-	GetCluster(context.Context) (*cluster.Resource, error)
-	GetNode(context.Context, id.Node) (*node.Resource, error)
-	GetVolume(context.Context, id.Namespace, id.Volume) (*volume.Resource, error)
+	GetCluster(ctx context.Context) (*cluster.Resource, error)
+	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
+	GetVolume(ctx context.Context, namespaceID id.Namespace, uid id.Volume) (*volume.Resource, error)
+	GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error)
 
-	ListNodes(context.Context) ([]*node.Resource, error)
-	ListVolumes(context.Context, id.Namespace) ([]*volume.Resource, error)
+	ListNodes(ctx context.Context) ([]*node.Resource, error)
+	ListVolumes(ctx context.Context, namespaceID id.Namespace) ([]*volume.Resource, error)
 	ListNamespaces(context.Context) ([]*namespace.Resource, error)
 
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
@@ -48,9 +48,10 @@ type Client struct {
 	transport Transport
 }
 
-// TODO: I think maybe this authenticate boiler plate should be moved down into
-// the OpenAPI layer? That way we can be smart and avoid re-authing etc without
-// breaking abstraction layers.
+// TODO(CP-3930): I think maybe this authenticate boiler plate should be moved
+// down into the OpenAPI layer? That way we can be smart and avoid re-authing
+// etc without breaking abstraction layers. Marking this as part of the JWT
+// caching work because it's related and might lead to a nice solution - Fraser
 func (c *Client) authenticate(ctx context.Context) (*user.Resource, error) {
 	username, err := c.config.Username()
 	if err != nil {
@@ -62,35 +63,6 @@ func (c *Client) authenticate(ctx context.Context) (*user.Resource, error) {
 	}
 
 	return c.transport.Authenticate(ctx, username, password)
-}
-
-// fetchAllVolumes requests the list of all namespaces from the StorageOS API,
-// then requests the list of volumes within each namespace, returning an
-// aggregate list of the volumes returned.
-//
-// If access is not granted when listing volumes for a retrieved namespace it
-// is noted but will not return an error. Only if access is denied for all
-// attempts will this return a permissions error.
-func (c *Client) fetchAllVolumes(ctx context.Context) ([]*volume.Resource, error) {
-	namespaces, err := c.transport.ListNamespaces(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var volumes []*volume.Resource
-
-	for _, ns := range namespaces {
-		nsvols, err := c.transport.ListVolumes(ctx, ns.ID)
-		switch {
-		case err == nil, errors.Is(err, UnauthorisedError{}):
-			// For these two errors, ignore - they're not fatal to the operation.
-		default:
-			return nil, err
-		}
-		volumes = append(volumes, nsvols...)
-	}
-
-	return volumes, nil
 }
 
 // New initialises a new Client using config for configuration settings,

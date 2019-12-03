@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -30,9 +31,14 @@ type GetClient interface {
 	GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
 	GetListNodesByName(ctx context.Context, names ...string) ([]*node.Resource, error)
 
-	GetVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume) (*volume.Resource, error)
+	GetVolume(ctx context.Context, namespaceID id.Namespace, uid id.Volume) (*volume.Resource, error)
+	GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error)
 	GetAllVolumes(ctx context.Context) ([]*volume.Resource, error)
-	GetNamespaceVolumes(ctx context.Context, namespaceID id.Namespace, volumeIDs ...id.Volume) ([]*volume.Resource, error)
+	GetNamespaceVolumes(ctx context.Context, namespaceID id.Namespace, uids ...id.Volume) ([]*volume.Resource, error)
+	GetNamespaceVolumesByName(ctx context.Context, namespaceID id.Namespace, names ...string) ([]*volume.Resource, error)
+
+	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
+	GetAllNamespaces(ctx context.Context) ([]*namespace.Resource, error)
 }
 
 // GetDisplayer defines the functionality required by the CLI application to

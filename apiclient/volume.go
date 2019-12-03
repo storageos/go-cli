@@ -2,6 +2,7 @@ package apiclient
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"code.storageos.net/storageos/c2-cli/pkg/id"
@@ -65,31 +66,26 @@ func (c *Client) GetNamespaceVolumes(ctx context.Context, namespace id.Namespace
 		return nil, err
 	}
 
-	if len(uids) == 0 {
-		return volumes, nil
+	return filterVolumesForUIDs(volumes, uids...)
+}
+
+// GetNamespaceVolumesByName requests basic information for each volume resource in
+// namespace from the StorageOS API.
+//
+// The returned list is filtered using uids so that it contains only those
+// resources which have a matching ID. Omitting uids will skip the filtering.
+func (c *Client) GetNamespaceVolumesByName(ctx context.Context, namespace id.Namespace, names ...string) ([]*volume.Resource, error) {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	// Filter uids have been provided:
-	retrieved := map[id.Volume]*volume.Resource{}
-
-	for _, v := range volumes {
-		retrieved[v.ID] = v
+	volumes, err := c.transport.ListVolumes(ctx, namespace)
+	if err != nil {
+		return nil, err
 	}
 
-	filtered := make([]*volume.Resource, len(uids))
-
-	i := 0
-	for _, id := range uids {
-		v, ok := retrieved[id]
-		if ok {
-			filtered[i] = v
-			i++
-		} else {
-			return nil, NewNotFoundError(fmt.Sprintf("volume %v not found", id))
-		}
-	}
-
-	return filtered, nil
+	return filterVolumesForNames(volumes, names...)
 }
 
 // GetAllVolumes requests basic information for each volume resource in every
@@ -101,4 +97,97 @@ func (c *Client) GetAllVolumes(ctx context.Context) ([]*volume.Resource, error) 
 	}
 
 	return c.fetchAllVolumes(ctx)
+}
+
+// fetchAllVolumes requests the list of all namespaces from the StorageOS API,
+// then requests the list of volumes within each namespace, returning an
+// aggregate list of the volumes returned.
+//
+// If access is not granted when listing volumes for a retrieved namespace it
+// is noted but will not return an error. Only if access is denied for all
+// attempts will this return a permissions error.
+func (c *Client) fetchAllVolumes(ctx context.Context) ([]*volume.Resource, error) {
+	namespaces, err := c.transport.ListNamespaces(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	volumes := []*volume.Resource{}
+
+	for _, ns := range namespaces {
+		nsvols, err := c.transport.ListVolumes(ctx, ns.ID)
+		switch {
+		case err == nil, errors.Is(err, UnauthorisedError{}):
+			// For these two errors, ignore - they're not fatal to the operation.
+		default:
+			return nil, err
+		}
+		volumes = append(volumes, nsvols...)
+	}
+
+	return volumes, nil
+}
+
+// filterVolumesForUIDs will return a subset of volumes containing resources
+// which have one of the provided uids. If uids is not provided, volumes is
+// returned as is.
+//
+// If there is no resource for a given uid then an error is returned, thus
+// this is a strict helper.
+func filterVolumesForUIDs(volumes []*volume.Resource, uids ...id.Volume) ([]*volume.Resource, error) {
+	if len(uids) == 0 {
+		return volumes, nil
+	}
+
+	retrieved := map[id.Volume]*volume.Resource{}
+
+	for _, v := range volumes {
+		retrieved[v.ID] = v
+	}
+
+	filtered := make([]*volume.Resource, len(uids))
+
+	i := 0
+	for _, id := range uids {
+		v, ok := retrieved[id]
+		if !ok {
+			return nil, NewNotFoundError(fmt.Sprintf("volume %v not found", id))
+		}
+		filtered[i] = v
+		i++
+	}
+
+	return filtered, nil
+}
+
+// filterVolumesForNames will return a subset of volumes containing resources
+// which have one of the provided names. If names is not provided, volumes is
+// returned as is.
+//
+// If there is no resource for a given name then an error is returned, thus
+// this is a strict helper.
+func filterVolumesForNames(volumes []*volume.Resource, names ...string) ([]*volume.Resource, error) {
+	if len(names) == 0 {
+		return volumes, nil
+	}
+
+	retrieved := map[string]*volume.Resource{}
+
+	for _, v := range volumes {
+		retrieved[v.Name] = v
+	}
+
+	filtered := make([]*volume.Resource, len(names))
+
+	i := 0
+	for _, name := range names {
+		v, ok := retrieved[name]
+		if !ok {
+			return nil, NewNotFoundError(fmt.Sprintf("volume with name %v not found", name))
+		}
+		filtered[i] = v
+		i++
+	}
+
+	return filtered, nil
 }

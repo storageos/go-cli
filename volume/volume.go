@@ -9,6 +9,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
 
+// FsType indicates the kind of filesystem which a volume has been given.
 type FsType string
 
 func FsTypeFromString(name string) FsType {
