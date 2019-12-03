@@ -118,7 +118,7 @@ func (c *Client) fetchAllVolumes(ctx context.Context) ([]*volume.Resource, error
 		nsvols, err := c.transport.ListVolumes(ctx, ns.ID)
 		switch {
 		case err == nil, errors.Is(err, UnauthorisedError{}):
-			// For these two errors, ignore - they're not fatal to the operation.
+			// For an unauthorised error, ignore - its not fatal to the operation.
 		default:
 			return nil, err
 		}

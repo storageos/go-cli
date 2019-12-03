@@ -229,7 +229,7 @@ func filterNodesForNames(nodes []*node.Resource, names ...string) ([]*node.Resou
 	for _, name := range names {
 		n, ok := retrieved[name]
 		if !ok {
-			return nil, NewNotFoundError(fmt.Sprintf("node %v not found", name))
+			return nil, NewNotFoundError(fmt.Sprintf("node with name %v not found", name))
 		}
 		filtered[i] = n
 		i++

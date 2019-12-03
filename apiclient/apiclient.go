@@ -36,7 +36,7 @@ type Transport interface {
 
 	ListNodes(ctx context.Context) ([]*node.Resource, error)
 	ListVolumes(ctx context.Context, namespaceID id.Namespace) ([]*volume.Resource, error)
-	ListNamespaces(context.Context) ([]*namespace.Resource, error)
+	ListNamespaces(ctx context.Context) ([]*namespace.Resource, error)
 
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
 }
