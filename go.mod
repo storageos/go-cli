@@ -11,6 +11,6 @@ require (
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
 )
 
-replace code.storageos.net/storageos/openapi => ../openapi
+replace code.storageos.net/storageos/openapi => ./pkg/openapi
 
 go 1.13

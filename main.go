@@ -32,11 +32,14 @@ func main() {
 	userAgent := strings.Join([]string{UserAgentPrefix, version.String()}, "/")
 
 	// Initialise the configuration provider stack.
-	// flags → env → TODO(CP-3918) config file → default
 	globalFlags := cmd.InitPersistentFlags()
+	// → flags
 	configProvider := flags.NewProvider(
 		globalFlags,
+		// → environment
 		environment.NewProvider(
+			// → TODO(CP-3918) config file
+			// → default values
 			config.NewDefaulter(),
 		),
 	)
