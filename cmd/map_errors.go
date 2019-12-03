@@ -26,25 +26,25 @@ func MapCommandError(err error) error {
 // ExitCodeForError returns the appropriate application exit code for err.
 func ExitCodeForError(err error) int {
 	switch {
-	case errors.Is(err, apiclient.BadRequestError{}):
+	case errors.As(err, &apiclient.BadRequestError{}):
 		return 1 // TODO(CP-3973): Pick code
-	case errors.Is(err, apiclient.AuthenticationError{}):
+	case errors.As(err, &apiclient.AuthenticationError{}):
 		return 1 // TODO(CP-3973): Pick code
-	case errors.Is(err, apiclient.UnauthorisedError{}):
+	case errors.As(err, &apiclient.UnauthorisedError{}):
 		return 1 // TODO(CP-3973): Pick code
-	case errors.Is(err, apiclient.NotFoundError{}):
+	case errors.As(err, &apiclient.NotFoundError{}):
 		return 1 // TODO(CP-3973): Pick code
-	case errors.Is(err, apiclient.ConflictError{}):
+	case errors.As(err, &apiclient.ConflictError{}):
 		return 1 // TODO(CP-3973): Pick code
-	case errors.Is(err, apiclient.StaleWriteError{}):
+	case errors.As(err, &apiclient.StaleWriteError{}):
 		return 1 // TODO(CP-3973): Pick code
-	case errors.Is(err, apiclient.InvalidStateTransitionError{}):
+	case errors.As(err, &apiclient.InvalidStateTransitionError{}):
 		return 1 // TODO(CP-3973): Pick code
-	case errors.Is(err, apiclient.LicenceCapabilityError{}):
+	case errors.As(err, &apiclient.LicenceCapabilityError{}):
 		return 1 // TODO(CP-3973): Pick code
-	case errors.Is(err, apiclient.ServerError{}):
+	case errors.As(err, &apiclient.ServerError{}):
 		return 1 // TODO(CP-3973): Pick code
-	case errors.Is(err, apiclient.StoreError{}):
+	case errors.As(err, &apiclient.StoreError{}):
 		return 1 // TODO(CP-3973): Pick code
 	case errors.Is(err, context.DeadlineExceeded),
 		errors.Is(err, ErrCommandTimedOut):
