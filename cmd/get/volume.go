@@ -1,5 +1,7 @@
 package get
 
+// TODO: Implement name usage
+
 import (
 	"context"
 	"errors"
@@ -101,7 +103,7 @@ func newVolume(w io.Writer, client GetClient, config ConfigProvider) *cobra.Comm
 
 	cobraCommand := &cobra.Command{
 		Aliases: []string{"volumes"},
-		Use:     "volume [volume ids...]",
+		Use:     "volume [volume names...]",
 		Short:   "volume retrieves basic information about StorageOS volumes",
 		Example: `
 $ storageos get volume banana

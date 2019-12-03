@@ -19,6 +19,36 @@ func (c *Client) GetVolume(ctx context.Context, namespace id.Namespace, uid id.V
 	return c.transport.GetVolume(ctx, namespace, uid)
 }
 
+// GetVolumeByName requests basic information for the volume resource which has
+// name in namespace.
+//
+// The resource model for the API is build around using unique identifiers,
+// so this operation is inherently more expensive than the corresponding
+// GetVolume() operation.
+//
+// Retrieving a volume resource by name involves requesting a list of all
+// volumes in the namespace from the StorageOS API and returning the first one
+// where the name matches.
+func (c *Client) GetVolumeByName(ctx context.Context, namespace id.Namespace, name string) (*volume.Resource, error) {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	volumes, err := c.transport.ListVolumes(ctx, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range volumes {
+		if v.Name == name {
+			return v, nil
+		}
+	}
+
+	return nil, NewNotFoundError(fmt.Sprintf("volume with name %v not found", name))
+}
+
 // GetNamespaceVolumes requests basic information for each volume resource in
 // namespace from the StorageOS API.
 //

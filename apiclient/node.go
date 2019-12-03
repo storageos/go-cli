@@ -66,30 +66,7 @@ func (c *Client) GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Res
 		return nil, err
 	}
 
-	if len(uids) == 0 {
-		return nodes, nil
-	}
-
-	// Filter uids have been provided:
-	retrieved := map[id.Node]*node.Resource{}
-
-	for _, n := range nodes {
-		retrieved[n.ID] = n
-	}
-
-	filtered := make([]*node.Resource, len(uids))
-
-	i := 0
-	for _, id := range uids {
-		n, ok := retrieved[id]
-		if !ok {
-			return nil, NewNotFoundError(fmt.Sprintf("node %v not found", id))
-		}
-		filtered[i] = n
-		i++
-	}
-
-	return nodes, nil
+	return filterNodesForUIDs(nodes, uids...)
 }
 
 // GetListNodesByName requests a list containing basic information on each
@@ -108,41 +85,13 @@ func (c *Client) GetListNodesByName(ctx context.Context, names ...string) ([]*no
 		return nil, err
 	}
 
-	if len(names) == 0 {
-		return nodes, nil
-	}
-
-	// Filter uids have been provided:
-	retrieved := map[string]*node.Resource{}
-
-	for _, n := range nodes {
-		retrieved[n.Name] = n
-	}
-
-	filtered := make([]*node.Resource, len(names))
-
-	i := 0
-	for _, name := range names {
-		n, ok := retrieved[name]
-		if !ok {
-			return nil, NewNotFoundError(fmt.Sprintf("node %v not found", name))
-		}
-		filtered[i] = n
-		i++
-	}
-
-	return nodes, nil
+	return filterNodesForNames(nodes, names...)
 }
 
 // DescribeNode requests detailed information for the node resource which
 // corresponds to uid from the StorageOS API.
 func (c *Client) DescribeNode(ctx context.Context, uid id.Node) (*node.State, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	resource, err := c.transport.GetNode(ctx, uid)
+	resource, err := c.GetNode(ctx, uid)
 	if err != nil {
 		return nil, err
 	}
@@ -201,29 +150,42 @@ func (c *Client) DescribeListNodes(ctx context.Context, uids ...id.Node) ([]*nod
 		return nil, err
 	}
 
-	if len(uids) > 0 {
-		retrieved := map[id.Node]*node.Resource{}
-
-		for _, n := range resources {
-			retrieved[n.ID] = n
-		}
-
-		filtered := make([]*node.Resource, len(uids))
-
-		i := 0
-		for _, id := range uids {
-			n, ok := retrieved[id]
-			if ok {
-				filtered[i] = n
-				i++
-			} else {
-				return nil, NewNotFoundError(fmt.Sprintf("node %v not found", id))
-			}
-		}
-
-		resources = filtered
+	resources, err = filterNodesForUIDs(resources, uids...)
+	if err != nil {
+		return nil, err
 	}
 
+	return c.getNodeStates(ctx, resources)
+}
+
+// DescribeListNodesByName requests a list containing detailed information on each
+// node resource in the cluster.
+//
+// The returned list is filtered using names so that it contains only those
+// resources which have a matching name. If none are specified, all are returned.
+func (c *Client) DescribeListNodesByName(ctx context.Context, names ...string) ([]*node.State, error) {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	resources, err := c.transport.ListNodes(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	resources, err = filterNodesForNames(resources, names...)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.getNodeStates(ctx, resources)
+}
+
+// getNodeStates is a helper function to build a slice of *node.State from
+// resources. To accurately construct a *node.State from a *node.Resource
+// requires knowledge of the complete volume set so this is expensive.
+func (c *Client) getNodeStates(ctx context.Context, resources []*node.Resource) ([]*node.State, error) {
 	nodes := make([]*node.State, len(resources))
 
 	volumes, err := c.fetchAllVolumes(ctx)
@@ -241,6 +203,72 @@ func (c *Client) DescribeListNodes(ctx context.Context, uids ...id.Node) ([]*nod
 	}
 
 	return nodes, nil
+}
+
+// filterNodesForNames will return a subset of nodes containing resources
+// which have one of the provided names. If names is not provided, nodes is
+// returned as is.
+//
+// If there is no resource for a given name then an error is returned, thus
+// this is a strict helper.
+func filterNodesForNames(nodes []*node.Resource, names ...string) ([]*node.Resource, error) {
+	// return everything if no filter names given
+	if len(names) == 0 {
+		return nodes, nil
+	}
+
+	retrieved := map[string]*node.Resource{}
+
+	for _, n := range nodes {
+		retrieved[n.Name] = n
+	}
+
+	filtered := make([]*node.Resource, len(names))
+
+	i := 0
+	for _, name := range names {
+		n, ok := retrieved[name]
+		if !ok {
+			return nil, NewNotFoundError(fmt.Sprintf("node %v not found", name))
+		}
+		filtered[i] = n
+		i++
+	}
+
+	return filtered, nil
+}
+
+// filterNodesForUIDs will return a subset of nodes containing resources
+// which have one of the provided uids. If uids is not provided, nodes is
+// returned as is.
+//
+// If there is no resource for a given uid then an error is returned, thus
+// this is a strict helper.
+func filterNodesForUIDs(nodes []*node.Resource, uids ...id.Node) ([]*node.Resource, error) {
+	// return everything if no filter uids given
+	if len(uids) == 0 {
+		return nodes, nil
+	}
+
+	retrieved := map[id.Node]*node.Resource{}
+
+	for _, n := range nodes {
+		retrieved[n.ID] = n
+	}
+
+	filtered := make([]*node.Resource, len(uids))
+
+	i := 0
+	for _, id := range uids {
+		n, ok := retrieved[id]
+		if !ok {
+			return nil, NewNotFoundError(fmt.Sprintf("node %v not found", id))
+		}
+		filtered[i] = n
+		i++
+	}
+
+	return filtered, nil
 }
 
 // deploymentsForNode is a utility function returning the list of all

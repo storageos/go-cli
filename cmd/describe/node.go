@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 )
@@ -14,6 +15,8 @@ type nodeCommand struct {
 	config  ConfigProvider
 	client  DescribeClient
 	display DescribeDisplayer
+
+	usingID bool
 
 	writer io.Writer
 }
@@ -28,35 +31,47 @@ func (c *nodeCommand) run(cmd *cobra.Command, args []string) error {
 
 	switch len(args) {
 	case 1:
-		return c.describeNode(ctx, args)
+		n, err := c.describeNode(ctx, args[0])
+		if err != nil {
+			return err
+		}
+
+		return c.display.DescribeNode(ctx, c.writer, n)
 	default:
-		return c.listNodes(ctx, args)
+		nodes, err := c.listNodes(ctx, args)
+		if err != nil {
+			return err
+		}
+
+		return c.display.DescribeNodeList(ctx, c.writer, nodes)
 	}
 }
 
-func (c *nodeCommand) describeNode(ctx context.Context, args []string) error {
-	uid := id.Node(args[0])
-
-	node, err := c.client.DescribeNode(ctx, uid)
-	if err != nil {
-		return err
+// describeNode retrieves a single node state using the API client, determining
+// whether to retrieve the node by name or ID based on the current command configuration.
+func (c *nodeCommand) describeNode(ctx context.Context, ref string) (*node.State, error) {
+	if !c.usingID {
+		return c.client.DescribeNodeByName(ctx, ref)
 	}
 
-	return c.display.DescribeNode(ctx, c.writer, node)
+	uid := id.Node(ref)
+	return c.client.DescribeNode(ctx, uid)
 }
 
-func (c *nodeCommand) listNodes(ctx context.Context, args []string) error {
-	uids := make([]id.Node, len(args))
-	for i, a := range args {
-		uids[i] = id.Node(a)
+// listNodes retrieves a list of node states using the API client, determining
+// whether to retrieve nodes by names by name or ID based on the current
+// command configuration.
+func (c *nodeCommand) listNodes(ctx context.Context, refs []string) ([]*node.State, error) {
+	if !c.usingID {
+		return c.client.DescribeListNodesByName(ctx, refs...)
 	}
 
-	nodes, err := c.client.DescribeListNodes(ctx, uids...)
-	if err != nil {
-		return err
+	uids := make([]id.Node, len(refs))
+	for i, ref := range refs {
+		uids[i] = id.Node(ref)
 	}
 
-	return c.display.DescribeNodeList(ctx, c.writer, nodes)
+	return c.client.DescribeListNodes(ctx, uids...)
 }
 
 func newNode(w io.Writer, client DescribeClient, config ConfigProvider) *cobra.Command {
@@ -71,7 +86,7 @@ func newNode(w io.Writer, client DescribeClient, config ConfigProvider) *cobra.C
 	}
 	cobraCommand := &cobra.Command{
 		Aliases: []string{"nodes"},
-		Use:     "node [node ids...]",
+		Use:     "node [node names...]",
 		Short:   "node retrieves detailed information about StorageOS nodes",
 		Example: `
 $ storageos describe node banana
@@ -81,6 +96,8 @@ $ storageos describe node banana
 
 		SilenceUsage: true,
 	}
+
+	cobraCommand.Flags().BoolVar(&c.usingID, "use-id", false, "request StorageOS nodes by ID instead of by name")
 
 	return cobraCommand
 }

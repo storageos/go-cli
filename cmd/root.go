@@ -14,6 +14,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/get"
 	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/config/flags"
+	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/user"
@@ -29,17 +30,39 @@ type ConfigProvider interface {
 // Client defines the functionality required by the CLI application to
 // reasonably implement the commands it provides.
 type Client interface {
+
+	// ------
+	// Create
+	// ------
+
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
 
-	GetCluster(context.Context) (*cluster.Resource, error)
-	GetNode(context.Context, id.Node) (*node.Resource, error)
-	GetListNodes(context.Context, ...id.Node) ([]*node.Resource, error)
-	GetVolume(context.Context, id.Namespace, id.Volume) (*volume.Resource, error)
-	GetAllVolumes(context.Context) ([]*volume.Resource, error)
-	GetNamespaceVolumes(context.Context, id.Namespace, ...id.Volume) ([]*volume.Resource, error)
+	// ---
+	// Get
+	// ---
 
-	DescribeNode(context.Context, id.Node) (*node.State, error)
-	DescribeListNodes(context.Context, ...id.Node) ([]*node.State, error)
+	GetCluster(ctx context.Context) (*cluster.Resource, error)
+
+	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
+	GetNodeByName(ctx context.Context, name string) (*node.Resource, error)
+	GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
+	GetListNodesByName(ctx context.Context, names ...string) ([]*node.Resource, error)
+
+	GetVolume(ctx context.Context, namespaceID id.Namespace, uid id.Volume) (*volume.Resource, error)
+	GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error)
+	GetAllVolumes(ctx context.Context) ([]*volume.Resource, error)
+	GetNamespaceVolumes(ctx context.Context, namespaceID id.Namespace, uids ...id.Volume) ([]*volume.Resource, error)
+
+	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
+
+	// --------
+	// Describe
+	// --------
+
+	DescribeNode(ctx context.Context, uid id.Node) (*node.State, error)
+	DescribeNodeByName(ctx context.Context, name string) (*node.State, error)
+	DescribeListNodes(ctx context.Context, uids ...id.Node) ([]*node.State, error)
+	DescribeListNodesByName(ctx context.Context, names ...string) ([]*node.State, error)
 }
 
 // InitPersistentFlags builds a flag set containing the global flag set for the

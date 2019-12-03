@@ -23,14 +23,16 @@ type ConfigProvider interface {
 // GetClient defines the functionality required by the CLI application to
 // reasonably implement the "get" verb commands.
 type GetClient interface {
-	GetCluster(context.Context) (*cluster.Resource, error)
+	GetCluster(ctx context.Context) (*cluster.Resource, error)
 
-	GetNode(context.Context, id.Node) (*node.Resource, error)
-	GetListNodes(context.Context, ...id.Node) ([]*node.Resource, error)
+	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
+	GetNodeByName(ctx context.Context, name string) (*node.Resource, error)
+	GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
+	GetListNodesByName(ctx context.Context, names ...string) ([]*node.Resource, error)
 
-	GetVolume(context.Context, id.Namespace, id.Volume) (*volume.Resource, error)
-	GetAllVolumes(context.Context) ([]*volume.Resource, error)
-	GetNamespaceVolumes(context.Context, id.Namespace, ...id.Volume) ([]*volume.Resource, error)
+	GetVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume) (*volume.Resource, error)
+	GetAllVolumes(ctx context.Context) ([]*volume.Resource, error)
+	GetNamespaceVolumes(ctx context.Context, namespaceID id.Namespace, volumeIDs ...id.Volume) ([]*volume.Resource, error)
 }
 
 // GetDisplayer defines the functionality required by the CLI application to

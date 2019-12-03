@@ -21,8 +21,10 @@ type ConfigProvider interface {
 // DescribeClient describes the functionality required by the CLI application
 // to reasonably implement the "describe" verb commands.
 type DescribeClient interface {
-	DescribeNode(context.Context, id.Node) (*node.State, error)
-	DescribeListNodes(context.Context, ...id.Node) ([]*node.State, error)
+	DescribeNode(ctx context.Context, uid id.Node) (*node.State, error)
+	DescribeNodeByName(ctx context.Context, name string) (*node.State, error)
+	DescribeListNodes(ctx context.Context, uids ...id.Node) ([]*node.State, error)
+	DescribeListNodesByName(ctx context.Context, names ...string) ([]*node.State, error)
 }
 
 // DescribeDisplayer defines the functionality required by the CLI application
