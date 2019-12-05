@@ -1,0 +1,37 @@
+# code.storageos.net/storageos/openapi v0.0.0-00010101000000-000000000000 => ./pkg/openapi
+code.storageos.net/storageos/openapi
+# github.com/antihax/optional v1.0.0
+github.com/antihax/optional
+# github.com/blang/semver v3.5.1+incompatible
+github.com/blang/semver
+# github.com/golang/protobuf v1.2.0
+github.com/golang/protobuf/proto
+# github.com/inconshreveable/mousetrap v1.0.0
+github.com/inconshreveable/mousetrap
+# github.com/kr/pretty v0.1.0
+github.com/kr/pretty
+# github.com/kr/text v0.1.0
+github.com/kr/text
+# github.com/spf13/cobra v0.0.5
+github.com/spf13/cobra
+# github.com/spf13/pflag v1.0.3
+github.com/spf13/pflag
+# golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+golang.org/x/crypto/ssh/terminal
+# golang.org/x/net v0.0.0-20190620200207-3b0461eec859
+golang.org/x/net/context
+golang.org/x/net/context/ctxhttp
+# golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+golang.org/x/oauth2
+golang.org/x/oauth2/internal
+# golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# google.golang.org/appengine v1.4.0
+google.golang.org/appengine/internal
+google.golang.org/appengine/internal/base
+google.golang.org/appengine/internal/datastore
+google.golang.org/appengine/internal/log
+google.golang.org/appengine/internal/remote_api
+google.golang.org/appengine/internal/urlfetch
+google.golang.org/appengine/urlfetch
