@@ -21,7 +21,13 @@ func (c codec) decodeCluster(model openapi.Cluster) (*cluster.Resource, error) {
 	return &cluster.Resource{
 		ID: id.Cluster(model.Id),
 
-		Licence: &cluster.Licence{},
+		Licence: &cluster.Licence{
+			ClusterID:            id.Cluster(model.Licence.ClusterID),
+			ExpiresAt:            model.Licence.ExpiresAt,
+			ClusterCapacityBytes: model.Licence.ClusterCapacityBytes,
+			Kind:                 model.Licence.Kind,
+			CustomerName:         model.Licence.CustomerName,
+		},
 
 		DisableTelemetry:      model.DisableTelemetry,
 		DisableCrashReporting: model.DisableCrashReporting,

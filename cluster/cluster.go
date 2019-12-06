@@ -47,4 +47,10 @@ type Resource struct {
 
 // Licence describes a StorageOS product licence and the features included with
 // it.
-type Licence struct{}
+type Licence struct {
+	ClusterID            id.Cluster `json:"clusterId"`
+	ExpiresAt            time.Time  `json:"expiresAt"`
+	ClusterCapacityBytes uint64     `json:"clusterCapacityBytes"`
+	Kind                 string     `json:"kind"`
+	CustomerName         string     `json:"customerName"`
+}
