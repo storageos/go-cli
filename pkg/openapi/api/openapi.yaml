@@ -2955,6 +2955,16 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The entity to be wrote uses an identifier that already exists.
+        451:
+          content:
+            application/json:
+              example:
+                error: insufficient allowed capacity (bytes) (used 53687091200, allowed
+                  53687091200, requested 5000000)
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested operation failed because your storageOS licence does not allow it, either create an account for a free licence or buy a professional licence.
         500:
           content:
             application/json:
@@ -3321,6 +3331,16 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        451:
+          content:
+            application/json:
+              example:
+                error: insufficient allowed capacity (bytes) (used 53687091200, allowed
+                  53687091200, requested 5000000)
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested operation failed because your storageOS licence does not allow it, either create an account for a free licence or buy a professional licence.
         500:
           content:
             application/json:
@@ -3645,6 +3665,7 @@ paths:
                 licenceKey:
                   description: |
                     A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
+                    If this field is empty we assume that the called does not want to update the cluster's licence, and do not perform any operation.
                   type: string
                 disableTelemetry:
                   default: false
@@ -3977,6 +3998,16 @@ components:
       description: |
         The server is currently unable to handle the request due to a temporary store failure.
         Check the health of the node/cluster and if the error persists, contact support.
+    LicenceRestricted:
+      content:
+        application/json:
+          example:
+            error: insufficient allowed capacity (bytes) (used 53687091200, allowed
+              53687091200, requested 5000000)
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: |
+        The requested operation failed because your storageOS licence does not allow it, either create an account for a free licence or buy a professional licence.
     Unauthorised:
       content:
         application/json:
@@ -4081,6 +4112,15 @@ components:
         If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
       example: true
       type: boolean
+    ExpiresAt:
+      description: |
+        The time after which a licence will no longer be valid
+        This timestamp is set when the licence is created.
+        String format is RFC3339.
+      example: 2019-03-10T13:42:42Z
+      format: date-time
+      readOnly: true
+      type: string
     CreatedAt:
       description: |
         The time the entity was created.
@@ -4202,7 +4242,12 @@ components:
     Cluster:
       example:
         disableVersionCheck: false
-        licence: '{}'
+        licence:
+          clusterCapacityBytes: 1000000
+          kind: basic
+          clusterID: c5666b58-b805-4215-ab4a-cb094948ccc6
+          expiresAt: 2019-03-10T13:42:42Z
+          customerName: Desmond
         createdAt: 2019-03-10T13:42:42Z
         disableCrashReporting: false
         logFormat: json
@@ -4219,9 +4264,7 @@ components:
           readOnly: true
           type: string
         licence:
-          description: |
-            A JSON digest of a StorageOS product licence. The fields on this type may change.
-          type: object
+          $ref: '#/components/schemas/Licence'
         disableTelemetry:
           default: false
           description: Disables collection of telemetry data across the cluster.
@@ -4342,10 +4385,6 @@ components:
           minLength: 1
           type: string
       type: object
-    LicenceKey:
-      description: |
-        A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
-      type: string
     Volume:
       example:
         replicas:
@@ -4781,7 +4820,46 @@ components:
       type: object
     Licence:
       description: |
-        A JSON digest of a StorageOS product licence. The fields on this type may change.
+        A representation of a cluster's licence properties
+      example:
+        clusterCapacityBytes: 1000000
+        kind: basic
+        clusterID: c5666b58-b805-4215-ab4a-cb094948ccc6
+        expiresAt: 2019-03-10T13:42:42Z
+        customerName: Desmond
+      properties:
+        clusterID:
+          description: |
+            A unique identifier for a cluster. The format of this type is undefined and may change but the defined properties will not change.
+          example: c5666b58-b805-4215-ab4a-cb094948ccc6
+          readOnly: true
+          type: string
+        expiresAt:
+          description: |
+            The time after which a licence will no longer be valid
+            This timestamp is set when the licence is created.
+            String format is RFC3339.
+          example: 2019-03-10T13:42:42Z
+          format: date-time
+          readOnly: true
+          type: string
+        clusterCapacityBytes:
+          description: |
+            The allowed provisioning capacity in bytes
+            This value if for the cluster, if provisioning a volume brings the cluster's total provisioned capacity above it the request will fail
+          example: 1000000
+          minimum: 0
+          type: uint64
+        kind:
+          description: |
+            Denotes which category the licence belongs to
+          example: basic
+          type: string
+        customerName:
+          description: |
+            A user friendly reference to the customer
+          example: Desmond
+          type: string
       type: object
     AcceptedMessage:
       example:
@@ -5283,6 +5361,7 @@ components:
         licenceKey:
           description: |
             A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
+            If this field is empty we assume that the called does not want to update the cluster's licence, and do not perform any operation.
           type: string
         disableTelemetry:
           default: false

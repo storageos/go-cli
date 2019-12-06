@@ -12,8 +12,8 @@ package openapi
 
 // CreateRuleData struct for CreateRuleData
 type CreateRuleData struct {
-	Name     string            `json:"name,omitempty"`
-	Selector string            `json:"selector,omitempty"`
-	Action   string            `json:"action,omitempty"`
-	Labels   map[string]string `json:"labels,omitempty"`
+	Name     string              `json:"name,omitempty"`
+	Selector string              `json:"selector,omitempty"`
+	Action   string              `json:"action,omitempty"`
+	Labels   []map[string]string `json:"labels,omitempty"`
 }
