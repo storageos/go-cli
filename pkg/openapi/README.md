@@ -92,6 +92,7 @@ Class | Method | HTTP request | Description
  - [Error](docs/Error.md)
  - [FsType](docs/FsType.md)
  - [Health](docs/Health.md)
+ - [Licence](docs/Licence.md)
  - [LogFormat](docs/LogFormat.md)
  - [LogLevel](docs/LogLevel.md)
  - [Namespace](docs/Namespace.md)

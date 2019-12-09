@@ -9,7 +9,6 @@
  */
 
 package openapi
-
 // Error struct for Error
 type Error struct {
 	Error string `json:"error"`
