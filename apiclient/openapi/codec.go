@@ -1,6 +1,8 @@
 package openapi
 
 import (
+	"errors"
+
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -130,4 +132,23 @@ func (c codec) decodeUser(model openapi.User) (*user.Resource, error) {
 		UpdatedAt: model.UpdatedAt,
 		Version:   version.FromString(model.Version),
 	}, nil
+}
+
+func (c codec) encodeFsType(filesystem volume.FsType) (openapi.FsType, error) {
+	switch filesystem.String() {
+	case string(openapi.EXT2):
+		return openapi.EXT2, nil
+	case string(openapi.EXT3):
+		return openapi.EXT3, nil
+	case string(openapi.EXT4):
+		return openapi.EXT4, nil
+	case string(openapi.XFS):
+		return openapi.XFS, nil
+	case string(openapi.BTRFS):
+		return openapi.BTRFS, nil
+	case string(openapi.BLOCK):
+		return openapi.BLOCK, nil
+	default:
+		return "", errors.New("unknown fs type")
+	}
 }

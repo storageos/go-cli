@@ -9,6 +9,18 @@ import (
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
+// CreateVolume requests the creation of a new StorageOS volume in namespace
+// from the provided fields. If successful the created resource for the volume
+// is returned to the caller.
+func (c *Client) CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error) {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.transport.CreateVolume(ctx, namespace, name, description, fs, sizeBytes, labels)
+}
+
 // GetVolume requests basic information for the volume resource which
 // corresponds to uid in namespace from the StorageOS API.
 func (c *Client) GetVolume(ctx context.Context, namespace id.Namespace, uid id.Volume) (*volume.Resource, error) {

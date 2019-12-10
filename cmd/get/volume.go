@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -12,8 +11,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
-
-var errNoNamespace = errors.New("namespace not specified for id format")
 
 type volumeCommand struct {
 	config  ConfigProvider
@@ -71,7 +68,7 @@ func (c *volumeCommand) getVolume(ctx context.Context, args []string) (*volume.R
 	volumeReference := args[0]
 
 	if !c.usingIDs {
-		nsName, volName, err := parseReferenceName(args[0])
+		nsName, volName, err := volume.ParseReferenceName(args[0])
 		if err != nil {
 			return nil, err
 		}
@@ -84,10 +81,10 @@ func (c *volumeCommand) getVolume(ctx context.Context, args []string) (*volume.R
 		return c.client.GetVolumeByName(ctx, ns.ID, volName)
 	}
 
-	nsID, volID, err := parseReferenceID(volumeReference)
+	nsID, volID, err := volume.ParseReferenceID(volumeReference)
 	switch err {
 	case nil:
-	case errNoNamespace:
+	case volume.ErrNoNamespace:
 		// if no namespace is supplied then resolve the id of the default one
 		defaultNs, err := c.client.GetNamespaceByName(ctx, "default")
 		if err != nil {
@@ -108,7 +105,7 @@ func (c *volumeCommand) listVolumes(ctx context.Context, nameRefs []string) ([]*
 	nsIDForName := map[string]id.Namespace{}
 
 	for _, ref := range nameRefs {
-		nsName, volName, err := parseReferenceName(ref)
+		nsName, volName, err := volume.ParseReferenceName(ref)
 
 		if err != nil {
 			return nil, err
@@ -156,12 +153,12 @@ func (c *volumeCommand) listVolumesUsingID(ctx context.Context, idRefs []string)
 	defaultNsVols := []id.Volume{}
 
 	for _, ref := range idRefs {
-		nsID, volID, err := parseReferenceID(ref)
+		nsID, volID, err := volume.ParseReferenceID(ref)
 
 		switch err {
 		case nil:
 			nsVols[nsID] = append(nsVols[nsID], volID)
-		case errNoNamespace:
+		case volume.ErrNoNamespace:
 			defaultNsVols = append(defaultNsVols, volID)
 		default:
 			return nil, err
@@ -208,7 +205,7 @@ func newVolume(w io.Writer, client GetClient, config ConfigProvider) *cobra.Comm
 		Use:     "volume [volume names...]",
 		Short:   "volume retrieves basic information about StorageOS volumes",
 		Example: `
-$ storageos get volume --namespace fruits banana
+$ storageos get volume fruits/banana
 `,
 
 		RunE: c.run,
@@ -221,42 +218,4 @@ $ storageos get volume --namespace fruits banana
 	cobraCommand.Flags().BoolVar(&c.usingIDs, "use-id", false, "request StorageOS volumes by their namespace ID and volume ID instead of by their namespace name and volume name")
 
 	return cobraCommand
-}
-
-// parseReferenceName will parse a volume reference string built of
-// a namespace name and a volume name.
-//
-// if no namespace name is present then "default" is returned for the
-// namespace.
-func parseReferenceName(ref string) (namespace string, volume string, err error) {
-	parts := strings.Split(ref, "/")
-
-	switch len(parts) {
-	case 2:
-		return parts[0], parts[1], nil
-	case 1:
-		return "default", parts[0], nil
-	default:
-		return "", "", errors.New("invalid volume reference string")
-	}
-}
-
-// parseReferenceID will parse a volume reference string built of a namespace
-// ID and a volume ID.
-//
-// if the reference string does not contain a namespace then the volume id
-// is returned along with an errNoNamespace, so that the caller can check
-// for the value and decide on using the default namespace (as this is not
-// free for ID usecases)
-func parseReferenceID(ref string) (id.Namespace, id.Volume, error) {
-	parts := strings.Split(ref, "/")
-
-	switch len(parts) {
-	case 2:
-		return id.Namespace(parts[0]), id.Volume(parts[1]), nil
-	case 1:
-		return "", id.Volume(parts[0]), errNoNamespace
-	default:
-		return "", "", errors.New("invalid volume reference string")
-	}
 }

@@ -8,7 +8,8 @@ import (
 )
 
 // CreateUser requests the creation of a new StorageOS user account from the
-// provided fields.
+// provided fields. If successful the created resource for the user account
+// is returned to the caller.
 func (c *Client) CreateUser(
 	ctx context.Context,
 	username, password string,
