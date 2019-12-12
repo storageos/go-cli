@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/blang/semver"
+	"github.com/spf13/pflag"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/apiclient/openapi"
@@ -31,15 +32,18 @@ func main() {
 
 	userAgent := strings.Join([]string{UserAgentPrefix, version.String()}, "/")
 
-	// Initialise the configuration provider stack.
-	globalFlags := cmd.InitPersistentFlags()
-	// → flags
+	// Initialise the configuration provider stack:
+	//
+	// → flags first. note we init the flagset here because it needs to be
+	// given to the InitCommand call (setting up global flags)
+	globalFlags := pflag.NewFlagSet("storageos", pflag.ContinueOnError)
 	configProvider := flags.NewProvider(
 		globalFlags,
-		// → environment
+		// → environment next
 		environment.NewProvider(
-			// → TODO(CP-3918) config file
-			// → default values
+			// → TODO(CP-3918) config file next
+			//
+			// → default values as final fallback
 			config.NewDefaulter(),
 		),
 	)

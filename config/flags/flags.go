@@ -23,9 +23,15 @@ const (
 	PasswordFlag = "password"
 )
 
-// FlagSet describes a set of typed flag set accessors required by the
+// FlagSet describes a set of typed flag set accessors/setters required by the
 // Provider.
 type FlagSet interface {
+	Changed(name string) bool
+
+	Duration(name string, value time.Duration, usage string) *time.Duration
+	String(name string, value string, usage string) *string
+	StringArray(name string, value []string, usage string) *[]string
+
 	GetDuration(name string) (time.Duration, error)
 	GetString(name string) (string, error)
 	GetStringArray(name string) ([]string, error)
@@ -45,7 +51,7 @@ func (flag *Provider) APIEndpoints() ([]string, error) {
 		return nil, err
 	}
 
-	if len(hosts) == 0 {
+	if len(hosts) == 0 || !flag.set.Changed(APIEndpointsFlag) {
 		return flag.fallback.APIEndpoints()
 	}
 
@@ -58,7 +64,7 @@ func (flag *Provider) CommandTimeout() (time.Duration, error) {
 		return 0, err
 	}
 
-	if timeout == 0 {
+	if timeout == 0 || !flag.set.Changed(CommandTimeoutFlag) {
 		return flag.fallback.CommandTimeout()
 	}
 
@@ -71,7 +77,7 @@ func (flag *Provider) Username() (string, error) {
 		return "", err
 	}
 
-	if username == "" {
+	if username == "" || !flag.set.Changed(UsernameFlag) {
 		return flag.fallback.Username()
 	}
 
@@ -84,17 +90,42 @@ func (flag *Provider) Password() (string, error) {
 		return "", err
 	}
 
-	if password == "" {
+	if password == "" || !flag.set.Changed(PasswordFlag) {
 		return flag.fallback.Password()
 	}
 
 	return password, nil
 }
 
-// NewProvider initialises a new flag based configuration provider sourcing its
-// values from flagset, falling back on the provided fallback if the value can
+// NewProvider initialises a new flag based configuration provider backed by
+// flagset, falling back on the provided fallback if the value can
 // not be sourced from flagset.
+//
+//
 func NewProvider(flagset FlagSet, fallback config.Provider) *Provider {
+
+	// Set up the flags for the config provider
+	flagset.StringArray(
+		APIEndpointsFlag,
+		[]string{config.DefaultAPIEndpoint},
+		"set the list of endpoints which are used when connecting to the StorageOS API",
+	)
+	flagset.Duration(
+		CommandTimeoutFlag,
+		config.DefaultCommandTimeout,
+		"set the timeout duration to use for execution of the command",
+	)
+	flagset.String(
+		UsernameFlag,
+		config.DefaultUsername,
+		"set the StorageOS account username to authenticate as",
+	)
+	flagset.String(
+		PasswordFlag,
+		config.DefaultPassword,
+		"set the StorageOS account password to authenticate with",
+	)
+
 	return &Provider{
 		set:      flagset,
 		fallback: fallback,

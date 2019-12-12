@@ -12,8 +12,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/create"
 	"code.storageos.net/storageos/c2-cli/cmd/describe"
 	"code.storageos.net/storageos/c2-cli/cmd/get"
-	"code.storageos.net/storageos/c2-cli/config"
-	"code.storageos.net/storageos/c2-cli/config/flags"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
@@ -67,35 +65,6 @@ type Client interface {
 	DescribeNodeByName(ctx context.Context, name string) (*node.State, error)
 	DescribeListNodes(ctx context.Context, uids ...id.Node) ([]*node.State, error)
 	DescribeListNodesByName(ctx context.Context, names ...string) ([]*node.State, error)
-}
-
-// InitPersistentFlags builds a flag set containing the global flag set for the
-// configuration settings.
-func InitPersistentFlags() *pflag.FlagSet {
-	flagSet := pflag.NewFlagSet("storageos", pflag.ContinueOnError)
-
-	flagSet.StringArray(
-		flags.APIEndpointsFlag,
-		[]string{config.DefaultAPIEndpoint},
-		"set the list of endpoints which are used when connecting to the StorageOS API",
-	)
-	flagSet.Duration(
-		flags.CommandTimeoutFlag,
-		config.DefaultCommandTimeout,
-		"set the timeout duration to use for execution of the command",
-	)
-	flagSet.String(
-		flags.UsernameFlag,
-		config.DefaultUsername,
-		"set the StorageOS account username to authenticate as",
-	)
-	flagSet.String(
-		flags.PasswordFlag,
-		config.DefaultPassword,
-		"set the StorageOS account password to authenticate with",
-	)
-
-	return flagSet
 }
 
 // InitCommand configures the CLI application's commands from the root down, using
