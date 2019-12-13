@@ -48,24 +48,17 @@ func main() {
 		),
 	)
 
-	// Construct the API client with OpenAPI "transport".
-	transport, err := openapi.NewOpenAPI(configProvider, userAgent)
-	if err != nil {
-		fmt.Printf("failure occurred during initialisation of api client transport: %v\n", err)
-		os.Exit(1)
-	}
-
+	// Construct the initial API client without a transport
 	client := apiclient.New(
-		transport,
+		nil,
 		configProvider,
 	)
-	if err != nil {
-		fmt.Printf("failure occurred during initialisation of api client: %v\n", err)
-		os.Exit(1)
-	}
 
 	app := cmd.InitCommand(
 		client,
+		func() (apiclient.Transport, error) {
+			return openapi.NewOpenAPI(configProvider, userAgent)
+		},
 		configProvider,
 		globalFlags,
 		version,

@@ -16,6 +16,9 @@ func (c *Client) CreateUser(
 	withAdmin bool,
 	groups ...id.PolicyGroup,
 ) (*user.Resource, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err

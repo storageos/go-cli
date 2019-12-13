@@ -4,6 +4,7 @@ package apiclient
 
 import (
 	"context"
+	"sync"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -45,6 +46,7 @@ type Transport interface {
 // Client provides a collection of methods for consumers to interact with the
 // StorageOS API.
 type Client struct {
+	mu        *sync.RWMutex
 	config    ConfigProvider
 	transport Transport
 }
@@ -66,11 +68,21 @@ func (c *Client) authenticate(ctx context.Context) (*user.Resource, error) {
 	return c.transport.Authenticate(ctx, username, password)
 }
 
+// SetTransport configures c to use transport as the underlying implementation
+// for interacting with the StorageOS API.
+func (c *Client) SetTransport(transport Transport) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.transport = transport
+}
+
 // New initialises a new Client using config for configuration settings,
 // with transport providing the underlying implementation for encoding
 // requests and decoding responses.
 func New(transport Transport, config ConfigProvider) *Client {
 	return &Client{
+		mu:        &sync.RWMutex{},
 		transport: transport,
 		config:    config,
 	}

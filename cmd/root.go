@@ -2,12 +2,15 @@ package cmd
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/blang/semver"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/cmd/create"
 	"code.storageos.net/storageos/c2-cli/cmd/describe"
@@ -29,6 +32,12 @@ type ConfigProvider interface {
 // Client defines the functionality required by the CLI application to
 // reasonably implement the commands it provides.
 type Client interface {
+
+	// ---------
+	// Configure
+	// ---------
+
+	SetTransport(transport apiclient.Transport)
 
 	// ------
 	// Create
@@ -73,7 +82,7 @@ type Client interface {
 // The returned Command is configured with a flag set containing global configuration settings.
 //
 // Downstream errors are suppressed, so the caller is responsible for displaying messages.
-func InitCommand(client Client, config ConfigProvider, globalFlags *pflag.FlagSet, version semver.Version) *cobra.Command {
+func InitCommand(client Client, initTransport func() (apiclient.Transport, error), config ConfigProvider, globalFlags *pflag.FlagSet, version semver.Version) *cobra.Command {
 	app := &cobra.Command{
 		Use: "storageos <command>",
 		Short: `Storage for Cloud Native Applications.
@@ -84,6 +93,16 @@ User Subscription Agreement (EUSA) found at: https://storageos.com/legal/#eusa
 To be notified about stable releases and latest features, sign up at https://my.storageos.com.
 `,
 		Version: version.String(),
+
+		PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
+			transport, err := initTransport()
+			if err != nil {
+				fmt.Printf("failure occurred during initialisation of api client transport: %v\n", err)
+				os.Exit(1)
+			}
+			client.SetTransport(transport)
+			return nil
+		},
 
 		SilenceErrors: true,
 	}
