@@ -2,10 +2,12 @@ package get
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 )
 
@@ -33,10 +35,9 @@ func (c *clusterCommand) run(cmd *cobra.Command, _ []string) error {
 	return c.display.GetCluster(ctx, c.writer, cluster)
 }
 
-func newCluster(w io.Writer, client GetClient, config ConfigProvider) *cobra.Command {
+func newCluster(w io.Writer, initClient func() (*apiclient.Client, error), config ConfigProvider) *cobra.Command {
 	c := &clusterCommand{
 		config: config,
-		client: client,
 		display: jsonformat.NewDisplayer(
 			jsonformat.DefaultEncodingIndent,
 		),
@@ -50,6 +51,14 @@ func newCluster(w io.Writer, client GetClient, config ConfigProvider) *cobra.Com
 $ storageos get cluster
 `,
 
+		PreRunE: func(_ *cobra.Command, _ []string) error {
+			client, err := initClient()
+			if err != nil {
+				return fmt.Errorf("error initialising api client: %w", err)
+			}
+			c.client = client
+			return nil
+		},
 		RunE: c.run,
 
 		// If a legitimate error occurs as part of the VERB cluster command

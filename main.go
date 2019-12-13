@@ -48,16 +48,18 @@ func main() {
 		),
 	)
 
-	// Construct the initial API client without a transport
-	client := apiclient.New(
-		nil,
-		configProvider,
-	)
-
 	app := cmd.InitCommand(
-		client,
-		func() (apiclient.Transport, error) {
-			return openapi.NewOpenAPI(configProvider, userAgent)
+		// Provide a closure for initialising the API client to the command,
+		// so that it can be configured after flags have been parsed.
+		func() (*apiclient.Client, error) {
+			transport, err := openapi.NewOpenAPI(configProvider, userAgent)
+			if err != nil {
+				return nil, err
+			}
+			return apiclient.New(
+				transport,
+				configProvider,
+			), nil
 		},
 		configProvider,
 		globalFlags,

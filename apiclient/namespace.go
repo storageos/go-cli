@@ -11,9 +11,6 @@ import (
 // GetNamespace requests basic information for the namespace resource which
 // corresponds to uid from the StorageOS API.
 func (c *Client) GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err
@@ -33,9 +30,6 @@ func (c *Client) GetNamespace(ctx context.Context, uid id.Namespace) (*namespace
 // namespaces from the StorageOS API and returning the first one where the
 // name matches.
 func (c *Client) GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err
@@ -58,9 +52,6 @@ func (c *Client) GetNamespaceByName(ctx context.Context, name string) (*namespac
 // GetListNamespaces requests a list containing basic information for every namespace
 // in the StorageOS cluster.
 func (c *Client) GetAllNamespaces(ctx context.Context) ([]*namespace.Resource, error) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err

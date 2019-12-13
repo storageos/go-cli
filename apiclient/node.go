@@ -12,9 +12,6 @@ import (
 // GetNode requests basic information for the node resource which
 // corresponds to uid from the StorageOS API.
 func (c *Client) GetNode(ctx context.Context, uid id.Node) (*node.Resource, error) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err
@@ -34,9 +31,6 @@ func (c *Client) GetNode(ctx context.Context, uid id.Node) (*node.Resource, erro
 // in the cluster from the StorageOS API and returning the first node where the
 // name matches.
 func (c *Client) GetNodeByName(ctx context.Context, name string) (*node.Resource, error) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err
@@ -62,9 +56,6 @@ func (c *Client) GetNodeByName(ctx context.Context, name string) (*node.Resource
 // The returned list is filtered using uids so that it contains only those
 // resources which have a matching ID. Omitting uids will skip the filtering.
 func (c *Client) GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err
@@ -84,9 +75,6 @@ func (c *Client) GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Res
 // The returned list is filtered using names so that it contains only those
 // resources which have a matching name. Omitting names will skip the filtering.
 func (c *Client) GetListNodesByName(ctx context.Context, names ...string) ([]*node.Resource, error) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err
@@ -103,9 +91,6 @@ func (c *Client) GetListNodesByName(ctx context.Context, names ...string) ([]*no
 // DescribeNode requests detailed information for the node resource which
 // corresponds to uid from the StorageOS API.
 func (c *Client) DescribeNode(ctx context.Context, uid id.Node) (*node.State, error) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	resource, err := c.GetNode(ctx, uid)
 	if err != nil {
 		return nil, err
@@ -125,9 +110,6 @@ func (c *Client) DescribeNode(ctx context.Context, uid id.Node) (*node.State, er
 // in the cluster from the StorageOS API and gathering information about the
 // the first node where the name matches using its unique identifier.
 func (c *Client) DescribeNodeByName(ctx context.Context, name string) (*node.State, error) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	resource, err := c.GetNodeByName(ctx, name)
 	if err != nil {
 		return nil, err
@@ -158,9 +140,6 @@ func (c *Client) describeNode(ctx context.Context, resource *node.Resource) (*no
 // The returned list is filtered using uids so that it contains only those
 // resources which have a matching ID. If none are specified, all are returned.
 func (c *Client) DescribeListNodes(ctx context.Context, uids ...id.Node) ([]*node.State, error) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err
@@ -185,9 +164,6 @@ func (c *Client) DescribeListNodes(ctx context.Context, uids ...id.Node) ([]*nod
 // The returned list is filtered using names so that it contains only those
 // resources which have a matching name. If none are specified, all are returned.
 func (c *Client) DescribeListNodesByName(ctx context.Context, names ...string) ([]*node.State, error) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err

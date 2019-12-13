@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
@@ -37,15 +38,15 @@ type CreateDisplayer interface {
 	CreateVolume(ctx context.Context, w io.Writer, resource *volume.Resource) error
 }
 
-func NewCommand(client CreateClient, config ConfigProvider) *cobra.Command {
+func NewCommand(initClient func() (*apiclient.Client, error), config ConfigProvider) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "create",
 		Short: "create requests the creation of a new StorageOS resource",
 	}
 
 	command.AddCommand(
-		newUser(os.Stdout, client, config),
-		newVolume(os.Stdout, client, config),
+		newUser(os.Stdout, initClient, config),
+		newVolume(os.Stdout, initClient, config),
 	)
 
 	return command

@@ -9,9 +9,6 @@ import (
 // GetCluster requests basic information for the cluster resource from the
 // StorageOS API.
 func (c *Client) GetCluster(ctx context.Context) (*cluster.Resource, error) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err
