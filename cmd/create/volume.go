@@ -130,10 +130,10 @@ func newVolume(w io.Writer, client CreateClient, config ConfigProvider) *cobra.C
 		Use:   "volume",
 		Short: "volume requests the creation of a new StorageOS volume",
 		Example: `
-		$ storageos create volume --description "This volume contains the data for my app" --fs-type "ext4" --labels env=prod,rack=db-1 --size 10 my-namespace/my-app
-		`, // TODO: Ensure this is up to date
+		$ storageos create volume --description "This volume contains the data for my app" --fs-type "ext4" --labels env=prod,rack=db-1 --size 10GiB my-namespace-name/my-app
+		`,
 
-		Args: cobra.ExactArgs(1), // TODO: Maybe parse args here is nicer?
+		Args: cobra.ExactArgs(1),
 
 		RunE: c.run,
 
