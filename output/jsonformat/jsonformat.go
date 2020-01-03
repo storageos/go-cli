@@ -33,6 +33,10 @@ func (d *Displayer) CreateUser(ctx context.Context, w io.Writer, resource *user.
 	return d.encode(w, resource)
 }
 
+func (d *Displayer) CreateVolume(ctx context.Context, w io.Writer, resource *volume.Resource) error {
+	return d.encode(w, resource)
+}
+
 //-----------------------------------------------------------------------------
 // GET
 //-----------------------------------------------------------------------------

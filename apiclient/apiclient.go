@@ -39,6 +39,7 @@ type Transport interface {
 	ListNamespaces(ctx context.Context) ([]*namespace.Resource, error)
 
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
+	CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error)
 }
 
 // Client provides a collection of methods for consumers to interact with the
