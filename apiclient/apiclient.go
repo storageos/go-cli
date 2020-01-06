@@ -15,7 +15,10 @@ import (
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
-var ErrTransportAlreadyConfigured = errors.New("the client's transport has already been configured")
+var (
+	ErrNoTransportConfigured      = errors.New("the client has not been configured with a transport")
+	ErrTransportAlreadyConfigured = errors.New("the client's transport has already been configured")
+)
 
 // ConfigProvider describes the access to configuration values required by
 // the apiclient package.
@@ -92,7 +95,8 @@ func (c *Client) ConfigureTransport(transport Transport) error {
 // used.
 func New(config ConfigProvider) *Client {
 	return &Client{
-		config: config,
+		config:    config,
+		transport: &noTransport{},
 
 		configureOnce: &sync.Once{},
 	}
