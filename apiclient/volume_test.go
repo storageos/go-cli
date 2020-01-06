@@ -89,7 +89,10 @@ func TestGetVolumeByName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			client := New(tt.transport, tt.configProvider)
+			client := New(tt.configProvider)
+			if err := client.ConfigureTransport(tt.transport); err != nil {
+				t.Fatalf("got error configuring client transport: %v", err)
+			}
 
 			gotResource, gotErr := client.GetVolumeByName(context.Background(), "arbitrary-namespace-id", tt.volumeName)
 			if !reflect.DeepEqual(gotErr, tt.wantErr) {
@@ -210,7 +213,10 @@ func TestFetchAllVolumes(t *testing.T) {
 		var tt = tt
 		t.Run(tt.name, func(t *testing.T) {
 
-			client := New(tt.transport, &mockConfigProvider{})
+			client := New(&mockConfigProvider{})
+			if err := client.ConfigureTransport(tt.transport); err != nil {
+				t.Fatalf("got error configuring client transport: %v", err)
+			}
 
 			gotVolumes, gotErr := client.fetchAllVolumes(context.Background())
 			if !reflect.DeepEqual(gotErr, tt.wantErr) {
