@@ -3,12 +3,10 @@ package get
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/spf13/cobra"
 
-	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -191,9 +189,10 @@ func (c *volumeCommand) listVolumesUsingID(ctx context.Context, idRefs []string)
 	return resources, nil
 }
 
-func newVolume(w io.Writer, initClient func() (*apiclient.Client, error), config ConfigProvider) *cobra.Command {
+func newVolume(w io.Writer, client GetClient, config ConfigProvider) *cobra.Command {
 	c := &volumeCommand{
 		config: config,
+		client: client,
 		display: jsonformat.NewDisplayer(
 			jsonformat.DefaultEncodingIndent,
 		),
@@ -209,14 +208,6 @@ func newVolume(w io.Writer, initClient func() (*apiclient.Client, error), config
 $ storageos get volume fruits/banana
 `,
 
-		PreRunE: func(_ *cobra.Command, _ []string) error {
-			client, err := initClient()
-			if err != nil {
-				return fmt.Errorf("error initialising api client: %w", err)
-			}
-			c.client = client
-			return nil
-		},
 		RunE: c.run,
 
 		// If a legitimate error occurs as part of the VERB volume command

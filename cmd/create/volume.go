@@ -10,7 +10,6 @@ import (
 	units "github.com/alecthomas/units"
 	"github.com/spf13/cobra"
 
-	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
@@ -116,9 +115,10 @@ func (c *volumeCommand) createVolumeByNamespaceID(ctx context.Context, ref strin
 	)
 }
 
-func newVolume(w io.Writer, initClient func() (*apiclient.Client, error), config ConfigProvider) *cobra.Command {
+func newVolume(w io.Writer, client CreateClient, config ConfigProvider) *cobra.Command {
 	c := &volumeCommand{
 		config: config,
+		client: client,
 		display: jsonformat.NewDisplayer(
 			jsonformat.DefaultEncodingIndent,
 		),
@@ -135,14 +135,6 @@ func newVolume(w io.Writer, initClient func() (*apiclient.Client, error), config
 
 		Args: cobra.ExactArgs(1),
 
-		PreRunE: func(_ *cobra.Command, _ []string) error {
-			client, err := initClient()
-			if err != nil {
-				return fmt.Errorf("error initialising api client: %w", err)
-			}
-			c.client = client
-			return nil
-		},
 		RunE: c.run,
 
 		SilenceUsage: true,

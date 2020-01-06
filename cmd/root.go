@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"strings"
 	"time"
 
 	"github.com/blang/semver"
@@ -8,15 +9,23 @@ import (
 	"github.com/spf13/pflag"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
+	"code.storageos.net/storageos/c2-cli/apiclient/openapi"
 	"code.storageos.net/storageos/c2-cli/cmd/create"
 	"code.storageos.net/storageos/c2-cli/cmd/describe"
 	"code.storageos.net/storageos/c2-cli/cmd/get"
 )
 
+// UserAgentPrefix is used by the CLI application to identify itself to
+// StorageOS.
+var UserAgentPrefix string = "storageos-cli"
+
 // ConfigProvider specifies the configuration settings which commands require
 // access to.
 type ConfigProvider interface {
+	APIEndpoints() ([]string, error)
 	CommandTimeout() (time.Duration, error)
+	Username() (string, error)
+	Password() (string, error)
 }
 
 // InitCommand configures the CLI application's commands from the root down, using
@@ -25,7 +34,7 @@ type ConfigProvider interface {
 // The returned Command is configured with a flag set containing global configuration settings.
 //
 // Downstream errors are suppressed, so the caller is responsible for displaying messages.
-func InitCommand(initClient func() (*apiclient.Client, error), config ConfigProvider, globalFlags *pflag.FlagSet, version semver.Version) *cobra.Command {
+func InitCommand(client *apiclient.Client, config ConfigProvider, globalFlags *pflag.FlagSet, version semver.Version) *cobra.Command {
 	app := &cobra.Command{
 		Use: "storageos <command>",
 		Short: `Storage for Cloud Native Applications.
@@ -37,13 +46,24 @@ To be notified about stable releases and latest features, sign up at https://my.
 `,
 		Version: version.String(),
 
+		PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
+			userAgent := strings.Join([]string{UserAgentPrefix, version.String()}, "/")
+
+			transport, err := openapi.NewOpenAPI(config, userAgent)
+			if err != nil {
+				return err
+			}
+
+			return client.ConfigureTransport(transport)
+		},
+
 		SilenceErrors: true,
 	}
 
 	app.AddCommand(
-		create.NewCommand(initClient, config),
-		get.NewCommand(initClient, config),
-		describe.NewCommand(initClient, config),
+		create.NewCommand(client, config),
+		get.NewCommand(client, config),
+		describe.NewCommand(client, config),
 	)
 
 	app.PersistentFlags().AddFlagSet(globalFlags)

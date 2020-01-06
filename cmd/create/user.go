@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 
-	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 )
@@ -110,9 +109,10 @@ func (c *userCommand) promptForPassword() (string, error) {
 
 // newUser builds a cobra command from the provided arguments for requesting the
 // creation of a StorageOS user account.
-func newUser(w io.Writer, initClient func() (*apiclient.Client, error), config ConfigProvider) *cobra.Command {
+func newUser(w io.Writer, client CreateClient, config ConfigProvider) *cobra.Command {
 	c := &userCommand{
 		config: config,
+		client: client,
 		display: jsonformat.NewDisplayer(
 			jsonformat.DefaultEncodingIndent,
 		),
@@ -144,14 +144,6 @@ $ storageos create user --with-username=alice --with-admin=true
 			return nil
 		},
 
-		PreRunE: func(_ *cobra.Command, _ []string) error {
-			client, err := initClient()
-			if err != nil {
-				return fmt.Errorf("error initialising api client: %w", err)
-			}
-			c.client = client
-			return nil
-		},
 		RunE: c.run,
 
 		SilenceUsage: true,

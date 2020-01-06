@@ -8,7 +8,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 )
@@ -36,14 +35,14 @@ type DescribeDisplayer interface {
 }
 
 // NewCommand configures the set of commands which are grouped by the "describe" verb.
-func NewCommand(initClient func() (*apiclient.Client, error), config ConfigProvider) *cobra.Command {
+func NewCommand(client DescribeClient, config ConfigProvider) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "describe",
 		Short: "describe retrieves a StorageOS resource, displaying detailed information about it",
 	}
 
 	command.AddCommand(
-		newNode(os.Stdout, initClient, config),
+		newNode(os.Stdout, client, config),
 	)
 
 	return command

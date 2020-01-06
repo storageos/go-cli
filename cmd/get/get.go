@@ -8,7 +8,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -53,16 +52,16 @@ type GetDisplayer interface {
 }
 
 // NewCommand configures the set of commands which are grouped by the "get" verb.
-func NewCommand(initClient func() (*apiclient.Client, error), config ConfigProvider) *cobra.Command {
+func NewCommand(client GetClient, config ConfigProvider) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "get",
 		Short: "get retrieves a StorageOS resource, displaying basic information about it",
 	}
 
 	command.AddCommand(
-		newCluster(os.Stdout, initClient, config),
-		newNode(os.Stdout, initClient, config),
-		newVolume(os.Stdout, initClient, config),
+		newCluster(os.Stdout, client, config),
+		newNode(os.Stdout, client, config),
+		newVolume(os.Stdout, client, config),
 	)
 
 	return command
