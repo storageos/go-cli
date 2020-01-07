@@ -1,0 +1,80 @@
+# Run on code only in the new commits
+new: true
+
+run:
+  # Max 1 minute
+  timeout: 1m
+
+  # Return an exit code of 1 when a linter fails
+  issues-exit-code: 1
+
+  # Include test files
+  tests: true
+
+  # Use the vendored 3rd party libs
+  #modules-download-mode: release
+
+# output configuration options
+output:
+  # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
+  format: colored-line-number
+
+  # print lines of code with issue, default is true
+  print-issued-lines: true
+
+  # print linter name in the end of issue text, default is true
+  print-linter-name: true
+
+linters:
+  enable:
+    - golint
+    - gosec
+    - unconvert
+    - gocyclo
+    - goimports
+    - nakedret
+    - scopelint
+
+linter-settings:
+  gocyclo:
+    min-complexity: 20
+
+  goimports:
+    local-prefixes: code.storageos.net
+
+  errcheck:
+    # report about not checking of errors in type assertions: `a := b.(MyStruct)`;
+    # default is false: such cases aren't reported by default.
+    check-type-assertions: true
+
+issues:
+  exclude-use-default: false
+
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - gosec
+
+    - linters:
+        - errcheck
+      text: Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*printf?|os\.(Un)?Setenv). is not checked
+
+    - linters:
+        - gosec
+      text: "G104: Errors unhandled"
+
+    - linters:
+        - gosec
+      text: "G204: Subprocess launched with variable"
+
+    - linters:
+        - gosec
+      text: "G304: Potential file inclusion via variable"
+
+    - path: mock_.+\.go
+      text: "should have comment or be unexported"
+      linters:
+        - golint
