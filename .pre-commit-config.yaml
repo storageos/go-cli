@@ -34,9 +34,6 @@ repos:
         types: [go]
         exclude: \.pb.go$
         args: ["-local=code.storageos.net"]
-      - id: dep-check
-        stages: [push, manual]
-        types: [go]
       - id: todo-jira-check
         stages: [push, manual]
         types: [go]
@@ -54,3 +51,12 @@ repos:
         types: [go]
         exclude: \.pb.go$
 
+  # A CI-only lint that runs golang-ci on all the code
+  - repo: local
+    hooks:
+      - id: golangci-lint
+        name: Run golang-ci lints on all code
+        stages: [manual]
+        language: system
+        entry: sh -c 'golangci-lint run --timeout=5m ./...'
+        pass_filenames: false
