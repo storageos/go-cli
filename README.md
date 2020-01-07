@@ -16,6 +16,12 @@ $ make build
 ...
 ```
 
+For building releases, please ensure `gox` is installed:
+
+```bash
+$ go get github.com/mitchellh/gox
+```
+
 ## OpenAPI generated client code
 
 At time of writing the openapi-generator produces some incorrect types for
