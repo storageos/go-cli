@@ -38,6 +38,9 @@ type mockTransport struct {
 
 	CreateUserResource *user.Resource
 	CreateUserError    error
+
+	CreateVolumeResource *volume.Resource
+	CreateVolumeError    error
 }
 
 var _ Transport = (*mockTransport)(nil)
@@ -76,4 +79,8 @@ func (m *mockTransport) ListNamespaces(ctx context.Context) ([]*namespace.Resour
 
 func (m *mockTransport) CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error) {
 	return m.CreateUserResource, m.CreateUserError
+}
+
+func (m *mockTransport) CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error) {
+	return m.CreateVolumeResource, m.CreateVolumeError
 }

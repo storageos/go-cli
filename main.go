@@ -3,12 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/blang/semver"
+	"github.com/spf13/pflag"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
-	"code.storageos.net/storageos/c2-cli/apiclient/openapi"
 	"code.storageos.net/storageos/c2-cli/cmd"
 	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/config/environment"
@@ -19,9 +18,6 @@ var (
 	// Version is the semantic version string which has been assigned to the
 	// cli application.
 	Version string
-	// UserAgentPrefix is used by the CLI application to identify itself to
-	// StorageOS.
-	UserAgentPrefix string = "storageos-cli"
 )
 
 func main() {
@@ -29,36 +25,23 @@ func main() {
 	// If it errors 0.0.0 is returned
 	version, _ := semver.Make(Version)
 
-	userAgent := strings.Join([]string{UserAgentPrefix, version.String()}, "/")
-
-	// Initialise the configuration provider stack.
-	globalFlags := cmd.InitPersistentFlags()
-	// → flags
+	// Initialise the configuration provider stack:
+	//
+	// → flags first. note we init the flagset here because it needs to be
+	// given to the InitCommand call (setting up global flags)
+	globalFlags := pflag.NewFlagSet("storageos", pflag.ContinueOnError)
 	configProvider := flags.NewProvider(
 		globalFlags,
-		// → environment
+		// → environment next
 		environment.NewProvider(
-			// → TODO(CP-3918) config file
-			// → default values
+			// → TODO(CP-3918) config file next
+			//
+			// → default values as final fallback
 			config.NewDefaulter(),
 		),
 	)
 
-	// Construct the API client with OpenAPI "transport".
-	transport, err := openapi.NewOpenAPI(configProvider, userAgent)
-	if err != nil {
-		fmt.Printf("failure occurred during initialisation of api client transport: %v\n", err)
-		os.Exit(1)
-	}
-
-	client := apiclient.New(
-		transport,
-		configProvider,
-	)
-	if err != nil {
-		fmt.Printf("failure occurred during initialisation of api client: %v\n", err)
-		os.Exit(1)
-	}
+	client := apiclient.New(configProvider)
 
 	app := cmd.InitCommand(
 		client,

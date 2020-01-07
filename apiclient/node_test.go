@@ -89,7 +89,10 @@ func TestGetNodeByName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			client := New(tt.transport, tt.configProvider)
+			client := New(tt.configProvider)
+			if err := client.ConfigureTransport(tt.transport); err != nil {
+				t.Fatalf("got error configuring client transport: %v", err)
+			}
 
 			gotResource, gotErr := client.GetNodeByName(context.Background(), tt.nodeName)
 			if !reflect.DeepEqual(gotErr, tt.wantErr) {

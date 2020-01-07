@@ -4,6 +4,8 @@ package apiclient
 
 import (
 	"context"
+	"errors"
+	"sync"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -11,6 +13,11 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
+)
+
+var (
+	ErrNoTransportConfigured      = errors.New("the client has not been configured with a transport")
+	ErrTransportAlreadyConfigured = errors.New("the client's transport has already been configured")
 )
 
 // ConfigProvider describes the access to configuration values required by
@@ -47,6 +54,8 @@ type Transport interface {
 type Client struct {
 	config    ConfigProvider
 	transport Transport
+
+	configureOnce *sync.Once
 }
 
 // TODO(CP-3930): I think maybe this authenticate boiler plate should be moved
@@ -66,12 +75,29 @@ func (c *Client) authenticate(ctx context.Context) (*user.Resource, error) {
 	return c.transport.Authenticate(ctx, username, password)
 }
 
-// New initialises a new Client using config for configuration settings,
-// with transport providing the underlying implementation for encoding
-// requests and decoding responses.
-func New(transport Transport, config ConfigProvider) *Client {
+// ConfigureTransport must be called with a valid transport before any methods
+// are called on c.
+//
+// The client's transport may only be set once through this method.
+func (c *Client) ConfigureTransport(transport Transport) error {
+	err := ErrTransportAlreadyConfigured
+
+	c.configureOnce.Do(func() {
+		c.transport = transport
+		err = nil
+	})
+
+	return err
+}
+
+// New initialises a new Client which will source configuration settings using
+// config. The returned client must be configured with a Transport before it is
+// used.
+func New(config ConfigProvider) *Client {
 	return &Client{
-		transport: transport,
 		config:    config,
+		transport: &noTransport{},
+
+		configureOnce: &sync.Once{},
 	}
 }

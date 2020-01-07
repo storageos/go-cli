@@ -1,0 +1,56 @@
+# Lints should have the "manual" stage set - this flags them to run in the CI
+# pipeline.
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.4.0
+    hooks:
+      - id: check-executables-have-shebangs
+        stages: [commit, manual]
+        exclude: ^vendor/
+      - id: check-json
+        stages: [commit, manual]
+      - id: check-yaml
+        stages: [commit, manual]
+      - id: check-merge-conflict
+        stages: [commit, manual]
+      - id: mixed-line-ending
+        args: ["--fix=no"]
+        stages: [commit, manual]
+      - id: no-commit-to-branch
+        args: ["--branch", "master", "--branch", "development"]
+        stages: [commit, manual]
+
+  - repo: https://github.com/domodwyer/pre-commit
+    rev: v1.2.1
+    hooks:
+      - id: go-test
+        stages: [commit, push]
+        types: [go]
+        exclude: \.pb.go$
+        args: ["-timeout=30s"]
+      - id: goimports
+        stages: [commit, push, manual]
+        types: [go]
+        exclude: \.pb.go$
+        args: ["-local=code.storageos.net"]
+      - id: dep-check
+        stages: [push, manual]
+        types: [go]
+      - id: todo-jira-check
+        stages: [push, manual]
+        types: [go]
+        args: ["--tag=CP"]
+        exclude: ^vendor/
+      - id: branch-name-check
+        stages: [push]
+
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.21.0
+    hooks:
+      - id: golangci-lint
+        args: [--new-from-rev=origin/master]
+        stages: [commit, push]
+        types: [go]
+        exclude: \.pb.go$
+
