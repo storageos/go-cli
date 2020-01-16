@@ -90,16 +90,22 @@ func (c codec) decodeVolume(model openapi.Volume) (*volume.Resource, error) {
 		Syncing: m.Syncing,
 	}
 
-	v.Replicas = make([]*volume.Deployment, len(v.Replicas))
-	for i, r := range *model.Replicas {
-		v.Replicas[i] = &volume.Deployment{
-			ID:      id.Deployment(r.Id),
-			Node:    id.Node(r.NodeID),
-			Inode:   r.Inode,
-			Health:  health.FromString(string(r.Health)),
-			Syncing: r.Syncing,
+	replicas := []*volume.Deployment{}
+
+	if model.Replicas != nil {
+		replicas = make([]*volume.Deployment, len(*model.Replicas))
+		for i, r := range *model.Replicas {
+			replicas[i] = &volume.Deployment{
+				ID:      id.Deployment(r.Id),
+				Node:    id.Node(r.NodeID),
+				Inode:   r.Inode,
+				Health:  health.FromString(string(r.Health)),
+				Syncing: r.Syncing,
+			}
 		}
 	}
+
+	v.Replicas = replicas
 
 	return v, nil
 }
@@ -117,10 +123,16 @@ func (c codec) decodeNamespace(model openapi.Namespace) (*namespace.Resource, er
 }
 
 func (c codec) decodeUser(model openapi.User) (*user.Resource, error) {
-	groups := make([]id.PolicyGroup, len(*model.Groups))
-	for i, groupID := range *model.Groups {
-		groups[i] = id.PolicyGroup(groupID)
+
+	groups := []id.PolicyGroup{}
+
+	if model.Groups != nil {
+		groups = make([]id.PolicyGroup, len(*model.Groups))
+		for i, groupID := range *model.Groups {
+			groups[i] = id.PolicyGroup(groupID)
+		}
 	}
+
 	return &user.Resource{
 		ID:       id.User(model.Id),
 		Username: model.Username,
