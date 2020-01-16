@@ -14,8 +14,8 @@ import (
 
 type volumeCommand struct {
 	config  ConfigProvider
-	client  GetClient
-	display GetDisplayer
+	client  Client
+	display Displayer
 
 	usingIDs bool
 
@@ -189,7 +189,7 @@ func (c *volumeCommand) listVolumesUsingID(ctx context.Context, idRefs []string)
 	return resources, nil
 }
 
-func newVolume(w io.Writer, client GetClient, config ConfigProvider) *cobra.Command {
+func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 	c := &volumeCommand{
 		config: config,
 		client: client,

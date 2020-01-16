@@ -7,24 +7,31 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
 
+// LogLevel is a typed wrapper around a cluster's log level configuration.
 type LogLevel string
 
+// LogLevelFromString wraps level as a LogLevel.
 func LogLevelFromString(level string) LogLevel {
 	return LogLevel(level)
 }
 
+// String returns the string representation of l.
 func (l LogLevel) String() string {
 	return string(l)
 }
 
+// LogFormat is a typed wrapper around a cluster's log entry format
+// configuration.
 type LogFormat string
 
+// LogFormatFromString wraps format as a LogFormat.
 func LogFormatFromString(format string) LogFormat {
 	return LogFormat(format)
 }
 
-func (l LogFormat) String() string {
-	return string(l)
+// String returns the string representation of f.
+func (f LogFormat) String() string {
+	return string(f)
 }
 
 // Resource encapsulate a StorageOS cluster api resource as a data type.

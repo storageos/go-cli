@@ -21,9 +21,9 @@ type ConfigProvider interface {
 	CommandTimeout() (time.Duration, error)
 }
 
-// GetClient defines the functionality required by the CLI application to
+// Client defines the functionality required by the CLI application to
 // reasonably implement the "get" verb commands.
-type GetClient interface {
+type Client interface {
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
 
 	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
@@ -41,9 +41,9 @@ type GetClient interface {
 	GetAllNamespaces(ctx context.Context) ([]*namespace.Resource, error)
 }
 
-// GetDisplayer defines the functionality required by the CLI application to
+// Displayer defines the functionality required by the CLI application to
 // display the results gathered by the "get" verb commands.
-type GetDisplayer interface {
+type Displayer interface {
 	GetCluster(context.Context, io.Writer, *cluster.Resource) error
 	GetNode(context.Context, io.Writer, *node.Resource) error
 	GetNodeList(context.Context, io.Writer, []*node.Resource) error
@@ -52,7 +52,7 @@ type GetDisplayer interface {
 }
 
 // NewCommand configures the set of commands which are grouped by the "get" verb.
-func NewCommand(client GetClient, config ConfigProvider) *cobra.Command {
+func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "get",
 		Short: "get retrieves a StorageOS resource, displaying basic information about it",

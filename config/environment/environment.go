@@ -22,13 +22,11 @@ const (
 	UsernameVar = "STORAGEOS_USER_NAME"
 	// PasswordVar keys the environment variable from which we source the
 	// password of the StorageOS account to authenticate with.
-	PasswordVar = "STORAGEOS_PASSWORD"
-	// TODO(CP-3919):
-	//
+	PasswordVar = "STORAGEOS_PASSWORD" // #nosec G101
 	// PasswordCommandVar keys the environment variable from which we optionally
 	// source the password of the StorageOS account to authenticate with through
-	// command execution.
-	PasswordCommandVar = "STORAGEOS_PASSWORD_COMMAND"
+	// command execution. TODO(CP-3919)
+	PasswordCommandVar = "STORAGEOS_PASSWORD_COMMAND" // #nosec G101
 )
 
 // Provider exports functionality to retrieve global configuration values from
@@ -38,10 +36,12 @@ type Provider struct {
 	fallback config.Provider
 }
 
+// APIEndpoints sources the list of comma-separated target API endpoints from
+// the environment if set. If not set in the environment then env's fallback
+// is used.
 func (env *Provider) APIEndpoints() ([]string, error) {
 	hostString := os.Getenv(APIEndpointsVar)
 	if hostString == "" {
-		// If there is no value to parse then fall back
 		return env.fallback.APIEndpoints()
 	}
 	endpoints := strings.Split(hostString, ",")
@@ -49,6 +49,8 @@ func (env *Provider) APIEndpoints() ([]string, error) {
 	return endpoints, nil
 }
 
+// CommandTimeout sources the command timeout duration from the environment
+// if set. If not set in the environment then env's fallback is used.
 func (env *Provider) CommandTimeout() (time.Duration, error) {
 	timeoutString := os.Getenv(CommandTimeoutVar)
 	if timeoutString == "" {
@@ -58,6 +60,9 @@ func (env *Provider) CommandTimeout() (time.Duration, error) {
 	return time.ParseDuration(timeoutString)
 }
 
+// Username sources the StorageOS account username to authenticate with from
+// the environment if set. If not set in the environment then env's fallback
+// is used.
 func (env *Provider) Username() (string, error) {
 	username := os.Getenv(UsernameVar)
 	if username == "" {
@@ -67,6 +72,9 @@ func (env *Provider) Username() (string, error) {
 	return username, nil
 }
 
+// Password sources the StorageOS account password to authenticate with from
+// the environment if set. If not set in the environment then env's fallback
+// is used.
 func (env *Provider) Password() (string, error) {
 	password := os.Getenv(PasswordVar)
 	if password == "" {
@@ -74,7 +82,6 @@ func (env *Provider) Password() (string, error) {
 	}
 
 	return password, nil
-
 }
 
 // NewProvider returns a configuration provider which sources

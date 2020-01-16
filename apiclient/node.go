@@ -9,6 +9,40 @@ import (
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
+// NodeNotFoundError indicates that the API could not find the StorageOS node
+// specified.
+type NodeNotFoundError struct {
+	uid  id.Node
+	name string
+}
+
+// Error returns an error message indicating that the node with a given
+// ID or name was not found, as configured.
+func (e NodeNotFoundError) Error() string {
+	switch {
+	case e.uid != "":
+		return fmt.Sprintf("node with ID %v not found", e.uid)
+	case e.name != "":
+		return fmt.Sprintf("node with name %v not found", e.name)
+	}
+
+	return fmt.Sprintf("node not found")
+}
+
+// NewNodeNotFoundError returns a NodeNotFoundError for the node with uid.
+func NewNodeNotFoundError(uid id.Node) NodeNotFoundError {
+	return NodeNotFoundError{
+		uid: uid,
+	}
+}
+
+// NewNodeNameNotFoundError returns a NodeNotFoundError for the node with name.
+func NewNodeNameNotFoundError(name string) NodeNotFoundError {
+	return NodeNotFoundError{
+		name: name,
+	}
+}
+
 // GetNode requests basic information for the node resource which
 // corresponds to uid from the StorageOS API.
 func (c *Client) GetNode(ctx context.Context, uid id.Node) (*node.Resource, error) {
@@ -47,7 +81,7 @@ func (c *Client) GetNodeByName(ctx context.Context, name string) (*node.Resource
 		}
 	}
 
-	return nil, NewNotFoundError(fmt.Sprintf("node with name %v not found", name))
+	return nil, NewNodeNameNotFoundError(name)
 }
 
 // GetListNodes requests a list containing basic information on each
@@ -99,7 +133,7 @@ func (c *Client) DescribeNode(ctx context.Context, uid id.Node) (*node.State, er
 	return c.describeNode(ctx, resource)
 }
 
-// DescribeNode requests detailed information for the node resource which
+// DescribeNodeByName requests detailed information for the node resource which
 // has name from the StorageOS API.
 //
 // The resource model for the API is build around using unique identifiers,
@@ -229,7 +263,7 @@ func filterNodesForNames(nodes []*node.Resource, names ...string) ([]*node.Resou
 	for _, name := range names {
 		n, ok := retrieved[name]
 		if !ok {
-			return nil, NewNotFoundError(fmt.Sprintf("node with name %v not found", name))
+			return nil, NewNodeNameNotFoundError(name)
 		}
 		filtered[i] = n
 		i++
@@ -262,7 +296,7 @@ func filterNodesForUIDs(nodes []*node.Resource, uids ...id.Node) ([]*node.Resour
 	for _, id := range uids {
 		n, ok := retrieved[id]
 		if !ok {
-			return nil, NewNotFoundError(fmt.Sprintf("node %v not found", id))
+			return nil, NewNodeNotFoundError(id)
 		}
 		filtered[i] = n
 		i++

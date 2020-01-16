@@ -10,6 +10,95 @@ import (
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
+// VolumeExistsError is returned when a volume creation request is sent to the
+// StorageOS API for a namespace where name is already in use.
+type VolumeExistsError struct {
+	name        string
+	namespaceID id.Namespace
+}
+
+// Error returns an error message indicating that a volume name is already in
+// use for the target namespace.
+func (e VolumeExistsError) Error() string {
+	return fmt.Sprintf("volume name %v is already in use for namespace with ID %v", e.name, e.namespaceID)
+}
+
+// NewVolumeExistsError returns an error indicating that a volume with name
+// already exists in namespaceID.
+func NewVolumeExistsError(name string, namespaceID id.Namespace) VolumeExistsError {
+	return VolumeExistsError{
+		name:        name,
+		namespaceID: namespaceID,
+	}
+}
+
+// InvalidVolumeCreationError is returned when a volume creation request sent
+// to the StorageOS API is invalid.
+type InvalidVolumeCreationError struct {
+	details string
+}
+
+// Error returns an error message indicating that a volume creation request
+// made to the StorageOS API is invalid, including details if available.
+func (e InvalidVolumeCreationError) Error() string {
+	msg := "volume creation request is invalid"
+	if e.details != "" {
+		msg = fmt.Sprintf("%v: %v", msg, e.details)
+	}
+	return msg
+}
+
+// NewInvalidVolumeCreationError returns an InvalidVolumeCreationError, using
+// details to provide information about what must be corrected.
+func NewInvalidVolumeCreationError(details string) InvalidVolumeCreationError {
+	return InvalidVolumeCreationError{
+		details: details,
+	}
+}
+
+// VolumeNotFoundError indicates that the API could not find the StorageOS volume
+// specified.
+type VolumeNotFoundError struct {
+	msg string
+
+	uid  id.Volume
+	name string
+}
+
+// Error returns an error message indicating that the volume with a given
+// ID or name was not found, as configured.
+func (e VolumeNotFoundError) Error() string {
+	return e.msg
+}
+
+// NewVolumeNotFoundError returns a VolumeNotFoundError using details as the
+// the error message. This can be used when provided an opaque but detailed
+// error strings.
+func NewVolumeNotFoundError(details string) VolumeNotFoundError {
+	return VolumeNotFoundError{
+		msg: details,
+	}
+}
+
+// NewVolumeIDNotFoundError returns a VolumeNotFoundError for the volume with uid,
+// constructing a user friendly message and storing the ID inside the error.
+func NewVolumeIDNotFoundError(uid id.Volume) VolumeNotFoundError {
+	return VolumeNotFoundError{
+		msg: fmt.Sprintf("volume with ID %v not found for target namespace", uid),
+		uid: uid,
+	}
+}
+
+// NewVolumeNameNotFoundError returns a VolumeNotFoundError for the volume
+// with name, constructing a user friendly message and storing the name inside
+// the error.
+func NewVolumeNameNotFoundError(name string) VolumeNotFoundError {
+	return VolumeNotFoundError{
+		msg:  fmt.Sprintf("volume with name %v not found for target namespace", name),
+		name: name,
+	}
+}
+
 // CreateVolume requests the creation of a new StorageOS volume in namespace
 // from the provided fields. If successful the created resource for the volume
 // is returned to the caller.
@@ -60,7 +149,7 @@ func (c *Client) GetVolumeByName(ctx context.Context, namespace id.Namespace, na
 		}
 	}
 
-	return nil, NewNotFoundError(fmt.Sprintf("volume with name %v not found", name))
+	return nil, NewVolumeNameNotFoundError(name)
 }
 
 // GetNamespaceVolumes requests basic information for each volume resource in
@@ -164,7 +253,7 @@ func filterVolumesForUIDs(volumes []*volume.Resource, uids ...id.Volume) ([]*vol
 	for _, id := range uids {
 		v, ok := retrieved[id]
 		if !ok {
-			return nil, NewNotFoundError(fmt.Sprintf("volume %v not found", id))
+			return nil, NewVolumeIDNotFoundError(id)
 		}
 		filtered[i] = v
 		i++
@@ -196,7 +285,7 @@ func filterVolumesForNames(volumes []*volume.Resource, names ...string) ([]*volu
 	for _, name := range names {
 		v, ok := retrieved[name]
 		if !ok {
-			return nil, NewNotFoundError(fmt.Sprintf("volume with name %v not found", name))
+			return nil, NewVolumeNameNotFoundError(name)
 		}
 		filtered[i] = v
 		i++

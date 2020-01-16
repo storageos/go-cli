@@ -67,7 +67,9 @@ func TestGetNodeByName(t *testing.T) {
 			nodeName: "definitely-steve",
 
 			wantResource: nil,
-			wantErr:      NewNotFoundError("node with name definitely-steve not found"),
+			wantErr: NodeNotFoundError{
+				name: "definitely-steve",
+			},
 		},
 		{
 			name: "error getting list of nodes",
@@ -190,7 +192,9 @@ func TestFilterNodesForNames(t *testing.T) {
 			names: []string{"node-a", "definitely-steve"},
 
 			wantNodes: nil,
-			wantErr:   NewNotFoundError("node with name definitely-steve not found"),
+			wantErr: NodeNotFoundError{
+				name: "definitely-steve",
+			},
 		},
 	}
 
@@ -296,7 +300,9 @@ func TestFilterNodesForUIDs(t *testing.T) {
 			uids: []id.Node{"node-1", "node-42"},
 
 			wantNodes: nil,
-			wantErr:   NewNotFoundError("node node-42 not found"),
+			wantErr: NodeNotFoundError{
+				uid: "node-42",
+			},
 		},
 	}
 

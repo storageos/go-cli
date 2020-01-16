@@ -10,8 +10,14 @@ import (
 	"code.storageos.net/storageos/openapi"
 )
 
+// IgnoreVersionHeader is a HTTP header which can be used to specify that
+// API entity versions are to be ignored when making requests.
+//
+// Not all API operations support this.
 const IgnoreVersionHeader = "ignore-version"
 
+// ConfigProvider abstracts the functionality required by the OpenAPI transport
+// implementation for client configuration.
 type ConfigProvider interface {
 	APIEndpoints() ([]string, error)
 }
@@ -31,6 +37,11 @@ type OpenAPI struct {
 	codec  codec
 }
 
+// Authenticate attempts to authenticate against the target API using username
+// and password. If successful, o's underlying OpenAPI client will use the
+// returned token in the Authorization header for future operations.
+//
+// The returned *user.Resource corresponds to the authenticated user.
 func (o *OpenAPI) Authenticate(ctx context.Context, username, password string) (*user.Resource, error) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -52,6 +63,8 @@ func (o *OpenAPI) Authenticate(ctx context.Context, username, password string) (
 	return o.codec.decodeUser(model)
 }
 
+// NewOpenAPI initialises a new OpenAPI transport using config to source the
+// target host endpoints and userAgent as the HTTP user agent string.
 func NewOpenAPI(config ConfigProvider, userAgent string) (*OpenAPI, error) {
 	hosts, err := config.APIEndpoints()
 	if err != nil || len(hosts) == 0 {

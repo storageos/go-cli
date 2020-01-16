@@ -1,26 +1,9 @@
+package apiclient
+
 // TODO(CP-3962): These should be converted to more application specific error
 // types that can be used to provide additional error context to the user at
 // the terminal based on the operation/resource being attempted, consider
 // housing them alongside the appropriate apiclient methods.
-package apiclient
-
-// BadRequestError indicates that the request made by the client is invalid.
-type BadRequestError struct {
-	msg string
-}
-
-func (e BadRequestError) Error() string {
-	if e.msg == "" {
-		return "bad request"
-	}
-	return e.msg
-}
-
-func NewBadRequestError(msg string) BadRequestError {
-	return BadRequestError{
-		msg: msg,
-	}
-}
 
 // AuthenticationError indicates that the requested operation could not be
 // performed for the client due to an issue with the authentication credentials
@@ -36,6 +19,8 @@ func (e AuthenticationError) Error() string {
 	return e.msg
 }
 
+// NewAuthenticationError returns a new AuthenticationError using msg as an
+// optional error message if given.
 func NewAuthenticationError(msg string) AuthenticationError {
 	return AuthenticationError{
 		msg: msg,
@@ -50,51 +35,15 @@ type UnauthorisedError struct {
 
 func (e UnauthorisedError) Error() string {
 	if e.msg == "" {
-		return "unauthorised"
+		return "authenticated user is not authorised to perform that action"
 	}
 	return e.msg
 }
 
+// NewUnauthorisedError returns a new UnauthorisedError using msg as an
+// optional error message if given.
 func NewUnauthorisedError(msg string) UnauthorisedError {
 	return UnauthorisedError{
-		msg: msg,
-	}
-}
-
-// NotFoundError indicates that a resource involved in carrying out the API
-// request was not found.
-type NotFoundError struct {
-	msg string
-}
-
-func (e NotFoundError) Error() string {
-	if e.msg == "" {
-		return "not found"
-	}
-	return e.msg
-}
-
-func NewNotFoundError(msg string) NotFoundError {
-	return NotFoundError{
-		msg: msg,
-	}
-}
-
-// ConflictError indicates that the requested operation could not be carried
-// out due to a conflict between the current state and the desired state.
-type ConflictError struct {
-	msg string
-}
-
-func (e ConflictError) Error() string {
-	if e.msg == "" {
-		return "conflict"
-	}
-	return e.msg
-}
-
-func NewConflictError(msg string) ConflictError {
-	return ConflictError{
 		msg: msg,
 	}
 }
@@ -109,11 +58,13 @@ type StaleWriteError struct {
 
 func (e StaleWriteError) Error() string {
 	if e.msg == "" {
-		return "stale write"
+		return "stale write attempted"
 	}
 	return e.msg
 }
 
+// NewStaleWriteError returns a new StaleWriteError using msg as an optional
+// error message if given.
 func NewStaleWriteError(msg string) StaleWriteError {
 	return StaleWriteError{
 		msg: msg,
@@ -128,11 +79,13 @@ type InvalidStateTransitionError struct {
 
 func (e InvalidStateTransitionError) Error() string {
 	if e.msg == "" {
-		return "invalid state transition"
+		return "target resource is in an invalid state for carrying out the request"
 	}
 	return e.msg
 }
 
+// NewInvalidStateTransitionError returns a new InvalidStateTransitionError
+// using msg as an optional error message if given.
 func NewInvalidStateTransitionError(msg string) InvalidStateTransitionError {
 	return InvalidStateTransitionError{
 		msg: msg,
@@ -154,6 +107,8 @@ func (e LicenceCapabilityError) Error() string {
 	return e.msg
 }
 
+// NewLicenceCapabilityError returns a new LicenceCapabilityError using msg as
+// an optional error message if given.
 func NewLicenceCapabilityError(msg string) LicenceCapabilityError {
 	return LicenceCapabilityError{
 		msg: msg,
@@ -168,11 +123,13 @@ type ServerError struct {
 
 func (e ServerError) Error() string {
 	if e.msg == "" {
-		return "server error"
+		return "server encountered internal error"
 	}
 	return e.msg
 }
 
+// NewServerError returns a new ServerError using msg as an optional error
+// message if given.
 func NewServerError(msg string) ServerError {
 	return ServerError{
 		msg: msg,
@@ -187,11 +144,13 @@ type StoreError struct {
 
 func (e StoreError) Error() string {
 	if e.msg == "" {
-		return "store error"
+		return "server encountered store outage"
 	}
 	return e.msg
 }
 
+// NewStoreError returns a new StoreError using msg as an optional error
+// message if given.
 func NewStoreError(msg string) StoreError {
 	return StoreError{
 		msg: msg,

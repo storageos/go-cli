@@ -6,8 +6,11 @@ import (
 	"strings"
 )
 
+// ErrInvalidLabelFormat indicates that a provided label is not using the
+// correct format.
 var ErrInvalidLabelFormat = errors.New("invalid label format")
 
+// Set provides a typed wrapper for a label map.
 type Set map[string]string
 
 // SetFromPairs constructs a label set from labelPairs, returning an

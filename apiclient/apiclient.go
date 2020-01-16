@@ -16,7 +16,16 @@ import (
 )
 
 var (
-	ErrNoTransportConfigured      = errors.New("the client has not been configured with a transport")
+	// ErrNoTransportConfigured indicates that the API client has not be
+	// configured with an underlying transport implementation, which is required
+	// for operation.
+	ErrNoTransportConfigured = errors.New("the client has not been configured with a transport")
+	// ErrTransportAlreadyConfigured indicates an attempt was made to configure
+	// an API client with a new transport implementation when the client already
+	// has one.
+	//
+	// To use a new transport implementation a consumer of the package must
+	// instantiate a new Client.
 	ErrTransportAlreadyConfigured = errors.New("the client's transport has already been configured")
 )
 

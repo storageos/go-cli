@@ -26,15 +26,13 @@ func MapCommandError(err error) error {
 // ExitCodeForError returns the appropriate application exit code for err.
 func ExitCodeForError(err error) int {
 	switch {
-	case errors.As(err, &apiclient.BadRequestError{}):
-		return 1 // TODO(CP-3973): Pick code
 	case errors.As(err, &apiclient.AuthenticationError{}):
 		return 1 // TODO(CP-3973): Pick code
 	case errors.As(err, &apiclient.UnauthorisedError{}):
 		return 1 // TODO(CP-3973): Pick code
-	case errors.As(err, &apiclient.NotFoundError{}):
-		return 1 // TODO(CP-3973): Pick code
-	case errors.As(err, &apiclient.ConflictError{}):
+	case errors.As(err, &apiclient.NamespaceNotFoundError{}),
+		errors.As(err, &apiclient.NodeNotFoundError{}),
+		errors.As(err, &apiclient.VolumeNotFoundError{}):
 		return 1 // TODO(CP-3973): Pick code
 	case errors.As(err, &apiclient.StaleWriteError{}):
 		return 1 // TODO(CP-3973): Pick code

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"syscall"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
@@ -26,8 +25,8 @@ var (
 
 type userCommand struct {
 	config  ConfigProvider
-	client  CreateClient
-	display CreateDisplayer
+	client  Client
+	display Displayer
 
 	username      string
 	password      string
@@ -95,7 +94,7 @@ func (c *userCommand) promptForPassword() (string, error) {
 	}
 
 	fmt.Fprint(c.writer, "Confirm Password: ")
-	confirmation, err := terminal.ReadPassword(int(syscall.Stdin))
+	confirmation, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 	fmt.Fprintln(c.writer)
 	if err != nil {
 		return "", err
@@ -109,7 +108,7 @@ func (c *userCommand) promptForPassword() (string, error) {
 
 // newUser builds a cobra command from the provided arguments for requesting the
 // creation of a StorageOS user account.
-func newUser(w io.Writer, client CreateClient, config ConfigProvider) *cobra.Command {
+func newUser(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 	c := &userCommand{
 		config: config,
 		client: client,

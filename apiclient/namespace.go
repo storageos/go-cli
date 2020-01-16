@@ -8,6 +8,42 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 )
 
+// NamespaceNotFoundError indicates that the API could not find the StorageOS
+// namespace specified.
+type NamespaceNotFoundError struct {
+	uid  id.Namespace
+	name string
+}
+
+// Error returns an error message indicating that the namespace with a given
+// ID or name was not found, as configured.
+func (e NamespaceNotFoundError) Error() string {
+	switch {
+	case e.uid != "":
+		return fmt.Sprintf("namespace with ID %v not found", e.uid)
+	case e.name != "":
+		return fmt.Sprintf("namespace with name %v not found", e.name)
+	}
+
+	return fmt.Sprintf("namespace not found")
+}
+
+// NewNamespaceNotFoundError returns a NamespaceNotFoundError for the namespace
+// with uid.
+func NewNamespaceNotFoundError(uid id.Namespace) NamespaceNotFoundError {
+	return NamespaceNotFoundError{
+		uid: uid,
+	}
+}
+
+// NewNamespaceNameNotFoundError returns a NamespaceNotFoundError for the
+// namespace with name.
+func NewNamespaceNameNotFoundError(name string) NamespaceNotFoundError {
+	return NamespaceNotFoundError{
+		name: name,
+	}
+}
+
 // GetNamespace requests basic information for the namespace resource which
 // corresponds to uid from the StorageOS API.
 func (c *Client) GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error) {
@@ -46,10 +82,10 @@ func (c *Client) GetNamespaceByName(ctx context.Context, name string) (*namespac
 		}
 	}
 
-	return nil, NewNotFoundError(fmt.Sprintf("namespace with name %v not found", name))
+	return nil, NewNamespaceNameNotFoundError(name)
 }
 
-// GetListNamespaces requests a list containing basic information for every namespace
+// GetAllNamespaces requests a list containing basic information for every namespace
 // in the StorageOS cluster.
 func (c *Client) GetAllNamespaces(ctx context.Context) ([]*namespace.Resource, error) {
 	_, err := c.authenticate(ctx)

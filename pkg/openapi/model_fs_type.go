@@ -9,15 +9,16 @@
  */
 
 package openapi
-// FsType The file system type of a volume. \"block\" is a raw block device (no filesystem). 
+
+// FsType The file system type of a volume. \"block\" is a raw block device (no filesystem).
 type FsType string
 
 // List of FsType
 const (
-	EXT2 FsType = "ext2"
-	EXT3 FsType = "ext3"
-	EXT4 FsType = "ext4"
-	XFS FsType = "xfs"
+	EXT2  FsType = "ext2"
+	EXT3  FsType = "ext3"
+	EXT4  FsType = "ext4"
+	XFS   FsType = "xfs"
 	BTRFS FsType = "btrfs"
 	BLOCK FsType = "block"
 )

@@ -9,14 +9,14 @@ const (
 	// DefaultCommandTimeout is a sensible command timeout duration to use when
 	// none has been specified.
 	DefaultCommandTimeout = 5 * time.Second
-	// DefaultPassword defines a fallback username which the CLI will
+	// DefaultUsername defines a fallback username which the CLI will
 	// attempt to use in the credentials presented to the StorageOS API for
 	// authentication.
-	DefaultUsername = "storageos"
+	DefaultUsername = "storageos" // #nosec G101
 	// DefaultPassword defines a fallback password which the CLI will
 	// attempt to use in the credentials presented to the StorageOS API for
 	// authentication.
-	DefaultPassword = "storageos"
+	DefaultPassword = "storageos" // #nosec G101
 )
 
 // Defaulter exports functionality to retrieve default values for the global

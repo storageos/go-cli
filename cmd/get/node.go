@@ -13,8 +13,8 @@ import (
 
 type nodeCommand struct {
 	config  ConfigProvider
-	client  GetClient
-	display GetDisplayer
+	client  Client
+	display Displayer
 
 	usingID bool
 
@@ -74,7 +74,7 @@ func (c *nodeCommand) listNodes(ctx context.Context, refs []string) ([]*node.Res
 	return c.client.GetListNodes(ctx, uids...)
 }
 
-func newNode(w io.Writer, client GetClient, config ConfigProvider) *cobra.Command {
+func newNode(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 	c := &nodeCommand{
 		config: config,
 		client: client,

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	// APIEndpointsFlags keys the long flag from which the list of API host
+	// APIEndpointsFlag keys the long flag from which the list of API host
 	// endpoints are sourced, if set.
 	APIEndpointsFlag = "endpoints"
 	// CommandTimeoutFlag keys the long flag from which the timeout for API
@@ -45,6 +45,9 @@ type Provider struct {
 	fallback config.Provider
 }
 
+// APIEndpoints sources the list of comma-separated target API endpoints from
+// flag's FlagSet. If the value stored has not changed then flag's fallback
+// is used.
 func (flag *Provider) APIEndpoints() ([]string, error) {
 	hosts, err := flag.set.GetStringArray(APIEndpointsFlag)
 	if err != nil {
@@ -58,6 +61,8 @@ func (flag *Provider) APIEndpoints() ([]string, error) {
 	return hosts, nil
 }
 
+// CommandTimeout sources the command timeout duration from flag's FlagSet.
+// If the value stored has not changed then flag's fallback is used.
 func (flag *Provider) CommandTimeout() (time.Duration, error) {
 	timeout, err := flag.set.GetDuration(CommandTimeoutFlag)
 	if err != nil {
@@ -71,6 +76,9 @@ func (flag *Provider) CommandTimeout() (time.Duration, error) {
 	return timeout, nil
 }
 
+// Username sources the StorageOS account username to authenticate with from
+// flag's FlagSet. If the value stored has not changed then flag's fallback
+// is used.
 func (flag *Provider) Username() (string, error) {
 	username, err := flag.set.GetString(UsernameFlag)
 	if err != nil {
@@ -84,6 +92,9 @@ func (flag *Provider) Username() (string, error) {
 	return username, nil
 }
 
+// Password sources the StorageOS account password to authenticate with from
+// flag's FlagSet. If the value stored has not changed then flag's fallback
+// is used.
 func (flag *Provider) Password() (string, error) {
 	password, err := flag.set.GetString(PasswordFlag)
 	if err != nil {

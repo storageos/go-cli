@@ -12,13 +12,14 @@ package openapi
 
 import (
 	_context "context"
+	"fmt"
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"fmt"
-	"strings"
-	"github.com/antihax/optional"
 	"os"
+	"strings"
+
+	"github.com/antihax/optional"
 )
 
 // Linger please
@@ -448,7 +449,7 @@ func (a *DefaultApiService) CreateNamespace(ctx _context.Context, createNamespac
 
 /*
 CreatePolicyGroup Create a new policy group
-Create a new policy group in the cluster - only administrators can create new policy groups. 
+Create a new policy group in the cluster - only administrators can create new policy groups.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param createPolicyGroupData
 @return PolicyGroup
@@ -894,7 +895,7 @@ func (a *DefaultApiService) CreateUser(ctx _context.Context, createUserData Crea
 
 // CreateVolumeOpts Optional parameters for the method 'CreateVolume'
 type CreateVolumeOpts struct {
-    AsyncMax optional.String
+	AsyncMax optional.String
 }
 
 /*
@@ -904,7 +905,7 @@ Create a new volume in the given namespace
  * @param namespaceID ID of a Namespace
  * @param createVolumeData
  * @param optional nil or *CreateVolumeOpts - Optional Parameters:
- * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values. 
+ * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.
 @return Volume
 */
 func (a *DefaultApiService) CreateVolume(ctx _context.Context, namespaceID string, createVolumeData CreateVolumeData, localVarOptionals *CreateVolumeOpts) (Volume, *_nethttp.Response, error) {
@@ -1074,16 +1075,16 @@ func (a *DefaultApiService) CreateVolume(ctx _context.Context, namespaceID strin
 
 // DeleteAuthenticatedUserOpts Optional parameters for the method 'DeleteAuthenticatedUser'
 type DeleteAuthenticatedUserOpts struct {
-    IgnoreVersion optional.Bool
+	IgnoreVersion optional.Bool
 }
 
 /*
 DeleteAuthenticatedUser Delete the authenticated user
 Remove the authenticated user from the cluster.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
  * @param optional nil or *DeleteAuthenticatedUserOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
 */
 func (a *DefaultApiService) DeleteAuthenticatedUser(ctx _context.Context, version string, localVarOptionals *DeleteAuthenticatedUserOpts) (*_nethttp.Response, error) {
 	var (
@@ -1360,7 +1361,7 @@ func (a *DefaultApiService) DeleteAuthenticatedUserSessions(ctx _context.Context
 
 // DeleteNamespaceOpts Optional parameters for the method 'DeleteNamespace'
 type DeleteNamespaceOpts struct {
-    IgnoreVersion optional.Bool
+	IgnoreVersion optional.Bool
 }
 
 /*
@@ -1368,9 +1369,9 @@ DeleteNamespace Delete a namespace
 Remove the namespace identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a namespace
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
  * @param optional nil or *DeleteNamespaceOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
 */
 func (a *DefaultApiService) DeleteNamespace(ctx _context.Context, id string, version string, localVarOptionals *DeleteNamespaceOpts) (*_nethttp.Response, error) {
 	var (
@@ -1524,19 +1525,19 @@ func (a *DefaultApiService) DeleteNamespace(ctx _context.Context, id string, ver
 
 // DeleteNodeOpts Optional parameters for the method 'DeleteNode'
 type DeleteNodeOpts struct {
-    IgnoreVersion optional.Bool
-    AsyncMax optional.String
+	IgnoreVersion optional.Bool
+	AsyncMax      optional.String
 }
 
 /*
 DeleteNode Delete a node
-Remove the node identified by id. A node can only be deleted if it is currently offline. 
+Remove the node identified by id. A node can only be deleted if it is currently offline.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a node
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
  * @param optional nil or *DeleteNodeOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
- * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values. 
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
+ * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.
 */
 func (a *DefaultApiService) DeleteNode(ctx _context.Context, id string, version string, localVarOptionals *DeleteNodeOpts) (*_nethttp.Response, error) {
 	var (
@@ -1703,7 +1704,7 @@ func (a *DefaultApiService) DeleteNode(ctx _context.Context, id string, version 
 
 // DeletePolicyGroupOpts Optional parameters for the method 'DeletePolicyGroup'
 type DeletePolicyGroupOpts struct {
-    IgnoreVersion optional.Bool
+	IgnoreVersion optional.Bool
 }
 
 /*
@@ -1711,9 +1712,9 @@ DeletePolicyGroup Delete a policy group
 Remove the policy group identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a policy group
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
  * @param optional nil or *DeletePolicyGroupOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
 */
 func (a *DefaultApiService) DeletePolicyGroup(ctx _context.Context, id string, version string, localVarOptionals *DeletePolicyGroupOpts) (*_nethttp.Response, error) {
 	var (
@@ -1867,7 +1868,7 @@ func (a *DefaultApiService) DeletePolicyGroup(ctx _context.Context, id string, v
 
 // DeleteRuleOpts Optional parameters for the method 'DeleteRule'
 type DeleteRuleOpts struct {
-    IgnoreVersion optional.Bool
+	IgnoreVersion optional.Bool
 }
 
 /*
@@ -1876,9 +1877,9 @@ Remove the rule identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespaceID ID of a Namespace
  * @param id ID of a Rule
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
  * @param optional nil or *DeleteRuleOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
 */
 func (a *DefaultApiService) DeleteRule(ctx _context.Context, namespaceID string, id string, version string, localVarOptionals *DeleteRuleOpts) (*_nethttp.Response, error) {
 	var (
@@ -2023,7 +2024,7 @@ func (a *DefaultApiService) DeleteRule(ctx _context.Context, namespaceID string,
 
 /*
 DeleteSessions Invalidate login sessions
-Invalidates active JWTs on a per-user basis, specified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose. 
+Invalidates active JWTs on a per-user basis, specified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a user
 */
@@ -2159,17 +2160,17 @@ func (a *DefaultApiService) DeleteSessions(ctx _context.Context, id string) (*_n
 
 // DeleteUserOpts Optional parameters for the method 'DeleteUser'
 type DeleteUserOpts struct {
-    IgnoreVersion optional.Bool
+	IgnoreVersion optional.Bool
 }
 
 /*
 DeleteUser Delete a user
-Remove the user identified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose. 
+Remove the user identified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a user
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
  * @param optional nil or *DeleteUserOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
 */
 func (a *DefaultApiService) DeleteUser(ctx _context.Context, id string, version string, localVarOptionals *DeleteUserOpts) (*_nethttp.Response, error) {
 	var (
@@ -2313,8 +2314,8 @@ func (a *DefaultApiService) DeleteUser(ctx _context.Context, id string, version 
 
 // DeleteVolumeOpts Optional parameters for the method 'DeleteVolume'
 type DeleteVolumeOpts struct {
-    IgnoreVersion optional.Bool
-    AsyncMax optional.String
+	IgnoreVersion optional.Bool
+	AsyncMax      optional.String
 }
 
 /*
@@ -2323,10 +2324,10 @@ Remove the volume identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespaceID ID of a Namespace
  * @param id ID of a Volume
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
  * @param optional nil or *DeleteVolumeOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
- * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values. 
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
+ * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.
 */
 func (a *DefaultApiService) DeleteVolume(ctx _context.Context, namespaceID string, id string, version string, localVarOptionals *DeleteVolumeOpts) (*_nethttp.Response, error) {
 	var (
@@ -2504,7 +2505,7 @@ func (a *DefaultApiService) DeleteVolume(ctx _context.Context, namespaceID strin
 
 // DetachVolumeOpts Optional parameters for the method 'DetachVolume'
 type DetachVolumeOpts struct {
-    IgnoreVersion optional.Bool
+	IgnoreVersion optional.Bool
 }
 
 /*
@@ -2513,9 +2514,9 @@ Detach the volume identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespaceID ID of a Namespace
  * @param id ID of a Volume
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
  * @param optional nil or *DetachVolumeOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
 */
 func (a *DefaultApiService) DetachVolume(ctx _context.Context, namespaceID string, id string, version string, localVarOptionals *DetachVolumeOpts) (*_nethttp.Response, error) {
 	var (
@@ -2940,7 +2941,7 @@ func (a *DefaultApiService) GetCluster(ctx _context.Context) (Cluster, *_nethttp
 
 /*
 GetDiagnostics Retrieves a diagnostics bundle from the target node
-Requests that the target node gathers detailed information about the state of the cluster, using it to then build and return a bundle which can be used for troubleshooting. The request will only be served when the authenticated user is an administrator. The node will attempt to gather information about its local state, cluster-wide state and local state of other nodes in the cluster. If the cluster is unhealthy this may cause a slower response. 
+Requests that the target node gathers detailed information about the state of the cluster, using it to then build and return a bundle which can be used for troubleshooting. The request will only be served when the authenticated user is an administrator. The node will attempt to gather information about its local state, cluster-wide state and local state of other nodes in the cluster. If the cluster is unhealthy this may cause a slower response.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 @return *os.File
 */
@@ -5812,7 +5813,7 @@ func (a *DefaultApiService) UpdateRule(ctx _context.Context, namespaceID string,
 
 /*
 UpdateUser Update a user
-Update the user identified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose. 
+Update the user identified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a user
  * @param updateUserData

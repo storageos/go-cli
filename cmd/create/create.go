@@ -21,23 +21,25 @@ type ConfigProvider interface {
 	CommandTimeout() (time.Duration, error)
 }
 
-// CreateClient describes the functionality required by the CLI application
+// Client describes the functionality required by the CLI application
 // to reasonably implement the "create" verb commands.
-type CreateClient interface {
+type Client interface {
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
 	CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labelSet labels.Set) (*volume.Resource, error)
 
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 }
 
-// CreateDisplayer describes the functionality required by the CLI application
+// Displayer describes the functionality required by the CLI application
 // to display the resources produced by the "create" verb commands.
-type CreateDisplayer interface {
+type Displayer interface {
 	CreateUser(ctx context.Context, w io.Writer, resource *user.Resource) error
 	CreateVolume(ctx context.Context, w io.Writer, resource *volume.Resource) error
 }
 
-func NewCommand(client CreateClient, config ConfigProvider) *cobra.Command {
+// NewCommand configures the set of commands which are grouped by the "create"
+// verb.
+func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "create",
 		Short: "create requests the creation of a new StorageOS resource",

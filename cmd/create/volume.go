@@ -18,8 +18,8 @@ import (
 
 type volumeCommand struct {
 	config  ConfigProvider
-	client  CreateClient
-	display CreateDisplayer
+	client  Client
+	display Displayer
 
 	description string
 	fsType      string
@@ -89,7 +89,7 @@ func (c *volumeCommand) createVolume(ctx context.Context, ref string, sizeBytes 
 		volName,
 		c.description,
 		volume.FsTypeFromString(c.fsType),
-		uint64(sizeBytes),
+		sizeBytes,
 		labelSet,
 	)
 }
@@ -110,12 +110,12 @@ func (c *volumeCommand) createVolumeByNamespaceID(ctx context.Context, ref strin
 		parts[1],
 		c.description,
 		volume.FsTypeFromString(c.fsType),
-		uint64(sizeBytes),
+		sizeBytes,
 		labelSet,
 	)
 }
 
-func newVolume(w io.Writer, client CreateClient, config ConfigProvider) *cobra.Command {
+func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 	c := &volumeCommand{
 		config: config,
 		client: client,

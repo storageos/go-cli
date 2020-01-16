@@ -67,7 +67,10 @@ func TestGetVolumeByName(t *testing.T) {
 			volumeName: "definitely-alan",
 
 			wantResource: nil,
-			wantErr:      NewNotFoundError("volume with name definitely-alan not found"),
+			wantErr: VolumeNotFoundError{
+				msg:  "volume with name definitely-alan not found for target namespace",
+				name: "definitely-alan",
+			},
 		},
 		{
 			name: "error getting list of volumes",
@@ -315,7 +318,10 @@ func TestFilterVolumesForNames(t *testing.T) {
 			names: []string{"volume-a", "definitely-steve"},
 
 			wantVolumes: nil,
-			wantErr:     NewNotFoundError("volume with name definitely-steve not found"),
+			wantErr: VolumeNotFoundError{
+				msg:  "volume with name definitely-steve not found for target namespace",
+				name: "definitely-steve",
+			},
 		},
 	}
 
@@ -421,7 +427,10 @@ func TestFilterVolumesForUIDs(t *testing.T) {
 			uids: []id.Volume{"volume-1", "volume-42"},
 
 			wantVolumes: nil,
-			wantErr:     NewNotFoundError("volume volume-42 not found"),
+			wantErr: VolumeNotFoundError{
+				msg: "volume with ID volume-42 not found for target namespace",
+				uid: "volume-42",
+			},
 		},
 	}
 

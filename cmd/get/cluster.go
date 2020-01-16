@@ -11,8 +11,8 @@ import (
 
 type clusterCommand struct {
 	config  ConfigProvider
-	client  GetClient
-	display GetDisplayer
+	client  Client
+	display Displayer
 
 	writer io.Writer
 }
@@ -33,7 +33,7 @@ func (c *clusterCommand) run(cmd *cobra.Command, _ []string) error {
 	return c.display.GetCluster(ctx, c.writer, cluster)
 }
 
-func newCluster(w io.Writer, client GetClient, config ConfigProvider) *cobra.Command {
+func newCluster(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 	c := &clusterCommand{
 		config: config,
 		client: client,
