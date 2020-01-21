@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -139,13 +140,13 @@ func TestEnvironmentProvider(t *testing.T) {
 
 			setenv: func(t *testing.T) {},
 			fallback: &mockProvider{
-				GetUsername: "whatchamacallit",
+				GetUsername: "username",
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Username()
 			},
 
-			wantValue: "whatchamacallit",
+			wantValue: "username",
 			wantErr:   nil,
 		},
 		{
@@ -204,6 +205,123 @@ func TestEnvironmentProvider(t *testing.T) {
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Password()
+			},
+
+			wantValue: "",
+			wantErr:   errors.New("bananas"),
+		},
+		{
+			name: "fetch use-ids when set",
+
+			setenv: func(t *testing.T) {
+				err := os.Setenv(UseIDsVar, "true")
+				if err != nil {
+					t.Fatalf("got unexpected error setting up env: %v", err)
+				}
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("dont call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.UseIDs()
+			},
+
+			wantValue: true,
+			wantErr:   nil,
+		},
+		{
+			name: "fetch use-ids has invalid value",
+
+			setenv: func(t *testing.T) {
+				err := os.Setenv(UseIDsVar, "notabool")
+				if err != nil {
+					t.Fatalf("got unexpected error setting up environment: %v", err)
+				}
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("dont call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.UseIDs()
+			},
+
+			wantValue: false,
+			wantErr: &strconv.NumError{
+				Func: "ParseBool",
+				Num:  "notabool",
+				Err:  strconv.ErrSyntax,
+			},
+		},
+		{
+			name: "fetch use-ids falls back when not set",
+
+			setenv: func(t *testing.T) {},
+			fallback: &mockProvider{
+				GetUseIDs: true,
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.UseIDs()
+			},
+
+			wantValue: true,
+			wantErr:   nil,
+		},
+		{
+			name: "fetch use-ids fall back errors",
+
+			setenv: func(t *testing.T) {},
+			fallback: &mockProvider{
+				GetError: errors.New("bananas"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.UseIDs()
+			},
+
+			wantValue: false,
+			wantErr:   errors.New("bananas"),
+		},
+		{
+			name: "fetch namespace when set",
+
+			setenv: func(t *testing.T) {
+				err := os.Setenv(NamespaceVar, "my-namespace")
+				if err != nil {
+					t.Fatalf("got unexpected error setting up env: %v", err)
+				}
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("dont call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.Namespace()
+			},
+
+			wantValue: "my-namespace",
+			wantErr:   nil,
+		},
+		{
+			name: "fetch namespace falls back when not set",
+
+			setenv: func(t *testing.T) {},
+			fallback: &mockProvider{
+				GetNamespace: "my-namespace",
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.Namespace()
+			},
+
+			wantValue: "my-namespace",
+			wantErr:   nil,
+		},
+		{
+			name: "fetch namespace fall back errors",
+
+			setenv: func(t *testing.T) {},
+			fallback: &mockProvider{
+				GetError: errors.New("bananas"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.Namespace()
 			},
 
 			wantValue: "",

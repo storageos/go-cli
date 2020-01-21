@@ -12,4 +12,6 @@ type Provider interface {
 	CommandTimeout() (time.Duration, error)
 	Username() (string, error)
 	Password() (string, error)
+	UseIDs() (bool, error)
+	Namespace() (string, error)
 }

@@ -1,7 +1,10 @@
 package cluster
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/alecthomas/units"
 
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/version"
@@ -60,4 +63,18 @@ type Licence struct {
 	ClusterCapacityBytes uint64     `json:"clusterCapacityBytes"`
 	Kind                 string     `json:"kind"`
 	CustomerName         string     `json:"customerName"`
+}
+
+func (l *Licence) String() string {
+	return fmt.Sprintf(`Cluster ID: %v
+Expires at: %v
+Cluster capacity: %v
+Kind: %v
+Customer name: %v
+`,
+		l.ClusterID,
+		l.ExpiresAt.Format(time.RFC3339),
+		units.Base2Bytes(l.ClusterCapacityBytes).String(),
+		l.Kind,
+		l.CustomerName)
 }

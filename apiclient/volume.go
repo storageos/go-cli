@@ -174,8 +174,8 @@ func (c *Client) GetNamespaceVolumes(ctx context.Context, namespace id.Namespace
 // GetNamespaceVolumesByName requests basic information for each volume resource in
 // namespace from the StorageOS API.
 //
-// The returned list is filtered using uids so that it contains only those
-// resources which have a matching ID. Omitting uids will skip the filtering.
+// The returned list is filtered using names so that it contains only those
+// resources which have a matching name. Omitting names will skip the filtering.
 func (c *Client) GetNamespaceVolumesByName(ctx context.Context, namespace id.Namespace, names ...string) ([]*volume.Resource, error) {
 	_, err := c.authenticate(ctx)
 	if err != nil {

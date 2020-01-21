@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
@@ -16,18 +17,10 @@ type nodeCommand struct {
 	client  Client
 	display Displayer
 
-	usingID bool
-
 	writer io.Writer
 }
 
-func (c *nodeCommand) run(cmd *cobra.Command, args []string) error {
-	timeout, err := c.config.CommandTimeout()
-	if err != nil {
-		return err
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
+func (c *nodeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args []string) error {
 
 	switch len(args) {
 	case 1:
@@ -50,7 +43,8 @@ func (c *nodeCommand) run(cmd *cobra.Command, args []string) error {
 // getNode retrieves a single node resource using the API client, determining
 // whether to retrieve the node by name or ID based on the current command configuration.
 func (c *nodeCommand) getNode(ctx context.Context, ref string) (*node.Resource, error) {
-	if !c.usingID {
+
+	if useIDs, err := c.config.UseIDs(); !useIDs || err != nil {
 		return c.client.GetNodeByName(ctx, ref)
 	}
 
@@ -62,7 +56,7 @@ func (c *nodeCommand) getNode(ctx context.Context, ref string) (*node.Resource, 
 // whether to retrieve nodes by names by name or ID based on the current
 // command configuration.
 func (c *nodeCommand) listNodes(ctx context.Context, refs []string) ([]*node.Resource, error) {
-	if !c.usingID {
+	if useIDs, err := c.config.UseIDs(); !useIDs || err != nil {
 		return c.client.GetListNodesByName(ctx, refs...)
 	}
 
@@ -89,17 +83,18 @@ func newNode(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 		Use:     "node [node names...]",
 		Short:   "node retrieves basic information about StorageOS nodes",
 		Example: `
-$ storageos get node banana
+$ storageos get node my-node-name
 `,
 
-		RunE: c.run,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			run := runwrappers.RunWithTimeout(c.config)(c.runWithCtx)
+			return run(context.Background(), cmd, args)
+		},
 
 		// If a legitimate error occurs as part of the VERB node command
 		// we don't need to barf the usage template.
 		SilenceUsage: true,
 	}
-
-	cobraCommand.Flags().BoolVar(&c.usingID, "use-id", false, "request StorageOS nodes by ID instead of by name")
 
 	return cobraCommand
 }

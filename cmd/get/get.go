@@ -19,6 +19,8 @@ import (
 // access to.
 type ConfigProvider interface {
 	CommandTimeout() (time.Duration, error)
+	UseIDs() (bool, error)
+	Namespace() (string, error)
 }
 
 // Client defines the functionality required by the CLI application to

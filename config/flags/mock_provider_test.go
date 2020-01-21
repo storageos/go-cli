@@ -13,6 +13,8 @@ type mockProvider struct {
 	GetCommandTimeout time.Duration
 	GetUsername       string
 	GetPassword       string
+	GetUseIDs         bool
+	GetNamespace      string
 }
 
 var _ config.Provider = (*mockProvider)(nil)
@@ -31,4 +33,12 @@ func (m *mockProvider) Username() (string, error) {
 
 func (m *mockProvider) Password() (string, error) {
 	return m.GetPassword, m.GetError
+}
+
+func (m *mockProvider) UseIDs() (bool, error) {
+	return m.GetUseIDs, m.GetError
+}
+
+func (m *mockProvider) Namespace() (string, error) {
+	return m.GetNamespace, m.GetError
 }

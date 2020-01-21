@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
@@ -16,19 +17,10 @@ type nodeCommand struct {
 	client  Client
 	display Displayer
 
-	usingID bool
-
 	writer io.Writer
 }
 
-func (c *nodeCommand) run(cmd *cobra.Command, args []string) error {
-	timeout, err := c.config.CommandTimeout()
-	if err != nil {
-		return err
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
+func (c *nodeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args []string) error {
 	switch len(args) {
 	case 1:
 		n, err := c.describeNode(ctx, args[0])
@@ -50,7 +42,7 @@ func (c *nodeCommand) run(cmd *cobra.Command, args []string) error {
 // describeNode retrieves a single node state using the API client, determining
 // whether to retrieve the node by name or ID based on the current command configuration.
 func (c *nodeCommand) describeNode(ctx context.Context, ref string) (*node.State, error) {
-	if !c.usingID {
+	if useIDs, err := c.config.UseIDs(); !useIDs || err != nil {
 		return c.client.DescribeNodeByName(ctx, ref)
 	}
 
@@ -62,7 +54,7 @@ func (c *nodeCommand) describeNode(ctx context.Context, ref string) (*node.State
 // whether to retrieve nodes by names by name or ID based on the current
 // command configuration.
 func (c *nodeCommand) listNodes(ctx context.Context, refs []string) ([]*node.State, error) {
-	if !c.usingID {
+	if useIDs, err := c.config.UseIDs(); !useIDs || err != nil {
 		return c.client.DescribeListNodesByName(ctx, refs...)
 	}
 
@@ -89,15 +81,16 @@ func newNode(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 		Use:     "node [node names...]",
 		Short:   "node retrieves detailed information about StorageOS nodes",
 		Example: `
-$ storageos describe node banana
+$ storageos describe node my-node-name
 `,
 
-		RunE: c.run,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			run := runwrappers.RunWithTimeout(c.config)(c.runWithCtx)
+			return run(context.Background(), cmd, args)
+		},
 
 		SilenceUsage: true,
 	}
-
-	cobraCommand.Flags().BoolVar(&c.usingID, "use-id", false, "request StorageOS nodes by ID instead of by name")
 
 	return cobraCommand
 }

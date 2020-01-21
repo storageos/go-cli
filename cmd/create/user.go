@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 
+	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 )
@@ -36,12 +37,7 @@ type userCommand struct {
 	writer io.Writer
 }
 
-func (c *userCommand) run(cmd *cobra.Command, _ []string) error {
-	timeout, err := c.config.CommandTimeout()
-	if err != nil {
-		return err
-	}
-
+func (c *userCommand) ensurePassword(_ *cobra.Command, _ []string) error {
 	// If there is no password available when running the command interactively
 	// prompt for one.
 	if c.password == "" {
@@ -56,14 +52,10 @@ func (c *userCommand) run(cmd *cobra.Command, _ []string) error {
 		return errPasswordTooShort
 	}
 
-	// Start the timeout after the prompt interaction has been completed.
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
-	return c.createUser(ctx)
+	return nil
 }
 
-func (c *userCommand) createUser(ctx context.Context) error {
+func (c *userCommand) createUser(ctx context.Context, _ *cobra.Command, _ []string) error {
 	groupIDs := make([]id.PolicyGroup, len(c.groups))
 	for i, g := range c.groups {
 		groupIDs[i] = id.PolicyGroup(g)
@@ -123,7 +115,7 @@ func newUser(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 		Short: "user requests the creation of a new StorageOS user account",
 		Example: `
 $ storageos create user --with-username=alice --with-admin=true 
-		`,
+`,
 
 		Args: func(_ *cobra.Command, args []string) error {
 			switch len(args) {
@@ -143,7 +135,14 @@ $ storageos create user --with-username=alice --with-admin=true
 			return nil
 		},
 
-		RunE: c.run,
+		// Ensure that the command has an ok password before contacting the API
+		// with a deadline.
+		PreRunE: c.ensurePassword,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			run := runwrappers.RunWithTimeout(c.config)(c.createUser)
+
+			return run(context.Background(), cmd, args)
+		},
 
 		SilenceUsage: true,
 	}

@@ -4,6 +4,7 @@ package environment
 
 import (
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -27,6 +28,14 @@ const (
 	// source the password of the StorageOS account to authenticate with through
 	// command execution. TODO(CP-3919)
 	PasswordCommandVar = "STORAGEOS_PASSWORD_COMMAND" // #nosec G101
+	// UseIDsVar keys the environment variable from which we source the setting
+	// which determines whether existing StorageOS API resources are specified
+	// by their unique identifiers instead of names.
+	UseIDsVar = "STORAGEOS_USE_IDS"
+	// NamespaceVar keys the environment variable from which we source the
+	// namespace name or unique identifier to operate within for commands that
+	// require it.
+	NamespaceVar = "STORAGEOS_NAMESPACE"
 )
 
 // Provider exports functionality to retrieve global configuration values from
@@ -82,6 +91,32 @@ func (env *Provider) Password() (string, error) {
 	}
 
 	return password, nil
+}
+
+// UseIDs sources the configuration setting to specify existing API resources
+// by their unique identifier instead of name from the environment if set.
+// If not set in the environment then env's fallback is used.
+func (env *Provider) UseIDs() (bool, error) {
+	useIDs := os.Getenv(UseIDsVar)
+	if useIDs == "" {
+		return env.fallback.UseIDs()
+	}
+
+	return strconv.ParseBool(useIDs)
+}
+
+// Namespace sources the StorageOS namespace to operate within from the
+// environment if set. The value used must match up with the configuration
+// setting for using IDs.
+//
+// If not set set in the environment then env's fallback is used.
+func (env *Provider) Namespace() (string, error) {
+	namespace := os.Getenv(NamespaceVar)
+	if namespace == "" {
+		return env.fallback.Namespace()
+	}
+
+	return namespace, nil
 }
 
 // NewProvider returns a configuration provider which sources

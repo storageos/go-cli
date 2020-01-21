@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"strings"
-	"time"
 
 	"github.com/blang/semver"
 	"github.com/spf13/cobra"
@@ -13,20 +12,12 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/create"
 	"code.storageos.net/storageos/c2-cli/cmd/describe"
 	"code.storageos.net/storageos/c2-cli/cmd/get"
+	"code.storageos.net/storageos/c2-cli/config"
 )
 
 // UserAgentPrefix is used by the CLI application to identify itself to
 // StorageOS.
 var UserAgentPrefix string = "storageos-cli"
-
-// ConfigProvider specifies the configuration settings which commands require
-// access to.
-type ConfigProvider interface {
-	APIEndpoints() ([]string, error)
-	CommandTimeout() (time.Duration, error)
-	Username() (string, error)
-	Password() (string, error)
-}
 
 // InitCommand configures the CLI application's commands from the root down, using
 // client as the method of communicating with the StorageOS API.
@@ -34,7 +25,7 @@ type ConfigProvider interface {
 // The returned Command is configured with a flag set containing global configuration settings.
 //
 // Downstream errors are suppressed, so the caller is responsible for displaying messages.
-func InitCommand(client *apiclient.Client, config ConfigProvider, globalFlags *pflag.FlagSet, version semver.Version) *cobra.Command {
+func InitCommand(client *apiclient.Client, config config.Provider, globalFlags *pflag.FlagSet, version semver.Version) *cobra.Command {
 	app := &cobra.Command{
 		Use: "storageos <command>",
 		Short: `Storage for Cloud Native Applications.

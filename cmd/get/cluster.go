@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 )
 
@@ -17,14 +18,7 @@ type clusterCommand struct {
 	writer io.Writer
 }
 
-func (c *clusterCommand) run(cmd *cobra.Command, _ []string) error {
-	timeout, err := c.config.CommandTimeout()
-	if err != nil {
-		return err
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
+func (c *clusterCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, _ []string) error {
 	cluster, err := c.client.GetCluster(ctx)
 	if err != nil {
 		return err
@@ -50,7 +44,10 @@ func newCluster(w io.Writer, client Client, config ConfigProvider) *cobra.Comman
 $ storageos get cluster
 `,
 
-		RunE: c.run,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			run := runwrappers.RunWithTimeout(c.config)(c.runWithCtx)
+			return run(context.Background(), cmd, args)
+		},
 
 		// If a legitimate error occurs as part of the VERB cluster command
 		// we don't need to barf the usage template.

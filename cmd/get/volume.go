@@ -7,186 +7,99 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
+
+var errNoNamespaceSpecified = errors.New("must specify a namespace to get volumes from")
 
 type volumeCommand struct {
 	config  ConfigProvider
 	client  Client
 	display Displayer
 
-	usingIDs bool
+	allNamespaces bool
+	namespace     string
 
 	writer io.Writer
 }
 
-func (c *volumeCommand) run(cmd *cobra.Command, args []string) error {
-	timeout, err := c.config.CommandTimeout()
+func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args []string) error {
+	if c.allNamespaces {
+		vols, err := c.client.GetAllVolumes(ctx)
+		if err != nil {
+			return err
+		}
+
+		return c.display.GetVolumeList(ctx, c.writer, vols)
+	}
+
+	nsID, err := c.getNamespaceID(ctx)
 	if err != nil {
 		return err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
 
+	// If only one volume is requested then API requests can be minimised.
 	switch len(args) {
 	case 1:
-		v, err := c.getVolume(ctx, args)
+		v, err := c.getVolume(ctx, nsID, args[0])
 		if err != nil {
 			return err
 		}
 
 		return c.display.GetVolume(ctx, c.writer, v)
-	case 0:
-		volumes, err := c.client.GetAllVolumes(ctx)
+	default:
+		vols, err := c.listVolumes(ctx, nsID, args)
 		if err != nil {
 			return err
 		}
 
-		return c.display.GetVolumeList(ctx, c.writer, volumes)
-	default:
-		if c.usingIDs {
-			volumes, err := c.listVolumesUsingID(ctx, args)
-			if err != nil {
-				return err
-			}
-
-			return c.display.GetVolumeList(ctx, c.writer, volumes)
-		}
-
-		volumes, err := c.listVolumes(ctx, args)
-		if err != nil {
-			return err
-		}
-
-		return c.display.GetVolumeList(ctx, c.writer, volumes)
+		return c.display.GetVolumeList(ctx, c.writer, vols)
 	}
 }
 
-func (c *volumeCommand) getVolume(ctx context.Context, args []string) (*volume.Resource, error) {
-	volumeReference := args[0]
-
-	if !c.usingIDs {
-		nsName, volName, err := volume.ParseReferenceName(args[0])
+// getNamespaceID retrieves the namespace ID to use for API client calls based
+// on the configuration of c.
+//
+// If no namespace is specified on c, the ID of the default namespace is
+// retrieved.
+func (c *volumeCommand) getNamespaceID(ctx context.Context) (id.Namespace, error) {
+	if useIDs, err := c.config.UseIDs(); !useIDs || err != nil {
+		ns, err := c.client.GetNamespaceByName(ctx, c.namespace)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 
-		ns, err := c.client.GetNamespaceByName(ctx, nsName)
-		if err != nil {
-			return nil, err
-		}
-
-		return c.client.GetVolumeByName(ctx, ns.ID, volName)
+		return ns.ID, nil
 	}
-
-	nsID, volID, err := volume.ParseReferenceID(volumeReference)
-	switch err {
-	case nil:
-	case volume.ErrNoNamespace:
-		// if no namespace is supplied then resolve the id of the default one
-		defaultNs, err := c.client.GetNamespaceByName(ctx, "default")
-		if err != nil {
-			return nil, err
-		}
-		nsID = defaultNs.ID
-	default:
-		return nil, err
-	}
-
-	return c.client.GetVolume(ctx, nsID, volID)
+	return id.Namespace(c.namespace), nil
 }
 
-// listVolumes retrieves a list of volume resources from the provided set of
-// name-based reference strings using the API client.
-func (c *volumeCommand) listVolumes(ctx context.Context, nameRefs []string) ([]*volume.Resource, error) {
-	nsVols := map[string][]string{}
-	nsIDForName := map[string]id.Namespace{}
-
-	for _, ref := range nameRefs {
-		nsName, volName, err := volume.ParseReferenceName(ref)
-
-		if err != nil {
-			return nil, err
-		}
-
-		nsVols[nsName] = append(nsVols[nsName], volName)
+// getVolume requests a volume resource from ns, treating vol as an ID or a
+// name based on c's configuration.
+func (c *volumeCommand) getVolume(ctx context.Context, ns id.Namespace, vol string) (*volume.Resource, error) {
+	if useIDs, err := c.config.UseIDs(); !useIDs || err != nil {
+		return c.client.GetVolumeByName(ctx, ns, vol)
 	}
 
-	// Get the namespace ID → name mapping to identify requested
-	// volumes.
-	namespaces, err := c.client.GetAllNamespaces(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, ns := range namespaces {
-		if _, ok := nsVols[ns.Name]; ok {
-			nsIDForName[ns.Name] = ns.ID
-		}
-	}
-
-	resources := []*volume.Resource{}
-
-	for nsName, volNames := range nsVols {
-		nsID, ok := nsIDForName[nsName]
-		if !ok {
-			return nil, errors.New("namespace with name %v not found")
-		}
-
-		nsResources, err := c.client.GetNamespaceVolumesByName(ctx, nsID, volNames...)
-		if err != nil {
-			return nil, err
-		}
-
-		resources = append(resources, nsResources...)
-	}
-
-	return resources, nil
+	return c.client.GetVolume(ctx, ns, id.Volume(vol))
 }
 
-// listVolumesUsingID retrieves a list of volume resources from the provided
-// set of ID-based reference strings using the API client.
-func (c *volumeCommand) listVolumesUsingID(ctx context.Context, idRefs []string) ([]*volume.Resource, error) {
-	nsVols := map[id.Namespace][]id.Volume{}
-	defaultNsVols := []id.Volume{}
-
-	for _, ref := range idRefs {
-		nsID, volID, err := volume.ParseReferenceID(ref)
-
-		switch err {
-		case nil:
-			nsVols[nsID] = append(nsVols[nsID], volID)
-		case volume.ErrNoNamespace:
-			defaultNsVols = append(defaultNsVols, volID)
-		default:
-			return nil, err
-		}
+// listVolumes requests a list of volume resources using the configured API
+// client, filtering using vols (if provided) as c's configuration dictates.
+func (c *volumeCommand) listVolumes(ctx context.Context, ns id.Namespace, vols []string) ([]*volume.Resource, error) {
+	if useIDs, err := c.config.UseIDs(); !useIDs || err != nil {
+		return c.client.GetNamespaceVolumesByName(ctx, ns, vols...)
 	}
 
-	if len(defaultNsVols) > 0 {
-		// Get the default ns id and put in the map
-		defaultNs, err := c.client.GetNamespaceByName(ctx, "default")
-		if err != nil {
-			return nil, err
-		}
-
-		nsVols[defaultNs.ID] = append(nsVols[defaultNs.ID], defaultNsVols...)
+	volIDs := []id.Volume{}
+	for _, uid := range vols {
+		volIDs = append(volIDs, id.Volume(uid))
 	}
 
-	resources := []*volume.Resource{}
-
-	for nsID, volIDs := range nsVols {
-		nsResources, err := c.client.GetNamespaceVolumes(ctx, nsID, volIDs...)
-		if err != nil {
-			return nil, err
-		}
-
-		resources = append(resources, nsResources...)
-	}
-
-	return resources, nil
+	return c.client.GetNamespaceVolumes(ctx, ns, volIDs...)
 }
 
 func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
@@ -205,17 +118,41 @@ func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command
 		Use:     "volume [volume names...]",
 		Short:   "volume retrieves basic information about StorageOS volumes",
 		Example: `
-$ storageos get volume fruits/banana
+$ storageos get volumes --all-namespaces
+
+$ storageos get volume --namespace my-namespace-name my-volume-name
 `,
 
-		RunE: c.run,
+		PreRunE: func(_ *cobra.Command, _ []string) error {
+			ns, err := c.config.Namespace()
+			if err != nil {
+				return err
+			}
+
+			if ns == "" && !c.allNamespaces {
+				return errNoNamespaceSpecified
+			}
+			c.namespace = ns
+
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			run := runwrappers.RunWithTimeout(c.config)(c.runWithCtx)
+			return run(context.Background(), cmd, args)
+		},
+		Args: func(_ *cobra.Command, args []string) error {
+			if c.allNamespaces && len(args) > 0 {
+				return errors.New("volumes cannot be retrieved by name or ID across all namespaces")
+			}
+			return nil
+		},
 
 		// If a legitimate error occurs as part of the VERB volume command
 		// we don't need to barf the usage template.
 		SilenceUsage: true,
 	}
 
-	cobraCommand.Flags().BoolVar(&c.usingIDs, "use-id", false, "request StorageOS volumes by their namespace ID and volume ID instead of by their namespace name and volume name")
+	cobraCommand.Flags().BoolVar(&c.allNamespaces, "all-namespaces", false, "retrieves volumes from all accessible namespaces. This option overrides the namespace configuration")
 
 	return cobraCommand
 }

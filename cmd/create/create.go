@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
@@ -19,6 +20,8 @@ import (
 // access to.
 type ConfigProvider interface {
 	CommandTimeout() (time.Duration, error)
+	UseIDs() (bool, error)
+	Namespace() (string, error)
 }
 
 // Client describes the functionality required by the CLI application
@@ -27,6 +30,7 @@ type Client interface {
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
 	CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labelSet labels.Set) (*volume.Resource, error)
 
+	GetCluster(ctx context.Context) (*cluster.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 }
 

@@ -17,6 +17,13 @@ const (
 	// attempt to use in the credentials presented to the StorageOS API for
 	// authentication.
 	DefaultPassword = "storageos" // #nosec G101
+	// DefaultUseIDs defines the default setting for using unique identifiers
+	// over names when specifying existing API resources. The default is to
+	// use names.
+	DefaultUseIDs = false
+	// DefaultNamespaceName defines the name of the default StorageOS namespace
+	// which is used as a fallback when no namespace specifier is provided.
+	DefaultNamespaceName = "default"
 )
 
 // Defaulter exports functionality to retrieve default values for the global
@@ -46,6 +53,18 @@ func (d *Defaulter) Username() (string, error) {
 // Password returns a password to default to.
 func (d *Defaulter) Password() (string, error) {
 	return DefaultPassword, nil
+}
+
+// UseIDs returns the default value for whether API resources must be specified
+// by their unique identifiers instead of names.
+func (d *Defaulter) UseIDs() (bool, error) {
+	return DefaultUseIDs, nil
+}
+
+// Namespace returns the namespace name "default" to use for operations which
+// required a namespace to be specified.
+func (d *Defaulter) Namespace() (string, error) {
+	return DefaultNamespaceName, nil
 }
 
 var _ Provider = (*Defaulter)(nil) // Ensure that the defaulter satisfies the exported interface

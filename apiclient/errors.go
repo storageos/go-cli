@@ -1,10 +1,5 @@
 package apiclient
 
-// TODO(CP-3962): These should be converted to more application specific error
-// types that can be used to provide additional error context to the user at
-// the terminal based on the operation/resource being attempted, consider
-// housing them alongside the appropriate apiclient methods.
-
 // AuthenticationError indicates that the requested operation could not be
 // performed for the client due to an issue with the authentication credentials
 // provided by the client.

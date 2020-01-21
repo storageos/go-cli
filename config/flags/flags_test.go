@@ -115,7 +115,7 @@ func TestFlagProvider(t *testing.T) {
 			name: "fetch username when set",
 
 			arguments: []string{
-				"--" + UsernameFlag, "mange",
+				"--" + UsernameFlag, "a-username",
 			},
 			fallback: &mockProvider{
 				GetError: errors.New("dont call me"),
@@ -124,7 +124,7 @@ func TestFlagProvider(t *testing.T) {
 				return p.Username()
 			},
 
-			wantValue: "mange",
+			wantValue: "a-username",
 			wantErr:   nil,
 		},
 		{
@@ -132,13 +132,13 @@ func TestFlagProvider(t *testing.T) {
 
 			arguments: []string{},
 			fallback: &mockProvider{
-				GetUsername: "mange",
+				GetUsername: "a-username",
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Username()
 			},
 
-			wantValue: "mange",
+			wantValue: "a-username",
 			wantErr:   nil,
 		},
 		{
@@ -146,20 +146,20 @@ func TestFlagProvider(t *testing.T) {
 
 			arguments: []string{},
 			fallback: &mockProvider{
-				GetError: errors.New("fest hos mange"),
+				GetError: errors.New("a-username"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Username()
 			},
 
 			wantValue: "",
-			wantErr:   errors.New("fest hos mange"),
+			wantErr:   errors.New("a-username"),
 		},
 		{
 			name: "fetch password when set",
 
 			arguments: []string{
-				"--" + PasswordFlag, "mangemakers",
+				"--" + PasswordFlag, "verysecret",
 			},
 			fallback: &mockProvider{
 				GetError: errors.New("dont call me"),
@@ -168,7 +168,7 @@ func TestFlagProvider(t *testing.T) {
 				return p.Password()
 			},
 
-			wantValue: "mangemakers",
+			wantValue: "verysecret",
 			wantErr:   nil,
 		},
 		{
@@ -176,13 +176,13 @@ func TestFlagProvider(t *testing.T) {
 
 			arguments: []string{},
 			fallback: &mockProvider{
-				GetPassword: "mangemakers",
+				GetPassword: "verysecret",
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Password()
 			},
 
-			wantValue: "mangemakers",
+			wantValue: "verysecret",
 			wantErr:   nil,
 		},
 		{
@@ -194,6 +194,94 @@ func TestFlagProvider(t *testing.T) {
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Password()
+			},
+
+			wantValue: "",
+			wantErr:   errors.New("bananas"),
+		},
+		{
+			name: "fetch use-ids when set",
+
+			arguments: []string{
+				"--" + UseIDsFlag, "true",
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("dont call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.UseIDs()
+			},
+
+			wantValue: true,
+			wantErr:   nil,
+		},
+		{
+			name: "fetch use-ids falls back when not set",
+
+			arguments: []string{},
+			fallback: &mockProvider{
+				GetUseIDs: true,
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.UseIDs()
+			},
+
+			wantValue: true,
+			wantErr:   nil,
+		},
+		{
+			name: "fetch use-ids fall back errors",
+
+			arguments: []string{},
+			fallback: &mockProvider{
+				GetError: errors.New("bananas"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.UseIDs()
+			},
+
+			wantValue: false,
+			wantErr:   errors.New("bananas"),
+		},
+		{
+			name: "fetch namespace when set",
+
+			arguments: []string{
+				"--" + NamespaceFlag, "my-namespace",
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("dont call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.Namespace()
+			},
+
+			wantValue: "my-namespace",
+			wantErr:   nil,
+		},
+		{
+			name: "fetch namespace falls back when not set",
+
+			arguments: []string{},
+			fallback: &mockProvider{
+				GetNamespace: "my-namespace",
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.Namespace()
+			},
+
+			wantValue: "my-namespace",
+			wantErr:   nil,
+		},
+		{
+			name: "fetch namespace fall back errors",
+
+			arguments: []string{},
+			fallback: &mockProvider{
+				GetError: errors.New("bananas"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.Namespace()
 			},
 
 			wantValue: "",
