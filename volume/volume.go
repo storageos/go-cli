@@ -2,6 +2,7 @@ package volume
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 	"time"
 
@@ -9,6 +10,29 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/pkg/version"
+)
+
+const (
+	// LabelNoCache is a StorageOS volume label which when enabled disables the
+	// caching of volume data.
+	LabelNoCache = "storageos.com/nocache"
+	// LabelNoCompress is a StorageOS volume label which when enabled disables the
+	// compression of volume data (both at rest and during transit).
+	LabelNoCompress = "storageos.com/nocompress"
+	// LabelReplicas is a StorageOS volume label which decides how many replicas
+	// must be provisioned for that volume.
+	LabelReplicas = "storageos.com/replicas"
+	// LabelThrottle is a StorageOS volume label which when enabled deprioritises
+	// the volume's traffic by reducing disk I/O rate.
+	LabelThrottle = "storageos.com/throttle"
+	// LabelHintMaster is a StorageOS volume label holding a list of nodes. When set,
+	// placement of the volume master on one of the nodes present in the list is
+	// preferred.
+	LabelHintMaster = "storageos.com/hint.master"
+	// LabelHintReplicas is a StorageOS volume label holding a list of nodes. When
+	// set, placement of volume replicas on nodes present in the list is
+	// preferred.
+	LabelHintReplicas = "storageos.com/hint.replicas"
 )
 
 // ErrNoNamespace is an error stating that an ID based volume reference
@@ -58,6 +82,39 @@ type Deployment struct {
 	Inode   uint32        `json:"inode"`
 	Health  health.State  `json:"health"`
 	Syncing bool          `json:"syncing"`
+}
+
+// IsCachingDisabled returns if the volume resource is configured to disable
+// caching of data.
+func (r *Resource) IsCachingDisabled() (bool, error) {
+	value, exists := r.Labels[LabelNoCache]
+	if !exists {
+		return false, nil
+	}
+
+	return strconv.ParseBool(value)
+}
+
+// IsCompressionDisabled returns if the volume resource is configured to disable
+// compression of data at rest and during transit.
+func (r *Resource) IsCompressionDisabled() (bool, error) {
+	value, exists := r.Labels[LabelNoCompress]
+	if !exists {
+		return false, nil
+	}
+
+	return strconv.ParseBool(value)
+}
+
+// IsThrottleEnabled returns if the volume resource is configured to have its
+// traffic deprioritised by reducing its disk I/O rate.
+func (r *Resource) IsThrottleEnabled() (bool, error) {
+	value, exists := r.Labels[LabelThrottle]
+	if !exists {
+		return false, nil
+	}
+
+	return strconv.ParseBool(value)
 }
 
 // ParseReferenceName will parse a volume reference string built of
