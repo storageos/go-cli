@@ -33,3 +33,13 @@ This allows flexibility down the line. We can choose to manually vendor the
 openapi code directly in `pkg` and remove it from the `go.mod` file/vendor dir
 or we can remove it from `pkg` and host the generated code at a repository so 
 that it can be imported by the go module system and leverage versioning.
+
+## API version semantics
+
+For all resource update operations in the StorageOS API an entity version *must*
+be provided. This helps to prevent writes being lost. For resource deletion 
+operations the API allows users to specify the `ignore-version` header to force
+deletion even when an outdated version is specified. This can be the default 
+behaviour when specifying the target by its ID, but when specifying the target
+by name a version should be specified as name based operations will be two-step
+(fetch list, find name then perform delete operation by the ID).

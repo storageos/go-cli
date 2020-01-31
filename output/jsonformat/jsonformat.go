@@ -45,6 +45,15 @@ func (d *Displayer) CreateVolume(ctx context.Context, w io.Writer, resource *vol
 }
 
 //-----------------------------------------------------------------------------
+// UPDATE
+//-----------------------------------------------------------------------------
+
+// UpdateLicence encodes licence as JSON, writing the result to w.
+func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *cluster.Licence) error {
+	return d.encode(w, licence)
+}
+
+//-----------------------------------------------------------------------------
 // GET
 //-----------------------------------------------------------------------------
 

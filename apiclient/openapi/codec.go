@@ -3,6 +3,7 @@ package openapi
 import (
 	"errors"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -15,8 +16,8 @@ import (
 	"code.storageos.net/storageos/openapi"
 )
 
-// codec provides functionality to "decode" openapi models, translating them to
-// internal types.
+// codec provides functionality to encode/decode openapi models, translating
+// them to/from internal types.
 type codec struct{}
 
 func (c codec) decodeCluster(model openapi.Cluster) (*cluster.Resource, error) {
@@ -147,20 +148,46 @@ func (c codec) decodeUser(model openapi.User) (*user.Resource, error) {
 }
 
 func (c codec) encodeFsType(filesystem volume.FsType) (openapi.FsType, error) {
-	switch filesystem.String() {
-	case string(openapi.EXT2):
-		return openapi.EXT2, nil
-	case string(openapi.EXT3):
-		return openapi.EXT3, nil
-	case string(openapi.EXT4):
-		return openapi.EXT4, nil
-	case string(openapi.XFS):
-		return openapi.XFS, nil
-	case string(openapi.BTRFS):
-		return openapi.BTRFS, nil
-	case string(openapi.BLOCK):
-		return openapi.BLOCK, nil
+	v := openapi.FsType(filesystem.String())
+	switch v {
+	case openapi.EXT2, openapi.EXT3,
+		openapi.EXT4, openapi.XFS,
+		openapi.BTRFS, openapi.BLOCK:
+		return v, nil
 	default:
-		return "", errors.New("unknown fs type")
+		return "", apiclient.NewEncodingError(
+			errors.New("unknown fs type"),
+			v,
+			filesystem,
+		)
+	}
+}
+
+func (c codec) encodeLogLevel(level cluster.LogLevel) (openapi.LogLevel, error) {
+	v := openapi.LogLevel(level.String())
+	switch v {
+	case openapi.DEBUG, openapi.INFO,
+		openapi.WARN, openapi.ERROR:
+		return v, nil
+	default:
+		return "", apiclient.NewEncodingError(
+			errors.New("unknown log level"),
+			v,
+			level,
+		)
+	}
+}
+
+func (c codec) encodeLogFormat(format cluster.LogFormat) (openapi.LogFormat, error) {
+	v := openapi.LogFormat(format.String())
+	switch v {
+	case openapi.DEFAULT, openapi.JSON:
+		return v, nil
+	default:
+		return "", apiclient.NewEncodingError(
+			errors.New("unknown log format"),
+			v,
+			format,
+		)
 	}
 }

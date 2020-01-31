@@ -1,5 +1,7 @@
 package apiclient
 
+import "fmt"
+
 // AuthenticationError indicates that the requested operation could not be
 // performed for the client due to an issue with the authentication credentials
 // provided by the client.
@@ -149,5 +151,27 @@ func (e StoreError) Error() string {
 func NewStoreError(msg string) StoreError {
 	return StoreError{
 		msg: msg,
+	}
+}
+
+// EncodingError provides a unified error type which transport encoding
+// implementations return when given a value that cannot be encoded with the
+// target encoding.
+type EncodingError struct {
+	err        error
+	targetType interface{}
+	value      interface{}
+}
+
+func (e EncodingError) Error() string {
+	return fmt.Sprintf("cannot encode %v as %T: %s", e.value, e.targetType, e.err)
+}
+
+// NewEncodingError wraps err as an encoding error for value into targetType.
+func NewEncodingError(err error, targetType, value interface{}) EncodingError {
+	return EncodingError{
+		err:        err,
+		targetType: targetType,
+		value:      value,
 	}
 }

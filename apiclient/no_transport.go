@@ -11,6 +11,10 @@ import (
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
+// noTransport implements the Transport interface for the API client, but
+// returns a known error from all method invocations. It is a placeholder
+// to allow for configuration of the API client to take place after it
+// has been constructed.
 type noTransport struct{}
 
 var _ Transport = (*noTransport)(nil)
@@ -52,5 +56,9 @@ func (t *noTransport) CreateUser(ctx context.Context, username, password string,
 }
 
 func (t *noTransport) CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
+func (t *noTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource, licenceKey []byte) (*cluster.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }

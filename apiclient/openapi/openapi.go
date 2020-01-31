@@ -10,12 +10,6 @@ import (
 	"code.storageos.net/storageos/openapi"
 )
 
-// IgnoreVersionHeader is a HTTP header which can be used to specify that
-// API entity versions are to be ignored when making requests.
-//
-// Not all API operations support this.
-const IgnoreVersionHeader = "ignore-version"
-
 // ConfigProvider abstracts the functionality required by the OpenAPI transport
 // implementation for client configuration.
 type ConfigProvider interface {
@@ -85,10 +79,8 @@ func NewOpenAPI(config ConfigProvider, userAgent string) (*OpenAPI, error) {
 	// Create the OpenAPI client configuration
 	// and initialise.
 	apiCfg := &openapi.Configuration{
-		BasePath: "v2",
-		DefaultHeader: map[string]string{
-			IgnoreVersionHeader: "true", // Set the default header to include ignore-version=true
-		},
+		BasePath:      "v2",
+		DefaultHeader: map[string]string{},
 		// TODO(CP-3924): For now the CLI supports only sending requests to the
 		// first host provided. There should be a way to utilise multiple
 		// hosts.
