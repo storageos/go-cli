@@ -257,16 +257,14 @@ func filterNodesForNames(nodes []*node.Resource, names ...string) ([]*node.Resou
 		retrieved[n.Name] = n
 	}
 
-	filtered := make([]*node.Resource, len(names))
+	filtered := make([]*node.Resource, 0, len(names))
 
-	i := 0
 	for _, name := range names {
 		n, ok := retrieved[name]
 		if !ok {
 			return nil, NewNodeNameNotFoundError(name)
 		}
-		filtered[i] = n
-		i++
+		filtered = append(filtered, n)
 	}
 
 	return filtered, nil
@@ -290,16 +288,14 @@ func filterNodesForUIDs(nodes []*node.Resource, uids ...id.Node) ([]*node.Resour
 		retrieved[n.ID] = n
 	}
 
-	filtered := make([]*node.Resource, len(uids))
+	filtered := make([]*node.Resource, 0, len(uids))
 
-	i := 0
 	for _, id := range uids {
 		n, ok := retrieved[id]
 		if !ok {
 			return nil, NewNodeNotFoundError(id)
 		}
-		filtered[i] = n
-		i++
+		filtered = append(filtered, n)
 	}
 
 	return filtered, nil

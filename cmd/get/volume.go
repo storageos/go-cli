@@ -7,9 +7,11 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/selectors"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
@@ -22,18 +24,28 @@ type volumeCommand struct {
 
 	allNamespaces bool
 	namespace     string
+	selectors     []string
 
 	writer io.Writer
 }
 
 func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args []string) error {
+	set, err := selectors.NewSetFromStrings(c.selectors...)
+	if err != nil {
+		return err
+	}
+
 	if c.allNamespaces {
 		vols, err := c.client.GetAllVolumes(ctx)
 		if err != nil {
 			return err
 		}
 
-		return c.display.GetVolumeList(ctx, c.writer, vols)
+		return c.display.GetListVolumes(
+			ctx,
+			c.writer,
+			set.FilterVolumes(vols),
+		)
 	}
 
 	nsID, err := c.getNamespaceID(ctx)
@@ -41,22 +53,27 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		return err
 	}
 
-	// If only one volume is requested then API requests can be minimised.
 	switch len(args) {
 	case 1:
+		// If only one volume is requested then API requests can be minimised.
 		v, err := c.getVolume(ctx, nsID, args[0])
 		if err != nil {
 			return err
 		}
 
 		return c.display.GetVolume(ctx, c.writer, v)
+
 	default:
 		vols, err := c.listVolumes(ctx, nsID, args)
 		if err != nil {
 			return err
 		}
 
-		return c.display.GetVolumeList(ctx, c.writer, vols)
+		return c.display.GetListVolumes(
+			ctx,
+			c.writer,
+			set.FilterVolumes(vols),
+		)
 	}
 }
 
@@ -66,7 +83,12 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 // If no namespace is specified on c, the ID of the default namespace is
 // retrieved.
 func (c *volumeCommand) getNamespaceID(ctx context.Context) (id.Namespace, error) {
-	if useIDs, err := c.config.UseIDs(); !useIDs || err != nil {
+	useIDs, err := c.config.UseIDs()
+	if err != nil {
+		return "", err
+	}
+
+	if !useIDs {
 		ns, err := c.client.GetNamespaceByName(ctx, c.namespace)
 		if err != nil {
 			return "", err
@@ -80,7 +102,12 @@ func (c *volumeCommand) getNamespaceID(ctx context.Context) (id.Namespace, error
 // getVolume requests a volume resource from ns, treating vol as an ID or a
 // name based on c's configuration.
 func (c *volumeCommand) getVolume(ctx context.Context, ns id.Namespace, vol string) (*volume.Resource, error) {
-	if useIDs, err := c.config.UseIDs(); !useIDs || err != nil {
+	useIDs, err := c.config.UseIDs()
+	if err != nil {
+		return nil, err
+	}
+
+	if !useIDs {
 		return c.client.GetVolumeByName(ctx, ns, vol)
 	}
 
@@ -90,7 +117,12 @@ func (c *volumeCommand) getVolume(ctx context.Context, ns id.Namespace, vol stri
 // listVolumes requests a list of volume resources using the configured API
 // client, filtering using vols (if provided) as c's configuration dictates.
 func (c *volumeCommand) listVolumes(ctx context.Context, ns id.Namespace, vols []string) ([]*volume.Resource, error) {
-	if useIDs, err := c.config.UseIDs(); !useIDs || err != nil {
+	useIDs, err := c.config.UseIDs()
+	if err != nil {
+		return nil, err
+	}
+
+	if !useIDs {
 		return c.client.GetNamespaceVolumesByName(ctx, ns, vols...)
 	}
 
@@ -123,7 +155,7 @@ $ storageos get volumes --all-namespaces
 $ storageos get volume --namespace my-namespace-name my-volume-name
 `,
 
-		PreRunE: func(_ *cobra.Command, _ []string) error {
+		PreRunE: func(_ *cobra.Command, args []string) error {
 			ns, err := c.config.Namespace()
 			if err != nil {
 				return err
@@ -137,7 +169,10 @@ $ storageos get volume --namespace my-namespace-name my-volume-name
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			run := runwrappers.RunWithTimeout(c.config)(c.runWithCtx)
+			run := runwrappers.Chain(
+				runwrappers.RunWithTimeout(c.config),
+				runwrappers.EnsureTargetOrSelectors(&c.selectors),
+			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},
 		Args: func(_ *cobra.Command, args []string) error {
@@ -153,6 +188,8 @@ $ storageos get volume --namespace my-namespace-name my-volume-name
 	}
 
 	cobraCommand.Flags().BoolVar(&c.allNamespaces, "all-namespaces", false, "retrieves volumes from all accessible namespaces. This option overrides the namespace configuration")
+
+	flagutil.SupportSelectors(cobraCommand.Flags(), &c.selectors)
 
 	return cobraCommand
 }

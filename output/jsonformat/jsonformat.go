@@ -8,6 +8,7 @@ import (
 	"io"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -57,8 +58,18 @@ func (d *Displayer) GetNode(ctx context.Context, w io.Writer, resource *node.Res
 	return d.encode(w, resource)
 }
 
-// GetNodeList encodes resources as JSON, writing the result to w.
-func (d *Displayer) GetNodeList(ctx context.Context, w io.Writer, resources []*node.Resource) error {
+// GetListNodes encodes resources as JSON, writing the result to w.
+func (d *Displayer) GetListNodes(ctx context.Context, w io.Writer, resources []*node.Resource) error {
+	return d.encode(w, resources)
+}
+
+// GetNamespace encodes resource as JSON, writing the result to w.
+func (d *Displayer) GetNamespace(ctx context.Context, w io.Writer, resource *namespace.Resource) error {
+	return d.encode(w, resource)
+}
+
+// GetListNamespaces encodes resources as JSON, writing the result to w.
+func (d *Displayer) GetListNamespaces(ctx context.Context, w io.Writer, resources []*namespace.Resource) error {
 	return d.encode(w, resources)
 }
 
@@ -67,8 +78,8 @@ func (d *Displayer) GetVolume(ctx context.Context, w io.Writer, resource *volume
 	return d.encode(w, resource)
 }
 
-// GetVolumeList encodes resources as JSON, writing the result to w.
-func (d *Displayer) GetVolumeList(ctx context.Context, w io.Writer, resources []*volume.Resource) error {
+// GetListVolumes encodes resources as JSON, writing the result to w.
+func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, resources []*volume.Resource) error {
 	return d.encode(w, resources)
 }
 
@@ -81,8 +92,8 @@ func (d *Displayer) DescribeNode(ctx context.Context, w io.Writer, state *node.S
 	return d.encode(w, state)
 }
 
-// DescribeNodeList encodes states as JSON, writing the result to w.
-func (d *Displayer) DescribeNodeList(ctx context.Context, w io.Writer, states []*node.State) error {
+// DescribeListNodes encodes states as JSON, writing the result to w.
+func (d *Displayer) DescribeListNodes(ctx context.Context, w io.Writer, states []*node.State) error {
 	return d.encode(w, states)
 }
 

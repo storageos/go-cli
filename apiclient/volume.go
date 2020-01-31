@@ -247,16 +247,14 @@ func filterVolumesForUIDs(volumes []*volume.Resource, uids ...id.Volume) ([]*vol
 		retrieved[v.ID] = v
 	}
 
-	filtered := make([]*volume.Resource, len(uids))
+	filtered := make([]*volume.Resource, 0, len(uids))
 
-	i := 0
 	for _, id := range uids {
 		v, ok := retrieved[id]
 		if !ok {
 			return nil, NewVolumeIDNotFoundError(id)
 		}
-		filtered[i] = v
-		i++
+		filtered = append(filtered, v)
 	}
 
 	return filtered, nil
@@ -279,16 +277,14 @@ func filterVolumesForNames(volumes []*volume.Resource, names ...string) ([]*volu
 		retrieved[v.Name] = v
 	}
 
-	filtered := make([]*volume.Resource, len(names))
+	filtered := make([]*volume.Resource, 0, len(names))
 
-	i := 0
 	for _, name := range names {
 		v, ok := retrieved[name]
 		if !ok {
 			return nil, NewVolumeNameNotFoundError(name)
 		}
-		filtered[i] = v
-		i++
+		filtered = append(filtered, v)
 	}
 
 	return filtered, nil

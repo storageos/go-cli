@@ -85,6 +85,36 @@ func (c *Client) GetNamespaceByName(ctx context.Context, name string) (*namespac
 	return nil, NewNamespaceNameNotFoundError(name)
 }
 
+// GetListNamespaces requests a list of namespace resources present in the
+// cluster.
+//
+// The returned list is filtered using uids so that it contains only those
+// namespace resources which have a matching ID. If no uids are given then
+// all namespaces are returned.
+func (c *Client) GetListNamespaces(ctx context.Context, uids ...id.Namespace) ([]*namespace.Resource, error) {
+	resources, err := c.GetAllNamespaces(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return filterNamespacesForUIDs(resources, uids...)
+}
+
+// GetListNamespacesByName requests a list of namespace resources present in
+// the cluster.
+//
+// The returned list is filtered using names so that it contains only those
+// namespaces resources which have a matching name. If no names are given then
+// all namespaces are returned.
+func (c *Client) GetListNamespacesByName(ctx context.Context, names ...string) ([]*namespace.Resource, error) {
+	resources, err := c.GetAllNamespaces(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return filterNamespacesForNames(resources, names...)
+}
+
 // GetAllNamespaces requests a list containing basic information for every namespace
 // in the StorageOS cluster.
 func (c *Client) GetAllNamespaces(ctx context.Context) ([]*namespace.Resource, error) {
@@ -94,4 +124,63 @@ func (c *Client) GetAllNamespaces(ctx context.Context) ([]*namespace.Resource, e
 	}
 
 	return c.transport.ListNamespaces(ctx)
+}
+
+// filterNamespacesForNames will return a subset of namespaces containing
+// resources which have one of the provided names. If names is not provided,
+// namespaces is returned as is.
+//
+// If there is no resource for a given name then an error is returned, thus
+// this is a strict helper.
+func filterNamespacesForNames(namespaces []*namespace.Resource, names ...string) ([]*namespace.Resource, error) {
+	if len(names) == 0 {
+		return namespaces, nil
+	}
+
+	retrieved := map[string]*namespace.Resource{}
+
+	for _, ns := range namespaces {
+		retrieved[ns.Name] = ns
+	}
+
+	filtered := make([]*namespace.Resource, 0, len(names))
+	for _, name := range names {
+		ns, ok := retrieved[name]
+		if !ok {
+			return nil, NewNamespaceNameNotFoundError(name)
+		}
+		filtered = append(filtered, ns)
+	}
+
+	return filtered, nil
+}
+
+// filterNamespacesForUIDS will return a subset of namespaces containing
+// resources which have one of the provided uids. If uids is not provided,
+// namespaces is returned as is.
+//
+// If there is no resource for a given uid then an error is returned, thus
+// this is a strict helper.
+func filterNamespacesForUIDs(namespaces []*namespace.Resource, uids ...id.Namespace) ([]*namespace.Resource, error) {
+	if len(uids) == 0 {
+		return namespaces, nil
+	}
+
+	retrieved := map[id.Namespace]*namespace.Resource{}
+
+	for _, ns := range namespaces {
+		retrieved[ns.ID] = ns
+	}
+
+	filtered := make([]*namespace.Resource, 0, len(uids))
+
+	for _, id := range uids {
+		ns, ok := retrieved[id]
+		if !ok {
+			return nil, NewNamespaceNotFoundError(id)
+		}
+		filtered = append(filtered, ns)
+	}
+
+	return filtered, nil
 }

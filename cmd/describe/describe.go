@@ -16,7 +16,6 @@ import (
 // access to.
 type ConfigProvider interface {
 	CommandTimeout() (time.Duration, error)
-
 	UseIDs() (bool, error)
 }
 
@@ -33,7 +32,7 @@ type Client interface {
 // to display the results gathered by the "describe" verb commands.
 type Displayer interface {
 	DescribeNode(context.Context, io.Writer, *node.State) error
-	DescribeNodeList(context.Context, io.Writer, []*node.State) error
+	DescribeListNodes(ctx context.Context, w io.Writer, states []*node.State) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "describe" verb.

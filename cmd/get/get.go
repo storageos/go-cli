@@ -39,18 +39,23 @@ type Client interface {
 	GetNamespaceVolumes(ctx context.Context, namespaceID id.Namespace, uids ...id.Volume) ([]*volume.Resource, error)
 	GetNamespaceVolumesByName(ctx context.Context, namespaceID id.Namespace, names ...string) ([]*volume.Resource, error)
 
+	GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
+	GetListNamespaces(ctx context.Context, uids ...id.Namespace) ([]*namespace.Resource, error)
+	GetListNamespacesByName(ctx context.Context, name ...string) ([]*namespace.Resource, error)
 	GetAllNamespaces(ctx context.Context) ([]*namespace.Resource, error)
 }
 
 // Displayer defines the functionality required by the CLI application to
 // display the results gathered by the "get" verb commands.
 type Displayer interface {
-	GetCluster(context.Context, io.Writer, *cluster.Resource) error
-	GetNode(context.Context, io.Writer, *node.Resource) error
-	GetNodeList(context.Context, io.Writer, []*node.Resource) error
-	GetVolume(context.Context, io.Writer, *volume.Resource) error
-	GetVolumeList(context.Context, io.Writer, []*volume.Resource) error
+	GetCluster(ctx context.Context, w io.Writer, resource *cluster.Resource) error
+	GetNode(ctx context.Context, w io.Writer, resource *node.Resource) error
+	GetListNodes(ctx context.Context, w io.Writer, resources []*node.Resource) error
+	GetNamespace(ctx context.Context, w io.Writer, resource *namespace.Resource) error
+	GetListNamespaces(ctx context.Context, w io.Writer, resources []*namespace.Resource) error
+	GetVolume(ctx context.Context, w io.Writer, resource *volume.Resource) error
+	GetListVolumes(ctx context.Context, w io.Writer, resources []*volume.Resource) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "get" verb.
@@ -63,6 +68,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command.AddCommand(
 		newCluster(os.Stdout, client, config),
 		newNode(os.Stdout, client, config),
+		newNamespace(os.Stdout, client, config),
 		newVolume(os.Stdout, client, config),
 	)
 

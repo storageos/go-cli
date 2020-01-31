@@ -4,10 +4,17 @@ package runwrappers
 
 import (
 	"context"
+	"errors"
 
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/pkg/cmdcontext"
+)
+
+var (
+	// ErrTargetOrSelector is an error that indicates that a label selector
+	// cannot be used when specifying resource names or unique identifiers.
+	ErrTargetOrSelector = errors.New("a target name or unique identifier cannot be used with a label selector")
 )
 
 // RunEWithContext is a function that extends a cobra.RunE function with a
@@ -39,6 +46,20 @@ func RunWithTimeout(provider cmdcontext.TimeoutProvider) WrapRunEWithContext {
 		return func(ctx context.Context, cmd *cobra.Command, args []string) error {
 			ctx, cancel := cmdcontext.WithTimeoutFromConfig(ctx, provider)
 			defer cancel()
+
+			return next(ctx, cmd, args)
+		}
+	}
+}
+
+// EnsureTargetOrSelectors returns a wrapper function that wraps next if
+// both selectors and args have non-zero length.
+func EnsureTargetOrSelectors(selectors *[]string) WrapRunEWithContext {
+	return func(next RunEWithContext) RunEWithContext {
+		return func(ctx context.Context, cmd *cobra.Command, args []string) error {
+			if len(*selectors) > 0 && len(args) > 0 {
+				return ErrTargetOrSelector
+			}
 
 			return next(ctx, cmd, args)
 		}

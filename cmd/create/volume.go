@@ -49,7 +49,7 @@ type volumeCommand struct {
 
 func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args []string) error {
 	// Convert the flag values to the desired types/units
-	labelSet, err := labels.SetFromPairs(c.labelPairs)
+	labelSet, err := labels.NewSetFromPairs(c.labelPairs)
 	if err != nil {
 		return err
 	}

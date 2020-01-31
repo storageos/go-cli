@@ -6,10 +6,12 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/selectors"
 )
 
 type nodeCommand struct {
@@ -17,11 +19,12 @@ type nodeCommand struct {
 	client  Client
 	display Displayer
 
+	selectors []string
+
 	writer io.Writer
 }
 
 func (c *nodeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args []string) error {
-
 	switch len(args) {
 	case 1:
 		n, err := c.getNode(ctx, args[0])
@@ -31,20 +34,29 @@ func (c *nodeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 
 		return c.display.GetNode(ctx, c.writer, n)
 	default:
+		set, err := selectors.NewSetFromStrings(c.selectors...)
+		if err != nil {
+			return err
+		}
+
 		nodes, err := c.listNodes(ctx, args)
 		if err != nil {
 			return err
 		}
 
-		return c.display.GetNodeList(ctx, c.writer, nodes)
+		return c.display.GetListNodes(ctx, c.writer, set.FilterNodes(nodes))
 	}
 }
 
 // getNode retrieves a single node resource using the API client, determining
 // whether to retrieve the node by name or ID based on the current command configuration.
 func (c *nodeCommand) getNode(ctx context.Context, ref string) (*node.Resource, error) {
+	useIDs, err := c.config.UseIDs()
+	if err != nil {
+		return nil, err
+	}
 
-	if useIDs, err := c.config.UseIDs(); !useIDs || err != nil {
+	if !useIDs {
 		return c.client.GetNodeByName(ctx, ref)
 	}
 
@@ -56,7 +68,12 @@ func (c *nodeCommand) getNode(ctx context.Context, ref string) (*node.Resource, 
 // whether to retrieve nodes by names by name or ID based on the current
 // command configuration.
 func (c *nodeCommand) listNodes(ctx context.Context, refs []string) ([]*node.Resource, error) {
-	if useIDs, err := c.config.UseIDs(); !useIDs || err != nil {
+	useIDs, err := c.config.UseIDs()
+	if err != nil {
+		return nil, err
+	}
+
+	if !useIDs {
 		return c.client.GetListNodesByName(ctx, refs...)
 	}
 
@@ -87,7 +104,10 @@ $ storageos get node my-node-name
 `,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			run := runwrappers.RunWithTimeout(c.config)(c.runWithCtx)
+			run := runwrappers.Chain(
+				runwrappers.RunWithTimeout(c.config),
+				runwrappers.EnsureTargetOrSelectors(&c.selectors),
+			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},
 
@@ -95,6 +115,8 @@ $ storageos get node my-node-name
 		// we don't need to barf the usage template.
 		SilenceUsage: true,
 	}
+
+	flagutil.SupportSelectors(cobraCommand.Flags(), &c.selectors)
 
 	return cobraCommand
 }
