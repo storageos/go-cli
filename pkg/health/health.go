@@ -2,29 +2,15 @@
 // status of supported StorageOS resources.
 package health
 
-import "strings"
-
 // State represents the health of a StorageOS resource.
 type State string
 
-const (
-	// Unknown indicates that either the status of the resource could not be
-	// determined or is not recognised.
-	Unknown State = "unknown"
-	// Online indicates the resource is functional.
-	Online = "online"
-	// Offline indicates the resource is not available.
-	Offline = "offline"
-)
-
-// FromString returns resource state determined by the value of health.
+// FromString wraps health as a State type.
 func FromString(health string) State {
-	switch strings.ToLower(health) {
-	case "online":
-		return Online
-	case "offline":
-		return Offline
-	default:
-		return Unknown
-	}
+	return State(health)
+}
+
+// String returns the string representation of s.
+func (s State) String() string {
+	return string(s)
 }

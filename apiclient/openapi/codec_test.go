@@ -148,7 +148,7 @@ func TestDecodeNode(t *testing.T) {
 			wantResource: &node.Resource{
 				ID:     "banananodeid",
 				Name:   "banananodename",
-				Health: health.Online,
+				Health: health.State("online"),
 
 				Labels: labels.Set{
 					"storageos.com/label": "value",
@@ -263,7 +263,7 @@ func TestDecodeVolume(t *testing.T) {
 					ID:      "master-id",
 					Node:    "some-arbitrary-node-id",
 					Inode:   43,
-					Health:  health.Online,
+					Health:  health.State("online"),
 					Syncing: false,
 				},
 				Replicas: []*volume.Deployment{
@@ -271,14 +271,14 @@ func TestDecodeVolume(t *testing.T) {
 						ID:      "replica-a-id",
 						Node:    "some-second-node-id",
 						Inode:   44,
-						Health:  health.Online,
+						Health:  health.State("online"),
 						Syncing: true,
 					},
 					&volume.Deployment{
 						ID:      "replica-b-id",
 						Node:    "some-third-node-id",
 						Inode:   45,
-						Health:  health.Offline,
+						Health:  health.State("offline"),
 						Syncing: false,
 					},
 				},
@@ -334,7 +334,7 @@ func TestDecodeVolume(t *testing.T) {
 					ID:      "master-id",
 					Node:    "some-arbitrary-node-id",
 					Inode:   43,
-					Health:  health.Online,
+					Health:  health.State("online"),
 					Syncing: false,
 				},
 				Replicas: []*volume.Deployment{},
