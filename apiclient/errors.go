@@ -95,8 +95,6 @@ type LicenceCapabilityError struct {
 	msg string
 }
 
-// TODO(CP-3925): This should be more helpful. Maybe decorate with upgrade
-// links or suggested actions.
 func (e LicenceCapabilityError) Error() string {
 	if e.msg == "" {
 		return "licence capability error"

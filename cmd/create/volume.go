@@ -11,6 +11,7 @@ import (
 	units "github.com/alecthomas/units"
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
@@ -143,13 +144,13 @@ $ storageos create volume --description "This volume contains the data for my ap
 $ storageos create volume --replicas 1 --hint-master reliable-node-1,reliable-node-2 --namespace my-namespace-name my-replicated-app
 `,
 
-		Args: func(cmd *cobra.Command, args []string) error {
+		Args: argwrappers.WrapInvalidArgsError(func(cmd *cobra.Command, args []string) error {
 			if len(args) != 1 {
 				return errVolumeNameSpecifiedWrong
 			}
 			return nil
-		},
-		PreRunE: func(_ *cobra.Command, _ []string) error {
+		}),
+		PreRunE: argwrappers.WrapInvalidArgsError(func(_ *cobra.Command, _ []string) error {
 			ns, err := c.config.Namespace()
 			if err != nil {
 				return err
@@ -161,7 +162,7 @@ $ storageos create volume --replicas 1 --hint-master reliable-node-1,reliable-no
 			c.namespace = ns
 
 			return nil
-		},
+		}),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run := runwrappers.Chain(

@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
@@ -154,8 +155,14 @@ $ storageos get volumes --all-namespaces
 
 $ storageos get volume --namespace my-namespace-name my-volume-name
 `,
+		Args: argwrappers.WrapInvalidArgsError(func(_ *cobra.Command, args []string) error {
+			if c.allNamespaces && len(args) > 0 {
+				return errors.New("volumes cannot be retrieved by name or ID across all namespaces")
+			}
+			return nil
+		}),
 
-		PreRunE: func(_ *cobra.Command, args []string) error {
+		PreRunE: argwrappers.WrapInvalidArgsError(func(_ *cobra.Command, args []string) error {
 			ns, err := c.config.Namespace()
 			if err != nil {
 				return err
@@ -167,19 +174,14 @@ $ storageos get volume --namespace my-namespace-name my-volume-name
 			c.namespace = ns
 
 			return nil
-		},
+		}),
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
 				runwrappers.EnsureTargetOrSelectors(&c.selectors),
 			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
-		},
-		Args: func(_ *cobra.Command, args []string) error {
-			if c.allNamespaces && len(args) > 0 {
-				return errors.New("volumes cannot be retrieved by name or ID across all namespaces")
-			}
-			return nil
 		},
 
 		// If a legitimate error occurs as part of the VERB volume command

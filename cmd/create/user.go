@@ -11,17 +11,18 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 
+	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 )
 
 var (
-	errUsernameArgRequired = errors.New("Username argument required")
-	errConflictingUsername = errors.New("Conflicting usernames provided: specify either via the flag or the argument")
+	errUsernameArgRequired = errors.New("username argument required")
+	errConflictingUsername = errors.New("conflicting usernames provided, specify either via the flag or the argument")
 
-	errPasswordTooShort     = errors.New("Provided password must have at least 8 characters")
-	errUserPasswordMismatch = errors.New("Provided passwords do not match")
+	errPasswordTooShort     = errors.New("provided password must have at least 8 characters")
+	errUserPasswordMismatch = errors.New("provided passwords do not match")
 )
 
 type userCommand struct {
@@ -117,7 +118,7 @@ func newUser(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 $ storageos create user --with-username=alice --with-admin=true 
 `,
 
-		Args: func(_ *cobra.Command, args []string) error {
+		Args: argwrappers.WrapInvalidArgsError(func(_ *cobra.Command, args []string) error {
 			switch len(args) {
 			case 0:
 				if c.username == "" {
@@ -133,11 +134,12 @@ $ storageos create user --with-username=alice --with-admin=true
 			}
 
 			return nil
-		},
+		}),
 
 		// Ensure that the command has an ok password before contacting the API
 		// with a deadline.
-		PreRunE: c.ensurePassword,
+		PreRunE: argwrappers.WrapInvalidArgsError(c.ensurePassword),
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run := runwrappers.RunWithTimeout(c.config)(c.createUser)
 

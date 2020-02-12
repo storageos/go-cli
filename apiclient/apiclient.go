@@ -69,7 +69,7 @@ type Client struct {
 	configureOnce *sync.Once
 }
 
-// TODO(CP-3930): I think maybe this authenticate boiler plate should be moved
+// TODO(CP-4038): I think maybe this authenticate boiler plate should be moved
 // down into the OpenAPI layer? That way we can be smart and avoid re-authing
 // etc without breaking abstraction layers. Marking this as part of the JWT
 // caching work because it's related and might lead to a nice solution - Fraser
