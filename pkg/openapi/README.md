@@ -37,7 +37,6 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**AuthenticateUser**](docs/DefaultApi.md#authenticateuser) | **Post** /auth/login | Authenticate a user
 *DefaultApi* | [**CreateNamespace**](docs/DefaultApi.md#createnamespace) | **Post** /namespaces | Create a new namespace
 *DefaultApi* | [**CreatePolicyGroup**](docs/DefaultApi.md#createpolicygroup) | **Post** /policies | Create a new policy group
-*DefaultApi* | [**CreateRule**](docs/DefaultApi.md#createrule) | **Post** /namespaces/{namespaceID}/rules | Create a new Rule in the specified namespace
 *DefaultApi* | [**CreateUser**](docs/DefaultApi.md#createuser) | **Post** /users | Create a new user
 *DefaultApi* | [**CreateVolume**](docs/DefaultApi.md#createvolume) | **Post** /namespaces/{namespaceID}/volumes | Create a new Volume in the specified namespace
 *DefaultApi* | [**DeleteAuthenticatedUser**](docs/DefaultApi.md#deleteauthenticateduser) | **Delete** /users/self | Delete the authenticated user
@@ -45,7 +44,6 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**DeleteNamespace**](docs/DefaultApi.md#deletenamespace) | **Delete** /namespaces/{id} | Delete a namespace
 *DefaultApi* | [**DeleteNode**](docs/DefaultApi.md#deletenode) | **Delete** /nodes/{id} | Delete a node
 *DefaultApi* | [**DeletePolicyGroup**](docs/DefaultApi.md#deletepolicygroup) | **Delete** /policies/{id} | Delete a policy group
-*DefaultApi* | [**DeleteRule**](docs/DefaultApi.md#deleterule) | **Delete** /namespaces/{namespaceID}/rules/{id} | Delete a rule
 *DefaultApi* | [**DeleteSessions**](docs/DefaultApi.md#deletesessions) | **Delete** /users/{id}/sessions | Invalidate login sessions
 *DefaultApi* | [**DeleteUser**](docs/DefaultApi.md#deleteuser) | **Delete** /users/{id} | Delete a user
 *DefaultApi* | [**DeleteVolume**](docs/DefaultApi.md#deletevolume) | **Delete** /namespaces/{namespaceID}/volumes/{id} | Delete a volume
@@ -56,13 +54,11 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**GetNamespace**](docs/DefaultApi.md#getnamespace) | **Get** /namespaces/{id} | Fetch a namespace
 *DefaultApi* | [**GetNode**](docs/DefaultApi.md#getnode) | **Get** /nodes/{id} | Fetch a node
 *DefaultApi* | [**GetPolicyGroup**](docs/DefaultApi.md#getpolicygroup) | **Get** /policies/{id} | Fetch a policy group
-*DefaultApi* | [**GetRule**](docs/DefaultApi.md#getrule) | **Get** /namespaces/{namespaceID}/rules/{id} | Fetch a rule
 *DefaultApi* | [**GetUser**](docs/DefaultApi.md#getuser) | **Get** /users/{id} | Fetch a user
 *DefaultApi* | [**GetVolume**](docs/DefaultApi.md#getvolume) | **Get** /namespaces/{namespaceID}/volumes/{id} | Fetch a volume
 *DefaultApi* | [**ListNamespaces**](docs/DefaultApi.md#listnamespaces) | **Get** /namespaces | Fetch the list of namespaces
 *DefaultApi* | [**ListNodes**](docs/DefaultApi.md#listnodes) | **Get** /nodes | Fetch the list of nodes
 *DefaultApi* | [**ListPolicyGroups**](docs/DefaultApi.md#listpolicygroups) | **Get** /policies | Fetch the list of policy groups
-*DefaultApi* | [**ListRules**](docs/DefaultApi.md#listrules) | **Get** /namespaces/{namespaceID}/rules | Fetch the list of rules in the given namespace
 *DefaultApi* | [**ListUsers**](docs/DefaultApi.md#listusers) | **Get** /users | Fetch the list of users
 *DefaultApi* | [**ListVolumes**](docs/DefaultApi.md#listvolumes) | **Get** /namespaces/{namespaceID}/volumes | Fetch the list of volumes in the given namespace
 *DefaultApi* | [**RefreshJwt**](docs/DefaultApi.md#refreshjwt) | **Post** /auth/refresh | Refresh the JWT
@@ -72,7 +68,6 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**UpdateNamespace**](docs/DefaultApi.md#updatenamespace) | **Put** /namespaces/{id} | Update a namespace
 *DefaultApi* | [**UpdateNode**](docs/DefaultApi.md#updatenode) | **Put** /nodes/{id} | Update a node
 *DefaultApi* | [**UpdatePolicyGroup**](docs/DefaultApi.md#updatepolicygroup) | **Put** /policies/{id} | Update a policy group
-*DefaultApi* | [**UpdateRule**](docs/DefaultApi.md#updaterule) | **Put** /namespaces/{namespaceID}/rules/{id} | Update a rule
 *DefaultApi* | [**UpdateUser**](docs/DefaultApi.md#updateuser) | **Put** /users/{id} | Update a user
 *DefaultApi* | [**UpdateVolume**](docs/DefaultApi.md#updatevolume) | **Put** /namespaces/{namespaceID}/volumes/{id} | Update a volume
 
@@ -82,31 +77,36 @@ Class | Method | HTTP request | Description
  - [AcceptedMessage](docs/AcceptedMessage.md)
  - [AttachVolumeData](docs/AttachVolumeData.md)
  - [AuthUserData](docs/AuthUserData.md)
+ - [CapacityStats](docs/CapacityStats.md)
  - [Cluster](docs/Cluster.md)
  - [CreateNamespaceData](docs/CreateNamespaceData.md)
  - [CreatePolicyGroupData](docs/CreatePolicyGroupData.md)
- - [CreateRuleData](docs/CreateRuleData.md)
  - [CreateUserData](docs/CreateUserData.md)
  - [CreateVolumeData](docs/CreateVolumeData.md)
  - [DeploymentInfo](docs/DeploymentInfo.md)
  - [Error](docs/Error.md)
  - [FsType](docs/FsType.md)
- - [Health](docs/Health.md)
  - [Licence](docs/Licence.md)
  - [LogFormat](docs/LogFormat.md)
  - [LogLevel](docs/LogLevel.md)
+ - [MasterDeploymentInfo](docs/MasterDeploymentInfo.md)
+ - [MasterDeploymentInfoAllOf](docs/MasterDeploymentInfoAllOf.md)
+ - [MasterHealth](docs/MasterHealth.md)
  - [Namespace](docs/Namespace.md)
  - [Node](docs/Node.md)
+ - [NodeHealth](docs/NodeHealth.md)
  - [PoliciesSpecs](docs/PoliciesSpecs.md)
  - [PolicyGroup](docs/PolicyGroup.md)
  - [PolicyGroupUsers](docs/PolicyGroupUsers.md)
- - [Rule](docs/Rule.md)
+ - [ReplicaDeploymentInfo](docs/ReplicaDeploymentInfo.md)
+ - [ReplicaDeploymentInfoAllOf](docs/ReplicaDeploymentInfoAllOf.md)
+ - [ReplicaHealth](docs/ReplicaHealth.md)
+ - [SyncProgress](docs/SyncProgress.md)
  - [UpdateAuthenticatedUserData](docs/UpdateAuthenticatedUserData.md)
  - [UpdateClusterData](docs/UpdateClusterData.md)
  - [UpdateNamespaceData](docs/UpdateNamespaceData.md)
  - [UpdateNodeData](docs/UpdateNodeData.md)
  - [UpdatePolicyGroupData](docs/UpdatePolicyGroupData.md)
- - [UpdateRuleData](docs/UpdateRuleData.md)
  - [UpdateUserData](docs/UpdateUserData.md)
  - [UpdateVolumeData](docs/UpdateVolumeData.md)
  - [User](docs/User.md)
@@ -130,6 +130,7 @@ auth := context.WithValue(context.Background(), sw.ContextBasicAuth, sw.BasicAut
 })
 r, err := client.Service.Operation(auth, args)
 ```
+
 
 
 ## Author

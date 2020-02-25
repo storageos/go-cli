@@ -15,10 +15,10 @@ type FsType string
 
 // List of FsType
 const (
-	EXT2  FsType = "ext2"
-	EXT3  FsType = "ext3"
-	EXT4  FsType = "ext4"
-	XFS   FsType = "xfs"
-	BTRFS FsType = "btrfs"
-	BLOCK FsType = "block"
+	FSTYPE_EXT2  FsType = "ext2"
+	FSTYPE_EXT3  FsType = "ext3"
+	FSTYPE_EXT4  FsType = "ext4"
+	FSTYPE_XFS   FsType = "xfs"
+	FSTYPE_BTRFS FsType = "btrfs"
+	FSTYPE_BLOCK FsType = "block"
 )

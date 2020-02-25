@@ -38,7 +38,7 @@ paths:
         description: The credentials to use for authentication.
         required: true
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
@@ -52,7 +52,7 @@ paths:
               schema:
                 type: string
               style: simple
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -60,7 +60,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -70,7 +70,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -78,7 +78,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -92,7 +92,7 @@ paths:
       description: Obtain a fresh token with an updated expiry deadline.
       operationId: refreshJwt
       responses:
-        200:
+        "200":
           description: Refresh was successful
           headers:
             Authorization:
@@ -101,7 +101,7 @@ paths:
               schema:
                 type: string
               style: simple
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -111,7 +111,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -119,7 +119,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -135,13 +135,13 @@ paths:
       description: Fetch the list of users of the cluster.
       operationId: listUsers
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserList'
           description: A list of cluster users.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -151,7 +151,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -160,7 +160,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -168,7 +168,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -233,13 +233,13 @@ paths:
         description: Data required to create a new user in the cluster.
         required: true
       responses:
-        201:
+        "201":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
           description: The account was successfully created
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -247,7 +247,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -257,7 +257,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -266,7 +266,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        409:
+        "409":
           content:
             application/json:
               example:
@@ -275,7 +275,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The entity to be wrote uses an identifier that already exists.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -283,7 +283,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -329,9 +329,9 @@ paths:
           $ref: '#/components/schemas/IgnoreVersion'
         style: form
       responses:
-        200:
+        "200":
           description: The user was successfully deleted.
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -339,7 +339,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -349,7 +349,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -358,7 +358,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -367,7 +367,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -377,7 +377,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -385,7 +385,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -409,13 +409,13 @@ paths:
           $ref: '#/components/schemas/UserID'
         style: simple
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
           description: The user information.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -425,7 +425,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -434,7 +434,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -443,7 +443,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -451,7 +451,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -529,13 +529,13 @@ paths:
         description: The new User data to store.
         required: true
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
           description: The account was successfully updated
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -543,7 +543,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -553,7 +553,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -562,7 +562,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -571,7 +571,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -581,7 +581,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -589,7 +589,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -616,9 +616,9 @@ paths:
           $ref: '#/components/schemas/UserID'
         style: simple
       responses:
-        200:
+        "200":
           description: The users current session was successfully invalidated.
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -626,7 +626,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -636,7 +636,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -645,7 +645,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -654,7 +654,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -664,7 +664,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -672,7 +672,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -708,9 +708,9 @@ paths:
           $ref: '#/components/schemas/IgnoreVersion'
         style: form
       responses:
-        200:
+        "200":
           description: The authenticated user was successfully deleted.
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -718,7 +718,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -728,7 +728,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -737,7 +737,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -746,7 +746,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -756,7 +756,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -764,7 +764,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -779,13 +779,13 @@ paths:
       description: Fetch authenticated user's information.
       operationId: getAuthenticatedUser
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
           description: The authenticated user's information.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -795,7 +795,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -804,7 +804,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -813,7 +813,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -821,7 +821,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -865,13 +865,13 @@ paths:
         description: The new authenticated user's data.
         required: true
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
           description: The account was successfully updated
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -879,7 +879,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -889,7 +889,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -898,7 +898,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -907,7 +907,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -917,7 +917,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -925,7 +925,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -941,9 +941,9 @@ paths:
       description: Invalidates logged in user's active JWTs.
       operationId: deleteAuthenticatedUserSessions
       responses:
-        200:
+        "200":
           description: The authenticated user's sessions have been invalidated.
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -951,7 +951,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -961,7 +961,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -970,7 +970,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -979,7 +979,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -989,7 +989,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -997,7 +997,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -1013,13 +1013,13 @@ paths:
       description: Fetch the list of namespaces in the cluster.
       operationId: listNamespaces
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NamespaceList'
           description: A list of cluster namespaces.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -1029,7 +1029,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -1038,7 +1038,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -1046,7 +1046,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -1094,13 +1094,13 @@ paths:
         description: Data required to create a new namespace in the cluster.
         required: true
       responses:
-        201:
+        "201":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Namespace'
           description: The namespace was successfully created
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -1108,7 +1108,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -1118,7 +1118,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -1127,7 +1127,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        409:
+        "409":
           content:
             application/json:
               example:
@@ -1136,7 +1136,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The entity to be wrote uses an identifier that already exists.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -1144,7 +1144,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -1188,9 +1188,9 @@ paths:
           $ref: '#/components/schemas/IgnoreVersion'
         style: form
       responses:
-        200:
+        "200":
           description: The namespace was successfully deleted.
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -1198,7 +1198,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -1208,7 +1208,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -1217,7 +1217,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -1226,7 +1226,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        409:
+        "409":
           content:
             application/json:
               example:
@@ -1235,7 +1235,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced entity is currently in use.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -1245,7 +1245,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -1253,7 +1253,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -1277,13 +1277,13 @@ paths:
           $ref: '#/components/schemas/NamespaceID'
         style: simple
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Namespace'
           description: The namespace information.
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -1291,7 +1291,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -1301,7 +1301,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -1310,7 +1310,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -1319,7 +1319,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -1327,7 +1327,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -1386,13 +1386,13 @@ paths:
         description: The new namespace data to store.
         required: true
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Namespace'
           description: The namespace was successfully updated
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -1400,7 +1400,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -1410,7 +1410,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -1419,7 +1419,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -1428,7 +1428,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -1438,7 +1438,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -1446,7 +1446,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -1462,13 +1462,13 @@ paths:
       description: Fetch the list of nodes of the cluster.
       operationId: listNodes
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NodeList'
           description: A list of cluster nodes.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -1478,7 +1478,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -1487,7 +1487,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -1495,7 +1495,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -1554,16 +1554,16 @@ paths:
           type: string
         style: form
       responses:
-        200:
+        "200":
           description: The node was successfully deleted.
-        202:
+        "202":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AcceptedMessage'
           description: |
             An aynchronous request has been accepted
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -1571,7 +1571,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -1581,7 +1581,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -1590,7 +1590,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -1599,7 +1599,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        409:
+        "409":
           content:
             application/json:
               example:
@@ -1608,7 +1608,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The request attempted to delete a node that is not currently offline.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -1618,7 +1618,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -1626,7 +1626,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -1650,13 +1650,13 @@ paths:
           $ref: '#/components/schemas/NodeID'
         style: simple
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Node'
           description: The node information.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -1666,7 +1666,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -1675,7 +1675,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -1684,7 +1684,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -1692,7 +1692,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -1751,13 +1751,13 @@ paths:
         description: The new node data to store.
         required: true
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Node'
           description: The node was successfully updated
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -1765,7 +1765,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -1775,7 +1775,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -1784,7 +1784,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -1793,7 +1793,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -1803,7 +1803,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -1811,7 +1811,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -1827,13 +1827,13 @@ paths:
       description: Fetch the list of policy groups in the cluster.
       operationId: listPolicyGroups
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PolicyGroupList'
           description: A list of cluster policy groups.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -1843,7 +1843,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -1852,7 +1852,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -1860,7 +1860,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -1913,13 +1913,13 @@ paths:
         description: Data required to create a new policy group in the cluster.
         required: true
       responses:
-        201:
+        "201":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PolicyGroup'
           description: The policy group was successfully created
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -1927,7 +1927,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -1937,7 +1937,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -1946,7 +1946,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        409:
+        "409":
           content:
             application/json:
               example:
@@ -1955,7 +1955,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The entity to be wrote uses an identifier that already exists.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -1963,7 +1963,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -2007,9 +2007,9 @@ paths:
           $ref: '#/components/schemas/IgnoreVersion'
         style: form
       responses:
-        200:
+        "200":
           description: The policy group was successfully deleted.
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -2017,7 +2017,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -2027,7 +2027,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -2036,7 +2036,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -2045,7 +2045,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        409:
+        "409":
           content:
             application/json:
               example:
@@ -2054,7 +2054,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced entity is currently in use.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -2064,7 +2064,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -2072,7 +2072,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -2096,13 +2096,13 @@ paths:
           $ref: '#/components/schemas/PolicyGroupID'
         style: simple
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PolicyGroup'
           description: The policy group information.
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -2110,7 +2110,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -2120,7 +2120,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -2129,7 +2129,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -2138,7 +2138,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -2146,7 +2146,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -2213,13 +2213,13 @@ paths:
         description: The new policy group data to store.
         required: true
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PolicyGroup'
           description: The policy group was successfully updated
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -2227,7 +2227,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -2237,7 +2237,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -2246,7 +2246,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -2255,7 +2255,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -2265,7 +2265,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -2273,7 +2273,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -2284,492 +2284,6 @@ paths:
       security:
       - jwt: []
       summary: Update a policy group
-  /namespaces/{namespaceID}/rules:
-    get:
-      description: Fetch the list of rules in the cluster.
-      operationId: listRules
-      parameters:
-      - description: ID of a Namespace
-        explode: false
-        in: path
-        name: namespaceID
-        required: true
-        schema:
-          $ref: '#/components/schemas/NamespaceID'
-        style: simple
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RuleList'
-          description: A list of the namespace's rules.
-        401:
-          content:
-            application/json:
-              example:
-                error: authentication required
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The requested endpoint requires authentication - you must log in first.
-            If attempting to log in, your credentials were not recognised.
-        403:
-          content:
-            application/json:
-              example:
-                error: unauthorised
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The authenticated user does not have permission to perform the requested action.
-        500:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The request caused an internal server error and should be retried.
-            Check the health of the node/cluster and if the error persists, contact support.
-        503:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The server is currently unable to handle the request due to a temporary store failure.
-            Check the health of the node/cluster and if the error persists, contact support.
-      security:
-      - jwt: []
-      summary: Fetch the list of rules in the given namespace
-    post:
-      description: Create a new rule in the given namespace
-      operationId: createRule
-      parameters:
-      - description: ID of a Namespace
-        explode: false
-        in: path
-        name: namespaceID
-        required: true
-        schema:
-          $ref: '#/components/schemas/NamespaceID'
-        style: simple
-      requestBody:
-        $ref: '#/components/requestBodies/CreateRuleData'
-        content:
-          application/json:
-            schema:
-              example:
-                name: replicator
-                action: add
-                selector: selector
-                labels:
-                - env: prod
-                  rack: db-1
-                - env: prod
-                  rack: db-1
-              properties:
-                name:
-                  example: replicator
-                  type: string
-                selector:
-                  type: string
-                action:
-                  enum:
-                  - add
-                  - remove
-                  type: string
-                labels:
-                  items:
-                    $ref: '#/components/schemas/Labels'
-                  type: array
-              title: CreateRuleData
-              type: object
-        description: Data required to create a new rule in the cluster.
-        required: true
-      responses:
-        201:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Rule'
-          description: The rule was successfully created
-        400:
-          content:
-            application/json:
-              example:
-                error: a short description of the validation failure
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: The request does not conform to the API specification.
-        401:
-          content:
-            application/json:
-              example:
-                error: authentication required
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The requested endpoint requires authentication - you must log in first.
-            If attempting to log in, your credentials were not recognised.
-        403:
-          content:
-            application/json:
-              example:
-                error: unauthorised
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The authenticated user does not have permission to perform the requested action.
-        409:
-          content:
-            application/json:
-              example:
-                error: already exists
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The entity to be wrote uses an identifier that already exists.
-        500:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The request caused an internal server error and should be retried.
-            Check the health of the node/cluster and if the error persists, contact support.
-        503:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The server is currently unable to handle the request due to a temporary store failure.
-            Check the health of the node/cluster and if the error persists, contact support.
-      security:
-      - jwt: []
-      summary: Create a new Rule in the specified namespace
-  /namespaces/{namespaceID}/rules/{id}:
-    delete:
-      description: Remove the rule identified by id.
-      operationId: deleteRule
-      parameters:
-      - description: ID of a Namespace
-        explode: false
-        in: path
-        name: namespaceID
-        required: true
-        schema:
-          $ref: '#/components/schemas/NamespaceID'
-        style: simple
-      - description: ID of a Rule
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          $ref: '#/components/schemas/RuleID'
-        style: simple
-      - description: |
-          This value is used to perform a conditional delete of the entity.
-          If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
-        explode: true
-        in: query
-        name: version
-        required: true
-        schema:
-          $ref: '#/components/schemas/Version'
-        style: form
-      - description: |
-          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
-        explode: true
-        in: query
-        name: ignore-version
-        required: false
-        schema:
-          $ref: '#/components/schemas/IgnoreVersion'
-        style: form
-      responses:
-        200:
-          description: The rule was successfully deleted.
-        400:
-          content:
-            application/json:
-              example:
-                error: a short description of the validation failure
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: The request does not conform to the API specification.
-        401:
-          content:
-            application/json:
-              example:
-                error: authentication required
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The requested endpoint requires authentication - you must log in first.
-            If attempting to log in, your credentials were not recognised.
-        403:
-          content:
-            application/json:
-              example:
-                error: unauthorised
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The authenticated user does not have permission to perform the requested action.
-        404:
-          content:
-            application/json:
-              example:
-                error: not found
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            A referenced resource does not exist.
-        412:
-          content:
-            application/json:
-              example:
-                error: attempting to write stale object
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
-            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The request caused an internal server error and should be retried.
-            Check the health of the node/cluster and if the error persists, contact support.
-        503:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The server is currently unable to handle the request due to a temporary store failure.
-            Check the health of the node/cluster and if the error persists, contact support.
-      security:
-      - jwt: []
-      summary: Delete a rule
-    get:
-      description: Fetch the rule identified by id.
-      operationId: getRule
-      parameters:
-      - description: ID of a Namespace
-        explode: false
-        in: path
-        name: namespaceID
-        required: true
-        schema:
-          $ref: '#/components/schemas/NamespaceID'
-        style: simple
-      - description: ID of a Rule
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          $ref: '#/components/schemas/RuleID'
-        style: simple
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Rule'
-          description: The rule information.
-        400:
-          content:
-            application/json:
-              example:
-                error: a short description of the validation failure
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: The request does not conform to the API specification.
-        401:
-          content:
-            application/json:
-              example:
-                error: authentication required
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The requested endpoint requires authentication - you must log in first.
-            If attempting to log in, your credentials were not recognised.
-        403:
-          content:
-            application/json:
-              example:
-                error: unauthorised
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The authenticated user does not have permission to perform the requested action.
-        404:
-          content:
-            application/json:
-              example:
-                error: not found
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            A referenced resource does not exist.
-        500:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The request caused an internal server error and should be retried.
-            Check the health of the node/cluster and if the error persists, contact support.
-        503:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The server is currently unable to handle the request due to a temporary store failure.
-            Check the health of the node/cluster and if the error persists, contact support.
-      security:
-      - jwt: []
-      summary: Fetch a rule
-    put:
-      description: Update the rule identified by id.
-      operationId: updateRule
-      parameters:
-      - description: ID of a Namespace
-        explode: false
-        in: path
-        name: namespaceID
-        required: true
-        schema:
-          $ref: '#/components/schemas/NamespaceID'
-        style: simple
-      - description: ID of a Rule
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          $ref: '#/components/schemas/RuleID'
-        style: simple
-      requestBody:
-        $ref: '#/components/requestBodies/UpdateRuleData'
-        content:
-          application/json:
-            schema:
-              example:
-                action: add
-                selector: selector
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-                labels:
-                - env: prod
-                  rack: db-1
-                - env: prod
-                  rack: db-1
-              properties:
-                selector:
-                  type: string
-                action:
-                  enum:
-                  - add
-                  - remove
-                  type: string
-                labels:
-                  items:
-                    $ref: '#/components/schemas/Labels'
-                  type: array
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  minLength: 1
-                  type: string
-              title: UpdateRuleData
-              type: object
-        description: update a rule to a desired state.
-        required: true
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Rule'
-          description: The rule was successfully updated
-        400:
-          content:
-            application/json:
-              example:
-                error: a short description of the validation failure
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: The request does not conform to the API specification.
-        401:
-          content:
-            application/json:
-              example:
-                error: authentication required
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The requested endpoint requires authentication - you must log in first.
-            If attempting to log in, your credentials were not recognised.
-        403:
-          content:
-            application/json:
-              example:
-                error: unauthorised
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The authenticated user does not have permission to perform the requested action.
-        404:
-          content:
-            application/json:
-              example:
-                error: not found
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            A referenced resource does not exist.
-        412:
-          content:
-            application/json:
-              example:
-                error: attempting to write stale object
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
-            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The request caused an internal server error and should be retried.
-            Check the health of the node/cluster and if the error persists, contact support.
-        503:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The server is currently unable to handle the request due to a temporary store failure.
-            Check the health of the node/cluster and if the error persists, contact support.
-      security:
-      - jwt: []
-      summary: Update a rule
   /namespaces/{namespaceID}/volumes:
     get:
       description: Fetch the list of volumes in the cluster.
@@ -2784,13 +2298,13 @@ paths:
           $ref: '#/components/schemas/NamespaceID'
         style: simple
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/VolumeList'
           description: A list of the namespace's volumes.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -2800,7 +2314,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -2809,7 +2323,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -2817,7 +2331,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -2901,25 +2415,30 @@ paths:
                   example: 5000
                   minimum: 0
                   type: uint64
+              required:
+              - fsType
+              - name
+              - namespaceID
+              - sizeBytes
               title: CreateVolumeData
               type: object
         description: Data required to create a new volume in the cluster.
         required: true
       responses:
-        201:
+        "201":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Volume'
           description: The volume was successfully created
-        202:
+        "202":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AcceptedMessage'
           description: |
             An aynchronous request has been accepted
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -2927,7 +2446,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -2937,7 +2456,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -2946,7 +2465,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        409:
+        "409":
           content:
             application/json:
               example:
@@ -2955,7 +2474,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The entity to be wrote uses an identifier that already exists.
-        451:
+        "451":
           content:
             application/json:
               example:
@@ -2965,7 +2484,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The requested operation failed because your storageOS licence does not allow it, either create an account for a free licence or buy a professional licence.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -2973,7 +2492,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -2981,6 +2500,15 @@ paths:
           description: |
             The server is currently unable to handle the request due to a temporary store failure.
             Check the health of the node/cluster and if the error persists, contact support.
+        "507":
+          content:
+            application/json:
+              example:
+                error: insufficient storage capacity available
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            Available storage is not enough to handle the request.
       security:
       - jwt: []
       summary: Create a new Volume in the specified namespace
@@ -3038,16 +2566,16 @@ paths:
           type: string
         style: form
       responses:
-        200:
+        "200":
           description: The volume was successfully deleted.
-        202:
+        "202":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AcceptedMessage'
           description: |
             An aynchronous request has been accepted
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -3055,7 +2583,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -3065,7 +2593,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -3074,7 +2602,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -3083,7 +2611,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        409:
+        "409":
           content:
             application/json:
               example:
@@ -3092,7 +2620,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced entity is currently in use.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -3102,7 +2630,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        422:
+        "422":
           content:
             application/json:
               example:
@@ -3112,7 +2640,7 @@ paths:
           description: |
             An action was requested that cannot be performed on the entity in it's current state.
             As an example, this error might be returned when trying to delete a currently mounted volume.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -3120,7 +2648,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -3152,13 +2680,13 @@ paths:
           $ref: '#/components/schemas/VolumeID'
         style: simple
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Volume'
           description: The volume information.
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -3166,7 +2694,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -3176,7 +2704,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -3185,7 +2713,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -3194,7 +2722,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -3202,7 +2730,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -3279,13 +2807,13 @@ paths:
         description: update a volume to a desired state.
         required: true
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Volume'
           description: The volume was successfully updated
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -3293,7 +2821,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -3303,7 +2831,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -3312,7 +2840,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -3321,7 +2849,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -3331,7 +2859,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        451:
+        "451":
           content:
             application/json:
               example:
@@ -3341,7 +2869,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The requested operation failed because your storageOS licence does not allow it, either create an account for a free licence or buy a professional licence.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -3349,7 +2877,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -3401,9 +2929,9 @@ paths:
           $ref: '#/components/schemas/IgnoreVersion'
         style: form
       responses:
-        200:
+        "200":
           description: The volume was successfully detached.
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -3411,7 +2939,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -3421,7 +2949,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -3430,7 +2958,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -3439,7 +2967,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        409:
+        "409":
           content:
             application/json:
               example:
@@ -3448,7 +2976,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced entity is currently in use.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -3458,7 +2986,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        422:
+        "422":
           content:
             application/json:
               example:
@@ -3468,7 +2996,7 @@ paths:
           description: |
             An action was requested that cannot be performed on the entity in it's current state.
             As an example, this error might be returned when trying to delete a currently mounted volume.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -3476,7 +3004,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -3527,9 +3055,9 @@ paths:
         description: Node ID to which the volume will be attached.
         required: true
       responses:
-        200:
+        "200":
           description: The volume was successfully attached.
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -3537,7 +3065,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -3547,7 +3075,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -3556,7 +3084,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        404:
+        "404":
           content:
             application/json:
               example:
@@ -3565,7 +3093,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced resource does not exist.
-        409:
+        "409":
           content:
             application/json:
               example:
@@ -3574,7 +3102,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             A referenced entity is currently in use.
-        422:
+        "422":
           content:
             application/json:
               example:
@@ -3584,7 +3112,7 @@ paths:
           description: |
             An action was requested that cannot be performed on the entity in it's current state.
             As an example, this error might be returned when trying to delete a currently mounted volume.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -3601,13 +3129,13 @@ paths:
         cluster.
       operationId: getCluster
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Cluster'
           description: The cluster-wide configuration information.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -3617,7 +3145,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -3626,7 +3154,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -3634,7 +3162,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -3703,13 +3231,13 @@ paths:
         description: The new cluster-wide configuration settings to apply.
         required: true
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Cluster'
           description: The cluster was successfully updated.
-        400:
+        "400":
           content:
             application/json:
               example:
@@ -3717,7 +3245,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: The request does not conform to the API specification.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -3727,7 +3255,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -3736,7 +3264,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        412:
+        "412":
           content:
             application/json:
               example:
@@ -3746,7 +3274,7 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -3754,7 +3282,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -3773,7 +3301,7 @@ paths:
         The node will attempt to gather information about its local state, cluster-wide state and local state of other nodes in the cluster. If the cluster is unhealthy this may cause a slower response.
       operationId: getDiagnostics
       responses:
-        200:
+        "200":
           content:
             application/gzip:
               schema:
@@ -3781,7 +3309,7 @@ paths:
                 type: string
           description: |
             A diagnostics bundle was successfully built and returned.
-        401:
+        "401":
           content:
             application/json:
               example:
@@ -3791,7 +3319,7 @@ paths:
           description: |
             The requested endpoint requires authentication - you must log in first.
             If attempting to log in, your credentials were not recognised.
-        403:
+        "403":
           content:
             application/json:
               example:
@@ -3800,7 +3328,7 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: |
             The authenticated user does not have permission to perform the requested action.
-        500:
+        "500":
           content:
             application/json:
               schema:
@@ -3808,7 +3336,7 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
-        503:
+        "503":
           content:
             application/json:
               schema:
@@ -3824,7 +3352,7 @@ paths:
       description: Serves this openapi spec file
       operationId: spec
       responses:
-        200:
+        "200":
           content:
             text/yaml:
               schema:
@@ -3919,12 +3447,6 @@ components:
           schema:
             $ref: '#/components/schemas/UpdatePolicyGroupData'
       required: true
-    UpdateRuleData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UpdateRuleData'
-      required: true
     UpdateAuthenticatedUserData:
       content:
         application/json:
@@ -3954,12 +3476,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UpdateClusterData'
-      required: true
-    CreateRuleData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CreateRuleData'
       required: true
     AttachVolumeData:
       content:
@@ -4036,6 +3552,15 @@ components:
             $ref: '#/components/schemas/Error'
       description: |
         A referenced resource does not exist.
+    InsufficientStorage:
+      content:
+        application/json:
+          example:
+            error: insufficient storage capacity available
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: |
+        Available storage is not enough to handle the request.
     StaleWrite:
       content:
         application/json:
@@ -4153,9 +3678,9 @@ components:
       - block
       example: ext4
       type: string
-    Health:
+    NodeHealth:
       description: |
-        The operational health of an entity
+        The operational health of a node entity
       enum:
       - online
       - offline
@@ -4163,6 +3688,73 @@ components:
       example: online
       readOnly: true
       type: string
+    MasterHealth:
+      description: |
+        The operational health of a volume master deployment
+      enum:
+      - online
+      - offline
+      - unknown
+      example: online
+      readOnly: true
+      type: string
+    ReplicaHealth:
+      description: |
+        The operational health of a volume replica deployment
+      enum:
+      - recovering
+      - provisioning
+      - provisioned
+      - syncing
+      - ready
+      - deleted
+      - failed
+      - unknown
+      example: ready
+      readOnly: true
+      type: string
+    SyncProgress:
+      description: "The progress report for an ongoing sync. \n"
+      properties:
+        bytesRemaining:
+          description: |
+            Number of bytes left remaining to complete the sync.
+          example: 500000
+          type: uint64
+        throughputBytes:
+          description: |
+            The average throughput of the sync given as bytes per  second.
+          example: 100000
+          type: uint64
+        estimatedSecondsRemaining:
+          description: |
+            The estimated time left for the sync to complete, given in seconds.
+          example: 5
+          type: uint64
+      readOnly: true
+      type: object
+    CapacityStats:
+      example:
+        total: 42
+        available: 42
+        free: 42
+      properties:
+        total:
+          description: |
+            Total bytes in the filesystem
+          example: 42
+          type: uint64
+        free:
+          description: |
+            Free bytes in the filesystem available to root user
+          example: 42
+          type: uint64
+        available:
+          description: |
+            Byte value available to an unprivileged user
+          example: 42
+          type: uint64
+      type: object
     Labels:
       additionalProperties:
         type: string
@@ -4232,12 +3824,6 @@ components:
       description: |
         A unique identifier for a policy group. The format of this type is undefined and may change but the defined properties will not change..
       example: c5666b58-b805-4215-ab4a-cb094948ccc6
-      type: string
-    RuleID:
-      description: |
-        A unique identifier for a rule. The format of this type is undefined and may change but the defined properties will not change..
-      example: c5666b58-b805-4215-ab4a-cb094948ccc6
-      readOnly: true
       type: string
     Cluster:
       example:
@@ -4388,16 +3974,8 @@ components:
     Volume:
       example:
         replicas:
-        - inode: 1223
-          syncing: true
-          health: online
-          id: c5666b58-b805-4215-ab4a-cb094948ccc6
-          nodeID: c5666b58-b805-4215-ab4a-cb094948ccc6
-        - inode: 1223
-          syncing: true
-          health: online
-          id: c5666b58-b805-4215-ab4a-cb094948ccc6
-          nodeID: c5666b58-b805-4215-ab4a-cb094948ccc6
+        - null
+        - null
         description: This volume contains the data for my app
         fsType: ext4
         version: NDI0MjQyNDI0MjQyNDI0MjQy
@@ -4407,7 +3985,6 @@ components:
         master: ""
         sizeBytes: 5000
         attachedOn: ""
-        inode: 42
         createdAt: 2019-03-10T13:42:42Z
         namespaceID: ""
         name: app-data
@@ -4446,18 +4023,14 @@ components:
           type: object
         fsType:
           $ref: '#/components/schemas/FsType'
-        inode:
-          example: 42
-          readOnly: true
-          type: uint32
         master:
           allOf:
-          - $ref: '#/components/schemas/DeploymentInfo'
+          - $ref: '#/components/schemas/MasterDeploymentInfo'
           readOnly: true
         replicas:
           default: []
           items:
-            $ref: '#/components/schemas/DeploymentInfo'
+            $ref: '#/components/schemas/ReplicaDeploymentInfo'
           nullable: true
           readOnly: true
           type: array
@@ -4498,12 +4071,6 @@ components:
           type: string
       type: object
     DeploymentInfo:
-      example:
-        inode: 1223
-        syncing: true
-        health: online
-        id: c5666b58-b805-4215-ab4a-cb094948ccc6
-        nodeID: c5666b58-b805-4215-ab4a-cb094948ccc6
       properties:
         id:
           description: |
@@ -4516,17 +4083,19 @@ components:
           example: c5666b58-b805-4215-ab4a-cb094948ccc6
           readOnly: true
           type: string
-        inode:
-          example: 1223
-          readOnly: true
-          type: uint32
-        health:
-          $ref: '#/components/schemas/Health'
         syncing:
           description: |
-            indicates if a volume is undergoing data synchronization operations
+            indicates if the volume deployment is undergoing data synchronisation operations
           type: boolean
       type: object
+    MasterDeploymentInfo:
+      allOf:
+      - $ref: '#/components/schemas/DeploymentInfo'
+      - $ref: '#/components/schemas/MasterDeploymentInfo_allOf'
+    ReplicaDeploymentInfo:
+      allOf:
+      - $ref: '#/components/schemas/DeploymentInfo'
+      - $ref: '#/components/schemas/ReplicaDeploymentInfo_allOf'
     Node:
       example:
         createdAt: 2019-03-10T13:42:42Z
@@ -4538,6 +4107,10 @@ components:
         supervisorEndpoint: '["192.0.2.1:5704"]'
         clusteringEndpoint: '["192.0.2.1:5710"]'
         version: NDI0MjQyNDI0MjQyNDI0MjQy
+        capacity:
+          total: 42
+          available: 42
+          free: 42
         labels:
           env: prod
           rack: db-1
@@ -4557,7 +4130,9 @@ components:
           readOnly: true
           type: string
         health:
-          $ref: '#/components/schemas/Health'
+          $ref: '#/components/schemas/NodeHealth'
+        capacity:
+          $ref: '#/components/schemas/CapacityStats'
         ioEndpoint:
           description: |
             Endpoint at which we operate our dataplane's dfs service. (used for IO operations)
@@ -4678,49 +4253,6 @@ components:
           format: date-time
           readOnly: true
           type: string
-        version:
-          description: |
-            An opaque representation of an entity version at the time it was obtained from the API.
-            All operations that mutate the entity must include this version field in the request unchanged.
-            The format of this type is undefined and may change but the defined properties will not change.
-          example: NDI0MjQyNDI0MjQyNDI0MjQy
-          maxLength: 30
-          minLength: 1
-          type: string
-      type: object
-    Rule:
-      example:
-        name: replicator
-        action: add
-        selector: selector
-        id: c5666b58-b805-4215-ab4a-cb094948ccc6
-        version: NDI0MjQyNDI0MjQyNDI0MjQy
-        labels:
-        - env: prod
-          rack: db-1
-        - env: prod
-          rack: db-1
-      properties:
-        id:
-          description: |
-            A unique identifier for a rule. The format of this type is undefined and may change but the defined properties will not change..
-          example: c5666b58-b805-4215-ab4a-cb094948ccc6
-          readOnly: true
-          type: string
-        name:
-          example: replicator
-          type: string
-        selector:
-          type: string
-        action:
-          enum:
-          - add
-          - remove
-          type: string
-        labels:
-          items:
-            $ref: '#/components/schemas/Labels'
-          type: array
         version:
           description: |
             An opaque representation of an entity version at the time it was obtained from the API.
@@ -4883,10 +4415,6 @@ components:
     PolicyGroupList:
       items:
         $ref: '#/components/schemas/PolicyGroup'
-      type: array
-    RuleList:
-      items:
-        $ref: '#/components/schemas/Rule'
       type: array
     VolumeList:
       items:
@@ -5191,66 +4719,6 @@ components:
           type: string
       title: UpdatePolicyGroupData
       type: object
-    CreateRuleData:
-      example:
-        name: replicator
-        action: add
-        selector: selector
-        labels:
-        - env: prod
-          rack: db-1
-        - env: prod
-          rack: db-1
-      properties:
-        name:
-          example: replicator
-          type: string
-        selector:
-          type: string
-        action:
-          enum:
-          - add
-          - remove
-          type: string
-        labels:
-          items:
-            $ref: '#/components/schemas/Labels'
-          type: array
-      title: CreateRuleData
-      type: object
-    UpdateRuleData:
-      example:
-        action: add
-        selector: selector
-        version: NDI0MjQyNDI0MjQyNDI0MjQy
-        labels:
-        - env: prod
-          rack: db-1
-        - env: prod
-          rack: db-1
-      properties:
-        selector:
-          type: string
-        action:
-          enum:
-          - add
-          - remove
-          type: string
-        labels:
-          items:
-            $ref: '#/components/schemas/Labels'
-          type: array
-        version:
-          description: |
-            An opaque representation of an entity version at the time it was obtained from the API.
-            All operations that mutate the entity must include this version field in the request unchanged.
-            The format of this type is undefined and may change but the defined properties will not change.
-          example: NDI0MjQyNDI0MjQyNDI0MjQy
-          maxLength: 30
-          minLength: 1
-          type: string
-      title: UpdateRuleData
-      type: object
     CreateVolumeData:
       example:
         namespaceID: c5666b58-b805-4215-ab4a-cb094948ccc6
@@ -5295,6 +4763,11 @@ components:
           example: 5000
           minimum: 0
           type: uint64
+      required:
+      - fsType
+      - name
+      - namespaceID
+      - sizeBytes
       title: CreateVolumeData
       type: object
     UpdateVolumeData:
@@ -5396,6 +4869,16 @@ components:
           type: string
       title: UpdateClusterData
       type: object
+    MasterDeploymentInfo_allOf:
+      properties:
+        health:
+          $ref: '#/components/schemas/MasterHealth'
+    ReplicaDeploymentInfo_allOf:
+      properties:
+        health:
+          $ref: '#/components/schemas/ReplicaHealth'
+        syncProgress:
+          $ref: '#/components/schemas/SyncProgress'
     PolicyGroup_users:
       properties:
         id:

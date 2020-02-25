@@ -14,8 +14,8 @@ type LogLevel string
 
 // List of LogLevel
 const (
-	DEBUG LogLevel = "debug"
-	INFO LogLevel = "info"
-	WARN LogLevel = "warn"
-	ERROR LogLevel = "error"
+	LOGLEVEL_DEBUG LogLevel = "debug"
+	LOGLEVEL_INFO LogLevel = "info"
+	LOGLEVEL_WARN LogLevel = "warn"
+	LOGLEVEL_ERROR LogLevel = "error"
 )

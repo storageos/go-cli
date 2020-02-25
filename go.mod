@@ -8,7 +8,6 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.3
 	golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529
-	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
 	golang.org/x/tools/gopls v0.2.2 // indirect
 )
 

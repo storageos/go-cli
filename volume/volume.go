@@ -57,7 +57,6 @@ type Resource struct {
 	Namespace  id.Namespace `json:"namespaceID"`
 	Labels     labels.Set   `json:"labels"`
 	Filesystem FsType       `json:"filesystem"`
-	Inode      uint32       `json:"inode"`
 	SizeBytes  uint64       `json:"sizeBytes"`
 
 	Master   *Deployment   `json:"master"`
@@ -71,11 +70,18 @@ type Resource struct {
 // Deployment encapsulates a deployment instance for a
 // volume as a data type.
 type Deployment struct {
-	ID      id.Deployment `json:"id"`
-	Node    id.Node       `json:"nodeID"`
-	Inode   uint32        `json:"inode"`
-	Health  health.State  `json:"health"`
-	Syncing bool          `json:"syncing"`
+	ID           id.Deployment `json:"id"`
+	Node         id.Node       `json:"nodeID"`
+	Health       health.State  `json:"health"`
+	Syncing      bool          `json:"syncing"`
+	SyncProgress *SyncProgress `json:"syncProgress,omitempty"`
+}
+
+// SyncProgress is a point-in-time snapshot of an ongoing sync operation.
+type SyncProgress struct {
+	BytesRemaining            uint64 `json:"bytesRemaining"`
+	ThroughputBytes           uint64 `json:"throughputBytes"`
+	EstimatedSecondsRemaining uint64 `json:"estimatedSecondsRemaining"`
 }
 
 // IsCachingDisabled returns if the volume resource is configured to disable

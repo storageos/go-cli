@@ -14,6 +14,6 @@ type LogFormat string
 
 // List of LogFormat
 const (
-	DEFAULT LogFormat = "default"
-	JSON LogFormat = "json"
+	LOGFORMAT_DEFAULT LogFormat = "default"
+	LOGFORMAT_JSON LogFormat = "json"
 )

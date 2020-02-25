@@ -8,7 +8,6 @@ Method | HTTP request | Description
 [**AuthenticateUser**](DefaultApi.md#AuthenticateUser) | **Post** /auth/login | Authenticate a user
 [**CreateNamespace**](DefaultApi.md#CreateNamespace) | **Post** /namespaces | Create a new namespace
 [**CreatePolicyGroup**](DefaultApi.md#CreatePolicyGroup) | **Post** /policies | Create a new policy group
-[**CreateRule**](DefaultApi.md#CreateRule) | **Post** /namespaces/{namespaceID}/rules | Create a new Rule in the specified namespace
 [**CreateUser**](DefaultApi.md#CreateUser) | **Post** /users | Create a new user
 [**CreateVolume**](DefaultApi.md#CreateVolume) | **Post** /namespaces/{namespaceID}/volumes | Create a new Volume in the specified namespace
 [**DeleteAuthenticatedUser**](DefaultApi.md#DeleteAuthenticatedUser) | **Delete** /users/self | Delete the authenticated user
@@ -16,7 +15,6 @@ Method | HTTP request | Description
 [**DeleteNamespace**](DefaultApi.md#DeleteNamespace) | **Delete** /namespaces/{id} | Delete a namespace
 [**DeleteNode**](DefaultApi.md#DeleteNode) | **Delete** /nodes/{id} | Delete a node
 [**DeletePolicyGroup**](DefaultApi.md#DeletePolicyGroup) | **Delete** /policies/{id} | Delete a policy group
-[**DeleteRule**](DefaultApi.md#DeleteRule) | **Delete** /namespaces/{namespaceID}/rules/{id} | Delete a rule
 [**DeleteSessions**](DefaultApi.md#DeleteSessions) | **Delete** /users/{id}/sessions | Invalidate login sessions
 [**DeleteUser**](DefaultApi.md#DeleteUser) | **Delete** /users/{id} | Delete a user
 [**DeleteVolume**](DefaultApi.md#DeleteVolume) | **Delete** /namespaces/{namespaceID}/volumes/{id} | Delete a volume
@@ -27,13 +25,11 @@ Method | HTTP request | Description
 [**GetNamespace**](DefaultApi.md#GetNamespace) | **Get** /namespaces/{id} | Fetch a namespace
 [**GetNode**](DefaultApi.md#GetNode) | **Get** /nodes/{id} | Fetch a node
 [**GetPolicyGroup**](DefaultApi.md#GetPolicyGroup) | **Get** /policies/{id} | Fetch a policy group
-[**GetRule**](DefaultApi.md#GetRule) | **Get** /namespaces/{namespaceID}/rules/{id} | Fetch a rule
 [**GetUser**](DefaultApi.md#GetUser) | **Get** /users/{id} | Fetch a user
 [**GetVolume**](DefaultApi.md#GetVolume) | **Get** /namespaces/{namespaceID}/volumes/{id} | Fetch a volume
 [**ListNamespaces**](DefaultApi.md#ListNamespaces) | **Get** /namespaces | Fetch the list of namespaces
 [**ListNodes**](DefaultApi.md#ListNodes) | **Get** /nodes | Fetch the list of nodes
 [**ListPolicyGroups**](DefaultApi.md#ListPolicyGroups) | **Get** /policies | Fetch the list of policy groups
-[**ListRules**](DefaultApi.md#ListRules) | **Get** /namespaces/{namespaceID}/rules | Fetch the list of rules in the given namespace
 [**ListUsers**](DefaultApi.md#ListUsers) | **Get** /users | Fetch the list of users
 [**ListVolumes**](DefaultApi.md#ListVolumes) | **Get** /namespaces/{namespaceID}/volumes | Fetch the list of volumes in the given namespace
 [**RefreshJwt**](DefaultApi.md#RefreshJwt) | **Post** /auth/refresh | Refresh the JWT
@@ -43,7 +39,6 @@ Method | HTTP request | Description
 [**UpdateNamespace**](DefaultApi.md#UpdateNamespace) | **Put** /namespaces/{id} | Update a namespace
 [**UpdateNode**](DefaultApi.md#UpdateNode) | **Put** /nodes/{id} | Update a node
 [**UpdatePolicyGroup**](DefaultApi.md#UpdatePolicyGroup) | **Put** /policies/{id} | Update a policy group
-[**UpdateRule**](DefaultApi.md#UpdateRule) | **Put** /namespaces/{namespaceID}/rules/{id} | Update a rule
 [**UpdateUser**](DefaultApi.md#UpdateUser) | **Put** /users/{id} | Update a user
 [**UpdateVolume**](DefaultApi.md#UpdateVolume) | **Put** /namespaces/{namespaceID}/volumes/{id} | Update a volume
 
@@ -172,41 +167,6 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**PolicyGroup**](PolicyGroup.md)
-
-### Authorization
-
-[jwt](../README.md#jwt)
-
-### HTTP request headers
-
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## CreateRule
-
-> Rule CreateRule(ctx, namespaceID, createRuleData)
-
-Create a new Rule in the specified namespace
-
-Create a new rule in the given namespace
-
-### Required Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**createRuleData** | [**CreateRuleData**](CreateRuleData.md)|  | 
-
-### Return type
-
-[**Rule**](Rule.md)
 
 ### Authorization
 
@@ -498,55 +458,6 @@ Optional parameters are passed through a pointer to a DeletePolicyGroupOpts stru
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
-
-### Return type
-
- (empty response body)
-
-### Authorization
-
-[jwt](../README.md#jwt)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## DeleteRule
-
-> DeleteRule(ctx, namespaceID, id, version, optional)
-
-Delete a rule
-
-Remove the rule identified by id.
-
-### Required Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Rule | 
-**version** | **string**| This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.  | 
- **optional** | ***DeleteRuleOpts** | optional parameters | nil if no parameters
-
-### Optional Parameters
-
-Optional parameters are passed through a pointer to a DeleteRuleOpts struct
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
 
 
  **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
@@ -941,41 +852,6 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## GetRule
-
-> Rule GetRule(ctx, namespaceID, id)
-
-Fetch a rule
-
-Fetch the rule identified by id.
-
-### Required Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Rule | 
-
-### Return type
-
-[**Rule**](Rule.md)
-
-### Authorization
-
-[jwt](../README.md#jwt)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
 ## GetUser
 
 > User GetUser(ctx, id)
@@ -1120,40 +996,6 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**[]PolicyGroup**](PolicyGroup.md)
-
-### Authorization
-
-[jwt](../README.md#jwt)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## ListRules
-
-> []Rule ListRules(ctx, namespaceID)
-
-Fetch the list of rules in the given namespace
-
-Fetch the list of rules in the cluster.
-
-### Required Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-
-### Return type
-
-[**[]Rule**](Rule.md)
 
 ### Authorization
 
@@ -1451,42 +1293,6 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**PolicyGroup**](PolicyGroup.md)
-
-### Authorization
-
-[jwt](../README.md#jwt)
-
-### HTTP request headers
-
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## UpdateRule
-
-> Rule UpdateRule(ctx, namespaceID, id, updateRuleData)
-
-Update a rule
-
-Update the rule identified by id.
-
-### Required Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Rule | 
-**updateRuleData** | [**UpdateRuleData**](UpdateRuleData.md)|  | 
-
-### Return type
-
-[**Rule**](Rule.md)
 
 ### Authorization
 

@@ -9,12 +9,13 @@
  */
 
 package openapi
-// Health The operational health of an entity 
-type Health string
 
-// List of Health
+// NodeHealth The operational health of a node entity
+type NodeHealth string
+
+// List of NodeHealth
 const (
-	ONLINE Health = "online"
-	OFFLINE Health = "offline"
-	UNKNOWN Health = "unknown"
+	NODEHEALTH_ONLINE  NodeHealth = "online"
+	NODEHEALTH_OFFLINE NodeHealth = "offline"
+	NODEHEALTH_UNKNOWN NodeHealth = "unknown"
 )

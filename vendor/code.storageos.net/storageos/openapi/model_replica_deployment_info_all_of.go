@@ -9,13 +9,8 @@
  */
 
 package openapi
-
-// Health The operational health of an entity
-type Health string
-
-// List of Health
-const (
-	ONLINE  Health = "online"
-	OFFLINE Health = "offline"
-	UNKNOWN Health = "unknown"
-)
+// ReplicaDeploymentInfoAllOf struct for ReplicaDeploymentInfoAllOf
+type ReplicaDeploymentInfoAllOf struct {
+	Health ReplicaHealth `json:"health,omitempty"`
+	SyncProgress SyncProgress `json:"syncProgress,omitempty"`
+}

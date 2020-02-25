@@ -6,7 +6,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** | A unique identifier for a node. The format of this type is undefined and may change but the defined properties will not change.  | [optional] [readonly] 
 **Name** | **string** | The hostname of the node. This value is set by the node each time it joins the StorageOS cluster.  | [optional] [readonly] 
-**Health** | [**Health**](Health.md) |  | [optional] 
+**Health** | [**NodeHealth**](NodeHealth.md) |  | [optional] 
+**Capacity** | [**CapacityStats**](CapacityStats.md) |  | [optional] 
 **IoEndpoint** | **string** | Endpoint at which we operate our dataplane&#39;s dfs service. (used for IO operations) This value is set on startup by the corresponding environment variable (IO_ADVERTISE_ADDRESS)  | [optional] [readonly] 
 **SupervisorEndpoint** | **string** | Endpoint at which we operate our dataplane&#39;s supervisor service (used for sync). This value is set on startup by the corresponding environment variable (SUPERVISOR_ADVERTISE_ADDRESS)  | [optional] [readonly] 
 **GossipEndpoint** | **string** | Endpoint at which we operate our health checking service. This value is set on startup by the corresponding environment variable (GOSSIP_ADVERTISE_ADDRESS)  | [optional] [readonly] 

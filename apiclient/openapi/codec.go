@@ -75,7 +75,6 @@ func (c codec) decodeVolume(model openapi.Volume) (*volume.Resource, error) {
 		Namespace:  id.Namespace(model.NamespaceID),
 		Labels:     model.Labels,
 		Filesystem: volume.FsTypeFromString(string(model.FsType)),
-		Inode:      model.Inode,
 
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
@@ -86,7 +85,6 @@ func (c codec) decodeVolume(model openapi.Volume) (*volume.Resource, error) {
 	v.Master = &volume.Deployment{
 		ID:      id.Deployment(m.Id),
 		Node:    id.Node(m.NodeID),
-		Inode:   m.Inode,
 		Health:  health.FromString(string(m.Health)),
 		Syncing: m.Syncing,
 	}
@@ -99,9 +97,18 @@ func (c codec) decodeVolume(model openapi.Volume) (*volume.Resource, error) {
 			replicas[i] = &volume.Deployment{
 				ID:      id.Deployment(r.Id),
 				Node:    id.Node(r.NodeID),
-				Inode:   r.Inode,
 				Health:  health.FromString(string(r.Health)),
 				Syncing: r.Syncing,
+			}
+
+			p := r.SyncProgress
+
+			if (p != openapi.SyncProgress{}) {
+				replicas[i].SyncProgress = &volume.SyncProgress{
+					BytesRemaining:            p.BytesRemaining,
+					ThroughputBytes:           p.ThroughputBytes,
+					EstimatedSecondsRemaining: p.EstimatedSecondsRemaining,
+				}
 			}
 		}
 	}
@@ -150,9 +157,9 @@ func (c codec) decodeUser(model openapi.User) (*user.Resource, error) {
 func (c codec) encodeFsType(filesystem volume.FsType) (openapi.FsType, error) {
 	v := openapi.FsType(filesystem.String())
 	switch v {
-	case openapi.EXT2, openapi.EXT3,
-		openapi.EXT4, openapi.XFS,
-		openapi.BTRFS, openapi.BLOCK:
+	case openapi.FSTYPE_EXT2, openapi.FSTYPE_EXT3,
+		openapi.FSTYPE_EXT4, openapi.FSTYPE_XFS,
+		openapi.FSTYPE_BTRFS, openapi.FSTYPE_BLOCK:
 		return v, nil
 	default:
 		return "", apiclient.NewEncodingError(
@@ -166,8 +173,8 @@ func (c codec) encodeFsType(filesystem volume.FsType) (openapi.FsType, error) {
 func (c codec) encodeLogLevel(level cluster.LogLevel) (openapi.LogLevel, error) {
 	v := openapi.LogLevel(level.String())
 	switch v {
-	case openapi.DEBUG, openapi.INFO,
-		openapi.WARN, openapi.ERROR:
+	case openapi.LOGLEVEL_DEBUG, openapi.LOGLEVEL_INFO,
+		openapi.LOGLEVEL_WARN, openapi.LOGLEVEL_ERROR:
 		return v, nil
 	default:
 		return "", apiclient.NewEncodingError(
@@ -181,7 +188,7 @@ func (c codec) encodeLogLevel(level cluster.LogLevel) (openapi.LogLevel, error) 
 func (c codec) encodeLogFormat(format cluster.LogFormat) (openapi.LogFormat, error) {
 	v := openapi.LogFormat(format.String())
 	switch v {
-	case openapi.DEFAULT, openapi.JSON:
+	case openapi.LOGFORMAT_DEFAULT, openapi.LOGFORMAT_JSON:
 		return v, nil
 	default:
 		return "", apiclient.NewEncodingError(

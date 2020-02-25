@@ -48,8 +48,8 @@ func TestDecodeCluster(t *testing.T) {
 				DisableTelemetry:      true,
 				DisableCrashReporting: true,
 				DisableVersionCheck:   true,
-				LogLevel:              openapi.DEBUG,
-				LogFormat:             openapi.JSON,
+				LogLevel:              openapi.LOGLEVEL_DEBUG,
+				LogFormat:             openapi.LOGFORMAT_JSON,
 				CreatedAt:             mockCreatedAtTime,
 				UpdatedAt:             mockUpdatedAtTime,
 				Version:               "NDIK",
@@ -132,7 +132,7 @@ func TestDecodeNode(t *testing.T) {
 			model: openapi.Node{
 				Id:                 "banananodeid",
 				Name:               "banananodename",
-				Health:             openapi.ONLINE,
+				Health:             openapi.NODEHEALTH_ONLINE,
 				IoEndpoint:         "arbitraryIOEndpoint",
 				SupervisorEndpoint: "arbitrarySupervisorEndpoint",
 				GossipEndpoint:     "arbitraryGossipEndpoint",
@@ -214,28 +214,24 @@ func TestDecodeVolume(t *testing.T) {
 				Labels: map[string]string{
 					"storageos.com/label": "value",
 				},
-				FsType: openapi.EXT4,
-				Inode:  42,
-				Master: openapi.DeploymentInfo{
+				FsType: openapi.FSTYPE_EXT4,
+				Master: openapi.MasterDeploymentInfo{
 					Id:      "master-id",
 					NodeID:  "some-arbitrary-node-id",
-					Inode:   43,
-					Health:  openapi.ONLINE,
+					Health:  openapi.MASTERHEALTH_ONLINE,
 					Syncing: false,
 				},
-				Replicas: &[]openapi.DeploymentInfo{
-					openapi.DeploymentInfo{
+				Replicas: &[]openapi.ReplicaDeploymentInfo{
+					openapi.ReplicaDeploymentInfo{
 						Id:      "replica-a-id",
 						NodeID:  "some-second-node-id",
-						Inode:   44,
-						Health:  openapi.ONLINE,
+						Health:  openapi.REPLICAHEALTH_SYNCING,
 						Syncing: true,
 					},
-					openapi.DeploymentInfo{
+					openapi.ReplicaDeploymentInfo{
 						Id:      "replica-b-id",
 						NodeID:  "some-third-node-id",
-						Inode:   45,
-						Health:  openapi.OFFLINE,
+						Health:  openapi.REPLICAHEALTH_READY,
 						Syncing: false,
 					},
 				},
@@ -257,12 +253,10 @@ func TestDecodeVolume(t *testing.T) {
 					"storageos.com/label": "value",
 				},
 				Filesystem: volume.FsTypeFromString("ext4"),
-				Inode:      42,
 
 				Master: &volume.Deployment{
 					ID:      "master-id",
 					Node:    "some-arbitrary-node-id",
-					Inode:   43,
 					Health:  health.State("online"),
 					Syncing: false,
 				},
@@ -270,15 +264,13 @@ func TestDecodeVolume(t *testing.T) {
 					&volume.Deployment{
 						ID:      "replica-a-id",
 						Node:    "some-second-node-id",
-						Inode:   44,
-						Health:  health.State("online"),
+						Health:  health.State("syncing"),
 						Syncing: true,
 					},
 					&volume.Deployment{
 						ID:      "replica-b-id",
 						Node:    "some-third-node-id",
-						Inode:   45,
-						Health:  health.State("offline"),
+						Health:  health.State("ready"),
 						Syncing: false,
 					},
 				},
@@ -301,13 +293,11 @@ func TestDecodeVolume(t *testing.T) {
 				Labels: map[string]string{
 					"storageos.com/label": "value",
 				},
-				FsType: openapi.EXT4,
-				Inode:  42,
-				Master: openapi.DeploymentInfo{
+				FsType: openapi.FSTYPE_EXT4,
+				Master: openapi.MasterDeploymentInfo{
 					Id:      "master-id",
 					NodeID:  "some-arbitrary-node-id",
-					Inode:   43,
-					Health:  openapi.ONLINE,
+					Health:  openapi.MASTERHEALTH_ONLINE,
 					Syncing: false,
 				},
 				SizeBytes: 1337,
@@ -328,12 +318,10 @@ func TestDecodeVolume(t *testing.T) {
 					"storageos.com/label": "value",
 				},
 				Filesystem: volume.FsTypeFromString("ext4"),
-				Inode:      42,
 
 				Master: &volume.Deployment{
 					ID:      "master-id",
 					Node:    "some-arbitrary-node-id",
-					Inode:   43,
 					Health:  health.State("online"),
 					Syncing: false,
 				},
