@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"code.storageos.net/storageos/c2-cli/config"
+	"code.storageos.net/storageos/c2-cli/output"
 )
 
 const (
@@ -36,6 +37,9 @@ const (
 	// namespace name or unique identifier to operate within for commands that
 	// require it.
 	NamespaceVar = "STORAGEOS_NAMESPACE"
+	// OutputFormatVar keys the environment variable from which we source the output
+	// format to use when we print out the results.
+	OutputFormatVar = "STORAGEOS_OUTPUT_FORMAT"
 )
 
 // Provider exports functionality to retrieve global configuration values from
@@ -117,6 +121,22 @@ func (env *Provider) Namespace() (string, error) {
 	}
 
 	return namespace, nil
+}
+
+// OutputFormat returns the output format type taken from the environment, if set.
+// If not set, the env's fallback is used.
+func (env *Provider) OutputFormat() (output.Format, error) {
+	out := os.Getenv(OutputFormatVar)
+	if out == "" {
+		return env.fallback.OutputFormat()
+	}
+
+	outputType, err := output.FormatFromString(out)
+	if err != nil {
+		return output.Unknown, err
+	}
+
+	return outputType, nil
 }
 
 // NewProvider returns a configuration provider which sources

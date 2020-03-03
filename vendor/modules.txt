@@ -6,14 +6,28 @@ github.com/alecthomas/units
 github.com/antihax/optional
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
+# github.com/dustin/go-humanize v1.0.0
+github.com/dustin/go-humanize
+# github.com/fatih/color v1.9.0
+github.com/fatih/color
 # github.com/golang/protobuf v1.2.0
 github.com/golang/protobuf/proto
+# github.com/gosuri/uitable v0.0.4
+github.com/gosuri/uitable
+github.com/gosuri/uitable/util/strutil
+github.com/gosuri/uitable/util/wordwrap
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
 # github.com/kr/pretty v0.1.0
 github.com/kr/pretty
 # github.com/kr/text v0.1.0
 github.com/kr/text
+# github.com/mattn/go-colorable v0.1.4
+github.com/mattn/go-colorable
+# github.com/mattn/go-isatty v0.0.11
+github.com/mattn/go-isatty
+# github.com/mattn/go-runewidth v0.0.8
+github.com/mattn/go-runewidth
 # github.com/spf13/cobra v0.0.5
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.3
@@ -26,7 +40,7 @@ golang.org/x/net/context/ctxhttp
 # golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.0.0-20190412213103-97732733099d
+# golang.org/x/sys v0.0.0-20191026070338-33540a1f6037
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # google.golang.org/appengine v1.4.0
@@ -37,3 +51,5 @@ google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
+# gopkg.in/yaml.v3 v3.0.0-20200121175148-a6ecf24a6d71
+gopkg.in/yaml.v3

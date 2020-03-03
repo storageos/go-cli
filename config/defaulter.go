@@ -1,6 +1,10 @@
 package config
 
-import "time"
+import (
+	"time"
+
+	"code.storageos.net/storageos/c2-cli/output"
+)
 
 const (
 	// DefaultAPIEndpoint is the default endpoint which the CLI will
@@ -24,6 +28,9 @@ const (
 	// DefaultNamespaceName defines the name of the default StorageOS namespace
 	// which is used as a fallback when no namespace specifier is provided.
 	DefaultNamespaceName = "default"
+	// DefaultOutput defines the default output type for commands. Default is to
+	// use text
+	DefaultOutput = output.Text
 )
 
 // Defaulter exports functionality to retrieve default values for the global
@@ -65,6 +72,11 @@ func (d *Defaulter) UseIDs() (bool, error) {
 // required a namespace to be specified.
 func (d *Defaulter) Namespace() (string, error) {
 	return DefaultNamespaceName, nil
+}
+
+// OutputFormat returns the default output format of the command, that is output.Text
+func (d *Defaulter) OutputFormat() (output.Format, error) {
+	return DefaultOutput, nil
 }
 
 var _ Provider = (*Defaulter)(nil) // Ensure that the defaulter satisfies the exported interface

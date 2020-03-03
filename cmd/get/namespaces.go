@@ -9,7 +9,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/namespace"
-	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/selectors"
 )
@@ -94,10 +93,6 @@ func newNamespace(w io.Writer, client Client, config ConfigProvider) *cobra.Comm
 	c := &namespaceCommand{
 		config: config,
 		client: client,
-		display: jsonformat.NewDisplayer(
-			jsonformat.DefaultEncodingIndent,
-		),
-
 		writer: w,
 	}
 
@@ -110,6 +105,9 @@ $ storageos get namespaces
 
 $ storageos get namespace my-namespace-name
 `,
+		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+			c.display = SelectDisplayer(c.config)
+		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run := runwrappers.Chain(

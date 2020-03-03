@@ -9,12 +9,13 @@
  */
 
 package openapi
+
 // CapacityStats struct for CapacityStats
 type CapacityStats struct {
-	// Total bytes in the filesystem 
+	// Total bytes in the filesystem
 	Total uint64 `json:"total,omitempty"`
-	// Free bytes in the filesystem available to root user 
+	// Free bytes in the filesystem available to root user
 	Free uint64 `json:"free,omitempty"`
-	// Byte value available to an unprivileged user 
+	// Byte value available to an unprivileged user
 	Available uint64 `json:"available,omitempty"`
 }

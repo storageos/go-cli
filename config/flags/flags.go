@@ -3,9 +3,11 @@
 package flags
 
 import (
+	"fmt"
 	"time"
 
 	"code.storageos.net/storageos/c2-cli/config"
+	"code.storageos.net/storageos/c2-cli/output"
 )
 
 const (
@@ -28,6 +30,9 @@ const (
 	// NamespaceFlag keys the long flag from which the namespace name or ID to
 	// operate within is sourced for commands that required it.
 	NamespaceFlag = "namespace"
+	// OutputFormatFlag keys the long flag from which the output format is
+	// sourced for commands that requires it
+	OutputFormatFlag = "output"
 )
 
 // FlagSet describes a set of typed flag set accessors/setters required by the
@@ -149,11 +154,25 @@ func (flag *Provider) Namespace() (string, error) {
 	return namespace, nil
 }
 
+// OutputFormat sources the output format from flag's FlagSet. If the value
+// stored has not changed, then flag's fallback is used.
+func (flag *Provider) OutputFormat() (output.Format, error) {
+	out, err := flag.set.GetString(OutputFormatFlag)
+	if err != nil {
+		return flag.fallback.OutputFormat()
+	}
+
+	outputType, err := output.FormatFromString(out)
+	if err != nil {
+		return output.Unknown, err
+	}
+
+	return outputType, nil
+}
+
 // NewProvider initialises a new flag based configuration provider backed by
 // flagset, falling back on the provided fallback if the value can
 // not be sourced from flagset.
-//
-//
 func NewProvider(flagset FlagSet, fallback config.Provider) *Provider {
 
 	// Set up the flags for the config provider
@@ -186,6 +205,11 @@ func NewProvider(flagset FlagSet, fallback config.Provider) *Provider {
 		NamespaceFlag,
 		config.DefaultNamespaceName,
 		"specifies the namespace to operate within for commands that require one",
+	)
+	flagset.String(
+		OutputFormatFlag,
+		config.DefaultOutput.String(),
+		fmt.Sprintf("specifies the output format (one of %v)", output.ValidFormats),
 	)
 
 	return &Provider{

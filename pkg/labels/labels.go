@@ -5,6 +5,7 @@ package labels
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -31,6 +32,27 @@ func NewErrLabelKeyConflictWithDetails(details string) error {
 
 // Set provides a typed wrapper for a label map.
 type Set map[string]string
+
+func (s Set) String() string {
+	if len(s) == 0 {
+		return ""
+	}
+	var sb strings.Builder
+	sb.Grow(len(s) * 40) // Just estimating for performance
+
+	// extract keys and order them in place to make the print deterministic
+	keys := make([]string, 0, len(s))
+	for k := range s {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	// print keys/values ordered alphabetically by key
+	for _, k := range keys {
+		sb.WriteString(k + "=" + s[k] + ",")
+	}
+	return strings.TrimRight(sb.String(), ",")
+}
 
 // NewSetFromPairs constructs a label set from pairs, returning an
 // error if any of the provided items is not a key=value pair.

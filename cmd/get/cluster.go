@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
-	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 )
 
 type clusterCommand struct {
@@ -31,10 +30,6 @@ func newCluster(w io.Writer, client Client, config ConfigProvider) *cobra.Comman
 	c := &clusterCommand{
 		config: config,
 		client: client,
-		display: jsonformat.NewDisplayer(
-			jsonformat.DefaultEncodingIndent,
-		),
-
 		writer: w,
 	}
 	cobraCommand := &cobra.Command{
@@ -43,6 +38,10 @@ func newCluster(w io.Writer, client Client, config ConfigProvider) *cobra.Comman
 		Example: `
 $ storageos get cluster
 `,
+
+		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+			c.display = SelectDisplayer(c.config)
+		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run := runwrappers.RunWithTimeout(c.config)(c.runWithCtx)

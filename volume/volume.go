@@ -70,11 +70,11 @@ type Resource struct {
 // Deployment encapsulates a deployment instance for a
 // volume as a data type.
 type Deployment struct {
-	ID           id.Deployment `json:"id"`
-	Node         id.Node       `json:"nodeID"`
-	Health       health.State  `json:"health"`
-	Syncing      bool          `json:"syncing"`
-	SyncProgress *SyncProgress `json:"syncProgress,omitempty"`
+	ID           id.Deployment      `json:"id"`
+	Node         id.Node            `json:"nodeID"`
+	Health       health.VolumeState `json:"health"`
+	Syncing      bool               `json:"syncing"`
+	SyncProgress *SyncProgress      `json:"syncProgress,omitempty"`
 }
 
 // SyncProgress is a point-in-time snapshot of an ongoing sync operation.

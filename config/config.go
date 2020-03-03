@@ -2,7 +2,11 @@
 // required for operating the CLI.
 package config
 
-import "time"
+import (
+	"time"
+
+	"code.storageos.net/storageos/c2-cli/output"
+)
 
 // Provider defines the required set of configuration setting accessors
 // which a type must implement in order to be used for configuring the
@@ -14,4 +18,5 @@ type Provider interface {
 	Password() (string, error)
 	UseIDs() (bool, error)
 	Namespace() (string, error)
+	OutputFormat() (output.Format, error)
 }

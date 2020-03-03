@@ -9,12 +9,13 @@
  */
 
 package openapi
-// SyncProgress The progress report for an ongoing sync.  
+
+// SyncProgress The progress report for an ongoing sync.
 type SyncProgress struct {
-	// Number of bytes left remaining to complete the sync. 
+	// Number of bytes left remaining to complete the sync.
 	BytesRemaining uint64 `json:"bytesRemaining,omitempty"`
-	// The average throughput of the sync given as bytes per  second. 
+	// The average throughput of the sync given as bytes per  second.
 	ThroughputBytes uint64 `json:"throughputBytes,omitempty"`
-	// The estimated time left for the sync to complete, given in seconds. 
+	// The estimated time left for the sync to complete, given in seconds.
 	EstimatedSecondsRemaining uint64 `json:"estimatedSecondsRemaining,omitempty"`
 }

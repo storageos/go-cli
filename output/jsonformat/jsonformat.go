@@ -30,9 +30,9 @@ func (d *Displayer) encode(w io.Writer, v interface{}) error {
 	return enc.Encode(v)
 }
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // CREATE
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 // CreateUser encodes resource as JSON, writing the result to w.
 func (d *Displayer) CreateUser(ctx context.Context, w io.Writer, resource *user.Resource) error {
@@ -44,18 +44,18 @@ func (d *Displayer) CreateVolume(ctx context.Context, w io.Writer, resource *vol
 	return d.encode(w, resource)
 }
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // UPDATE
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 // UpdateLicence encodes licence as JSON, writing the result to w.
 func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *cluster.Licence) error {
 	return d.encode(w, licence)
 }
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // GET
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 // GetCluster encodes resource as JSON, writing the result to w.
 func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *cluster.Resource) error {
@@ -92,9 +92,9 @@ func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, resources [
 	return d.encode(w, resources)
 }
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // DESCRIBE
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 // DescribeNode encodes state as JSON, writing the result to w.
 func (d *Displayer) DescribeNode(ctx context.Context, w io.Writer, state *node.State) error {

@@ -148,7 +148,7 @@ func TestDecodeNode(t *testing.T) {
 			wantResource: &node.Resource{
 				ID:     "banananodeid",
 				Name:   "banananodename",
-				Health: health.State("online"),
+				Health: health.NodeOnline,
 
 				Labels: labels.Set{
 					"storageos.com/label": "value",
@@ -222,13 +222,13 @@ func TestDecodeVolume(t *testing.T) {
 					Syncing: false,
 				},
 				Replicas: &[]openapi.ReplicaDeploymentInfo{
-					openapi.ReplicaDeploymentInfo{
+					{
 						Id:      "replica-a-id",
 						NodeID:  "some-second-node-id",
 						Health:  openapi.REPLICAHEALTH_SYNCING,
 						Syncing: true,
 					},
-					openapi.ReplicaDeploymentInfo{
+					{
 						Id:      "replica-b-id",
 						NodeID:  "some-third-node-id",
 						Health:  openapi.REPLICAHEALTH_READY,
@@ -257,20 +257,20 @@ func TestDecodeVolume(t *testing.T) {
 				Master: &volume.Deployment{
 					ID:      "master-id",
 					Node:    "some-arbitrary-node-id",
-					Health:  health.State("online"),
+					Health:  health.MasterOnline,
 					Syncing: false,
 				},
 				Replicas: []*volume.Deployment{
-					&volume.Deployment{
+					{
 						ID:      "replica-a-id",
 						Node:    "some-second-node-id",
-						Health:  health.State("syncing"),
+						Health:  health.ReplicaSyncing,
 						Syncing: true,
 					},
-					&volume.Deployment{
+					{
 						ID:      "replica-b-id",
 						Node:    "some-third-node-id",
-						Health:  health.State("ready"),
+						Health:  health.ReplicaReady,
 						Syncing: false,
 					},
 				},
@@ -322,7 +322,7 @@ func TestDecodeVolume(t *testing.T) {
 				Master: &volume.Deployment{
 					ID:      "master-id",
 					Node:    "some-arbitrary-node-id",
-					Health:  health.State("online"),
+					Health:  health.MasterOnline,
 					Syncing: false,
 				},
 				Replicas: []*volume.Deployment{},

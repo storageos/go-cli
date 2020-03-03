@@ -49,7 +49,7 @@ func (c codec) decodeNode(model openapi.Node) (*node.Resource, error) {
 	return &node.Resource{
 		ID:     id.Node(model.Id),
 		Name:   model.Name,
-		Health: health.FromString(string(model.Health)),
+		Health: health.NodeFromString(string(model.Health)),
 
 		Labels: model.Labels,
 
@@ -85,7 +85,7 @@ func (c codec) decodeVolume(model openapi.Volume) (*volume.Resource, error) {
 	v.Master = &volume.Deployment{
 		ID:      id.Deployment(m.Id),
 		Node:    id.Node(m.NodeID),
-		Health:  health.FromString(string(m.Health)),
+		Health:  health.MasterFromString(string(m.Health)),
 		Syncing: m.Syncing,
 	}
 
@@ -97,7 +97,7 @@ func (c codec) decodeVolume(model openapi.Volume) (*volume.Resource, error) {
 			replicas[i] = &volume.Deployment{
 				ID:      id.Deployment(r.Id),
 				Node:    id.Node(r.NodeID),
-				Health:  health.FromString(string(r.Health)),
+				Health:  health.ReplicaFromString(string(r.Health)),
 				Syncing: r.Syncing,
 			}
 

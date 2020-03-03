@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"code.storageos.net/storageos/c2-cli/config"
+	"code.storageos.net/storageos/c2-cli/output"
 )
 
 type mockProvider struct {
@@ -15,6 +16,7 @@ type mockProvider struct {
 	GetPassword       string
 	GetUseIDs         bool
 	GetNamespace      string
+	GetOutput         output.Format
 }
 
 var _ config.Provider = (*mockProvider)(nil)
@@ -41,4 +43,8 @@ func (m *mockProvider) UseIDs() (bool, error) {
 
 func (m *mockProvider) Namespace() (string, error) {
 	return m.GetNamespace, m.GetError
+}
+
+func (m *mockProvider) OutputFormat() (output.Format, error) {
+	return m.GetOutput, m.GetError
 }

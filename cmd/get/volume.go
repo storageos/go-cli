@@ -10,7 +10,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
-	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/selectors"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -139,10 +138,6 @@ func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command
 	c := &volumeCommand{
 		config: config,
 		client: client,
-		display: jsonformat.NewDisplayer(
-			jsonformat.DefaultEncodingIndent,
-		),
-
 		writer: w,
 	}
 
@@ -161,6 +156,10 @@ $ storageos get volume --namespace my-namespace-name my-volume-name
 			}
 			return nil
 		}),
+
+		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+			c.display = SelectDisplayer(c.config)
+		},
 
 		PreRunE: argwrappers.WrapInvalidArgsError(func(_ *cobra.Command, args []string) error {
 			ns, err := c.config.Namespace()

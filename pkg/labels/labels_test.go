@@ -83,3 +83,60 @@ func TestNewSetFromPairs(t *testing.T) {
 		})
 	}
 }
+
+func TestSet_String(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		s    Set
+		want string
+	}{
+		{
+			name: "empty",
+			s:    map[string]string{},
+			want: "",
+		},
+		{
+			name: "one elem",
+			s: map[string]string{
+				"bananaKey": "bananaValue",
+			},
+			want: "bananaKey=bananaValue",
+		},
+		{
+			name: "two elems",
+			s: map[string]string{
+				"bananaKey": "bananaValue",
+				"kiwiKey":   "kiwiValue",
+			},
+			want: "bananaKey=bananaValue,kiwiKey=kiwiValue",
+		},
+		{
+			name: "three elems",
+			s: map[string]string{
+				"bananaKey": "bananaValue",
+				"kiwiKey":   "kiwiValue",
+				"peachKey":  "peachValue",
+			},
+			want: "bananaKey=bananaValue,kiwiKey=kiwiValue,peachKey=peachValue",
+		},
+		{
+			name: "three elems, different order",
+			s: map[string]string{
+				"peachKey":  "peachValue",
+				"kiwiKey":   "kiwiValue",
+				"bananaKey": "bananaValue",
+			},
+			want: "bananaKey=bananaValue,kiwiKey=kiwiValue,peachKey=peachValue",
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := tt.s.String(); got != tt.want {
+				t.Errorf("String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

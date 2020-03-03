@@ -9,7 +9,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/node"
-	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/selectors"
 )
@@ -89,10 +88,6 @@ func newNode(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 	c := &nodeCommand{
 		config: config,
 		client: client,
-		display: jsonformat.NewDisplayer(
-			jsonformat.DefaultEncodingIndent,
-		),
-
 		writer: w,
 	}
 	cobraCommand := &cobra.Command{
@@ -102,6 +97,9 @@ func newNode(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 		Example: `
 $ storageos get node my-node-name
 `,
+		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+			c.display = SelectDisplayer(c.config)
+		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run := runwrappers.Chain(

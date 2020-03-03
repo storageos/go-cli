@@ -26,9 +26,9 @@ type Deployment struct {
 
 // Resource encapsulates a StorageOS node API resource as a data type.
 type Resource struct {
-	ID     id.Node      `json:"id"`
-	Name   string       `json:"name"`
-	Health health.State `json:"health"`
+	ID     id.Node          `json:"id"`
+	Name   string           `json:"name"`
+	Health health.NodeState `json:"health"`
 
 	IOAddr         string `json:"ioAddress"`
 	SupervisorAddr string `json:"supervisorAddress"`
