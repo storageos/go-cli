@@ -97,7 +97,7 @@ func newNode(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 		Example: `
 $ storageos get node my-node-name
 `,
-		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+		PreRun: func(_ *cobra.Command, _ []string) {
 			c.display = SelectDisplayer(c.config)
 		},
 

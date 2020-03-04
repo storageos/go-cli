@@ -39,7 +39,7 @@ func newCluster(w io.Writer, client Client, config ConfigProvider) *cobra.Comman
 $ storageos get cluster
 `,
 
-		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+		PreRun: func(_ *cobra.Command, _ []string) {
 			c.display = SelectDisplayer(c.config)
 		},
 

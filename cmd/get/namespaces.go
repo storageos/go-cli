@@ -105,7 +105,7 @@ $ storageos get namespaces
 
 $ storageos get namespace my-namespace-name
 `,
-		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+		PreRun: func(_ *cobra.Command, _ []string) {
 			c.display = SelectDisplayer(c.config)
 		},
 

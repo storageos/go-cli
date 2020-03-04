@@ -157,11 +157,9 @@ $ storageos get volume --namespace my-namespace-name my-volume-name
 			return nil
 		}),
 
-		PersistentPreRun: func(_ *cobra.Command, _ []string) {
-			c.display = SelectDisplayer(c.config)
-		},
-
 		PreRunE: argwrappers.WrapInvalidArgsError(func(_ *cobra.Command, args []string) error {
+			c.display = SelectDisplayer(c.config)
+
 			ns, err := c.config.Namespace()
 			if err != nil {
 				return err
