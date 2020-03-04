@@ -73,7 +73,7 @@ type Deployment struct {
 	ID           id.Deployment      `json:"id"`
 	Node         id.Node            `json:"nodeID"`
 	Health       health.VolumeState `json:"health"`
-	Syncing      bool               `json:"syncing"`
+	Promotable   bool               `json:"promotable"`
 	SyncProgress *SyncProgress      `json:"syncProgress,omitempty"`
 }
 

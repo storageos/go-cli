@@ -12,8 +12,6 @@ package openapi
 
 // UpdateVolumeData struct for UpdateVolumeData
 type UpdateVolumeData struct {
-	// desired new volume name
-	Name string `json:"name,omitempty"`
 	// A set of arbitrary key value labels to apply to the entity.
 	Labels      map[string]string `json:"labels,omitempty"`
 	Description string            `json:"description,omitempty"`

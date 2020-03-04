@@ -9,14 +9,11 @@
  */
 
 package openapi
-
 // UpdateVolumeData struct for UpdateVolumeData
 type UpdateVolumeData struct {
-	// desired new volume name
-	Name string `json:"name,omitempty"`
-	// A set of arbitrary key value labels to apply to the entity.
-	Labels      map[string]string `json:"labels,omitempty"`
-	Description string            `json:"description,omitempty"`
-	// An opaque representation of an entity version at the time it was obtained from the API. All operations that mutate the entity must include this version field in the request unchanged. The format of this type is undefined and may change but the defined properties will not change.
+	// A set of arbitrary key value labels to apply to the entity. 
+	Labels map[string]string `json:"labels,omitempty"`
+	Description string `json:"description,omitempty"`
+	// An opaque representation of an entity version at the time it was obtained from the API. All operations that mutate the entity must include this version field in the request unchanged. The format of this type is undefined and may change but the defined properties will not change. 
 	Version string `json:"version,omitempty"`
 }

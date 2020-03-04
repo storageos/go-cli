@@ -5225,7 +5225,7 @@ func (a *DefaultApiService) UpdateUser(ctx _context.Context, id string, updateUs
 
 /*
 UpdateVolume Update a volume
-Update the volume identified by id.
+Update the description and non-storageos labels configured for the volume identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespaceID ID of a Namespace
  * @param id ID of a Volume

@@ -83,10 +83,10 @@ func (c codec) decodeVolume(model openapi.Volume) (*volume.Resource, error) {
 
 	m := model.Master
 	v.Master = &volume.Deployment{
-		ID:      id.Deployment(m.Id),
-		Node:    id.Node(m.NodeID),
-		Health:  health.MasterFromString(string(m.Health)),
-		Syncing: m.Syncing,
+		ID:         id.Deployment(m.Id),
+		Node:       id.Node(m.NodeID),
+		Health:     health.MasterFromString(string(m.Health)),
+		Promotable: m.Promotable,
 	}
 
 	replicas := []*volume.Deployment{}
@@ -95,10 +95,10 @@ func (c codec) decodeVolume(model openapi.Volume) (*volume.Resource, error) {
 		replicas = make([]*volume.Deployment, len(*model.Replicas))
 		for i, r := range *model.Replicas {
 			replicas[i] = &volume.Deployment{
-				ID:      id.Deployment(r.Id),
-				Node:    id.Node(r.NodeID),
-				Health:  health.ReplicaFromString(string(r.Health)),
-				Syncing: r.Syncing,
+				ID:         id.Deployment(r.Id),
+				Node:       id.Node(r.NodeID),
+				Health:     health.ReplicaFromString(string(r.Health)),
+				Promotable: r.Promotable,
 			}
 
 			p := r.SyncProgress

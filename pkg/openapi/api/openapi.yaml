@@ -2742,7 +2742,8 @@ paths:
       - jwt: []
       summary: Fetch a volume
     put:
-      description: Update the volume identified by id.
+      description: Update the description and non-storageos labels configured for
+        the volume identified by id.
       operationId: updateVolume
       parameters:
       - description: ID of a Namespace
@@ -2767,18 +2768,12 @@ paths:
           application/json:
             schema:
               example:
-                name: new-volume-name
                 description: This volume contains the data for my app
                 version: NDI0MjQyNDI0MjQyNDI0MjQy
                 labels:
                   env: prod
                   rack: db-1
               properties:
-                name:
-                  description: |
-                    desired new volume name
-                  example: new-volume-name
-                  type: string
                 labels:
                   additionalProperties:
                     type: string
@@ -2804,7 +2799,8 @@ paths:
                   type: string
               title: UpdateVolumeData
               type: object
-        description: update a volume to a desired state.
+        description: Update the volume description and label configuration to the
+          desired state. Alterations of StorageOS labels are rejected.
         required: true
       responses:
         "200":
@@ -3728,7 +3724,7 @@ components:
           type: uint64
         estimatedSecondsRemaining:
           description: |
-            The estimated time left for the sync to complete, given in seconds.
+            The estimated time left for the sync to complete, given in seconds. When this field has a value of 0 either the  sync is complete or no duration estimate could be made. The values reported for bytesRemaining and  throughputBytes provide the client with the information needed to choose what to display.
           example: 5
           type: uint64
       readOnly: true
@@ -4083,9 +4079,9 @@ components:
           example: c5666b58-b805-4215-ab4a-cb094948ccc6
           readOnly: true
           type: string
-        syncing:
+        promotable:
           description: |
-            indicates if the volume deployment is undergoing data synchronisation operations
+            Indicates if the volume deployment is eligible for promotion
           type: boolean
       type: object
     MasterDeploymentInfo:
@@ -4772,18 +4768,12 @@ components:
       type: object
     UpdateVolumeData:
       example:
-        name: new-volume-name
         description: This volume contains the data for my app
         version: NDI0MjQyNDI0MjQyNDI0MjQy
         labels:
           env: prod
           rack: db-1
       properties:
-        name:
-          description: |
-            desired new volume name
-          example: new-volume-name
-          type: string
         labels:
           additionalProperties:
             type: string

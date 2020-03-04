@@ -16,7 +16,7 @@ type MasterDeploymentInfo struct {
 	Id string `json:"id,omitempty"`
 	// A unique identifier for a node. The format of this type is undefined and may change but the defined properties will not change.
 	NodeID string `json:"nodeID,omitempty"`
-	// indicates if the volume deployment is undergoing data synchronisation operations
-	Syncing bool         `json:"syncing,omitempty"`
-	Health  MasterHealth `json:"health,omitempty"`
+	// Indicates if the volume deployment is eligible for promotion
+	Promotable bool         `json:"promotable,omitempty"`
+	Health     MasterHealth `json:"health,omitempty"`
 }

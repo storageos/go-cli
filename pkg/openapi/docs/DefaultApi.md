@@ -1349,7 +1349,7 @@ Name | Type | Description  | Notes
 
 Update a volume
 
-Update the volume identified by id.
+Update the description and non-storageos labels configured for the volume identified by id.
 
 ### Required Parameters
 
