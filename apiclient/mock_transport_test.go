@@ -46,6 +46,11 @@ type mockTransport struct {
 	UpdateClusterError         error
 	UpdateClusterGotResource   *cluster.Resource
 	UpdateClusterGotLicenceKey []byte
+
+	AttachGotNamespace id.Namespace
+	AttachGotVolume    id.Volume
+	AttachGotNode      id.Node
+	AttachError        error
 }
 
 var _ Transport = (*mockTransport)(nil)
@@ -58,15 +63,15 @@ func (m *mockTransport) GetCluster(ctx context.Context) (*cluster.Resource, erro
 	return m.GetClusterResource, m.GetClusterError
 }
 
-func (m *mockTransport) GetNode(ctx context.Context, uid id.Node) (*node.Resource, error) {
+func (m *mockTransport) GetNode(ctx context.Context, nodeID id.Node) (*node.Resource, error) {
 	return m.GetNodeResource, m.GetNodeError
 }
 
-func (m *mockTransport) GetVolume(ctx context.Context, namespaceID id.Namespace, uid id.Volume) (*volume.Resource, error) {
+func (m *mockTransport) GetVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume) (*volume.Resource, error) {
 	return m.GetVolumeResource, m.GetVolumeError
 }
 
-func (m *mockTransport) GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error) {
+func (m *mockTransport) GetNamespace(ctx context.Context, namespaceID id.Namespace) (*namespace.Resource, error) {
 	return m.GetNamespaceResource, m.GetNamespaceError
 }
 
@@ -86,7 +91,7 @@ func (m *mockTransport) CreateUser(ctx context.Context, username, password strin
 	return m.CreateUserResource, m.CreateUserError
 }
 
-func (m *mockTransport) CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error) {
+func (m *mockTransport) CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error) {
 	return m.CreateVolumeResource, m.CreateVolumeError
 }
 
@@ -94,4 +99,11 @@ func (m *mockTransport) UpdateCluster(ctx context.Context, resource *cluster.Res
 	m.UpdateClusterGotResource = resource
 	m.UpdateClusterGotLicenceKey = licenceKey
 	return m.UpdateClusterResource, m.UpdateClusterError
+}
+
+func (m *mockTransport) AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error {
+	m.AttachGotNamespace = namespaceID
+	m.AttachGotVolume = volumeID
+	m.AttachGotNode = nodeID
+	return m.AttachError
 }

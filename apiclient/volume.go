@@ -82,10 +82,10 @@ func NewVolumeNotFoundError(details string) VolumeNotFoundError {
 
 // NewVolumeIDNotFoundError returns a VolumeNotFoundError for the volume with uid,
 // constructing a user friendly message and storing the ID inside the error.
-func NewVolumeIDNotFoundError(uid id.Volume) VolumeNotFoundError {
+func NewVolumeIDNotFoundError(volumeID id.Volume) VolumeNotFoundError {
 	return VolumeNotFoundError{
-		msg: fmt.Sprintf("volume with ID %v not found for target namespace", uid),
-		uid: uid,
+		msg: fmt.Sprintf("volume with ID %v not found for target namespace", volumeID),
+		uid: volumeID,
 	}
 }
 
@@ -113,13 +113,13 @@ func (c *Client) CreateVolume(ctx context.Context, namespace id.Namespace, name,
 
 // GetVolume requests basic information for the volume resource which
 // corresponds to uid in namespace from the StorageOS API.
-func (c *Client) GetVolume(ctx context.Context, namespace id.Namespace, uid id.Volume) (*volume.Resource, error) {
+func (c *Client) GetVolume(ctx context.Context, namespace id.Namespace, volumeID id.Volume) (*volume.Resource, error) {
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return c.transport.GetVolume(ctx, namespace, uid)
+	return c.transport.GetVolume(ctx, namespace, volumeID)
 }
 
 // GetVolumeByName requests basic information for the volume resource which has
@@ -132,13 +132,13 @@ func (c *Client) GetVolume(ctx context.Context, namespace id.Namespace, uid id.V
 // Retrieving a volume resource by name involves requesting a list of all
 // volumes in the namespace from the StorageOS API and returning the first one
 // where the name matches.
-func (c *Client) GetVolumeByName(ctx context.Context, namespace id.Namespace, name string) (*volume.Resource, error) {
+func (c *Client) GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error) {
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	volumes, err := c.transport.ListVolumes(ctx, namespace)
+	volumes, err := c.transport.ListVolumes(ctx, namespaceID)
 	if err != nil {
 		return nil, err
 	}
@@ -157,13 +157,13 @@ func (c *Client) GetVolumeByName(ctx context.Context, namespace id.Namespace, na
 //
 // The returned list is filtered using uids so that it contains only those
 // resources which have a matching ID. Omitting uids will skip the filtering.
-func (c *Client) GetNamespaceVolumes(ctx context.Context, namespace id.Namespace, uids ...id.Volume) ([]*volume.Resource, error) {
+func (c *Client) GetNamespaceVolumes(ctx context.Context, namespaceID id.Namespace, uids ...id.Volume) ([]*volume.Resource, error) {
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	volumes, err := c.transport.ListVolumes(ctx, namespace)
+	volumes, err := c.transport.ListVolumes(ctx, namespaceID)
 	if err != nil {
 		return nil, err
 	}
@@ -176,13 +176,13 @@ func (c *Client) GetNamespaceVolumes(ctx context.Context, namespace id.Namespace
 //
 // The returned list is filtered using names so that it contains only those
 // resources which have a matching name. Omitting names will skip the filtering.
-func (c *Client) GetNamespaceVolumesByName(ctx context.Context, namespace id.Namespace, names ...string) ([]*volume.Resource, error) {
+func (c *Client) GetNamespaceVolumesByName(ctx context.Context, namespaceID id.Namespace, names ...string) ([]*volume.Resource, error) {
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	volumes, err := c.transport.ListVolumes(ctx, namespace)
+	volumes, err := c.transport.ListVolumes(ctx, namespaceID)
 	if err != nil {
 		return nil, err
 	}
@@ -288,4 +288,15 @@ func filterVolumesForNames(volumes []*volume.Resource, names ...string) ([]*volu
 	}
 
 	return filtered, nil
+}
+
+// AttachVolume requests to attach a volume (namespace/volume) to a node
+// It requires authentication.
+func (c *Client) AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return err
+	}
+
+	return c.transport.AttachVolume(ctx, namespaceID, volumeID, nodeID)
 }

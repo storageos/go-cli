@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	units "github.com/alecthomas/units"
+	"github.com/alecthomas/units"
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
@@ -67,7 +67,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 	}
 
 	name := args[0]
-	nsID := id.Namespace(c.namespace)
+	namespaceID := id.Namespace(c.namespace)
 
 	useIDs, err := c.config.UseIDs()
 	if err != nil {
@@ -79,12 +79,12 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		if err != nil {
 			return err
 		}
-		nsID = ns.ID
+		namespaceID = ns.ID
 	}
 
 	vol, err := c.client.CreateVolume(
 		ctx,
-		nsID,
+		namespaceID,
 		name,
 		c.description,
 		volume.FsTypeFromString(c.fsType),

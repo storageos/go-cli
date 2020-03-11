@@ -3,10 +3,11 @@ package openapi
 import (
 	"context"
 
+	"code.storageos.net/storageos/openapi"
+
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/volume"
-	"code.storageos.net/storageos/openapi"
 )
 
 // CreateVolume requests the creation of a new volume through the StorageOS API
@@ -46,11 +47,11 @@ func (o *OpenAPI) CreateVolume(ctx context.Context, namespace id.Namespace, name
 
 // GetVolume requests the volume with uid from the StorageOS API, translating
 // it into a *volume.Resource.
-func (o *OpenAPI) GetVolume(ctx context.Context, namespace id.Namespace, uid id.Volume) (*volume.Resource, error) {
+func (o *OpenAPI) GetVolume(ctx context.Context, namespaceID id.Namespace, uid id.Volume) (*volume.Resource, error) {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 
-	model, resp, err := o.client.DefaultApi.GetVolume(ctx, namespace.String(), uid.String())
+	model, resp, err := o.client.DefaultApi.GetVolume(ctx, namespaceID.String(), uid.String())
 	if err != nil {
 		switch v := mapOpenAPIError(err, resp).(type) {
 		case notFoundError:
@@ -65,15 +66,15 @@ func (o *OpenAPI) GetVolume(ctx context.Context, namespace id.Namespace, uid id.
 
 // ListVolumes requests a list of all volume in namespace from the StorageOS
 // API, translating each one to a *volume.Resource.
-func (o *OpenAPI) ListVolumes(ctx context.Context, namespace id.Namespace) ([]*volume.Resource, error) {
+func (o *OpenAPI) ListVolumes(ctx context.Context, namespaceID id.Namespace) ([]*volume.Resource, error) {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 
-	models, resp, err := o.client.DefaultApi.ListVolumes(ctx, namespace.String())
+	models, resp, err := o.client.DefaultApi.ListVolumes(ctx, namespaceID.String())
 	if err != nil {
 		switch v := mapOpenAPIError(err, resp).(type) {
 		case notFoundError:
-			return nil, apiclient.NewNamespaceNotFoundError(namespace)
+			return nil, apiclient.NewNamespaceNotFoundError(namespaceID)
 		default:
 			return nil, v
 		}
@@ -90,4 +91,26 @@ func (o *OpenAPI) ListVolumes(ctx context.Context, namespace id.Namespace) ([]*v
 	}
 
 	return volumes, nil
+}
+
+// AttachVolume request to attach the volume `volumeID` in the namespace
+// `namespaceID` to the node `nodeID`. It can return an error or nil if it
+// succeeds.
+func (o *OpenAPI) AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	resp, err := o.client.DefaultApi.AttachVolume(
+		ctx,
+		namespaceID.String(),
+		volumeID.String(),
+		openapi.AttachVolumeData{
+			NodeID: nodeID.String(),
+		},
+	)
+	if err != nil {
+		return mapOpenAPIError(err, resp)
+	}
+
+	return nil
 }

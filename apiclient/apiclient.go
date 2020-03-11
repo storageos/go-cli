@@ -46,18 +46,20 @@ type Transport interface {
 	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
 
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
-	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
-	GetVolume(ctx context.Context, namespaceID id.Namespace, uid id.Volume) (*volume.Resource, error)
-	GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error)
+	GetNode(ctx context.Context, nodeID id.Node) (*node.Resource, error)
+	GetVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume) (*volume.Resource, error)
+	GetNamespace(ctx context.Context, namespaceID id.Namespace) (*namespace.Resource, error)
 
 	ListNodes(ctx context.Context) ([]*node.Resource, error)
 	ListVolumes(ctx context.Context, namespaceID id.Namespace) ([]*volume.Resource, error)
 	ListNamespaces(ctx context.Context) ([]*namespace.Resource, error)
 
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
-	CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error)
+	CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error)
 
 	UpdateCluster(ctx context.Context, resource *cluster.Resource, licenceKey []byte) (*cluster.Resource, error)
+
+	AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error
 }
 
 // Client provides a collection of methods for consumers to interact with the

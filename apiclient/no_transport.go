@@ -27,15 +27,15 @@ func (t *noTransport) GetCluster(ctx context.Context) (*cluster.Resource, error)
 	return nil, ErrNoTransportConfigured
 }
 
-func (t *noTransport) GetNode(ctx context.Context, uid id.Node) (*node.Resource, error) {
+func (t *noTransport) GetNode(ctx context.Context, nodeID id.Node) (*node.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 
-func (t *noTransport) GetVolume(ctx context.Context, namespaceID id.Namespace, uid id.Volume) (*volume.Resource, error) {
+func (t *noTransport) GetVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume) (*volume.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 
-func (t *noTransport) GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error) {
+func (t *noTransport) GetNamespace(ctx context.Context, namespaceID id.Namespace) (*namespace.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 
@@ -55,10 +55,14 @@ func (t *noTransport) CreateUser(ctx context.Context, username, password string,
 	return nil, ErrNoTransportConfigured
 }
 
-func (t *noTransport) CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error) {
+func (t *noTransport) CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 
 func (t *noTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource, licenceKey []byte) (*cluster.Resource, error) {
 	return nil, ErrNoTransportConfigured
+}
+
+func (t *noTransport) AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error {
+	return nil
 }

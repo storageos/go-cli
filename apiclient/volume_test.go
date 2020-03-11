@@ -451,3 +451,108 @@ func TestFilterVolumesForUIDs(t *testing.T) {
 		})
 	}
 }
+
+func TestClientAttachVolume(t *testing.T) {
+	t.Parallel()
+
+	var mockErr = errors.New("banana error")
+
+	tests := []struct {
+		name string
+
+		configProvider *mockConfigProvider
+		transport      *mockTransport
+
+		nsID   id.Namespace
+		volID  id.Volume
+		nodeID id.Node
+
+		wantErr         error
+		wantNamespaceID id.Namespace
+		wantVolumeID    id.Volume
+		wantNodeID      id.Node
+	}{
+		{
+			name: "ok",
+
+			configProvider: &mockConfigProvider{},
+			transport: &mockTransport{
+				AuthenticateError: nil,
+				AttachError:       nil,
+			},
+
+			nsID:   "bananaNamespace",
+			volID:  "bananaVolume",
+			nodeID: "bananaNode",
+
+			wantErr:         nil,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantNodeID:      "bananaNode",
+		},
+		{
+			name: "attach authenticate error",
+
+			configProvider: &mockConfigProvider{},
+			transport: &mockTransport{
+				AuthenticateError: mockErr,
+				AttachError:       nil,
+			},
+
+			nsID:   "bananaNamespace",
+			volID:  "bananaVolume",
+			nodeID: "bananaNode",
+
+			wantErr:         mockErr,
+			wantNamespaceID: "",
+			wantVolumeID:    "",
+			wantNodeID:      "",
+		},
+		{
+			name: "attach transport error",
+
+			configProvider: &mockConfigProvider{},
+			transport: &mockTransport{
+				AuthenticateError: nil,
+				AttachError:       mockErr,
+			},
+
+			nsID:   "bananaNamespace",
+			volID:  "bananaVolume",
+			nodeID: "bananaNode",
+
+			wantErr:         mockErr,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantNodeID:      "bananaNode",
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			client := New(tt.configProvider)
+			if err := client.ConfigureTransport(tt.transport); err != nil {
+				t.Fatalf("got error configuring client transport: %v", err)
+			}
+
+			gotErr := client.AttachVolume(context.Background(), tt.nsID, tt.volID, tt.nodeID)
+
+			if !reflect.DeepEqual(gotErr, tt.wantErr) {
+				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+			}
+
+			if tt.transport.AttachGotNamespace != tt.wantNamespaceID {
+				t.Errorf("got %v, want %v", tt.transport.AttachGotNamespace, tt.wantNamespaceID)
+			}
+
+			if tt.transport.AttachGotVolume != tt.wantVolumeID {
+				t.Errorf("got %v, want %v", tt.transport.AttachGotVolume, tt.wantVolumeID)
+			}
+
+			if tt.transport.AttachGotNode != tt.wantNodeID {
+				t.Errorf("got %v, want %v", tt.transport.AttachGotNode, tt.wantNodeID)
+			}
+		})
+	}
+}

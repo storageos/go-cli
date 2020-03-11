@@ -48,7 +48,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		)
 	}
 
-	nsID, err := c.getNamespaceID(ctx)
+	namespaceID, err := c.getNamespaceID(ctx)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 	switch len(args) {
 	case 1:
 		// If only one volume is requested then API requests can be minimised.
-		v, err := c.getVolume(ctx, nsID, args[0])
+		v, err := c.getVolume(ctx, namespaceID, args[0])
 		if err != nil {
 			return err
 		}
@@ -64,7 +64,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		return c.display.GetVolume(ctx, c.writer, v)
 
 	default:
-		vols, err := c.listVolumes(ctx, nsID, args)
+		vols, err := c.listVolumes(ctx, namespaceID, args)
 		if err != nil {
 			return err
 		}

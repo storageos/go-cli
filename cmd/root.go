@@ -10,6 +10,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/apiclient/openapi"
 	"code.storageos.net/storageos/c2-cli/cmd/apply"
+	"code.storageos.net/storageos/c2-cli/cmd/attach"
 	"code.storageos.net/storageos/c2-cli/cmd/create"
 	"code.storageos.net/storageos/c2-cli/cmd/describe"
 	"code.storageos.net/storageos/c2-cli/cmd/get"
@@ -57,6 +58,7 @@ To be notified about stable releases and latest features, sign up at https://my.
 		create.NewCommand(client, config),
 		get.NewCommand(client, config),
 		describe.NewCommand(client, config),
+		attach.NewCommand(client, config),
 	)
 
 	app.PersistentFlags().AddFlagSet(globalFlags)

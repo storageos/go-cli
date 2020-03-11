@@ -154,6 +154,12 @@ func createTable(headers []interface{}) (*uitable.Table, func(io.Writer) error) 
 	}
 }
 
+// AttachVolume writes a success message in the writer
+func (d *Displayer) AttachVolume(ctx context.Context, w io.Writer) error {
+	_, err := w.Write([]byte("volume correctly attached"))
+	return err
+}
+
 // NewDisplayer initialises a Displayer which prints human readable strings
 // StorageOS to output CLI results.
 func NewDisplayer(timeHumanizer output.TimeHumanizer) *Displayer {

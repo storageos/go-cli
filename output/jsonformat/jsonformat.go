@@ -106,6 +106,11 @@ func (d *Displayer) DescribeListNodes(ctx context.Context, w io.Writer, states [
 	return d.encode(w, states)
 }
 
+// AttachVolume writes nothing in the writer
+func (d *Displayer) AttachVolume(ctx context.Context, w io.Writer) error {
+	return nil
+}
+
 // NewDisplayer initialises a Displayer which encodes StorageOS resources as
 // JSON, using encoderIndent as the indentation string.
 func NewDisplayer(encoderIndent string) *Displayer {
