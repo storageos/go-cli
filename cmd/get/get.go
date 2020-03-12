@@ -59,8 +59,8 @@ type Displayer interface {
 	GetListNodes(ctx context.Context, w io.Writer, resources []*node.Resource) error
 	GetNamespace(ctx context.Context, w io.Writer, resource *namespace.Resource) error
 	GetListNamespaces(ctx context.Context, w io.Writer, resources []*namespace.Resource) error
-	GetVolume(ctx context.Context, w io.Writer, resource *volume.Resource) error
-	GetListVolumes(ctx context.Context, w io.Writer, resources []*volume.Resource) error
+	GetVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
+	GetListVolumes(ctx context.Context, w io.Writer, volumes []*output.Volume) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "get" verb.

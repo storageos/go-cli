@@ -11,6 +11,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
+	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
@@ -80,13 +81,13 @@ func (d *Displayer) GetListNamespaces(ctx context.Context, w io.Writer, resource
 }
 
 // GetVolume encodes resource as YAML, writing the result to w.
-func (d *Displayer) GetVolume(ctx context.Context, w io.Writer, resource *volume.Resource) error {
-	return d.encode(w, resource)
+func (d *Displayer) GetVolume(ctx context.Context, w io.Writer, volume *output.Volume) error {
+	return d.encode(w, volume)
 }
 
 // GetListVolumes encodes resources as YAML, writing the result to w.
-func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, resources []*volume.Resource) error {
-	return d.encode(w, resources)
+func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, volumes []*output.Volume) error {
+	return d.encode(w, volumes)
 }
 
 // -----------------------------------------------------------------------------

@@ -6,16 +6,15 @@ import (
 	"io"
 	"time"
 
-	"code.storageos.net/storageos/c2-cli/pkg/health"
-
 	"github.com/dustin/go-humanize"
 	"github.com/gosuri/uitable"
+
+	"code.storageos.net/storageos/c2-cli/pkg/health"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
-	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 var (
@@ -99,14 +98,14 @@ func (d *Displayer) GetListNamespaces(ctx context.Context, w io.Writer, resource
 }
 
 // GetVolume creates human-readable strings, writing the result to w.
-func (d *Displayer) GetVolume(ctx context.Context, w io.Writer, resource *volume.Resource) error {
+func (d *Displayer) GetVolume(ctx context.Context, w io.Writer, volume *output.Volume) error {
 	table, write := createTable(volumeHeaders)
-	d.printVolume(table, resource)
+	d.printVolume(table, volume)
 	return write(w)
 }
 
 // GetListVolumes creates human-readable strings, writing the result to w.
-func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, resources []*volume.Resource) error {
+func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, resources []*output.Volume) error {
 	table, write := createTable(volumeHeaders)
 	for _, vol := range resources {
 		d.printVolume(table, vol)
@@ -114,7 +113,7 @@ func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, resources [
 	return write(w)
 }
 
-func (d *Displayer) printVolume(table *uitable.Table, vol *volume.Resource) {
+func (d *Displayer) printVolume(table *uitable.Table, vol *output.Volume) {
 	location := fmt.Sprintf("%s (%s)", vol.Master.Node, vol.Master.Health)
 
 	// Replicas
@@ -130,7 +129,7 @@ func (d *Displayer) printVolume(table *uitable.Table, vol *volume.Resource) {
 	size := humanize.IBytes(vol.SizeBytes)
 	age := d.timeHumanizer.TimeToHuman(vol.CreatedAt)
 
-	table.AddRow(vol.Namespace, vol.Name, size, location, replicas, age)
+	table.AddRow(vol.NamespaceName, vol.Name, size, location, replicas, age)
 }
 
 func (d *Displayer) printNode(table *uitable.Table, node *node.Resource) {

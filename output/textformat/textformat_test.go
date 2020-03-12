@@ -323,32 +323,34 @@ func TestDisplayer_GetVolume(t *testing.T) {
 	var mockTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	tests := []struct {
-		name     string
-		resource *volume.Resource
-		wantW    string
-		wantErr  bool
+		name          string
+		volume        *output.Volume
+		namespaceName string
+		wantW         string
+		wantErr       bool
 	}{
 		{
 			name: "print volume",
-			resource: &volume.Resource{
-				ID:          "bananaID",
-				Name:        "banana-name",
-				Description: "banana description",
-				AttachedOn:  "banana-node-a",
-				Namespace:   "banana-namespace",
+			volume: &output.Volume{
+				ID:            "bananaID",
+				Name:          "banana-name",
+				Description:   "banana description",
+				AttachedOn:    "banana-node-a",
+				Namespace:     "banana-namespace",
+				NamespaceName: "kiwi",
 				Labels: labels.Set{
 					"kiwi": "42",
 					"pear": "42",
 				},
 				Filesystem: volume.FsTypeFromString("ext4"),
 				SizeBytes:  humanize.GiByte,
-				Master: &volume.Deployment{
+				Master: &output.Deployment{
 					ID:         "bananaDeploymentID1",
 					Node:       "banana-node1",
 					Health:     "ready",
 					Promotable: true,
 				},
-				Replicas: []*volume.Deployment{
+				Replicas: []*output.Deployment{
 					{
 						ID:         "bananaDeploymentID2",
 						Node:       "banana-node2",
@@ -372,8 +374,8 @@ func TestDisplayer_GetVolume(t *testing.T) {
 				UpdatedAt: mockTime,
 				Version:   "42",
 			},
-			wantW: `NAMESPACE         NAME         SIZE     LOCATION              REPLICAS  AGE         
-banana-namespace  banana-name  1.0 GiB  banana-node1 (ready)  2/3       xx aeons ago
+			wantW: `NAMESPACE  NAME         SIZE     LOCATION              REPLICAS  AGE         
+kiwi       banana-name  1.0 GiB  banana-node1 (ready)  2/3       xx aeons ago
 `,
 			wantErr: false,
 		},
@@ -386,7 +388,7 @@ banana-namespace  banana-name  1.0 GiB  banana-node1 (ready)  2/3       xx aeons
 			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
 			w := &bytes.Buffer{}
 
-			err := d.GetVolume(context.Background(), w, tt.resource)
+			err := d.GetVolume(context.Background(), w, tt.volume)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetVolume() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -405,33 +407,34 @@ func TestDisplayer_GetListVolumes(t *testing.T) {
 	var mockTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	tests := []struct {
-		name      string
-		resources []*volume.Resource
-		wantW     string
-		wantErr   bool
+		name    string
+		volumes []*output.Volume
+		wantW   string
+		wantErr bool
 	}{
 		{
 			name: "print volumes",
-			resources: []*volume.Resource{
+			volumes: []*output.Volume{
 				{
-					ID:          "bananaID",
-					Name:        "banana-name",
-					Description: "banana description",
-					AttachedOn:  "banana-node-a",
-					Namespace:   "banana-namespace",
+					ID:            "bananaID",
+					Name:          "banana-name",
+					Description:   "banana description",
+					AttachedOn:    "banana-node-a",
+					Namespace:     "banana-namespace",
+					NamespaceName: "BANANA",
 					Labels: labels.Set{
 						"kiwi": "42",
 						"pear": "42",
 					},
 					Filesystem: volume.FsTypeFromString("ext4"),
 					SizeBytes:  humanize.GiByte,
-					Master: &volume.Deployment{
+					Master: &output.Deployment{
 						ID:         "bananaDeploymentID1",
 						Node:       "banana-node1",
 						Health:     "ready",
 						Promotable: true,
 					},
-					Replicas: []*volume.Deployment{
+					Replicas: []*output.Deployment{
 						{
 							ID:         "bananaDeploymentID2",
 							Node:       "banana-node2",
@@ -456,24 +459,25 @@ func TestDisplayer_GetListVolumes(t *testing.T) {
 					Version:   "42",
 				},
 				{
-					ID:          "kiwiID",
-					Name:        "kiwi-name",
-					Description: "kiwi description",
-					AttachedOn:  "kiwi-node-a",
-					Namespace:   "kiwi-namespace",
+					ID:            "kiwiID",
+					Name:          "kiwi-name",
+					Description:   "kiwi description",
+					AttachedOn:    "kiwi-node-a",
+					Namespace:     "kiwi-namespace",
+					NamespaceName: "KIWI",
 					Labels: labels.Set{
 						"kiwi": "foo",
 						"pear": "bar",
 					},
 					Filesystem: volume.FsTypeFromString("ext4"),
 					SizeBytes:  2 * humanize.GiByte,
-					Master: &volume.Deployment{
+					Master: &output.Deployment{
 						ID:         "bananaDeploymentID1",
 						Node:       "banana-node1",
 						Health:     "ready",
 						Promotable: true,
 					},
-					Replicas: []*volume.Deployment{
+					Replicas: []*output.Deployment{
 						{
 							ID:         "bananaDeploymentID2",
 							Node:       "banana-node2",
@@ -498,9 +502,9 @@ func TestDisplayer_GetListVolumes(t *testing.T) {
 					Version:   "43",
 				},
 			},
-			wantW: `NAMESPACE         NAME         SIZE     LOCATION              REPLICAS  AGE         
-banana-namespace  banana-name  1.0 GiB  banana-node1 (ready)  2/3       xx aeons ago
-kiwi-namespace    kiwi-name    2.0 GiB  banana-node1 (ready)  2/3       xx aeons ago
+			wantW: `NAMESPACE  NAME         SIZE     LOCATION              REPLICAS  AGE         
+BANANA     banana-name  1.0 GiB  banana-node1 (ready)  2/3       xx aeons ago
+KIWI       kiwi-name    2.0 GiB  banana-node1 (ready)  2/3       xx aeons ago
 `,
 			wantErr: false,
 		},
@@ -513,7 +517,7 @@ kiwi-namespace    kiwi-name    2.0 GiB  banana-node1 (ready)  2/3       xx aeons
 			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
 			w := &bytes.Buffer{}
 
-			err := d.GetListVolumes(context.Background(), w, tt.resources)
+			err := d.GetListVolumes(context.Background(), w, tt.volumes)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetListVolumes() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -10,12 +10,17 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
+	"code.storageos.net/storageos/c2-cli/namespace"
+	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/selectors"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
-var errNoNamespaceSpecified = errors.New("must specify a namespace to get volumes from")
+var (
+	errNoNamespaceSpecified = errors.New("must specify a namespace to get volumes from")
+	errMissingNamespace     = errors.New("volume contains a missing namespace reference")
+)
 
 type volumeCommand struct {
 	config  ConfigProvider
@@ -41,10 +46,28 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 			return err
 		}
 
+		volumes := set.FilterVolumes(vols)
+
+		namespaces, err := c.getNamespaces(ctx)
+		if err != nil {
+			return err
+		}
+
+		outputVolumes := make([]*output.Volume, 0, len(volumes))
+		for _, v := range volumes {
+
+			ns, ok := namespaces[v.Namespace]
+			if !ok {
+				return errMissingNamespace
+			}
+
+			outputVolumes = append(outputVolumes, output.NewVolume(v, ns))
+		}
+
 		return c.display.GetListVolumes(
 			ctx,
 			c.writer,
-			set.FilterVolumes(vols),
+			outputVolumes,
 		)
 	}
 
@@ -61,7 +84,12 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 			return err
 		}
 
-		return c.display.GetVolume(ctx, c.writer, v)
+		namespace, err := c.client.GetNamespace(ctx, v.Namespace)
+		if err != nil {
+			return err
+		}
+
+		return c.display.GetVolume(ctx, c.writer, output.NewVolume(v, namespace))
 
 	default:
 		vols, err := c.listVolumes(ctx, namespaceID, args)
@@ -69,12 +97,47 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 			return err
 		}
 
+		volumes := set.FilterVolumes(vols)
+
+		namespaces, err := c.getNamespaces(ctx)
+		if err != nil {
+			return err
+		}
+
+		outputVolumes := make([]*output.Volume, 0, len(volumes))
+		for _, v := range volumes {
+
+			ns, ok := namespaces[v.Namespace]
+			if !ok {
+				return errMissingNamespace
+			}
+
+			outputVolumes = append(outputVolumes, output.NewVolume(v, ns))
+		}
+
 		return c.display.GetListVolumes(
 			ctx,
 			c.writer,
-			set.FilterVolumes(vols),
+			outputVolumes,
 		)
 	}
+}
+
+// getNamespaceNames returns a map with namespace id as keys and namespace names
+// (string) as value.
+// List of volumes in input is used to filter out all unnecessary namespaces
+func (c *volumeCommand) getNamespaces(ctx context.Context) (map[id.Namespace]*namespace.Resource, error) {
+	namespaces, err := c.client.GetAllNamespaces(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespacesMap := make(map[id.Namespace]*namespace.Resource)
+	for _, n := range namespaces {
+		namespacesMap[n.ID] = n
+	}
+
+	return namespacesMap, nil
 }
 
 // getNamespaceID retrieves the namespace ID to use for API client calls based
