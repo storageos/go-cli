@@ -69,13 +69,18 @@ func NewVolume(vol *volume.Resource, ns *namespace.Resource) *Volume {
 }
 
 func newDeployment(dep *volume.Deployment) *Deployment {
-	return &Deployment{
-		ID:           dep.ID,
-		Node:         dep.Node,
-		Health:       dep.Health,
-		Promotable:   dep.Promotable,
-		SyncProgress: newSyncProgress(dep.SyncProgress),
+	outputDep := &Deployment{
+		ID:         dep.ID,
+		Node:       dep.Node,
+		Health:     dep.Health,
+		Promotable: dep.Promotable,
 	}
+
+	if dep.SyncProgress != nil {
+		outputDep.SyncProgress = newSyncProgress(dep.SyncProgress)
+	}
+
+	return outputDep
 }
 
 func newDeployments(deployments []*volume.Deployment) []*Deployment {
