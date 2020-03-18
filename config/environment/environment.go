@@ -15,7 +15,7 @@ import (
 const (
 	// APIEndpointsVar keys the environment variable from which we source the
 	// API host endpoints.
-	APIEndpointsVar = "STORAGEOS_HOST"
+	APIEndpointsVar = "STORAGEOS_ENDPOINTS"
 	// CommandTimeoutVar keys the environment variable from which we source the
 	// timeout for API operations.
 	CommandTimeoutVar = "STORAGEOS_API_TIMEOUT"
