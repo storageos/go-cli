@@ -109,7 +109,12 @@ func (o *OpenAPI) AttachVolume(ctx context.Context, namespaceID id.Namespace, vo
 		},
 	)
 	if err != nil {
-		return mapOpenAPIError(err, resp)
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return apiclient.NewVolumeNotFoundError(v.msg)
+		default:
+			return v
+		}
 	}
 
 	return nil

@@ -167,6 +167,7 @@ $ storageos create volume --replicas 1 --hint-master reliable-node-1,reliable-no
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
+				runwrappers.EnsureNamespaceSetWhenUseIDs(c.config),
 				runwrappers.HandleLicenceError(client),
 			)(c.runWithCtx)
 

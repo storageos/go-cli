@@ -142,9 +142,6 @@ func (c *volumeCommand) getNamespaces(ctx context.Context) (map[id.Namespace]*na
 
 // getNamespaceID retrieves the namespace ID to use for API client calls based
 // on the configuration of c.
-//
-// If no namespace is specified on c, the ID of the default namespace is
-// retrieved.
 func (c *volumeCommand) getNamespaceID(ctx context.Context) (id.Namespace, error) {
 	useIDs, err := c.config.UseIDs()
 	if err != nil {
@@ -239,6 +236,7 @@ $ storageos get volume --namespace my-namespace-name my-volume-name
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
+				runwrappers.EnsureNamespaceSetWhenUseIDs(c.config),
 				runwrappers.EnsureTargetOrSelectors(&c.selectors),
 			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)

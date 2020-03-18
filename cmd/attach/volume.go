@@ -14,7 +14,7 @@ import (
 
 var (
 	errArguments            = errors.New("must specify exactly two arguments <volume> <node>")
-	errNoNamespaceSpecified = errors.New("must specify a namespace to create the volume in")
+	errNoNamespaceSpecified = errors.New("must specify the namespace of the volume to attach")
 )
 
 type volumeCommand struct {
@@ -112,6 +112,7 @@ $ storageos attach volume --namespace my-namespace-name my-volume my-node
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
+				runwrappers.EnsureNamespaceSetWhenUseIDs(c.config),
 			)(c.runWithCtx)
 
 			return run(context.Background(), cmd, args)

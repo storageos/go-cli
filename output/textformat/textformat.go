@@ -155,7 +155,7 @@ func createTable(headers []interface{}) (*uitable.Table, func(io.Writer) error) 
 
 // AttachVolume writes a success message in the writer
 func (d *Displayer) AttachVolume(ctx context.Context, w io.Writer) error {
-	_, err := w.Write([]byte("volume correctly attached"))
+	_, err := fmt.Fprintln(w, "volume attached")
 	return err
 }
 
