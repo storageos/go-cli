@@ -34,7 +34,7 @@ func newCluster(w io.Writer, client Client, config ConfigProvider) *cobra.Comman
 	}
 	cobraCommand := &cobra.Command{
 		Use:   "cluster",
-		Short: "cluster retrieves basic information about the StorageOS cluster",
+		Short: "fetch cluster-wide configuration details",
 		Example: `
 $ storageos get cluster
 `,

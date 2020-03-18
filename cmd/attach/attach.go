@@ -47,7 +47,7 @@ type Displayer interface {
 func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "attach",
-		Short: "attach requests a volume be attached to the specified node",
+		Short: "attach volumes to nodes",
 	}
 
 	command.AddCommand(

@@ -67,7 +67,7 @@ type Displayer interface {
 func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "get",
-		Short: "get retrieves a StorageOS resource, displaying basic information about it",
+		Short: "fetch basic details for resources",
 	}
 
 	command.AddCommand(

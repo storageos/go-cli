@@ -32,7 +32,7 @@ type Displayer interface {
 func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "apply",
-		Short: "apply performs an update on an existing StorageOS resource, displaying the new state",
+		Short: "make changes to existing resources",
 	}
 
 	command.AddCommand(

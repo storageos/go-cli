@@ -99,7 +99,7 @@ func newNamespace(w io.Writer, client Client, config ConfigProvider) *cobra.Comm
 	cobraCommand := &cobra.Command{
 		Aliases: []string{"namespaces"},
 		Use:     "namespace [namespace names...]",
-		Short:   "namespace retrieves basic information about StorageOS namespaces",
+		Short:   "retrieve basic details of cluster namespaces",
 		Example: `
 $ storageos get namespaces
 

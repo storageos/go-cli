@@ -113,7 +113,7 @@ func newUser(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 	}
 	cobraCommand := &cobra.Command{
 		Use:   "user",
-		Short: "user requests the creation of a new StorageOS user account",
+		Short: "create a new user account",
 		Example: `
 $ storageos create user --with-username=alice --with-admin=true 
 `,

@@ -137,7 +137,7 @@ func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command
 
 	cobraCommand := &cobra.Command{
 		Use:   "volume",
-		Short: "volume requests the creation of a new StorageOS volume",
+		Short: "provision a new volume",
 		Example: `
 $ storageos create volume --description "This volume contains the data for my app" --fs-type "ext4" --labels env=prod,rack=db-1 --size 10GiB --namespace my-namespace-name my-app
 
