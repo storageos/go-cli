@@ -25,7 +25,7 @@ func (e NamespaceNotFoundError) Error() string {
 		return fmt.Sprintf("namespace with name %v not found", e.name)
 	}
 
-	return fmt.Sprintf("namespace not found")
+	return "namespace not found"
 }
 
 // NewNamespaceNotFoundError returns a NamespaceNotFoundError for the namespace

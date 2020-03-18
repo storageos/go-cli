@@ -26,7 +26,7 @@ func (e NodeNotFoundError) Error() string {
 		return fmt.Sprintf("node with name %v not found", e.name)
 	}
 
-	return fmt.Sprintf("node not found")
+	return "node not found"
 }
 
 // NewNodeNotFoundError returns a NodeNotFoundError for the node with uid.

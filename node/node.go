@@ -13,7 +13,7 @@ import (
 // State aggregates information that can be used to provide a detailed picture
 // of a node's state.
 type State struct {
-	Resource    *Resource     `json:"resource"`
+	Resource    *Resource     `json:"node"`
 	Deployments []*Deployment `json:"deployments"`
 }
 
