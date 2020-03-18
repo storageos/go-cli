@@ -20,7 +20,7 @@ import (
 var (
 	nodeHeaders      = []interface{}{"NAME", "HEALTH", "AGE", "LABELS"}
 	namespaceHeaders = []interface{}{"NAME", "AGE"}
-	volumeHeaders    = []interface{}{"NAMESPACE", "NAME", "SIZE", "LOCATION", "REPLICAS", "AGE"}
+	volumeHeaders    = []interface{}{"NAMESPACE", "NAME", "SIZE", "LOCATION", "ATTACHED ON", "REPLICAS", "AGE"}
 )
 
 // Displayer is a type which creates human-readable strings and writes them to
@@ -114,7 +114,7 @@ func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, resources [
 }
 
 func (d *Displayer) printVolume(table *uitable.Table, vol *output.Volume) {
-	location := fmt.Sprintf("%s (%s)", vol.Master.Node, vol.Master.Health)
+	location := fmt.Sprintf("%s (%s)", vol.Master.NodeName, vol.Master.Health)
 
 	// Replicas
 	readyReplicas := 0
@@ -129,7 +129,7 @@ func (d *Displayer) printVolume(table *uitable.Table, vol *output.Volume) {
 	size := humanize.IBytes(vol.SizeBytes)
 	age := d.timeHumanizer.TimeToHuman(vol.CreatedAt)
 
-	table.AddRow(vol.NamespaceName, vol.Name, size, location, replicas, age)
+	table.AddRow(vol.NamespaceName, vol.Name, size, location, vol.AttachedOnName, replicas, age)
 }
 
 func (d *Displayer) printNode(table *uitable.Table, node *node.Resource) {

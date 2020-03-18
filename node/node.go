@@ -21,6 +21,7 @@ type State struct {
 // belongs to.
 type Deployment struct {
 	VolumeID   id.Volume          `json:"volumeID"`
+	VolumeName string             `json:"volumeName"`
 	Deployment *volume.Deployment `json:"deployment"`
 }
 

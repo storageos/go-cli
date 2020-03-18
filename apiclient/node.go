@@ -311,6 +311,7 @@ func deploymentsForNode(uid id.Node, volumes []*volume.Resource) []*node.Deploym
 				deployments,
 				&node.Deployment{
 					VolumeID:   v.ID,
+					VolumeName: v.Name,
 					Deployment: v.Master,
 				},
 			)
@@ -322,6 +323,7 @@ func deploymentsForNode(uid id.Node, volumes []*volume.Resource) []*node.Deploym
 					deployments,
 					&node.Deployment{
 						VolumeID:   v.ID,
+						VolumeName: v.Name,
 						Deployment: r,
 					},
 				)
@@ -341,6 +343,7 @@ func mapNodeDeployments(volumes []*volume.Resource) map[id.Node][]*node.Deployme
 			deployMap[v.Master.Node],
 			&node.Deployment{
 				VolumeID:   v.ID,
+				VolumeName: v.Name,
 				Deployment: v.Master,
 			},
 		)
@@ -350,6 +353,7 @@ func mapNodeDeployments(volumes []*volume.Resource) map[id.Node][]*node.Deployme
 				deployMap[r.Node],
 				&node.Deployment{
 					VolumeID:   v.ID,
+					VolumeName: v.Name,
 					Deployment: r,
 				},
 			)

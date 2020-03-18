@@ -332,12 +332,12 @@ func TestDisplayer_GetVolume(t *testing.T) {
 		{
 			name: "print volume",
 			volume: &output.Volume{
-				ID:            "bananaID",
-				Name:          "banana-name",
-				Description:   "banana description",
-				AttachedOn:    "banana-node-a",
-				Namespace:     "banana-namespace",
-				NamespaceName: "kiwi",
+				ID:             "bananaID",
+				Name:           "banana-name",
+				Description:    "banana description",
+				AttachedOnName: "banana-node-a",
+				Namespace:      "banana-namespace",
+				NamespaceName:  "kiwi",
 				Labels: labels.Set{
 					"kiwi": "42",
 					"pear": "42",
@@ -346,26 +346,26 @@ func TestDisplayer_GetVolume(t *testing.T) {
 				SizeBytes:  humanize.GiByte,
 				Master: &output.Deployment{
 					ID:         "bananaDeploymentID1",
-					Node:       "banana-node1",
+					NodeName:   "banana-node1",
 					Health:     "ready",
 					Promotable: true,
 				},
 				Replicas: []*output.Deployment{
 					{
 						ID:         "bananaDeploymentID2",
-						Node:       "banana-node2",
+						NodeName:   "banana-node2",
 						Health:     "ready",
 						Promotable: true,
 					},
 					{
 						ID:         "bananaDeploymentID3",
-						Node:       "banana-node3",
+						NodeName:   "banana-node3",
 						Health:     "offline",
 						Promotable: false,
 					},
 					{
 						ID:         "bananaDeploymentID4",
-						Node:       "banana-node4",
+						NodeName:   "banana-node4",
 						Health:     "ready",
 						Promotable: true,
 					},
@@ -374,8 +374,8 @@ func TestDisplayer_GetVolume(t *testing.T) {
 				UpdatedAt: mockTime,
 				Version:   "42",
 			},
-			wantW: `NAMESPACE  NAME         SIZE     LOCATION              REPLICAS  AGE         
-kiwi       banana-name  1.0 GiB  banana-node1 (ready)  2/3       xx aeons ago
+			wantW: `NAMESPACE  NAME         SIZE     LOCATION              ATTACHED ON    REPLICAS  AGE         
+kiwi       banana-name  1.0 GiB  banana-node1 (ready)  banana-node-a  2/3       xx aeons ago
 `,
 			wantErr: false,
 		},
@@ -416,12 +416,12 @@ func TestDisplayer_GetListVolumes(t *testing.T) {
 			name: "print volumes",
 			volumes: []*output.Volume{
 				{
-					ID:            "bananaID",
-					Name:          "banana-name",
-					Description:   "banana description",
-					AttachedOn:    "banana-node-a",
-					Namespace:     "banana-namespace",
-					NamespaceName: "BANANA",
+					ID:             "bananaID",
+					Name:           "banana-name",
+					Description:    "banana description",
+					AttachedOnName: "banana-node-a",
+					Namespace:      "banana-namespace",
+					NamespaceName:  "BANANA",
 					Labels: labels.Set{
 						"kiwi": "42",
 						"pear": "42",
@@ -430,26 +430,26 @@ func TestDisplayer_GetListVolumes(t *testing.T) {
 					SizeBytes:  humanize.GiByte,
 					Master: &output.Deployment{
 						ID:         "bananaDeploymentID1",
-						Node:       "banana-node1",
+						NodeName:   "banana-node1",
 						Health:     "ready",
 						Promotable: true,
 					},
 					Replicas: []*output.Deployment{
 						{
 							ID:         "bananaDeploymentID2",
-							Node:       "banana-node2",
+							NodeName:   "banana-node2",
 							Health:     "ready",
 							Promotable: true,
 						},
 						{
 							ID:         "bananaDeploymentID3",
-							Node:       "banana-node3",
+							NodeName:   "banana-node3",
 							Health:     "offline",
 							Promotable: false,
 						},
 						{
 							ID:         "bananaDeploymentID4",
-							Node:       "banana-node4",
+							NodeName:   "banana-node4",
 							Health:     "ready",
 							Promotable: true,
 						},
@@ -459,12 +459,12 @@ func TestDisplayer_GetListVolumes(t *testing.T) {
 					Version:   "42",
 				},
 				{
-					ID:            "kiwiID",
-					Name:          "kiwi-name",
-					Description:   "kiwi description",
-					AttachedOn:    "kiwi-node-a",
-					Namespace:     "kiwi-namespace",
-					NamespaceName: "KIWI",
+					ID:             "kiwiID",
+					Name:           "kiwi-name",
+					Description:    "kiwi description",
+					AttachedOnName: "kiwi-node-a",
+					Namespace:      "kiwi-namespace",
+					NamespaceName:  "KIWI",
 					Labels: labels.Set{
 						"kiwi": "foo",
 						"pear": "bar",
@@ -473,26 +473,26 @@ func TestDisplayer_GetListVolumes(t *testing.T) {
 					SizeBytes:  2 * humanize.GiByte,
 					Master: &output.Deployment{
 						ID:         "bananaDeploymentID1",
-						Node:       "banana-node1",
+						NodeName:   "banana-node1",
 						Health:     "ready",
 						Promotable: true,
 					},
 					Replicas: []*output.Deployment{
 						{
 							ID:         "bananaDeploymentID2",
-							Node:       "banana-node2",
+							NodeName:   "banana-node2",
 							Health:     "ready",
 							Promotable: true,
 						},
 						{
 							ID:         "bananaDeploymentID3",
-							Node:       "banana-node3",
+							NodeName:   "banana-node3",
 							Health:     "offline",
 							Promotable: false,
 						},
 						{
 							ID:         "bananaDeploymentID4",
-							Node:       "banana-node4",
+							NodeName:   "banana-node4",
 							Health:     "ready",
 							Promotable: true,
 						},
@@ -502,9 +502,9 @@ func TestDisplayer_GetListVolumes(t *testing.T) {
 					Version:   "43",
 				},
 			},
-			wantW: `NAMESPACE  NAME         SIZE     LOCATION              REPLICAS  AGE         
-BANANA     banana-name  1.0 GiB  banana-node1 (ready)  2/3       xx aeons ago
-KIWI       kiwi-name    2.0 GiB  banana-node1 (ready)  2/3       xx aeons ago
+			wantW: `NAMESPACE  NAME         SIZE     LOCATION              ATTACHED ON    REPLICAS  AGE         
+BANANA     banana-name  1.0 GiB  banana-node1 (ready)  banana-node-a  2/3       xx aeons ago
+KIWI       kiwi-name    2.0 GiB  banana-node1 (ready)  kiwi-node-a    2/3       xx aeons ago
 `,
 			wantErr: false,
 		},

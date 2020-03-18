@@ -11,6 +11,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/namespace"
+	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/selectors"
@@ -41,14 +42,24 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 	}
 
 	if c.allNamespaces {
-		vols, err := c.client.GetAllVolumes(ctx)
+		volumes, err := c.client.GetAllVolumes(ctx)
 		if err != nil {
 			return err
 		}
 
-		volumes := set.FilterVolumes(vols)
+		volumes = set.FilterVolumes(volumes)
+
+		// Return early if there are no volumes to display
+		if len(volumes) == 0 {
+			return c.display.GetListVolumes(ctx, c.writer, nil)
+		}
 
 		namespaces, err := c.getNamespaces(ctx)
+		if err != nil {
+			return err
+		}
+
+		nodes, err := c.getNodeMapping(ctx)
 		if err != nil {
 			return err
 		}
@@ -61,7 +72,12 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 				return errMissingNamespace
 			}
 
-			outputVolumes = append(outputVolumes, output.NewVolume(v, ns))
+			outputVol, err := output.NewVolume(v, ns, nodes)
+			if err != nil {
+				return err
+			}
+
+			outputVolumes = append(outputVolumes, outputVol)
 		}
 
 		return c.display.GetListVolumes(
@@ -89,17 +105,37 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 			return err
 		}
 
-		return c.display.GetVolume(ctx, c.writer, output.NewVolume(v, namespace))
-
-	default:
-		vols, err := c.listVolumes(ctx, namespaceID, args)
+		nodes, err := c.getNodeMapping(ctx)
 		if err != nil {
 			return err
 		}
 
-		volumes := set.FilterVolumes(vols)
+		outputVol, err := output.NewVolume(v, namespace, nodes)
+		if err != nil {
+			return err
+		}
+
+		return c.display.GetVolume(ctx, c.writer, outputVol)
+
+	default:
+		volumes, err := c.listVolumes(ctx, namespaceID, args)
+		if err != nil {
+			return err
+		}
+
+		volumes = set.FilterVolumes(volumes)
+
+		// Return early if there are no volumes to display
+		if len(volumes) == 0 {
+			return c.display.GetListVolumes(ctx, c.writer, nil)
+		}
 
 		namespaces, err := c.getNamespaces(ctx)
+		if err != nil {
+			return err
+		}
+
+		nodes, err := c.getNodeMapping(ctx)
 		if err != nil {
 			return err
 		}
@@ -112,7 +148,12 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 				return errMissingNamespace
 			}
 
-			outputVolumes = append(outputVolumes, output.NewVolume(v, ns))
+			outputVol, err := output.NewVolume(v, ns, nodes)
+			if err != nil {
+				return err
+			}
+
+			outputVolumes = append(outputVolumes, outputVol)
 		}
 
 		return c.display.GetListVolumes(
@@ -192,6 +233,22 @@ func (c *volumeCommand) listVolumes(ctx context.Context, ns id.Namespace, vols [
 	}
 
 	return c.client.GetNamespaceVolumes(ctx, ns, volIDs...)
+}
+
+// getNodeMapping fetches the list of nodes from the API and builds a map from
+// their ID to the full resource.
+func (c *volumeCommand) getNodeMapping(ctx context.Context) (map[id.Node]*node.Resource, error) {
+	nodeList, err := c.client.GetListNodes(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := map[id.Node]*node.Resource{}
+	for _, n := range nodeList {
+		nodes[n.ID] = n
+	}
+
+	return nodes, nil
 }
 
 func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command {

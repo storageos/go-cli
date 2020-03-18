@@ -341,7 +341,8 @@ func TestDeploymentsForNode(t *testing.T) {
 			uid: "node-1",
 			volumes: []*volume.Resource{
 				{
-					ID: "volume-1",
+					ID:   "volume-1",
+					Name: "name-1",
 					Master: &volume.Deployment{
 						ID:   "deploy-1",
 						Node: "node-1",
@@ -358,7 +359,8 @@ func TestDeploymentsForNode(t *testing.T) {
 					},
 				},
 				{
-					ID: "volume-2",
+					Name: "name-2",
+					ID:   "volume-2",
 					Master: &volume.Deployment{
 						ID:   "deploy-4",
 						Node: "node-2",
@@ -368,7 +370,8 @@ func TestDeploymentsForNode(t *testing.T) {
 
 			wantDeployments: []*node.Deployment{
 				{
-					VolumeID: "volume-1",
+					VolumeID:   "volume-1",
+					VolumeName: "name-1",
 					Deployment: &volume.Deployment{
 						ID:   "deploy-1",
 						Node: "node-1",
@@ -382,7 +385,8 @@ func TestDeploymentsForNode(t *testing.T) {
 			uid: "node-2",
 			volumes: []*volume.Resource{
 				{
-					ID: "volume-1",
+					ID:   "volume-1",
+					Name: "name-1",
 					Master: &volume.Deployment{
 						ID:   "deploy-1",
 						Node: "node-1",
@@ -399,7 +403,8 @@ func TestDeploymentsForNode(t *testing.T) {
 					},
 				},
 				{
-					ID: "volume-2",
+					ID:   "volume-2",
+					Name: "name-2",
 					Master: &volume.Deployment{
 						ID:   "deploy-4",
 						Node: "node-2",
@@ -409,14 +414,16 @@ func TestDeploymentsForNode(t *testing.T) {
 
 			wantDeployments: []*node.Deployment{
 				{
-					VolumeID: "volume-1",
+					VolumeID:   "volume-1",
+					VolumeName: "name-1",
 					Deployment: &volume.Deployment{
 						ID:   "deploy-2",
 						Node: "node-2",
 					},
 				},
 				{
-					VolumeID: "volume-2",
+					VolumeID:   "volume-2",
+					VolumeName: "name-2",
 					Deployment: &volume.Deployment{
 						ID:   "deploy-4",
 						Node: "node-2",
