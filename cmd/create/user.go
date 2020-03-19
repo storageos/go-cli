@@ -103,13 +103,10 @@ func (c *userCommand) promptForPassword() (string, error) {
 // creation of a StorageOS user account.
 func newUser(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 	c := &userCommand{
-		config: config,
-		client: client,
-		display: jsonformat.NewDisplayer(
-			jsonformat.DefaultEncodingIndent,
-		),
-
-		writer: w,
+		config:  config,
+		client:  client,
+		display: jsonformat.NewDisplayer(jsonformat.DefaultEncodingIndent),
+		writer:  w,
 	}
 	cobraCommand := &cobra.Command{
 		Use:   "user",
@@ -138,7 +135,12 @@ $ storageos create user --with-username=alice --with-admin=true
 
 		// Ensure that the command has an ok password before contacting the API
 		// with a deadline.
-		PreRunE: argwrappers.WrapInvalidArgsError(c.ensurePassword),
+		PreRunE: argwrappers.WrapInvalidArgsError(func(cmd *cobra.Command, args []string) error {
+			// TODO(CP-4043): Implement create user text output
+			// c.display = SelectDisplayer(c.config)
+
+			return c.ensurePassword(cmd, args)
+		}),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run := runwrappers.RunWithTimeout(c.config)(c.createUser)

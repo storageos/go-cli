@@ -2,6 +2,7 @@ package textformat
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/gosuri/uitable"
 
 	"code.storageos.net/storageos/c2-cli/pkg/health"
+	"code.storageos.net/storageos/c2-cli/user"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -27,6 +29,23 @@ var (
 // io.Writers.
 type Displayer struct {
 	timeHumanizer output.TimeHumanizer
+}
+
+// -----------------------------------------------------------------------------
+// CREATE
+// -----------------------------------------------------------------------------
+
+// CreateUser builds a human friendly representation of resource, writing the
+// result to w.
+func (d *Displayer) CreateUser(ctx context.Context, w io.Writer, resource *user.Resource) error {
+	return errors.New("unimplemented")
+}
+
+// CreateVolume builds a human friendly string from volume, writing the result to w.
+func (d *Displayer) CreateVolume(ctx context.Context, w io.Writer, volume *output.Volume) error {
+	table, write := createTable(volumeHeaders)
+	d.printVolume(table, volume)
+	return write(w)
 }
 
 // -----------------------------------------------------------------------------

@@ -13,7 +13,9 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
-	"code.storageos.net/storageos/c2-cli/output/jsonformat"
+	"code.storageos.net/storageos/c2-cli/namespace"
+	"code.storageos.net/storageos/c2-cli/node"
+	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -74,12 +76,19 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		return err
 	}
 
+	var ns *namespace.Resource
+
 	if !useIDs {
-		ns, err := c.client.GetNamespaceByName(ctx, c.namespace)
+		ns, err = c.client.GetNamespaceByName(ctx, c.namespace)
 		if err != nil {
 			return err
 		}
 		namespaceID = ns.ID
+	} else {
+		ns, err = c.client.GetNamespace(ctx, namespaceID)
+		if err != nil {
+			return err
+		}
 	}
 
 	vol, err := c.client.CreateVolume(
@@ -95,7 +104,33 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		return err
 	}
 
-	return c.display.CreateVolume(ctx, c.writer, vol)
+	nodes, err := c.getNodeMapping(ctx)
+	if err != nil {
+		return err
+	}
+
+	outputVol, err := output.NewVolume(vol, ns, nodes)
+	if err != nil {
+		return err
+	}
+
+	return c.display.CreateVolume(ctx, c.writer, outputVol)
+}
+
+// getNodeMapping fetches the list of nodes from the API and builds a map from
+// their ID to the full resource.
+func (c *volumeCommand) getNodeMapping(ctx context.Context) (map[id.Node]*node.Resource, error) {
+	nodeList, err := c.client.GetListNodes(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := map[id.Node]*node.Resource{}
+	for _, n := range nodeList {
+		nodes[n.ID] = n
+	}
+
+	return nodes, nil
 }
 
 func (c *volumeCommand) setKnownLabels(original labels.Set) {
@@ -128,10 +163,6 @@ func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command
 	c := &volumeCommand{
 		config: config,
 		client: client,
-		display: jsonformat.NewDisplayer(
-			jsonformat.DefaultEncodingIndent,
-		),
-
 		writer: w,
 	}
 
@@ -151,6 +182,8 @@ $ storageos create volume --replicas 1 --hint-master reliable-node-1,reliable-no
 			return nil
 		}),
 		PreRunE: argwrappers.WrapInvalidArgsError(func(_ *cobra.Command, _ []string) error {
+			c.display = SelectDisplayer(c.config)
+
 			ns, err := c.config.Namespace()
 			if err != nil {
 				return err

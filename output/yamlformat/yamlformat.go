@@ -13,7 +13,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/user"
-	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 // Displayer is a type which encodes StorageOS resources to YAML and writes the
@@ -38,8 +37,8 @@ func (d *Displayer) CreateUser(ctx context.Context, w io.Writer, resource *user.
 }
 
 // CreateVolume encodes resource as YAML, writing the result to w.
-func (d *Displayer) CreateVolume(ctx context.Context, w io.Writer, resource *volume.Resource) error {
-	return d.encode(w, resource)
+func (d *Displayer) CreateVolume(ctx context.Context, w io.Writer, volume *output.Volume) error {
+	return d.encode(w, volume)
 }
 
 // -----------------------------------------------------------------------------

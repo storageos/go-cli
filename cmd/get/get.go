@@ -90,7 +90,7 @@ func SelectDisplayer(cp ConfigProvider) Displayer {
 
 	switch out {
 	case output.JSON:
-		return jsonformat.NewDisplayer("")
+		return jsonformat.NewDisplayer(jsonformat.DefaultEncodingIndent)
 	case output.YAML:
 		return yamlformat.NewDisplayer("")
 	case output.Text:
