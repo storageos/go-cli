@@ -1,6 +1,6 @@
 ###############################################################################
 #	The -docker targets run in the c2 build container, specified here:
-BUILD_CONTAINER ?= soegarots/c2-make:101ea1e8b6d8c7f16bf5ce03040b478d
+BUILD_CONTAINER ?= soegarots/c2-make:9738772b295c7cfb9d2629a366e3abeb
 ###############################################################################
 
 SHELL := /usr/bin/env bash

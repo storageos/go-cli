@@ -22,7 +22,7 @@ repos:
         stages: [commit, manual]
 
   - repo: https://github.com/domodwyer/pre-commit
-    rev: v1.2.1
+    rev: v1.2.2
     hooks:
       - id: go-test
         stages: [commit, push]
