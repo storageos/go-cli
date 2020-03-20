@@ -11,7 +11,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
-	"code.storageos.net/storageos/c2-cli/user"
 )
 
 // DefaultEncodingIndent is the encoding indent string which consumers of the
@@ -34,9 +33,9 @@ func (d *Displayer) encode(w io.Writer, v interface{}) error {
 // CREATE
 // -----------------------------------------------------------------------------
 
-// CreateUser encodes resource as JSON, writing the result to w.
-func (d *Displayer) CreateUser(ctx context.Context, w io.Writer, resource *user.Resource) error {
-	return d.encode(w, resource)
+// CreateUser encodes user as JSON, writing the result to w.
+func (d *Displayer) CreateUser(ctx context.Context, w io.Writer, user *output.User) error {
+	return d.encode(w, user)
 }
 
 // CreateVolume encodes volume as JSON, writing the result to w.

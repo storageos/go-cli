@@ -7,6 +7,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
@@ -48,6 +49,10 @@ func (t *noTransport) ListVolumes(ctx context.Context, namespaceID id.Namespace)
 }
 
 func (t *noTransport) ListNamespaces(ctx context.Context) ([]*namespace.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
+func (t *noTransport) ListPolicyGroups(ctx context.Context) ([]*policygroup.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 

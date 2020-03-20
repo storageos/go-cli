@@ -13,8 +13,10 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
+	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/policygroup"
 )
 
 var (
@@ -57,9 +59,39 @@ func (c *userCommand) ensurePassword(_ *cobra.Command, _ []string) error {
 }
 
 func (c *userCommand) createUser(ctx context.Context, _ *cobra.Command, _ []string) error {
-	groupIDs := make([]id.PolicyGroup, len(c.groups))
-	for i, g := range c.groups {
-		groupIDs[i] = id.PolicyGroup(g)
+	useIDs, err := c.config.UseIDs()
+	if err != nil {
+		return err
+	}
+
+	var policyGroups []*policygroup.Resource
+	groupIDs := make([]id.PolicyGroup, 0, len(c.groups))
+
+	if !useIDs {
+		// Fetch the groups by name
+		policyGroups, err = c.client.GetListPolicyGroupsByName(ctx, c.groups...)
+		if err != nil {
+			return err
+		}
+
+		for _, g := range policyGroups {
+			groupIDs = append(groupIDs, g.ID)
+		}
+	} else {
+		// Otherwise by given ID
+		for _, gid := range c.groups {
+			groupIDs = append(groupIDs, id.PolicyGroup(gid))
+		}
+
+		policyGroups, err = c.client.GetListPolicyGroups(ctx, groupIDs...)
+		if err != nil {
+			return err
+		}
+	}
+
+	groupMapping, err := c.getMappingForGroups(ctx, policyGroups)
+	if err != nil {
+		return err
 	}
 
 	user, err := c.client.CreateUser(
@@ -73,7 +105,21 @@ func (c *userCommand) createUser(ctx context.Context, _ *cobra.Command, _ []stri
 		return err
 	}
 
-	return c.display.CreateUser(ctx, c.writer, user)
+	outputUser, err := output.NewUser(user, groupMapping)
+	if err != nil {
+		return err
+	}
+
+	return c.display.CreateUser(ctx, c.writer, outputUser)
+}
+
+func (c *userCommand) getMappingForGroups(ctx context.Context, policyGroupList []*policygroup.Resource) (map[id.PolicyGroup]*policygroup.Resource, error) {
+	policyGroups := map[id.PolicyGroup]*policygroup.Resource{}
+	for _, g := range policyGroupList {
+		policyGroups[g.ID] = g
+	}
+
+	return policyGroups, nil
 }
 
 // promptForPassword will interactively request a password from the user,
@@ -136,8 +182,7 @@ $ storageos create user --with-username=alice --with-admin=true
 		// Ensure that the command has an ok password before contacting the API
 		// with a deadline.
 		PreRunE: argwrappers.WrapInvalidArgsError(func(cmd *cobra.Command, args []string) error {
-			// TODO(CP-4043): Implement create user text output
-			// c.display = SelectDisplayer(c.config)
+			c.display = SelectDisplayer(c.config)
 
 			return c.ensurePassword(cmd, args)
 		}),
@@ -151,10 +196,10 @@ $ storageos create user --with-username=alice --with-admin=true
 		SilenceUsage: true,
 	}
 
-	cobraCommand.Flags().StringVar(&c.username, "with-username", "", "the username to assign to the StorageOS user account being created")
-	cobraCommand.Flags().StringVar(&c.password, "with-password", "", "the password to assign to the StorageOS user account being created. If not specified, this will be prompted for.")
-	cobraCommand.Flags().BoolVar(&c.createAsAdmin, "with-admin", false, "controls whether the StorageOS user account being created is given administrative priviledges")
-	cobraCommand.Flags().StringArrayVar(&c.groups, "with-groups", []string{}, "the list of policy group IDs to assign to the StorageOS user account being created")
+	cobraCommand.Flags().StringVar(&c.username, "with-username", "", "the username to assign")
+	cobraCommand.Flags().StringVar(&c.password, "with-password", "", "the password to assign to the user. If not specified, this will be prompted for.")
+	cobraCommand.Flags().BoolVar(&c.createAsAdmin, "with-admin", false, "control whether the user is given administrative priviledges")
+	cobraCommand.Flags().StringArrayVar(&c.groups, "with-groups", []string{}, "the list of policy groups to assign to the user")
 
 	return cobraCommand
 }

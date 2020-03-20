@@ -13,6 +13,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/health"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 	"code.storageos.net/storageos/openapi"
@@ -415,6 +416,120 @@ func TestDecodeNamespace(t *testing.T) {
 			if !reflect.DeepEqual(gotResource, tt.wantResource) {
 				pretty.Ldiff(t, gotResource, tt.wantResource)
 				t.Errorf("got decoded namespace config %v, want %v", pretty.Sprint(gotResource), pretty.Sprint(tt.wantResource))
+			}
+		})
+	}
+}
+
+func TestDecodePolicyGroup(t *testing.T) {
+	t.Parallel()
+
+	mockCreatedAtTime := time.Date(2020, 01, 01, 0, 0, 0, 0, time.UTC)
+	mockUpdatedAtTime := time.Date(2020, 01, 01, 0, 0, 0, 1, time.UTC)
+
+	tests := []struct {
+		name string
+
+		model openapi.PolicyGroup
+
+		wantResource *policygroup.Resource
+		wantErr      error
+	}{
+		{
+			name: "ok with users and specs",
+
+			model: openapi.PolicyGroup{
+				Id:   "policy-group-id",
+				Name: "policy-group-name",
+				Users: []openapi.PolicyGroupUsers{
+					{
+						Id:       "user-id",
+						Username: "username",
+					},
+					{
+						Id:       "user-id-2",
+						Username: "username-2",
+					},
+				},
+				Specs: &[]openapi.PoliciesSpecs{
+					{
+						NamespaceID:  "namespace-id",
+						ResourceType: "resource-type",
+						ReadOnly:     true,
+					},
+				},
+				CreatedAt: mockCreatedAtTime,
+				UpdatedAt: mockUpdatedAtTime,
+				Version:   "version",
+			},
+
+			wantResource: &policygroup.Resource{
+				ID:   "policy-group-id",
+				Name: "policy-group-name",
+				Users: []*policygroup.Member{
+					{
+						ID:       "user-id",
+						Username: "username",
+					},
+					{
+						ID:       "user-id-2",
+						Username: "username-2",
+					},
+				},
+				Specs: []*policygroup.Spec{
+					{
+						NamespaceID:  "namespace-id",
+						ResourceType: "resource-type",
+						ReadOnly:     true,
+					},
+				},
+				CreatedAt: mockCreatedAtTime,
+				UpdatedAt: mockUpdatedAtTime,
+				Version:   "version",
+			},
+			wantErr: nil,
+		},
+		{
+			name: "ok with no users or specs",
+
+			model: openapi.PolicyGroup{
+				Id:        "policy-group-id",
+				Name:      "policy-group-name",
+				Users:     nil,
+				Specs:     nil,
+				CreatedAt: mockCreatedAtTime,
+				UpdatedAt: mockUpdatedAtTime,
+				Version:   "version",
+			},
+
+			wantResource: &policygroup.Resource{
+				ID:        "policy-group-id",
+				Name:      "policy-group-name",
+				Users:     []*policygroup.Member{},
+				Specs:     []*policygroup.Spec{},
+				CreatedAt: mockCreatedAtTime,
+				UpdatedAt: mockUpdatedAtTime,
+				Version:   "version",
+			},
+			wantErr: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		var tt = tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			c := codec{}
+
+			gotResource, gotErr := c.decodePolicyGroup(tt.model)
+			if !reflect.DeepEqual(gotErr, tt.wantErr) {
+				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+			}
+
+			if !reflect.DeepEqual(gotResource, tt.wantResource) {
+				pretty.Ldiff(t, gotResource, tt.wantResource)
+				t.Errorf("got decoded policy group %v, want %v", pretty.Sprint(gotResource), pretty.Sprint(tt.wantResource))
 			}
 		})
 	}

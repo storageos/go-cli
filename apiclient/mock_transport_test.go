@@ -7,6 +7,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
@@ -35,6 +36,9 @@ type mockTransport struct {
 
 	ListNamespacesResource []*namespace.Resource
 	ListNamespacesError    error
+
+	ListPolicyGroupsResource []*policygroup.Resource
+	ListPolicyGroupsError    error
 
 	CreateUserResource *user.Resource
 	CreateUserError    error
@@ -85,6 +89,10 @@ func (m *mockTransport) ListVolumes(ctx context.Context, namespaceID id.Namespac
 
 func (m *mockTransport) ListNamespaces(ctx context.Context) ([]*namespace.Resource, error) {
 	return m.ListNamespacesResource, m.ListNamespacesError
+}
+
+func (m *mockTransport) ListPolicyGroups(ctx context.Context) ([]*policygroup.Resource, error) {
+	return m.ListPolicyGroupsResource, m.ListPolicyGroupsError
 }
 
 func (m *mockTransport) CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error) {

@@ -17,6 +17,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/output/yamlformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
@@ -40,12 +41,14 @@ type Client interface {
 	GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 	GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
+	GetListPolicyGroups(ctx context.Context, gids ...id.PolicyGroup) ([]*policygroup.Resource, error)
+	GetListPolicyGroupsByName(ctx context.Context, names ...string) ([]*policygroup.Resource, error)
 }
 
 // Displayer describes the functionality required by the CLI application
 // to display the resources produced by the "create" verb commands.
 type Displayer interface {
-	CreateUser(ctx context.Context, w io.Writer, resource *user.Resource) error
+	CreateUser(ctx context.Context, w io.Writer, user *output.User) error
 	CreateVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
 }
 

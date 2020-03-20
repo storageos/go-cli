@@ -2,16 +2,15 @@ package textformat
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/dustin/go-humanize"
 	"github.com/gosuri/uitable"
 
 	"code.storageos.net/storageos/c2-cli/pkg/health"
-	"code.storageos.net/storageos/c2-cli/user"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -22,6 +21,7 @@ import (
 var (
 	nodeHeaders      = []interface{}{"NAME", "HEALTH", "AGE", "LABELS"}
 	namespaceHeaders = []interface{}{"NAME", "AGE"}
+	userHeaders      = []interface{}{"NAME", "ROLE", "AGE", "GROUPS"}
 	volumeHeaders    = []interface{}{"NAMESPACE", "NAME", "SIZE", "LOCATION", "ATTACHED ON", "REPLICAS", "AGE"}
 )
 
@@ -37,8 +37,10 @@ type Displayer struct {
 
 // CreateUser builds a human friendly representation of resource, writing the
 // result to w.
-func (d *Displayer) CreateUser(ctx context.Context, w io.Writer, resource *user.Resource) error {
-	return errors.New("unimplemented")
+func (d *Displayer) CreateUser(ctx context.Context, w io.Writer, user *output.User) error {
+	table, write := createTable(userHeaders)
+	d.printUser(table, user)
+	return write(w)
 }
 
 // CreateVolume builds a human friendly string from volume, writing the result to w.
@@ -154,6 +156,22 @@ func (d *Displayer) printVolume(table *uitable.Table, vol *output.Volume) {
 func (d *Displayer) printNode(table *uitable.Table, node *node.Resource) {
 	age := d.timeHumanizer.TimeToHuman(node.CreatedAt)
 	table.AddRow(node.Name, node.Health.String(), age, node.Labels.String())
+}
+
+func (d *Displayer) printUser(table *uitable.Table, user *output.User) {
+	age := d.timeHumanizer.TimeToHuman(user.CreatedAt)
+
+	role := "user"
+	if user.IsAdmin {
+		role = "admin"
+	}
+
+	groupNames := make([]string, 0, len(user.Groups))
+	for _, g := range user.Groups {
+		groupNames = append(groupNames, g.Name)
+	}
+
+	table.AddRow(user.Username, role, age, strings.Join(groupNames, ","))
 }
 
 func createTable(headers []interface{}) (*uitable.Table, func(io.Writer) error) {

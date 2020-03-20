@@ -10,6 +10,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/health"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/version"
+	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 
@@ -124,6 +125,41 @@ func (c codec) decodeNamespace(model openapi.Namespace) (*namespace.Resource, er
 		Name:   model.Name,
 		Labels: model.Labels,
 
+		CreatedAt: model.CreatedAt,
+		UpdatedAt: model.UpdatedAt,
+		Version:   version.FromString(model.Version),
+	}, nil
+}
+
+func (c codec) decodePolicyGroup(model openapi.PolicyGroup) (*policygroup.Resource, error) {
+	users := []*policygroup.Member{}
+	if model.Users != nil {
+		users = make([]*policygroup.Member, 0, len(model.Users))
+		for _, user := range model.Users {
+			users = append(users, &policygroup.Member{
+				ID:       id.User(user.Id),
+				Username: user.Username,
+			})
+		}
+	}
+
+	specs := []*policygroup.Spec{}
+	if model.Specs != nil {
+		specs = make([]*policygroup.Spec, 0, len(*model.Specs))
+		for _, spec := range *model.Specs {
+			specs = append(specs, &policygroup.Spec{
+				NamespaceID:  id.Namespace(spec.NamespaceID),
+				ResourceType: spec.ResourceType,
+				ReadOnly:     spec.ReadOnly,
+			})
+		}
+	}
+
+	return &policygroup.Resource{
+		ID:        id.PolicyGroup(model.Id),
+		Name:      model.Name,
+		Users:     users,
+		Specs:     specs,
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
 		Version:   version.FromString(model.Version),
