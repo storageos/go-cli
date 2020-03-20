@@ -67,8 +67,12 @@ release: release-binaries shasum
 .PHONY: release-binaries
 release-binaries:
 	@echo "++ Building storageos release binaries"
-	gox -verbose -output="bin/release/{{.Dir}}_{{.OS}}_{{.Arch}}" \
-		-ldflags "${LDFLAGS}" -osarch="linux/amd64 darwin/amd64 windows/amd64"
+	gox \
+	-mod=vendor \
+	-verbose \
+	-output="bin/release/storageos_{{.OS}}_{{.Arch}}" \
+	-ldflags "${LDFLAGS}" \
+	-osarch="linux/amd64 darwin/amd64 windows/amd64"
 
 SHASUM := $(shell command -v shasum 2> /dev/null)
 .PHONY: shasum
@@ -124,7 +128,7 @@ test-junit:
 #? clean: remove any generated files
 .PHONY: clean
 clean:
-	-rm bin/*
+	-rm -rf bin/*
 	-rm coverage.out
 	-rm -rf .build-tmp
 	-rm unit_test.output
