@@ -522,7 +522,6 @@ paths:
                     The format of this type is undefined and may change but the defined properties will not change.
                   example: NDI0MjQyNDI0MjQyNDI0MjQy
                   maxLength: 30
-                  minLength: 1
                   type: string
               title: UpdateUserData
               type: object
@@ -858,7 +857,6 @@ paths:
                     The format of this type is undefined and may change but the defined properties will not change.
                   example: NDI0MjQyNDI0MjQyNDI0MjQy
                   maxLength: 30
-                  minLength: 1
                   type: string
               title: UpdateAuthenticatedUserData
               type: object
@@ -1379,7 +1377,6 @@ paths:
                     The format of this type is undefined and may change but the defined properties will not change.
                   example: NDI0MjQyNDI0MjQyNDI0MjQy
                   maxLength: 30
-                  minLength: 1
                   type: string
               title: UpdateNamespaceData
               type: object
@@ -1744,7 +1741,6 @@ paths:
                     The format of this type is undefined and may change but the defined properties will not change.
                   example: NDI0MjQyNDI0MjQyNDI0MjQy
                   maxLength: 30
-                  minLength: 1
                   type: string
               title: UpdateNodeData
               type: object
@@ -2206,7 +2202,6 @@ paths:
                     The format of this type is undefined and may change but the defined properties will not change.
                   example: NDI0MjQyNDI0MjQyNDI0MjQy
                   maxLength: 30
-                  minLength: 1
                   type: string
               title: UpdatePolicyGroupData
               type: object
@@ -2741,149 +2736,6 @@ paths:
       security:
       - jwt: []
       summary: Fetch a volume
-    put:
-      description: Update the description and non-storageos labels configured for
-        the volume identified by id.
-      operationId: updateVolume
-      parameters:
-      - description: ID of a Namespace
-        explode: false
-        in: path
-        name: namespaceID
-        required: true
-        schema:
-          $ref: '#/components/schemas/NamespaceID'
-        style: simple
-      - description: ID of a Volume
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          $ref: '#/components/schemas/VolumeID'
-        style: simple
-      requestBody:
-        $ref: '#/components/requestBodies/UpdateVolumeData'
-        content:
-          application/json:
-            schema:
-              example:
-                description: This volume contains the data for my app
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-                labels:
-                  env: prod
-                  rack: db-1
-              properties:
-                labels:
-                  additionalProperties:
-                    type: string
-                  description: |
-                    A set of arbitrary key value labels to apply to the entity.
-                  example:
-                    env: prod
-                    rack: db-1
-                  externalDocs:
-                    url: https://docs.storageos.com/docs/reference/labels
-                  type: object
-                description:
-                  example: This volume contains the data for my app
-                  type: string
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  minLength: 1
-                  type: string
-              title: UpdateVolumeData
-              type: object
-        description: Update the volume description and label configuration to the
-          desired state. Alterations of StorageOS labels are rejected.
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Volume'
-          description: The volume was successfully updated
-        "400":
-          content:
-            application/json:
-              example:
-                error: a short description of the validation failure
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: The request does not conform to the API specification.
-        "401":
-          content:
-            application/json:
-              example:
-                error: authentication required
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The requested endpoint requires authentication - you must log in first.
-            If attempting to log in, your credentials were not recognised.
-        "403":
-          content:
-            application/json:
-              example:
-                error: unauthorised
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The authenticated user does not have permission to perform the requested action.
-        "404":
-          content:
-            application/json:
-              example:
-                error: not found
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            A referenced resource does not exist.
-        "412":
-          content:
-            application/json:
-              example:
-                error: attempting to write stale object
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
-            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
-        "451":
-          content:
-            application/json:
-              example:
-                error: insufficient allowed capacity (bytes) (used 53687091200, allowed
-                  53687091200, requested 5000000)
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The requested operation failed because your storageOS licence does not allow it, either create an account for a free licence or buy a professional licence.
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The request caused an internal server error and should be retried.
-            Check the health of the node/cluster and if the error persists, contact support.
-        "503":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: |
-            The server is currently unable to handle the request due to a temporary store failure.
-            Check the health of the node/cluster and if the error persists, contact support.
-      security:
-      - jwt: []
-      summary: Update a volume
   /namespaces/{namespaceID}/volumes/{id}/attach:
     delete:
       description: Detach the volume identified by id.
@@ -3220,7 +3072,6 @@ paths:
                     The format of this type is undefined and may change but the defined properties will not change.
                   example: NDI0MjQyNDI0MjQyNDI0MjQy
                   maxLength: 30
-                  minLength: 1
                   type: string
               title: UpdateClusterData
               type: object
@@ -3407,30 +3258,6 @@ components:
         type: string
       style: form
   requestBodies:
-    CreateVolumeData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CreateVolumeData'
-      required: true
-    UpdateVolumeData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UpdateVolumeData'
-      required: true
-    UpdateUserData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UpdateUserData'
-      required: true
-    CreateUserData:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CreateUserData'
-      required: true
     CreatePolicyGroupData:
       content:
         application/json:
@@ -3442,6 +3269,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UpdatePolicyGroupData'
+      required: true
+    CreateVolumeData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateVolumeData'
+      required: true
+    UpdateUserData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateUserData'
       required: true
     UpdateAuthenticatedUserData:
       content:
@@ -3472,6 +3311,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UpdateClusterData'
+      required: true
+    CreateUserData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateUserData'
       required: true
     AttachVolumeData:
       content:
@@ -3624,7 +3469,6 @@ components:
         The format of this type is undefined and may change but the defined properties will not change.
       example: NDI0MjQyNDI0MjQyNDI0MjQy
       maxLength: 30
-      minLength: 1
       type: string
     IgnoreVersion:
       default: false
@@ -3895,7 +3739,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       type: object
     User:
@@ -3964,7 +3807,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       type: object
     Volume:
@@ -4063,7 +3905,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       type: object
     DeploymentInfo:
@@ -4195,7 +4036,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       type: object
     Namespace:
@@ -4256,7 +4096,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       type: object
     PolicyGroup:
@@ -4343,7 +4182,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       type: object
     Licence:
@@ -4516,7 +4354,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       title: UpdateUserData
       type: object
@@ -4539,7 +4376,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       title: UpdateAuthenticatedUserData
       type: object
@@ -4594,7 +4430,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       title: UpdateNamespaceData
       type: object
@@ -4623,7 +4458,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       title: UpdateNodeData
       type: object
@@ -4711,7 +4545,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       title: UpdatePolicyGroupData
       type: object
@@ -4765,39 +4598,6 @@ components:
       - namespaceID
       - sizeBytes
       title: CreateVolumeData
-      type: object
-    UpdateVolumeData:
-      example:
-        description: This volume contains the data for my app
-        version: NDI0MjQyNDI0MjQyNDI0MjQy
-        labels:
-          env: prod
-          rack: db-1
-      properties:
-        labels:
-          additionalProperties:
-            type: string
-          description: |
-            A set of arbitrary key value labels to apply to the entity.
-          example:
-            env: prod
-            rack: db-1
-          externalDocs:
-            url: https://docs.storageos.com/docs/reference/labels
-          type: object
-        description:
-          example: This volume contains the data for my app
-          type: string
-        version:
-          description: |
-            An opaque representation of an entity version at the time it was obtained from the API.
-            All operations that mutate the entity must include this version field in the request unchanged.
-            The format of this type is undefined and may change but the defined properties will not change.
-          example: NDI0MjQyNDI0MjQyNDI0MjQy
-          maxLength: 30
-          minLength: 1
-          type: string
-      title: UpdateVolumeData
       type: object
     AttachVolumeData:
       example:
@@ -4855,7 +4655,6 @@ components:
             The format of this type is undefined and may change but the defined properties will not change.
           example: NDI0MjQyNDI0MjQyNDI0MjQy
           maxLength: 30
-          minLength: 1
           type: string
       title: UpdateClusterData
       type: object

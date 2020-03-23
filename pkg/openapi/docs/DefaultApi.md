@@ -40,7 +40,6 @@ Method | HTTP request | Description
 [**UpdateNode**](DefaultApi.md#UpdateNode) | **Put** /nodes/{id} | Update a node
 [**UpdatePolicyGroup**](DefaultApi.md#UpdatePolicyGroup) | **Put** /policies/{id} | Update a policy group
 [**UpdateUser**](DefaultApi.md#UpdateUser) | **Put** /users/{id} | Update a user
-[**UpdateVolume**](DefaultApi.md#UpdateVolume) | **Put** /namespaces/{namespaceID}/volumes/{id} | Update a volume
 
 
 
@@ -1328,42 +1327,6 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**User**](User.md)
-
-### Authorization
-
-[jwt](../README.md#jwt)
-
-### HTTP request headers
-
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## UpdateVolume
-
-> Volume UpdateVolume(ctx, namespaceID, id, updateVolumeData)
-
-Update a volume
-
-Update the description and non-storageos labels configured for the volume identified by id.
-
-### Required Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**namespaceID** | **string**| ID of a Namespace | 
-**id** | **string**| ID of a Volume | 
-**updateVolumeData** | [**UpdateVolumeData**](UpdateVolumeData.md)|  | 
-
-### Return type
-
-[**Volume**](Volume.md)
 
 ### Authorization
 

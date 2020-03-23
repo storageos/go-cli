@@ -15,3 +15,20 @@ import (
 func SupportSelectors(flagSet *pflag.FlagSet, p *[]string) {
 	flagSet.StringArrayVarP(p, "selector", "l", []string{}, "filter returned results by a set of comma-separated label selectors")
 }
+
+// SupportCAS registers a version constrained compare-and-set flag in flagSet,
+// storing the value provided in p. This enables commands using API methods that
+// operate on existing resources to take a version string to be used as an
+// update constraint. The returned closure indicates whether the flag was
+// given a value.
+//
+// It will replace the flag lookup for "cas".
+func SupportCAS(flagSet *pflag.FlagSet, p *string) func() bool {
+	const casName = "cas"
+
+	flagSet.StringVar(p, casName, "", "make changes to a resource conditional upon matching a provided version")
+
+	return func() bool {
+		return flagSet.Changed(casName)
+	}
+}

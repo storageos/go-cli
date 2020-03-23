@@ -3,6 +3,7 @@ module code.storageos.net/storageos/c2-cli
 require (
 	code.storageos.net/storageos/openapi v0.0.0-00010101000000-000000000000
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d
+	github.com/antihax/optional v1.0.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.9.0 // indirect

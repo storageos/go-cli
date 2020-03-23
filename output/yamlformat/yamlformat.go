@@ -107,6 +107,11 @@ func (d *Displayer) AttachVolume(ctx context.Context, w io.Writer) error {
 	return nil
 }
 
+// DetachVolume writes nothing to the writer
+func (d *Displayer) DetachVolume(ctx context.Context, w io.Writer) error {
+	return nil
+}
+
 // NewDisplayer initialises a Displayer which encodes StorageOS resources as
 // YAML, using encoderIndent as the indentation string.
 func NewDisplayer(encoderIndent string) *Displayer {

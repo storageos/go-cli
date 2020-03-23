@@ -14,6 +14,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/attach"
 	"code.storageos.net/storageos/c2-cli/cmd/create"
 	"code.storageos.net/storageos/c2-cli/cmd/describe"
+	"code.storageos.net/storageos/c2-cli/cmd/detach"
 	"code.storageos.net/storageos/c2-cli/cmd/get"
 	"code.storageos.net/storageos/c2-cli/config"
 )
@@ -67,6 +68,7 @@ To be notified about stable releases and latest features, sign up at https://my.
 		get.NewCommand(client, config),
 		describe.NewCommand(client, config),
 		attach.NewCommand(client, config),
+		detach.NewCommand(client, config),
 		versionCommand,
 	)
 

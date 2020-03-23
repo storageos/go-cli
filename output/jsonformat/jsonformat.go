@@ -105,8 +105,13 @@ func (d *Displayer) DescribeListNodes(ctx context.Context, w io.Writer, states [
 	return d.encode(w, states)
 }
 
-// AttachVolume writes nothing in the writer
+// AttachVolume writes nothing to the writer.
 func (d *Displayer) AttachVolume(ctx context.Context, w io.Writer) error {
+	return nil
+}
+
+// DetachVolume writes nothing to the writer.
+func (d *Displayer) DetachVolume(ctx context.Context, w io.Writer) error {
 	return nil
 }
 

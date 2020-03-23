@@ -3,6 +3,8 @@ package openapi
 import (
 	"context"
 
+	"github.com/antihax/optional"
+
 	"code.storageos.net/storageos/openapi"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
@@ -106,6 +108,47 @@ func (o *OpenAPI) AttachVolume(ctx context.Context, namespaceID id.Namespace, vo
 		volumeID.String(),
 		openapi.AttachVolumeData{
 			NodeID: nodeID.String(),
+		},
+	)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return apiclient.NewVolumeNotFoundError(v.msg)
+		default:
+			return v
+		}
+	}
+
+	return nil
+}
+
+// DetachVolume makes a detach request for volumeID in namespaceID.
+//
+// The behaviour of the operation is dictated by params:
+// 	- If params is nil or params.CASVersion is empty then the detach request is
+// 	unconditional
+// 	- If params.CASVersion is set, the request is conditional upon it matching
+// 	the volume entity's version as seen by the server.
+func (o *OpenAPI) DetachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *apiclient.DetachVolumeRequestParams) error {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	var casVersion string
+	var ignoreVersion bool = true
+
+	// Set the CAS version constraint if provided
+	if params != nil && params.CASVersion.String() != "" {
+		ignoreVersion = false
+		casVersion = params.CASVersion.String()
+	}
+
+	resp, err := o.client.DefaultApi.DetachVolume(
+		ctx,
+		namespaceID.String(),
+		volumeID.String(),
+		casVersion,
+		&openapi.DetachVolumeOpts{
+			IgnoreVersion: optional.NewBool(ignoreVersion),
 		},
 	)
 	if err != nil {

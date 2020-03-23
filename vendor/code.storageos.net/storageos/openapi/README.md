@@ -69,7 +69,6 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**UpdateNode**](docs/DefaultApi.md#updatenode) | **Put** /nodes/{id} | Update a node
 *DefaultApi* | [**UpdatePolicyGroup**](docs/DefaultApi.md#updatepolicygroup) | **Put** /policies/{id} | Update a policy group
 *DefaultApi* | [**UpdateUser**](docs/DefaultApi.md#updateuser) | **Put** /users/{id} | Update a user
-*DefaultApi* | [**UpdateVolume**](docs/DefaultApi.md#updatevolume) | **Put** /namespaces/{namespaceID}/volumes/{id} | Update a volume
 
 
 ## Documentation For Models
@@ -108,7 +107,6 @@ Class | Method | HTTP request | Description
  - [UpdateNodeData](docs/UpdateNodeData.md)
  - [UpdatePolicyGroupData](docs/UpdatePolicyGroupData.md)
  - [UpdateUserData](docs/UpdateUserData.md)
- - [UpdateVolumeData](docs/UpdateVolumeData.md)
  - [User](docs/User.md)
  - [Volume](docs/Volume.md)
 

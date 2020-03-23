@@ -196,6 +196,12 @@ func (d *Displayer) AttachVolume(ctx context.Context, w io.Writer) error {
 	return err
 }
 
+// DetachVolume writes a success message to the writer
+func (d *Displayer) DetachVolume(ctx context.Context, w io.Writer) error {
+	_, err := fmt.Fprintln(w, "volume detached")
+	return err
+}
+
 // NewDisplayer initialises a Displayer which prints human readable strings
 // StorageOS to output CLI results.
 func NewDisplayer(timeHumanizer output.TimeHumanizer) *Displayer {

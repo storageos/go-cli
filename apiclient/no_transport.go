@@ -69,5 +69,9 @@ func (t *noTransport) UpdateCluster(ctx context.Context, resource *cluster.Resou
 }
 
 func (t *noTransport) AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error {
-	return nil
+	return ErrNoTransportConfigured
+}
+
+func (t *noTransport) DetachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DetachVolumeRequestParams) error {
+	return ErrNoTransportConfigured
 }

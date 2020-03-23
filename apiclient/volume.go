@@ -7,6 +7,7 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
@@ -299,4 +300,25 @@ func (c *Client) AttachVolume(ctx context.Context, namespaceID id.Namespace, vol
 	}
 
 	return c.transport.AttachVolume(ctx, namespaceID, volumeID, nodeID)
+}
+
+// DetachVolumeRequestParams contains request parameters.
+type DetachVolumeRequestParams struct {
+	CASVersion version.Version
+}
+
+// DetachVolume makes a detach request for volumeID in namespaceID.
+//
+// The behaviour of the operation is dictated by params:
+// 	- If params is nil or params.CASVersion is empty then the detach request is
+// 	unconditional
+// 	- If params.CASVersion is set, the request is conditional upon it matching
+// 	the volume entity's version as seen by the server.
+func (c *Client) DetachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DetachVolumeRequestParams) error {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return err
+	}
+
+	return c.transport.DetachVolume(ctx, namespaceID, volumeID, params)
 }

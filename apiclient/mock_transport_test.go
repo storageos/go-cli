@@ -55,6 +55,11 @@ type mockTransport struct {
 	AttachGotVolume    id.Volume
 	AttachGotNode      id.Node
 	AttachError        error
+
+	DetachGotNamespace id.Namespace
+	DetachGotVolume    id.Volume
+	DetachGotParams    *DetachVolumeRequestParams
+	DetachError        error
 }
 
 var _ Transport = (*mockTransport)(nil)
@@ -114,4 +119,11 @@ func (m *mockTransport) AttachVolume(ctx context.Context, namespaceID id.Namespa
 	m.AttachGotVolume = volumeID
 	m.AttachGotNode = nodeID
 	return m.AttachError
+}
+
+func (m *mockTransport) DetachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DetachVolumeRequestParams) error {
+	m.DetachGotNamespace = namespaceID
+	m.DetachGotVolume = volumeID
+	m.DetachGotParams = params
+	return m.DetachError
 }
