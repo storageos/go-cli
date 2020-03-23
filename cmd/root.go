@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/blang/semver"
@@ -37,7 +38,6 @@ User Subscription Agreement (EUSA) found at: https://storageos.com/legal/#eusa
 
 To be notified about stable releases and latest features, sign up at https://my.storageos.com.
 `,
-		Version: version.String(),
 
 		PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
 			userAgent := strings.Join([]string{UserAgentPrefix, version.String()}, "/")
@@ -53,12 +53,21 @@ To be notified about stable releases and latest features, sign up at https://my.
 		SilenceErrors: true,
 	}
 
+	versionCommand := &cobra.Command{
+		Use:   "version",
+		Short: "View version information for the StorageOS CLI",
+		Run: func(_ *cobra.Command, _ []string) {
+			fmt.Printf("StorageOS CLI version: %v\n", version.String())
+		},
+	}
+
 	app.AddCommand(
 		apply.NewCommand(client, config),
 		create.NewCommand(client, config),
 		get.NewCommand(client, config),
 		describe.NewCommand(client, config),
 		attach.NewCommand(client, config),
+		versionCommand,
 	)
 
 	app.PersistentFlags().AddFlagSet(globalFlags)

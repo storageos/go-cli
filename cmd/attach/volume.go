@@ -82,7 +82,7 @@ func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command
 
 	cobraCommand := &cobra.Command{
 		Use:   "volume",
-		Short: "attach a volume to a node",
+		Short: "Attach a volume to a node",
 		Example: `
 $ storageos attach volume --namespace my-namespace-name my-volume my-node
 `,

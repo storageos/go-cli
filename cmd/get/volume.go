@@ -261,7 +261,7 @@ func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command
 	cobraCommand := &cobra.Command{
 		Aliases: []string{"volumes"},
 		Use:     "volume [volume names...]",
-		Short:   "retrieve basic details of volumes",
+		Short:   "Retrieve basic details of volumes",
 		Example: `
 $ storageos get volumes --all-namespaces
 

@@ -63,7 +63,7 @@ func newLicence(w io.Writer, client Client, config ConfigProvider) *cobra.Comman
 
 	cobraCommand := &cobra.Command{
 		Use:   "licence",
-		Short: "apply a product licence to the cluster",
+		Short: "Apply a product licence to the cluster",
 		Example: `
 $ storageos apply licence --from-file <path-to-licence-file>
 

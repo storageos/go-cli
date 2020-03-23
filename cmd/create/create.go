@@ -57,7 +57,7 @@ type Displayer interface {
 func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "create",
-		Short: "create new resources",
+		Short: "Create new resources",
 	}
 
 	command.AddCommand(

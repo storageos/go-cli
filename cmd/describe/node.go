@@ -98,7 +98,7 @@ func newNode(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 	cobraCommand := &cobra.Command{
 		Aliases: []string{"nodes"},
 		Use:     "node [node names...]",
-		Short:   "retrieve detailed information for nodes in the cluster",
+		Short:   "Retrieve detailed information for nodes in the cluster",
 		Example: `
 $ storageos describe node my-node-name
 `,

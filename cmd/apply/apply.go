@@ -32,7 +32,7 @@ type Displayer interface {
 func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "apply",
-		Short: "make changes to existing resources",
+		Short: "Make changes to existing resources",
 	}
 
 	command.AddCommand(
