@@ -8,8 +8,14 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
+	"code.storageos.net/storageos/c2-cli/output"
+	"code.storageos.net/storageos/c2-cli/output/jsonformat"
+	"code.storageos.net/storageos/c2-cli/output/textformat"
+	"code.storageos.net/storageos/c2-cli/output/yamlformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 // ConfigProvider specifies the configuration settings which commands require
@@ -17,6 +23,8 @@ import (
 type ConfigProvider interface {
 	CommandTimeout() (time.Duration, error)
 	UseIDs() (bool, error)
+	OutputFormat() (output.Format, error)
+	Namespace() (string, error)
 }
 
 // Client describes the functionality required by the CLI application
@@ -24,8 +32,17 @@ type ConfigProvider interface {
 type Client interface {
 	DescribeNode(ctx context.Context, uid id.Node) (*node.State, error)
 	DescribeNodeByName(ctx context.Context, name string) (*node.State, error)
+
 	DescribeListNodes(ctx context.Context, uids ...id.Node) ([]*node.State, error)
 	DescribeListNodesByName(ctx context.Context, names ...string) ([]*node.State, error)
+
+	// GetListNodes is used to get node details for describing volumes.
+	GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
+	GetVolume(ctx context.Context, namespace id.Namespace, vid id.Volume) (*volume.Resource, error)
+	GetVolumeByName(ctx context.Context, namespace id.Namespace, name string) (*volume.Resource, error)
+
+	GetNamespace(ctx context.Context, namespaceID id.Namespace) (*namespace.Resource, error)
+	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 }
 
 // Displayer defines the functionality required by the CLI application
@@ -33,6 +50,8 @@ type Client interface {
 type Displayer interface {
 	DescribeNode(context.Context, io.Writer, *node.State) error
 	DescribeListNodes(ctx context.Context, w io.Writer, states []*node.State) error
+	DescribeVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
+	DescribeListVolumes(ctx context.Context, w io.Writer, volumes []*output.Volume) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "describe" verb.
@@ -44,7 +63,28 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 
 	command.AddCommand(
 		newNode(os.Stdout, client, config),
+		newVolume(os.Stdout, client, config),
 	)
 
 	return command
+}
+
+// SelectDisplayer returns the right command displayer specified in the
+// config provider.
+func SelectDisplayer(cp ConfigProvider) Displayer {
+	out, err := cp.OutputFormat()
+	if err != nil {
+		return textformat.NewDisplayer(textformat.NewTimeFormatter())
+	}
+
+	switch out {
+	case output.JSON:
+		return jsonformat.NewDisplayer(jsonformat.DefaultEncodingIndent)
+	case output.YAML:
+		return yamlformat.NewDisplayer("")
+	case output.Text:
+		fallthrough
+	default:
+		return textformat.NewDisplayer(textformat.NewTimeFormatter())
+	}
 }

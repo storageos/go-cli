@@ -7,11 +7,13 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
+	"github.com/kr/pretty"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
+	"code.storageos.net/storageos/c2-cli/pkg/health"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
@@ -138,7 +140,8 @@ Licence:
   capacity:       42 GiB                             
   kind:           bananaLicence                      
   customer name:  bananaCustomer                     
-Created At:       2000-01-01T00:00:00Z (xx aeons ago)
+Created at:       2000-01-01T00:00:00Z (xx aeons ago)
+Updated at:       0001-01-01T00:00:00Z (xx aeons ago)
 `,
 			wantErr: false,
 		},
@@ -152,7 +155,7 @@ Created At:       2000-01-01T00:00:00Z (xx aeons ago)
 			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
 			w := &bytes.Buffer{}
 
-			err := d.GetCluster(context.Background(), w, tt.resource)
+			err := d.GetCluster(context.Background(), w, output.NewCluster(tt.resource))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetCluster() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -202,7 +205,7 @@ bananaName  ready   xx aeons ago  bananaLabelKey=bananaLabelValue
 
 			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
 			w := &bytes.Buffer{}
-			err := d.GetNode(context.Background(), w, tt.resource)
+			err := d.GetNode(context.Background(), w, output.NewNode(tt.resource))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNode() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -276,7 +279,7 @@ pineappleName  offline  xx aeons ago  pineappleLabelKey=pineappleLabelValue
 			t.Parallel()
 			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
 			w := &bytes.Buffer{}
-			err := d.GetListNodes(context.Background(), w, tt.resources)
+			err := d.GetListNodes(context.Background(), w, output.NewNodes(tt.resources))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetListNodes() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -322,7 +325,7 @@ bananaName  xx aeons ago
 
 			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
 			w := &bytes.Buffer{}
-			err := d.GetNamespace(context.Background(), w, tt.resource)
+			err := d.GetNamespace(context.Background(), w, output.NewNamespace(tt.resource))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNamespace() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -388,7 +391,7 @@ kiwiaName      xx aeons ago
 			t.Parallel()
 			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
 			w := &bytes.Buffer{}
-			err := d.GetListNamespaces(context.Background(), w, tt.resources)
+			err := d.GetListNamespaces(context.Background(), w, output.NewNamespaces(tt.resources))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetListNamespaces() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -608,6 +611,361 @@ KIWI       kiwi-name    2.0 GiB  banana-node1 (ready)  kiwi-node-a    2/3       
 
 			if gotW := w.String(); gotW != tt.wantW {
 				t.Errorf("GetListVolumes() GOT:\n%v\n\nWANT:\n%v\n", gotW, tt.wantW)
+			}
+		})
+	}
+}
+
+func TestDisplayer_DescribeVolume(t *testing.T) {
+	t.Parallel()
+
+	var mockTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name string
+
+		volume *output.Volume
+
+		wantOutput string
+		wantErr    error
+	}{
+		{
+			name: "describe volume ok",
+
+			volume: &output.Volume{
+				ID:             "bananaID",
+				Name:           "banana-name",
+				Description:    "banana description",
+				AttachedOn:     "banana-node-a-id",
+				AttachedOnName: "banana-node-a",
+				Namespace:      "banana-namespace-id",
+				NamespaceName:  "banana-namespace",
+				Labels: labels.Set{
+					"kiwi": "42",
+					"pear": "42",
+				},
+				Filesystem: volume.FsTypeFromString("ext4"),
+				SizeBytes:  humanize.GiByte,
+				Master: &output.Deployment{
+					ID:         "bananaDeploymentID1",
+					Node:       "banana-node1-id",
+					NodeName:   "banana-node1",
+					Health:     "ready",
+					Promotable: true,
+				},
+				Replicas: []*output.Deployment{
+					{
+						ID:           "bananaDeploymentID2",
+						Node:         "banana-node2-id",
+						NodeName:     "banana-node2",
+						Health:       health.ReplicaReady,
+						Promotable:   true,
+						SyncProgress: nil,
+					},
+					{
+						ID:           "bananaDeploymentID3",
+						Node:         "banana-node3-id",
+						NodeName:     "banana-node3",
+						Health:       health.ReplicaDeleted,
+						Promotable:   false,
+						SyncProgress: nil,
+					},
+					{
+						ID:         "bananaDeploymentID4",
+						Node:       "banana-node4-id",
+						NodeName:   "banana-node4",
+						Health:     health.ReplicaSyncing,
+						Promotable: false,
+						SyncProgress: &output.SyncProgress{
+							BytesRemaining:            256 * humanize.MiByte,
+							ThroughputBytes:           0,
+							EstimatedSecondsRemaining: 1200,
+						},
+					},
+				},
+				CreatedAt: mockTime,
+				UpdatedAt: mockTime,
+				Version:   "42",
+			},
+
+			wantOutput: `ID               bananaID                                                                        
+Name             banana-name                                                                     
+Description      banana description                                                              
+AttachedOn       banana-node-a (banana-node-a-id)                                                
+Namespace        banana-namespace (banana-namespace-id)                                          
+Labels           kiwi=42,pear=42                                                                 
+FileSystem       ext4                                                                            
+Size             1073741824                                                                      
+Version          42                                                                              
+Created at       2000-01-01T00:00:00Z (xx aeons ago)                                             
+Updated at       2000-01-01T00:00:00Z (xx aeons ago)                                             
+                                                                                                 
+Master:        
+  ID             bananaDeploymentID1                                                             
+  Node           banana-node1 (banana-node1-id)                                                  
+  Health         ready                                                                           
+                                                                                                 
+Replicas:      
+  ID             bananaDeploymentID2                                                             
+  Node           banana-node2 (banana-node2-id)                                                  
+  Health         ready                                                                           
+  Promotable     true                                                                            
+                                                                                                 
+  ID             bananaDeploymentID3                                                             
+  Node           banana-node3 (banana-node3-id)                                                  
+  Health         deleted                                                                         
+  Promotable     false                                                                           
+                                                                                                 
+  ID             bananaDeploymentID4                                                             
+  Node           banana-node4 (banana-node4-id)                                                  
+  Health         syncing                                                                         
+  Promotable     false                                                                           
+  Sync Progress  768.00 MiB / 1.00 GiB [##########################........] 75.00%  -  ETA: 20m0s
+`,
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
+			w := &bytes.Buffer{}
+
+			gotErr := d.DescribeVolume(context.Background(), w, tt.volume)
+			if gotErr != tt.wantErr {
+				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+				return
+			}
+
+			gotOutput := w.String()
+			if gotOutput != tt.wantOutput {
+				pretty.Ldiff(t, gotOutput, tt.wantOutput)
+				t.Errorf("got output: \n%v\n\nwant: \n%v\n", gotOutput, tt.wantOutput)
+			}
+		})
+	}
+}
+
+func TestDisplayer_DescribeListVolumes(t *testing.T) {
+	t.Parallel()
+
+	var mockTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name string
+
+		volumes []*output.Volume
+
+		wantOutput string
+		wantErr    error
+	}{
+		{
+			name: "describe volume ok",
+
+			volumes: []*output.Volume{
+				{
+					ID:             "bananaID",
+					Name:           "banana-name",
+					Description:    "banana description",
+					AttachedOn:     "banana-node-a-id",
+					AttachedOnName: "banana-node-a",
+					Namespace:      "banana-namespace-id",
+					NamespaceName:  "banana-namespace",
+					Labels: labels.Set{
+						"kiwi": "42",
+						"pear": "42",
+					},
+					Filesystem: volume.FsTypeFromString("ext4"),
+					SizeBytes:  humanize.GiByte,
+					Master: &output.Deployment{
+						ID:         "bananaDeploymentID1",
+						Node:       "banana-node1-id",
+						NodeName:   "banana-node1",
+						Health:     "ready",
+						Promotable: true,
+					},
+					Replicas: []*output.Deployment{
+						{
+							ID:           "bananaDeploymentID2",
+							Node:         "banana-node2-id",
+							NodeName:     "banana-node2",
+							Health:       health.ReplicaReady,
+							Promotable:   true,
+							SyncProgress: nil,
+						},
+						{
+							ID:           "bananaDeploymentID3",
+							Node:         "banana-node3-id",
+							NodeName:     "banana-node3",
+							Health:       health.ReplicaDeleted,
+							Promotable:   false,
+							SyncProgress: nil,
+						},
+						{
+							ID:         "bananaDeploymentID4",
+							Node:       "banana-node4-id",
+							NodeName:   "banana-node4",
+							Health:     health.ReplicaSyncing,
+							Promotable: false,
+							SyncProgress: &output.SyncProgress{
+								BytesRemaining:            256 * humanize.MiByte,
+								ThroughputBytes:           0,
+								EstimatedSecondsRemaining: 1200,
+							},
+						},
+					},
+					CreatedAt: mockTime,
+					UpdatedAt: mockTime,
+					Version:   "42",
+				},
+				{
+					ID:             "kiwiID",
+					Name:           "kiwi-name",
+					Description:    "kiwi description",
+					AttachedOn:     "kiwi-node-a-id",
+					AttachedOnName: "kiwi-node-a",
+					Namespace:      "kiwi-namespace-id",
+					NamespaceName:  "kiwi-namespace",
+					Labels: labels.Set{
+						"kiwi": "42",
+						"pear": "42",
+					},
+					Filesystem: volume.FsTypeFromString("ext4"),
+					SizeBytes:  humanize.GiByte,
+					Master: &output.Deployment{
+						ID:         "kiwiDeploymentID1",
+						Node:       "kiwi-node1-id",
+						NodeName:   "kiwi-node1",
+						Health:     "ready",
+						Promotable: true,
+					},
+					Replicas: []*output.Deployment{
+						{
+							ID:           "kiwiDeploymentID2",
+							Node:         "kiwi-node2-id",
+							NodeName:     "kiwi-node2",
+							Health:       health.ReplicaReady,
+							Promotable:   true,
+							SyncProgress: nil,
+						},
+						{
+							ID:           "kiwiDeploymentID3",
+							Node:         "kiwi-node3-id",
+							NodeName:     "kiwi-node3",
+							Health:       health.ReplicaDeleted,
+							Promotable:   false,
+							SyncProgress: nil,
+						},
+						{
+							ID:         "kiwiDeploymentID4",
+							Node:       "kiwi-node4-id",
+							NodeName:   "kiwi-node4",
+							Health:     health.ReplicaSyncing,
+							Promotable: false,
+							SyncProgress: &output.SyncProgress{
+								BytesRemaining:            256 * humanize.MiByte,
+								ThroughputBytes:           0,
+								EstimatedSecondsRemaining: 1200,
+							},
+						},
+					},
+					CreatedAt: mockTime,
+					UpdatedAt: mockTime,
+					Version:   "42",
+				},
+			},
+
+			wantOutput: `ID               bananaID                                                                        
+Name             banana-name                                                                     
+Description      banana description                                                              
+AttachedOn       banana-node-a (banana-node-a-id)                                                
+Namespace        banana-namespace (banana-namespace-id)                                          
+Labels           kiwi=42,pear=42                                                                 
+FileSystem       ext4                                                                            
+Size             1073741824                                                                      
+Version          42                                                                              
+Created at       2000-01-01T00:00:00Z (xx aeons ago)                                             
+Updated at       2000-01-01T00:00:00Z (xx aeons ago)                                             
+                                                                                                 
+Master:        
+  ID             bananaDeploymentID1                                                             
+  Node           banana-node1 (banana-node1-id)                                                  
+  Health         ready                                                                           
+                                                                                                 
+Replicas:      
+  ID             bananaDeploymentID2                                                             
+  Node           banana-node2 (banana-node2-id)                                                  
+  Health         ready                                                                           
+  Promotable     true                                                                            
+                                                                                                 
+  ID             bananaDeploymentID3                                                             
+  Node           banana-node3 (banana-node3-id)                                                  
+  Health         deleted                                                                         
+  Promotable     false                                                                           
+                                                                                                 
+  ID             bananaDeploymentID4                                                             
+  Node           banana-node4 (banana-node4-id)                                                  
+  Health         syncing                                                                         
+  Promotable     false                                                                           
+  Sync Progress  768.00 MiB / 1.00 GiB [##########################........] 75.00%  -  ETA: 20m0s
+
+ID               kiwiID                                                                          
+Name             kiwi-name                                                                       
+Description      kiwi description                                                                
+AttachedOn       kiwi-node-a (kiwi-node-a-id)                                                    
+Namespace        kiwi-namespace (kiwi-namespace-id)                                              
+Labels           kiwi=42,pear=42                                                                 
+FileSystem       ext4                                                                            
+Size             1073741824                                                                      
+Version          42                                                                              
+Created at       2000-01-01T00:00:00Z (xx aeons ago)                                             
+Updated at       2000-01-01T00:00:00Z (xx aeons ago)                                             
+                                                                                                 
+Master:        
+  ID             kiwiDeploymentID1                                                               
+  Node           kiwi-node1 (kiwi-node1-id)                                                      
+  Health         ready                                                                           
+                                                                                                 
+Replicas:      
+  ID             kiwiDeploymentID2                                                               
+  Node           kiwi-node2 (kiwi-node2-id)                                                      
+  Health         ready                                                                           
+  Promotable     true                                                                            
+                                                                                                 
+  ID             kiwiDeploymentID3                                                               
+  Node           kiwi-node3 (kiwi-node3-id)                                                      
+  Health         deleted                                                                         
+  Promotable     false                                                                           
+                                                                                                 
+  ID             kiwiDeploymentID4                                                               
+  Node           kiwi-node4 (kiwi-node4-id)                                                      
+  Health         syncing                                                                         
+  Promotable     false                                                                           
+  Sync Progress  768.00 MiB / 1.00 GiB [##########################........] 75.00%  -  ETA: 20m0s
+`,
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
+			w := &bytes.Buffer{}
+
+			gotErr := d.DescribeListVolumes(context.Background(), w, tt.volumes)
+			if gotErr != tt.wantErr {
+				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+				return
+			}
+
+			gotOutput := w.String()
+			if gotOutput != tt.wantOutput {
+				pretty.Ldiff(t, gotOutput, tt.wantOutput)
+				t.Errorf("got output: \n%v\n\nwant: \n%v\n", gotOutput, tt.wantOutput)
 			}
 		})
 	}

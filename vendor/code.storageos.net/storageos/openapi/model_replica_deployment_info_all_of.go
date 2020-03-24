@@ -9,8 +9,9 @@
  */
 
 package openapi
+
 // ReplicaDeploymentInfoAllOf struct for ReplicaDeploymentInfoAllOf
 type ReplicaDeploymentInfoAllOf struct {
-	Health ReplicaHealth `json:"health,omitempty"`
-	SyncProgress SyncProgress `json:"syncProgress,omitempty"`
+	Health       ReplicaHealth `json:"health,omitempty"`
+	SyncProgress SyncProgress  `json:"syncProgress,omitempty"`
 }

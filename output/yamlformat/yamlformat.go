@@ -9,7 +9,6 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
-	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
 )
@@ -54,27 +53,27 @@ func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *clu
 // -----------------------------------------------------------------------------
 
 // GetCluster encodes resource as YAML, writing the result to w.
-func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *cluster.Resource) error {
+func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *output.Cluster) error {
 	return d.encode(w, resource)
 }
 
 // GetNode encodes resource as YAML, writing the result to w.
-func (d *Displayer) GetNode(ctx context.Context, w io.Writer, resource *node.Resource) error {
+func (d *Displayer) GetNode(ctx context.Context, w io.Writer, resource *output.Node) error {
 	return d.encode(w, resource)
 }
 
 // GetListNodes encodes resources as YAML, writing the result to w.
-func (d *Displayer) GetListNodes(ctx context.Context, w io.Writer, resources []*node.Resource) error {
+func (d *Displayer) GetListNodes(ctx context.Context, w io.Writer, resources []*output.Node) error {
 	return d.encode(w, resources)
 }
 
 // GetNamespace encodes resource as YAML, writing the result to w.
-func (d *Displayer) GetNamespace(ctx context.Context, w io.Writer, resource *namespace.Resource) error {
+func (d *Displayer) GetNamespace(ctx context.Context, w io.Writer, resource *output.Namespace) error {
 	return d.encode(w, resource)
 }
 
 // GetListNamespaces encodes resources as YAML, writing the result to w.
-func (d *Displayer) GetListNamespaces(ctx context.Context, w io.Writer, resources []*namespace.Resource) error {
+func (d *Displayer) GetListNamespaces(ctx context.Context, w io.Writer, resources []*output.Namespace) error {
 	return d.encode(w, resources)
 }
 
@@ -100,6 +99,16 @@ func (d *Displayer) DescribeNode(ctx context.Context, w io.Writer, state *node.S
 // DescribeListNodes encodes states as YAML, writing the result to w.
 func (d *Displayer) DescribeListNodes(ctx context.Context, w io.Writer, states []*node.State) error {
 	return d.encode(w, states)
+}
+
+// DescribeVolume encodes volume as YAML, writing the result to w
+func (d *Displayer) DescribeVolume(ctx context.Context, w io.Writer, volume *output.Volume) error {
+	return d.encode(w, volume)
+}
+
+// DescribeListVolumes encodes volumes as YAML, writing the result to w
+func (d *Displayer) DescribeListVolumes(ctx context.Context, w io.Writer, volumes []*output.Volume) error {
+	return d.encode(w, volumes)
 }
 
 // AttachVolume writes nothing in the writer

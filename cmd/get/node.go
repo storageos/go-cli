@@ -9,6 +9,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/node"
+	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/selectors"
 )
@@ -31,7 +32,7 @@ func (c *nodeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 			return err
 		}
 
-		return c.display.GetNode(ctx, c.writer, n)
+		return c.display.GetNode(ctx, c.writer, output.NewNode(n))
 	default:
 		set, err := selectors.NewSetFromStrings(c.selectors...)
 		if err != nil {
@@ -43,7 +44,9 @@ func (c *nodeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 			return err
 		}
 
-		return c.display.GetListNodes(ctx, c.writer, set.FilterNodes(nodes))
+		nodes = set.FilterNodes(nodes)
+
+		return c.display.GetListNodes(ctx, c.writer, output.NewNodes(nodes))
 	}
 }
 

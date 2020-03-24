@@ -2,20 +2,20 @@ package textformat
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"math"
 	"strings"
 	"time"
 
+	"github.com/cheggaaa/pb/v3"
 	"github.com/dustin/go-humanize"
 	"github.com/gosuri/uitable"
 
-	"code.storageos.net/storageos/c2-cli/pkg/health"
-
-	"code.storageos.net/storageos/c2-cli/cluster"
-	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
+	"code.storageos.net/storageos/c2-cli/pkg/health"
 )
 
 var (
@@ -55,36 +55,30 @@ func (d *Displayer) CreateVolume(ctx context.Context, w io.Writer, volume *outpu
 // -----------------------------------------------------------------------------
 
 // GetCluster creates human-readable strings, writing the result to w.
-func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *cluster.Resource) error {
+func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *output.Cluster) error {
 	table, write := createTable(nil)
-
-	// Dates
-	expiration := d.timeHumanizer.TimeToHuman(resource.Licence.ExpiresAt)
-	expirationString := fmt.Sprintf("%s (%s)", resource.Licence.ExpiresAt.Format(time.RFC3339), expiration)
-
-	age := d.timeHumanizer.TimeToHuman(resource.CreatedAt)
-	ageString := fmt.Sprintf("%s (%s)", resource.CreatedAt.Format(time.RFC3339), age)
 
 	table.AddRow("ID:", resource.ID)
 	table.AddRow("Licence:", "")
-	table.AddRow("  expiration:", expirationString)
+	table.AddRow("  expiration:", d.timeToHuman(resource.Licence.ExpiresAt))
 	table.AddRow("  capacity:", humanize.IBytes(resource.Licence.ClusterCapacityBytes))
 	table.AddRow("  kind:", resource.Licence.Kind)
 	table.AddRow("  customer name:", resource.Licence.CustomerName)
-	table.AddRow("Created At:", ageString)
+	table.AddRow("Created at:", d.timeToHuman(resource.CreatedAt))
+	table.AddRow("Updated at:", d.timeToHuman(resource.UpdatedAt))
 
 	return write(w)
 }
 
 // GetNode creates human-readable strings, writing the result to w.
-func (d *Displayer) GetNode(ctx context.Context, w io.Writer, resource *node.Resource) error {
+func (d *Displayer) GetNode(ctx context.Context, w io.Writer, resource *output.Node) error {
 	table, write := createTable(nodeHeaders)
 	d.printNode(table, resource)
 	return write(w)
 }
 
 // GetListNodes creates human-readable strings, writing the result to w.
-func (d *Displayer) GetListNodes(ctx context.Context, w io.Writer, resources []*node.Resource) error {
+func (d *Displayer) GetListNodes(ctx context.Context, w io.Writer, resources []*output.Node) error {
 	table, write := createTable(nodeHeaders)
 	for _, r := range resources {
 		d.printNode(table, r)
@@ -93,7 +87,7 @@ func (d *Displayer) GetListNodes(ctx context.Context, w io.Writer, resources []*
 }
 
 // GetNamespace creates human-readable strings, writing the result to w.
-func (d *Displayer) GetNamespace(ctx context.Context, w io.Writer, resource *namespace.Resource) error {
+func (d *Displayer) GetNamespace(ctx context.Context, w io.Writer, resource *output.Namespace) error {
 	table, write := createTable(namespaceHeaders)
 
 	// Humanized
@@ -105,7 +99,7 @@ func (d *Displayer) GetNamespace(ctx context.Context, w io.Writer, resource *nam
 }
 
 // GetListNamespaces creates human-readable strings, writing the result to w.
-func (d *Displayer) GetListNamespaces(ctx context.Context, w io.Writer, resources []*namespace.Resource) error {
+func (d *Displayer) GetListNamespaces(ctx context.Context, w io.Writer, resources []*output.Namespace) error {
 	table, write := createTable(namespaceHeaders)
 
 	for _, ns := range resources {
@@ -153,7 +147,7 @@ func (d *Displayer) printVolume(table *uitable.Table, vol *output.Volume) {
 	table.AddRow(vol.NamespaceName, vol.Name, size, location, vol.AttachedOnName, replicas, age)
 }
 
-func (d *Displayer) printNode(table *uitable.Table, node *node.Resource) {
+func (d *Displayer) printNode(table *uitable.Table, node *output.Node) {
 	age := d.timeHumanizer.TimeToHuman(node.CreatedAt)
 	table.AddRow(node.Name, node.Health.String(), age, node.Labels.String())
 }
@@ -194,6 +188,137 @@ func createTable(headers []interface{}) (*uitable.Table, func(io.Writer) error) 
 func (d *Displayer) AttachVolume(ctx context.Context, w io.Writer) error {
 	_, err := fmt.Fprintln(w, "volume attached")
 	return err
+}
+
+// DescribeNode prints all the detailed information about a node
+func (d *Displayer) DescribeNode(context.Context, io.Writer, *node.State) error {
+	// TODO(CP-4048): describe node
+	return errors.New("no text formatter implemented")
+}
+
+// DescribeListNodes prints all the detailed information about a list of nodes
+func (d *Displayer) DescribeListNodes(ctx context.Context, w io.Writer, states []*node.State) error {
+	// TODO(CP-4048): describe node
+	return errors.New("no text formatter implemented")
+}
+
+// DescribeVolume prints in the output writer a tabular representation, in a key
+// value shape, of all details about a volumes and its master and replicas.
+func (d *Displayer) DescribeVolume(ctx context.Context, w io.Writer, volume *output.Volume) error {
+	return d.describeVolume(ctx, w, volume)
+}
+
+// DescribeListVolumes writes a detailed, yet human-friendly table
+// representation to w for each item in volumes.
+func (d *Displayer) DescribeListVolumes(ctx context.Context, w io.Writer, volumes []*output.Volume) error {
+	for i, v := range volumes {
+		if i > 0 {
+			_, err := w.Write([]byte("\n"))
+			if err != nil {
+				return err
+			}
+		}
+
+		err := d.describeVolume(ctx, w, v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (d *Displayer) describeVolume(ctx context.Context, w io.Writer, volume *output.Volume) error {
+	table := uitable.New()
+	table.Separator = "  "
+
+	table.AddRow("ID", volume.ID.String())
+	table.AddRow("Name", volume.Name)
+	table.AddRow("Description", volume.Description)
+
+	var attachedOnString string
+	if volume.AttachedOn != "" {
+		attachedOnString = fmt.Sprintf("%s (%s)", volume.AttachedOnName, volume.AttachedOn)
+	}
+
+	table.AddRow("AttachedOn", attachedOnString)
+	table.AddRow("Namespace", fmt.Sprintf("%s (%s)", volume.NamespaceName, volume.Namespace))
+	table.AddRow("Labels", volume.Labels.String())
+	table.AddRow("FileSystem", volume.Filesystem.String())
+	table.AddRow("Size", volume.SizeBytes)
+
+	table.AddRow("Version", volume.Version)
+	table.AddRow("Created at", d.timeToHuman(volume.CreatedAt))
+	table.AddRow("Updated at", d.timeToHuman(volume.UpdatedAt))
+
+	table.AddRow("", "")
+	table.AddRow("Master:")
+	d.describeMaster(table, volume.Master)
+
+	table.AddRow("", "")
+	table.AddRow("Replicas:")
+	for i, rep := range volume.Replicas {
+		if i > 0 {
+			table.AddRow("", "")
+		}
+		d.describeReplica(table, volume.SizeBytes, rep)
+	}
+
+	_, err := fmt.Fprintln(w, table)
+	return err
+}
+
+func (d *Displayer) describeMaster(table *uitable.Table, master *output.Deployment) {
+	table.AddRow("  ID", master.ID.String())
+	table.AddRow("  Node", fmt.Sprintf("%s (%s)", master.NodeName, master.Node))
+	table.AddRow("  Health", master.Health.String())
+}
+
+func (d *Displayer) describeReplica(table *uitable.Table, size uint64, replica *output.Deployment) {
+	table.AddRow("  ID", replica.ID.String())
+	table.AddRow("  Node", fmt.Sprintf("%s (%s)", replica.NodeName, replica.Node))
+	table.AddRow("  Health", replica.Health.String())
+	table.AddRow("  Promotable", replica.Promotable)
+	if replica.Health == health.ReplicaSyncing {
+		barStr, err := syncProgressBarString(
+			replica.SyncProgress.BytesRemaining,
+			size,
+			replica.SyncProgress.EstimatedSecondsRemaining,
+		)
+		if err != nil {
+			recap := fmt.Sprintf("%d/%d", size-replica.SyncProgress.BytesRemaining, size)
+			table.AddRow("  Sync Progress", recap)
+		} else {
+			table.AddRow("  Sync Progress", barStr)
+		}
+	}
+}
+
+const format pb.ProgressBarTemplate = `{{counters . }} {{bar . "[" "#" "#" "." "]"}} {{percent . }}  -  {{string . "suffix"}}`
+
+func syncProgressBarString(current, max, secondsRemaining uint64) (string, error) {
+	var maxInt64 uint64 = math.MaxInt64
+	if current > maxInt64 || max > maxInt64 {
+		return "", errors.New("invalid sync progress value received: int64 overflow")
+	}
+
+	if current > max {
+		return "", errors.New("invalid sync progress value received: current < max")
+	}
+
+	bar := format.Start64(int64(max))
+	bar.Set(pb.Bytes, true)
+	bar.SetWidth(80)
+	bar.SetCurrent(int64(max - current))
+
+	etaString := time.Duration(secondsRemaining) * time.Second
+	bar.Set("suffix", fmt.Sprintf("ETA: %s", etaString))
+	return bar.String(), nil
+}
+
+func (d *Displayer) timeToHuman(t time.Time) string {
+	humanized := d.timeHumanizer.TimeToHuman(t)
+	rfc := t.Format(time.RFC3339)
+	return fmt.Sprintf("%s (%s)", rfc, humanized)
 }
 
 // DetachVolume writes a success message to the writer

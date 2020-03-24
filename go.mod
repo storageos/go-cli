@@ -5,10 +5,10 @@ require (
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d
 	github.com/antihax/optional v1.0.0
 	github.com/blang/semver v3.5.1+incompatible
+	github.com/cheggaaa/pb/v3 v3.0.4
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/gosuri/uitable v0.0.4
-	github.com/kisielk/gotool v1.0.0 // indirect
 	github.com/kr/pretty v0.1.0
 	github.com/mattn/go-runewidth v0.0.8 // indirect
 	github.com/spf13/cobra v0.0.5

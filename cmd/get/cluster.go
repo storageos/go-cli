@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
+	"code.storageos.net/storageos/c2-cli/output"
 )
 
 type clusterCommand struct {
@@ -23,7 +24,7 @@ func (c *clusterCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, _ [
 		return err
 	}
 
-	return c.display.GetCluster(ctx, c.writer, cluster)
+	return c.display.GetCluster(ctx, c.writer, output.NewCluster(cluster))
 }
 
 func newCluster(w io.Writer, client Client, config ConfigProvider) *cobra.Command {

@@ -9,6 +9,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/namespace"
+	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/selectors"
 )
@@ -31,7 +32,7 @@ func (c *namespaceCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, a
 			return err
 		}
 
-		return c.display.GetNamespace(ctx, c.writer, ns)
+		return c.display.GetNamespace(ctx, c.writer, output.NewNamespace(ns))
 	default:
 		set, err := selectors.NewSetFromStrings(c.selectors...)
 		if err != nil {
@@ -43,10 +44,12 @@ func (c *namespaceCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, a
 			return err
 		}
 
+		namespaces = set.FilterNamespaces(namespaces)
+
 		return c.display.GetListNamespaces(
 			ctx,
 			c.writer,
-			set.FilterNamespaces(namespaces),
+			output.NewNamespaces(namespaces),
 		)
 	}
 }

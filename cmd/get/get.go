@@ -54,11 +54,11 @@ type Client interface {
 // Displayer defines the functionality required by the CLI application to
 // display the results gathered by the "get" verb commands.
 type Displayer interface {
-	GetCluster(ctx context.Context, w io.Writer, resource *cluster.Resource) error
-	GetNode(ctx context.Context, w io.Writer, resource *node.Resource) error
-	GetListNodes(ctx context.Context, w io.Writer, resources []*node.Resource) error
-	GetNamespace(ctx context.Context, w io.Writer, resource *namespace.Resource) error
-	GetListNamespaces(ctx context.Context, w io.Writer, resources []*namespace.Resource) error
+	GetCluster(ctx context.Context, w io.Writer, cluster *output.Cluster) error
+	GetNode(ctx context.Context, w io.Writer, node *output.Node) error
+	GetListNodes(ctx context.Context, w io.Writer, nodes []*output.Node) error
+	GetNamespace(ctx context.Context, w io.Writer, namespace *output.Namespace) error
+	GetListNamespaces(ctx context.Context, w io.Writer, namespaces []*output.Namespace) error
 	GetVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
 	GetListVolumes(ctx context.Context, w io.Writer, volumes []*output.Volume) error
 }
