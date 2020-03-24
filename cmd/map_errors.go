@@ -1,8 +1,13 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"fmt"
+
+	"github.com/gosuri/uitable"
+	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
@@ -58,6 +63,52 @@ const (
 	// maps to.
 	CommandTimedOutCode = 124
 )
+
+var exitCodeHelp = []struct {
+	code int
+	help string
+}{
+	{
+		code: LicenceCapabilityErrorCode,
+		help: "The product licence in use prevents the command from completing the operation at present",
+	},
+	{
+		code: AuthenticationErrorCode,
+		help: "Unable to authenticate with the API using the provided credentials",
+	},
+	{
+		code: UnauthorisedErrorCode,
+		help: "The authenticated user does not have the rights to perform the requested action",
+	},
+	{
+		code: NotFoundCode,
+		help: "A resource required for successful completion of the command is not found",
+	},
+	{
+		code: AlreadyExistsCode,
+		help: "The result of completing the command would conflict with an already existing resource, so it cannot be performed",
+	},
+	{
+		code: InvalidInputCode,
+		help: "An invalid value given to the command prevents completion of the operation and must be addressed before re-attempting the operation",
+	},
+	{
+		code: InvalidStateCode,
+		help: "The target's current state does not support an operation required to complete the command",
+	},
+	{
+		code: TryAgainCode,
+		help: "Indicates command failure as the result of a transient error. It can be re-attempted without modification",
+	},
+	{
+		code: InternalErrorCode,
+		help: "Command failure is prevented from completion as the result of an unexpected fatal error",
+	},
+	{
+		code: CommandTimedOutCode,
+		help: "The command reached the configured time out duration and exited early. It is recommended to check the current state before re-attempting",
+	},
+}
 
 // ErrCommandTimedOut is returned when a command's execution deadline is
 // exceeded.
@@ -152,5 +203,30 @@ func ExitCodeForError(err error) int {
 
 	default:
 		return 1
+	}
+}
+
+// newExitCodeHelpCommand initialises a non-runnable command which displays
+// help documentation for the application's defined exit codes.
+func newExitCodeHelpTopic() *cobra.Command {
+	w := &bytes.Buffer{}
+
+	fmt.Fprintf(w, "Certain classes of error encountered by the StorageOS CLI will set an exit code with special meaning.\n\nDefined Exit Codes:\n")
+
+	table := uitable.New()
+	table.MaxColWidth = 80
+	table.Separator = "  "
+	table.Wrap = true
+
+	for _, doc := range exitCodeHelp {
+		table.AddRow(fmt.Sprintf("  %d", doc.code), doc.help)
+	}
+
+	fmt.Fprintln(w, table)
+
+	return &cobra.Command{
+		Use:   "exitcodes",
+		Short: "View documentation for the exit codes used by the StorageOS CLI",
+		Long:  w.String(),
 	}
 }

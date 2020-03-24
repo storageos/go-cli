@@ -54,6 +54,7 @@ To be notified about stable releases and latest features, sign up at https://my.
 		SilenceErrors: true,
 	}
 
+	// Register the generic CLI commands that don't do any API interaction.
 	versionCommand := &cobra.Command{
 		Use:   "version",
 		Short: "View version information for the StorageOS CLI",
@@ -70,6 +71,13 @@ To be notified about stable releases and latest features, sign up at https://my.
 		attach.NewCommand(client, config),
 		detach.NewCommand(client, config),
 		versionCommand,
+	)
+
+	// Cobra subcommands which are not runnable and do not themselves have
+	// subcommands are added as additional help topics.
+	app.AddCommand(
+		newEnvConfigHelpTopic(),
+		newExitCodeHelpTopic(),
 	)
 
 	app.PersistentFlags().AddFlagSet(globalFlags)

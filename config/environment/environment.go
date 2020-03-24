@@ -42,6 +42,49 @@ const (
 	OutputFormatVar = "STORAGEOS_OUTPUT_FORMAT"
 )
 
+// EnvConfigHelp holds the list of environment variable used to source
+// configuration settings, along with a user facing help description.
+var EnvConfigHelp = []struct {
+	Name string
+	Help string
+}{
+	{
+		// TODO(CP-3924): Update this for multiple endpoints implementation
+		Name: APIEndpointsVar,
+		Help: "Sets the default StorageOS API endpoint for the CLI to connect to",
+	},
+	{
+		Name: CommandTimeoutVar,
+		Help: "Specifies the default duration which the CLI will give a command to complete before aborting with a timeout",
+	},
+	{
+		Name: UsernameVar,
+		Help: "Sets the default username provided by the CLI for authentication",
+	},
+	{
+		Name: PasswordVar,
+		Help: "Sets the default password provided by the CLI for authentication",
+	},
+	//  TODO(CP-3919): Uncomment/refine this when implemented.
+	//
+	// {
+	// 	Name: PasswordCommandVar,
+	// 	Help: "If set the default password provided by the CLI for authentication is sourced from the output produced by executing the command",
+	// },
+	{
+		Name: UseIDsVar,
+		Help: "When set to true, the CLI will use provided values as IDs instead of names for existing resources",
+	},
+	{
+		Name: NamespaceVar,
+		Help: "Specifies the default namespace for the CLI to operate in",
+	},
+	{
+		Name: OutputFormatVar,
+		Help: "Specifies the default format used by the CLI for output",
+	},
+}
+
 // Provider exports functionality to retrieve global configuration values from
 // environment variables if available. When a configuration value is not
 // available from the environment, the configured fallback is used.
