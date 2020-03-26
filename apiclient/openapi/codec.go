@@ -7,6 +7,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
+	"code.storageos.net/storageos/c2-cli/pkg/capacity"
 	"code.storageos.net/storageos/c2-cli/pkg/health"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/version"
@@ -46,11 +47,20 @@ func (c codec) decodeCluster(model openapi.Cluster) (*cluster.Resource, error) {
 	}, nil
 }
 
+func (c codec) decodeCapacityStats(stats openapi.CapacityStats) capacity.Stats {
+	return capacity.Stats{
+		Total:     stats.Total,
+		Free:      stats.Free,
+		Available: stats.Available,
+	}
+}
+
 func (c codec) decodeNode(model openapi.Node) (*node.Resource, error) {
 	return &node.Resource{
-		ID:     id.Node(model.Id),
-		Name:   model.Name,
-		Health: health.NodeFromString(string(model.Health)),
+		ID:       id.Node(model.Id),
+		Name:     model.Name,
+		Health:   health.NodeFromString(string(model.Health)),
+		Capacity: c.decodeCapacityStats(model.Capacity),
 
 		Labels: model.Labels,
 

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"code.storageos.net/storageos/c2-cli/node"
+	"code.storageos.net/storageos/c2-cli/pkg/capacity"
 	"code.storageos.net/storageos/c2-cli/pkg/health"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
@@ -15,6 +16,7 @@ type Node struct {
 	ID             id.Node          `json:"id"`
 	Name           string           `json:"name"`
 	Health         health.NodeState `json:"health"`
+	Capacity       capacity.Stats   `json:"capacity,omitempty"`
 	IOAddr         string           `json:"ioAddress"`
 	SupervisorAddr string           `json:"supervisorAddress"`
 	GossipAddr     string           `json:"gossipAddress"`
@@ -32,6 +34,7 @@ func NewNode(n *node.Resource) *Node {
 		ID:             n.ID,
 		Name:           n.Name,
 		Health:         n.Health,
+		Capacity:       n.Capacity,
 		IOAddr:         n.IOAddr,
 		SupervisorAddr: n.SupervisorAddr,
 		GossipAddr:     n.GossipAddr,
