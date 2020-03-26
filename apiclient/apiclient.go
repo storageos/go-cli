@@ -5,6 +5,7 @@ package apiclient
 import (
 	"context"
 	"errors"
+	"io"
 	"sync"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
@@ -50,6 +51,7 @@ type Transport interface {
 	GetNode(ctx context.Context, nodeID id.Node) (*node.Resource, error)
 	GetVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume) (*volume.Resource, error)
 	GetNamespace(ctx context.Context, namespaceID id.Namespace) (*namespace.Resource, error)
+	GetDiagnostics(ctx context.Context) (io.ReadCloser, error)
 
 	ListNodes(ctx context.Context) ([]*node.Resource, error)
 	ListVolumes(ctx context.Context, namespaceID id.Namespace) ([]*volume.Resource, error)

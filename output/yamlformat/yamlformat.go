@@ -57,6 +57,17 @@ func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *outpu
 	return d.encode(w, resource)
 }
 
+// GetDiagnostics encodes outputPath as YAML, writing the result to w.
+func (d *Displayer) GetDiagnostics(ctx context.Context, w io.Writer, outputPath string) error {
+	output := struct {
+		OutputPath string `yaml:"outputPath"`
+	}{
+		OutputPath: outputPath,
+	}
+
+	return d.encode(w, output)
+}
+
 // GetNode encodes resource as YAML, writing the result to w.
 func (d *Displayer) GetNode(ctx context.Context, w io.Writer, resource *output.Node) error {
 	return d.encode(w, resource)

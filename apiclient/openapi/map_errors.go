@@ -1,7 +1,6 @@
 package openapi
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -65,13 +64,27 @@ func newConflictError(msg string) conflictError {
 	}
 }
 
+type openAPIError struct {
+	inner openapi.Error
+}
+
+func (e openAPIError) Error() string {
+	return e.inner.Error
+}
+
+func newOpenAPIError(err openapi.Error) openAPIError {
+	return openAPIError{
+		inner: err,
+	}
+}
+
 // mapOpenAPIError will given err and its corresponding resp attempt to map the
 // HTTP error to an application level error.
 //
 // err is returned as is when any of the following are true:
 //
 // 	 → resp is nil
-// 	 → err is not a GenericOpenAPIError
+// 	 → err is not a GenericOpenAPIError or the unexported openAPIError
 //
 // Some response codes must be mapped by the caller in order to provide useful
 // application level errors:
@@ -88,17 +101,19 @@ func mapOpenAPIError(err error, resp *http.Response) error {
 		return err
 	}
 
-	var oerr openapi.GenericOpenAPIError
-	if ok := errors.As(err, &oerr); !ok {
-		return err
-	}
-
 	var details string
-	switch v := oerr.Model().(type) {
-	case openapi.Error:
-		details = v.Error
+	switch v := err.(type) {
+	case openapi.GenericOpenAPIError:
+		switch model := v.Model().(type) {
+		case openapi.Error:
+			details = model.Error
+		default:
+			details = fmt.Sprintf("%s", v.Body())
+		}
+	case openAPIError:
+		details = v.Error()
 	default:
-		details = fmt.Sprintf("%s", oerr.Body())
+		return err
 	}
 
 	switch resp.StatusCode {

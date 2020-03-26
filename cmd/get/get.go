@@ -32,6 +32,7 @@ type ConfigProvider interface {
 // reasonably implement the "get" verb commands.
 type Client interface {
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
+	GetDiagnostics(ctx context.Context) (io.ReadCloser, error)
 
 	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
 	GetNodeByName(ctx context.Context, name string) (*node.Resource, error)
@@ -55,6 +56,7 @@ type Client interface {
 // display the results gathered by the "get" verb commands.
 type Displayer interface {
 	GetCluster(ctx context.Context, w io.Writer, cluster *output.Cluster) error
+	GetDiagnostics(ctx context.Context, w io.Writer, outputPath string) error
 	GetNode(ctx context.Context, w io.Writer, node *output.Node) error
 	GetListNodes(ctx context.Context, w io.Writer, nodes []*output.Node) error
 	GetNamespace(ctx context.Context, w io.Writer, namespace *output.Namespace) error
@@ -72,6 +74,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 
 	command.AddCommand(
 		newCluster(os.Stdout, client, config),
+		newDiagnostics(os.Stdout, client, config),
 		newNode(os.Stdout, client, config),
 		newNamespace(os.Stdout, client, config),
 		newVolume(os.Stdout, client, config),

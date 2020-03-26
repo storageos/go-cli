@@ -70,6 +70,12 @@ func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *outpu
 	return write(w)
 }
 
+// GetDiagnostics writes a success message displaying outputPath to w.
+func (d *Displayer) GetDiagnostics(ctx context.Context, w io.Writer, outputPath string) error {
+	_, err := fmt.Fprintf(w, "Diagnostic bundle written to %v \n", outputPath)
+	return err
+}
+
 // GetNode creates human-readable strings, writing the result to w.
 func (d *Displayer) GetNode(ctx context.Context, w io.Writer, resource *output.Node) error {
 	table, write := createTable(nodeHeaders)

@@ -2,6 +2,7 @@ package apiclient
 
 import (
 	"context"
+	"io"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -25,6 +26,10 @@ func (t *noTransport) Authenticate(ctx context.Context, username, password strin
 }
 
 func (t *noTransport) GetCluster(ctx context.Context) (*cluster.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
+func (t *noTransport) GetDiagnostics(ctx context.Context) (io.ReadCloser, error) {
 	return nil, ErrNoTransportConfigured
 }
 

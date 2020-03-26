@@ -2,6 +2,7 @@ package apiclient
 
 import (
 	"context"
+	"io"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -18,6 +19,9 @@ type mockTransport struct {
 
 	GetClusterResource *cluster.Resource
 	GetClusterError    error
+
+	GetDiagnosticsReadCloser io.ReadCloser
+	GetDiagnosticsErr        error
 
 	GetNodeResource *node.Resource
 	GetNodeError    error
@@ -70,6 +74,10 @@ func (m *mockTransport) Authenticate(ctx context.Context, username, password str
 
 func (m *mockTransport) GetCluster(ctx context.Context) (*cluster.Resource, error) {
 	return m.GetClusterResource, m.GetClusterError
+}
+
+func (m *mockTransport) GetDiagnostics(ctx context.Context) (io.ReadCloser, error) {
+	return m.GetDiagnosticsReadCloser, m.GetDiagnosticsErr
 }
 
 func (m *mockTransport) GetNode(ctx context.Context, nodeID id.Node) (*node.Resource, error) {
