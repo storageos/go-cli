@@ -78,6 +78,8 @@ func newDiagnostics(w io.Writer, client Client, config ConfigProvider) *cobra.Co
 		Short: "Fetch a cluster diagnostic bundle",
 		Example: `
 $ storageos get diagnostics
+
+$ storageos get diagnostics --output-file ~/my-diagnostics
 `,
 		PreRun: func(_ *cobra.Command, _ []string) {
 			c.display = SelectDisplayer(c.config)
@@ -91,7 +93,7 @@ $ storageos get diagnostics
 		SilenceUsage: true,
 	}
 
-	cobraCommand.Flags().StringVarP(&c.outputPath, "output-file", "o", "", "writes the generated diagnostic bundle to a specified file path")
+	cobraCommand.Flags().StringVar(&c.outputPath, "output-file", "", "writes the generated diagnostic bundle to a specified file path")
 
 	return cobraCommand
 }

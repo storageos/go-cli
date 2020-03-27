@@ -30,9 +30,15 @@ const (
 	// NamespaceFlag keys the long flag from which the namespace name or ID to
 	// operate within is sourced for commands that required it.
 	NamespaceFlag = "namespace"
+	// ShortNamespaceFlag keys the short flag from which the namespace name or ID
+	// to operate within is sourced for commands that required it.
+	ShortNamespaceFlag = "n"
 	// OutputFormatFlag keys the long flag from which the output format is
 	// sourced for commands that requires it
 	OutputFormatFlag = "output"
+	// ShortOutputFormatFlag keys the short flag from which the output format is
+	// sourced for commands that requires it
+	ShortOutputFormatFlag = "o"
 )
 
 // FlagSet describes a set of typed flag set accessors/setters required by the
@@ -43,6 +49,7 @@ type FlagSet interface {
 	Bool(name string, value bool, usage string) *bool
 	Duration(name string, value time.Duration, usage string) *time.Duration
 	String(name string, value string, usage string) *string
+	StringP(name string, shorthand string, value string, usage string) *string
 	StringArray(name string, value []string, usage string) *[]string
 
 	GetBool(name string) (bool, error)
@@ -201,13 +208,15 @@ func NewProvider(flagset FlagSet, fallback config.Provider) *Provider {
 		config.DefaultUseIDs,
 		"specify existing StorageOS resources by their unique identifiers instead of by their names",
 	)
-	flagset.String(
+	flagset.StringP(
 		NamespaceFlag,
+		ShortNamespaceFlag,
 		config.DefaultNamespaceName,
 		"specifies the namespace to operate within for commands that require one",
 	)
-	flagset.String(
+	flagset.StringP(
 		OutputFormatFlag,
+		ShortOutputFormatFlag,
 		config.DefaultOutput.String(),
 		fmt.Sprintf("specifies the output format (one of %v)", output.ValidFormats),
 	)
