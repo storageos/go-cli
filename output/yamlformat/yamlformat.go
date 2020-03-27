@@ -121,6 +121,20 @@ func (d *Displayer) DescribeListVolumes(ctx context.Context, w io.Writer, volume
 	return d.encode(w, volumes)
 }
 
+// -----------------------------------------------------------------------------
+// DELETE
+// -----------------------------------------------------------------------------
+
+// DeleteVolume encodes the deletion confirmation as YAML, writing the result
+// to w.
+func (d *Displayer) DeleteVolume(ctx context.Context, w io.Writer, confirmation output.VolumeDeletion) error {
+	return d.encode(w, confirmation)
+}
+
+// -----------------------------------------------------------------------------
+// OTHER
+// -----------------------------------------------------------------------------
+
 // AttachVolume writes nothing in the writer
 func (d *Displayer) AttachVolume(ctx context.Context, w io.Writer) error {
 	return nil

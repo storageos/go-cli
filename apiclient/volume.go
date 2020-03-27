@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
@@ -291,6 +292,39 @@ func filterVolumesForNames(volumes []*volume.Resource, names ...string) ([]*volu
 	return filtered, nil
 }
 
+// DeleteVolumeRequestParams contains optional request parameters for a delete
+// volume operation.
+type DeleteVolumeRequestParams struct {
+	CASVersion version.Version
+	AsyncMax   time.Duration
+}
+
+// DeleteVolume makes a delete request for volumeID in namespaceID.
+//
+// The behaviour of the operation is dictated by params:
+//
+//
+// 	Version constraints:
+// 	- If params is nil or params.CASVersion is empty then the delete request is
+// 	unconditional
+// 	- If params.CASVersion is set, the request is conditional upon it matching
+// 	the volume entity's version as seen by the server.
+//
+//  Asynchrony:
+//  - If params is nil or params.AsyncMax is empty/zero valued then the delete
+//  request is performed synchronously.
+//  - If params.AsyncMax is set, the request is performed asynchronously using
+//  the duration given as the maximum amount of time allowed for the request
+//  before it times out.
+func (c *Client) DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DeleteVolumeRequestParams) error {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return err
+	}
+
+	return c.transport.DeleteVolume(ctx, namespaceID, volumeID, params)
+}
+
 // AttachVolume requests to attach a volume (namespace/volume) to a node
 // It requires authentication.
 func (c *Client) AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error {
@@ -302,7 +336,8 @@ func (c *Client) AttachVolume(ctx context.Context, namespaceID id.Namespace, vol
 	return c.transport.AttachVolume(ctx, namespaceID, volumeID, nodeID)
 }
 
-// DetachVolumeRequestParams contains request parameters.
+// DetachVolumeRequestParams contains optional request parameters for a detach
+// volume operation.
 type DetachVolumeRequestParams struct {
 	CASVersion version.Version
 }
@@ -310,6 +345,9 @@ type DetachVolumeRequestParams struct {
 // DetachVolume makes a detach request for volumeID in namespaceID.
 //
 // The behaviour of the operation is dictated by params:
+//
+//
+//  Version constraints:
 // 	- If params is nil or params.CASVersion is empty then the detach request is
 // 	unconditional
 // 	- If params.CASVersion is set, the request is conditional upon it matching

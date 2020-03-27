@@ -124,6 +124,20 @@ func (d *Displayer) DescribeListVolumes(ctx context.Context, w io.Writer, volume
 	return d.encode(w, volumes)
 }
 
+// -----------------------------------------------------------------------------
+// DELETE
+// -----------------------------------------------------------------------------
+
+// DeleteVolume encodes the volume deletion confirmation as JSON, writing the
+// result to w.
+func (d *Displayer) DeleteVolume(ctx context.Context, w io.Writer, confirmation output.VolumeDeletion) error {
+	return d.encode(w, confirmation)
+}
+
+// -----------------------------------------------------------------------------
+// OTHER
+// -----------------------------------------------------------------------------
+
 // AttachVolume writes nothing to the writer.
 func (d *Displayer) AttachVolume(ctx context.Context, w io.Writer) error {
 	return nil

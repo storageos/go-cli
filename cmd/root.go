@@ -13,6 +13,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/apply"
 	"code.storageos.net/storageos/c2-cli/cmd/attach"
 	"code.storageos.net/storageos/c2-cli/cmd/create"
+	"code.storageos.net/storageos/c2-cli/cmd/delete"
 	"code.storageos.net/storageos/c2-cli/cmd/describe"
 	"code.storageos.net/storageos/c2-cli/cmd/detach"
 	"code.storageos.net/storageos/c2-cli/cmd/get"
@@ -68,6 +69,7 @@ To be notified about stable releases and latest features, sign up at https://my.
 		create.NewCommand(client, config),
 		get.NewCommand(client, config),
 		describe.NewCommand(client, config),
+		delete.NewCommand(client, config),
 		attach.NewCommand(client, config),
 		detach.NewCommand(client, config),
 		versionCommand,

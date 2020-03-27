@@ -395,6 +395,13 @@ func (d *Displayer) DetachVolume(ctx context.Context, w io.Writer) error {
 	return err
 }
 
+// DeleteVolume writes a message containing the volume deletion confirmation
+// to w.
+func (d *Displayer) DeleteVolume(ctx context.Context, w io.Writer, confirmation output.VolumeDeletion) error {
+	_, err := fmt.Fprintf(w, "deleted volume %v from namespace %v\n", confirmation.ID, confirmation.Namespace)
+	return err
+}
+
 // NewDisplayer initialises a Displayer which prints human readable strings
 // StorageOS to output CLI results.
 func NewDisplayer(timeHumanizer output.TimeHumanizer) *Displayer {

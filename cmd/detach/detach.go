@@ -14,7 +14,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/namespace"
-	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/output/textformat"
@@ -43,7 +42,6 @@ type ConfigProvider interface {
 type Client interface {
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 	GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error)
-	GetNodeByName(ctx context.Context, name string) (*node.Resource, error)
 	DetachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *apiclient.DetachVolumeRequestParams) error
 }
 

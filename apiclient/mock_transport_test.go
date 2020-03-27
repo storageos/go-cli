@@ -55,6 +55,11 @@ type mockTransport struct {
 	UpdateClusterGotResource   *cluster.Resource
 	UpdateClusterGotLicenceKey []byte
 
+	DeleteVolumeGotNamespace id.Namespace
+	DeleteVolumeGotVolume    id.Volume
+	DeleteVolumeGotParams    *DeleteVolumeRequestParams
+	DeleteVolumeError        error
+
 	AttachGotNamespace id.Namespace
 	AttachGotVolume    id.Volume
 	AttachGotNode      id.Node
@@ -120,6 +125,13 @@ func (m *mockTransport) UpdateCluster(ctx context.Context, resource *cluster.Res
 	m.UpdateClusterGotResource = resource
 	m.UpdateClusterGotLicenceKey = licenceKey
 	return m.UpdateClusterResource, m.UpdateClusterError
+}
+
+func (m *mockTransport) DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DeleteVolumeRequestParams) error {
+	m.DeleteVolumeGotNamespace = namespaceID
+	m.DeleteVolumeGotVolume = volumeID
+	m.DeleteVolumeGotParams = params
+	return m.DeleteVolumeError
 }
 
 func (m *mockTransport) AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error {

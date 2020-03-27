@@ -51,6 +51,12 @@ type SyncProgress struct {
 	EstimatedSecondsRemaining uint64 `json:"estimatedSecondsRemaining" yaml:"estimatedSecondsRemaining"`
 }
 
+// VolumeDeletion defines a volume deletion confirmation output representation.
+type VolumeDeletion struct {
+	ID        id.Volume    `json:"id" yaml:"id"`
+	Namespace id.Namespace `json:"namespaceID" yaml:"namespaceID"`
+}
+
 // NewVolume creates a new Volume output representation using extra details
 // from the provided parameters.
 func NewVolume(vol *volume.Resource, ns *namespace.Resource, nodes map[id.Node]*node.Resource) (*Volume, error) {
@@ -133,5 +139,13 @@ func newSyncProgress(sync *volume.SyncProgress) *SyncProgress {
 		BytesRemaining:            sync.BytesRemaining,
 		ThroughputBytes:           sync.ThroughputBytes,
 		EstimatedSecondsRemaining: sync.EstimatedSecondsRemaining,
+	}
+}
+
+// NewVolumeDeletion constructs a volume deletion confirmation output representation.
+func NewVolumeDeletion(volumeID id.Volume, namespaceID id.Namespace) VolumeDeletion {
+	return VolumeDeletion{
+		ID:        volumeID,
+		Namespace: namespaceID,
 	}
 }

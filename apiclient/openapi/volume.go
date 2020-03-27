@@ -95,6 +95,64 @@ func (o *OpenAPI) ListVolumes(ctx context.Context, namespaceID id.Namespace) ([]
 	return volumes, nil
 }
 
+// DeleteVolume makes a delete request for volumeID in namespaceID.
+//
+// The behaviour of the operation is dictated by params:
+//
+//
+// 	Version constraints:
+// 	- If params is nil or params.CASVersion is empty then the delete request is
+// 	unconditional
+// 	- If params.CASVersion is set, the request is conditional upon it matching
+// 	the volume entity's version as seen by the server.
+//
+//  Asynchrony:
+//  - If params is nil or params.AsyncMax is empty/zero valued then the delete
+//  request is performed synchronously.
+//  - If params.AsyncMax is set, the request is performed asynchronously using
+//  the duration given as the maximum amount of time allowed for the request
+//  before it times out.
+func (o *OpenAPI) DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *apiclient.DeleteVolumeRequestParams) error {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	var casVersion string
+	var ignoreVersion optional.Bool = optional.NewBool(true)
+	var asyncMax optional.String = optional.EmptyString()
+
+	if params != nil {
+		if params.CASVersion.String() != "" {
+			ignoreVersion = optional.NewBool(false)
+			casVersion = params.CASVersion.String()
+		}
+
+		if params.AsyncMax != 0 {
+			asyncMax = optional.NewString(params.AsyncMax.String())
+		}
+	}
+
+	resp, err := o.client.DefaultApi.DeleteVolume(
+		ctx,
+		namespaceID.String(),
+		volumeID.String(),
+		casVersion,
+		&openapi.DeleteVolumeOpts{
+			IgnoreVersion: ignoreVersion,
+			AsyncMax:      asyncMax,
+		},
+	)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return apiclient.NewVolumeNotFoundError(v.msg)
+		default:
+			return v
+		}
+	}
+
+	return nil
+}
+
 // AttachVolume request to attach the volume `volumeID` in the namespace
 // `namespaceID` to the node `nodeID`. It can return an error or nil if it
 // succeeds.
@@ -125,6 +183,9 @@ func (o *OpenAPI) AttachVolume(ctx context.Context, namespaceID id.Namespace, vo
 // DetachVolume makes a detach request for volumeID in namespaceID.
 //
 // The behaviour of the operation is dictated by params:
+//
+//
+//  Version constraints:
 // 	- If params is nil or params.CASVersion is empty then the detach request is
 // 	unconditional
 // 	- If params.CASVersion is set, the request is conditional upon it matching
@@ -134,11 +195,11 @@ func (o *OpenAPI) DetachVolume(ctx context.Context, namespaceID id.Namespace, vo
 	defer o.mu.RUnlock()
 
 	var casVersion string
-	var ignoreVersion bool = true
+	var ignoreVersion optional.Bool = optional.NewBool(true)
 
 	// Set the CAS version constraint if provided
 	if params != nil && params.CASVersion.String() != "" {
-		ignoreVersion = false
+		ignoreVersion = optional.NewBool(false)
 		casVersion = params.CASVersion.String()
 	}
 
@@ -148,7 +209,7 @@ func (o *OpenAPI) DetachVolume(ctx context.Context, namespaceID id.Namespace, vo
 		volumeID.String(),
 		casVersion,
 		&openapi.DetachVolumeOpts{
-			IgnoreVersion: optional.NewBool(ignoreVersion),
+			IgnoreVersion: ignoreVersion,
 		},
 	)
 	if err != nil {
