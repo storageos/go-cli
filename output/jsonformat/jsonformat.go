@@ -8,7 +8,6 @@ import (
 	"io"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
-	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
 )
 
@@ -105,14 +104,14 @@ func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, volumes []*
 // DESCRIBE
 // -----------------------------------------------------------------------------
 
-// DescribeNode encodes state as JSON, writing the result to w.
-func (d *Displayer) DescribeNode(ctx context.Context, w io.Writer, state *node.State) error {
-	return d.encode(w, state)
+// DescribeNode encodes node as JSON, writing the result to w.
+func (d *Displayer) DescribeNode(ctx context.Context, w io.Writer, node *output.NodeDescription) error {
+	return d.encode(w, node)
 }
 
-// DescribeListNodes encodes states as JSON, writing the result to w.
-func (d *Displayer) DescribeListNodes(ctx context.Context, w io.Writer, states []*node.State) error {
-	return d.encode(w, states)
+// DescribeListNodes encodes nodes as JSON, writing the result to w.
+func (d *Displayer) DescribeListNodes(ctx context.Context, w io.Writer, nodes []*output.NodeDescription) error {
+	return d.encode(w, nodes)
 }
 
 // DescribeVolume encodes volume as JSON, writing the result to w

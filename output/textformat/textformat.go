@@ -13,8 +13,8 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/gosuri/uitable"
 
-	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
+	"code.storageos.net/storageos/c2-cli/pkg/capacity"
 	"code.storageos.net/storageos/c2-cli/pkg/health"
 )
 
@@ -197,15 +197,77 @@ func (d *Displayer) AttachVolume(ctx context.Context, w io.Writer) error {
 }
 
 // DescribeNode prints all the detailed information about a node
-func (d *Displayer) DescribeNode(context.Context, io.Writer, *node.State) error {
-	// TODO(CP-4048): describe node
-	return errors.New("no text formatter implemented")
+func (d *Displayer) DescribeNode(ctx context.Context, w io.Writer, node *output.NodeDescription) error {
+	return d.describeNode(ctx, w, node)
 }
 
 // DescribeListNodes prints all the detailed information about a list of nodes
-func (d *Displayer) DescribeListNodes(ctx context.Context, w io.Writer, states []*node.State) error {
-	// TODO(CP-4048): describe node
-	return errors.New("no text formatter implemented")
+func (d *Displayer) DescribeListNodes(ctx context.Context, w io.Writer, nodes []*output.NodeDescription) error {
+	for i, node := range nodes {
+		if i != 0 {
+			if _, err := fmt.Fprintln(w); err != nil {
+				return err
+			}
+		}
+
+		if err := d.describeNode(ctx, w, node); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (d *Displayer) describeNode(ctx context.Context, w io.Writer, node *output.NodeDescription) error {
+	table := uitable.New()
+	table.MaxColWidth = 80
+	table.Separator = "  "
+
+	table.AddRow("ID", node.ID.String())
+	table.AddRow("Name", node.Name)
+	table.AddRow("Health", node.Health.String())
+	// Addresses
+	table.AddRow("Addresses:")
+	table.AddRow("  Data Transfer address", node.IOAddr)
+	table.AddRow("  Gossip address", node.GossipAddr)
+	table.AddRow("  Supervisor address", node.SupervisorAddr)
+	table.AddRow("  Clustering address", node.ClusteringAddr)
+
+	table.AddRow("Labels", node.Labels.String())
+	table.AddRow("Created at", d.timeToHuman(node.CreatedAt))
+	table.AddRow("Updated at", d.timeToHuman(node.UpdatedAt))
+	table.AddRow("Version", node.Version.String())
+
+	capacityStats := "n/a"
+	if node.Capacity != (capacity.Stats{}) {
+		capacityStats = fmt.Sprintf(
+			"%s/%s (%s in use)",
+			humanize.IBytes(node.Capacity.Available),
+			humanize.IBytes(node.Capacity.Total),
+			humanize.IBytes(node.Capacity.Total-node.Capacity.Free),
+		)
+	}
+	table.AddRow("Available capacity", capacityStats)
+
+	// Volumes
+	if len(node.HostedVolumes) > 0 {
+		table.AddRow()
+		table.AddRow("Local volume deployments:")
+		table.AddRow("  DEPLOYMENT ID", "VOLUME", "NAMESPACE", "HEALTH", "TYPE", "SIZE")
+		for _, vol := range node.HostedVolumes {
+			table.AddRow(
+				"  "+vol.LocalDeployment.ID,
+				vol.Name,
+				vol.NamespaceName,
+				vol.LocalDeployment.Health,
+				vol.LocalDeployment.Kind,
+				humanize.IBytes(vol.SizeBytes),
+			)
+		}
+	}
+
+	_, err := fmt.Fprintln(w, table)
+	return err
 }
 
 // DescribeVolume prints in the output writer a tabular representation, in a key

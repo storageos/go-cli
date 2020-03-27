@@ -30,26 +30,26 @@ type ConfigProvider interface {
 // Client describes the functionality required by the CLI application
 // to reasonably implement the "describe" verb commands.
 type Client interface {
-	DescribeNode(ctx context.Context, uid id.Node) (*node.State, error)
-	DescribeNodeByName(ctx context.Context, name string) (*node.State, error)
+	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
+	GetNodeByName(ctx context.Context, name string) (*node.Resource, error)
 
-	DescribeListNodes(ctx context.Context, uids ...id.Node) ([]*node.State, error)
-	DescribeListNodesByName(ctx context.Context, names ...string) ([]*node.State, error)
-
-	// GetListNodes is used to get node details for describing volumes.
 	GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
+	GetListNodesByName(ctx context.Context, names ...string) ([]*node.Resource, error)
+
 	GetVolume(ctx context.Context, namespace id.Namespace, vid id.Volume) (*volume.Resource, error)
 	GetVolumeByName(ctx context.Context, namespace id.Namespace, name string) (*volume.Resource, error)
+	GetAllVolumes(ctx context.Context) ([]*volume.Resource, error)
 
 	GetNamespace(ctx context.Context, namespaceID id.Namespace) (*namespace.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
+	GetAllNamespaces(ctx context.Context) ([]*namespace.Resource, error)
 }
 
 // Displayer defines the functionality required by the CLI application
 // to display the results gathered by the "describe" verb commands.
 type Displayer interface {
-	DescribeNode(context.Context, io.Writer, *node.State) error
-	DescribeListNodes(ctx context.Context, w io.Writer, states []*node.State) error
+	DescribeNode(ctx context.Context, w io.Writer, node *output.NodeDescription) error
+	DescribeListNodes(ctx context.Context, w io.Writer, nodes []*output.NodeDescription) error
 	DescribeVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
 	DescribeListVolumes(ctx context.Context, w io.Writer, volumes []*output.Volume) error
 }

@@ -54,28 +54,6 @@ NEXT_NODE:
 	return filtered
 }
 
-// FilterNodeStates returns the subset of node states in nodes whose resource
-// matches on the selectors which s is configured with.
-func (s *Set) FilterNodeStates(nodes []*node.State) []*node.State {
-	if len(s.selectors) == 0 {
-		return nodes
-	}
-
-	filtered := make([]*node.State, 0)
-
-NEXT_NODE:
-	for _, n := range nodes {
-		for _, selects := range s.selectors {
-			if !selects(n.Resource.Labels) {
-				continue NEXT_NODE
-			}
-		}
-		filtered = append(filtered, n)
-	}
-
-	return filtered
-}
-
 // FilterNamespaces returns the subset of namespace resources in namespaces
 // which match on the selectors which s is configured with.
 func (s *Set) FilterNamespaces(namespaces []*namespace.Resource) []*namespace.Resource {

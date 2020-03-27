@@ -13,6 +13,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
+	"code.storageos.net/storageos/c2-cli/pkg/capacity"
 	"code.storageos.net/storageos/c2-cli/pkg/health"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -611,6 +612,178 @@ KIWI       kiwi-name    2.0 GiB  banana-node1 (ready)  kiwi-node-a    2/3       
 
 			if gotW := w.String(); gotW != tt.wantW {
 				t.Errorf("GetListVolumes() GOT:\n%v\n\nWANT:\n%v\n", gotW, tt.wantW)
+			}
+		})
+	}
+}
+
+func TestDescribeNode(t *testing.T) {
+	t.Parallel()
+
+	var (
+		createdTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+		updatedTime = time.Date(2001, 1, 1, 0, 0, 0, 0, time.UTC)
+	)
+
+	tests := []struct {
+		name string
+
+		node *output.NodeDescription
+
+		wantOutput string
+		wantErr    error
+	}{
+		{
+			name: "describe node with local volumes ok",
+
+			node: &output.NodeDescription{
+				Node: output.Node{
+					ID:     "bananaID",
+					Name:   "bananaName",
+					Health: health.NodeOnline,
+					Capacity: capacity.Stats{
+						Total:     humanize.GiByte,
+						Available: 500 * humanize.MiByte,
+						Free:      550 * humanize.MiByte,
+					},
+					IOAddr:         "io.addr",
+					SupervisorAddr: "supervisor.addr",
+					GossipAddr:     "gossip.addr",
+					ClusteringAddr: "clustering.addr",
+					Labels: labels.Set{
+						"a": "b",
+						"1": "2",
+					},
+					CreatedAt: createdTime,
+					UpdatedAt: updatedTime,
+					Version:   "some-version",
+				},
+				HostedVolumes: []*output.HostedVolume{
+					{
+						ID:            "volumeID",
+						Name:          "volumeName",
+						Description:   "description",
+						Namespace:     "namespaceID",
+						NamespaceName: "namespaceName",
+						Labels:        labels.Set{},
+						Filesystem:    volume.FsTypeFromString("fs"),
+						SizeBytes:     humanize.GiByte,
+						LocalDeployment: output.LocalDeployment{
+							ID:         "deployID",
+							Kind:       "master",
+							Health:     health.MasterOnline,
+							Promotable: true,
+						},
+						CreatedAt: createdTime,
+						UpdatedAt: updatedTime,
+						Version:   "other-version",
+					},
+					{
+						ID:            "volumeID2",
+						Name:          "volumeName2",
+						Description:   "description2",
+						Namespace:     "namespaceID2",
+						NamespaceName: "namespaceName2",
+						Labels:        labels.Set{},
+						Filesystem:    volume.FsTypeFromString("fs"),
+						SizeBytes:     2 * humanize.GiByte,
+						LocalDeployment: output.LocalDeployment{
+							ID:         "deployID2",
+							Kind:       "replica",
+							Health:     health.ReplicaReady,
+							Promotable: true,
+						},
+						CreatedAt: createdTime,
+						UpdatedAt: updatedTime,
+						Version:   "another-version",
+					},
+				},
+			},
+
+			wantOutput: `ID                         bananaID                              
+Name                       bananaName                            
+Health                     online                                
+Addresses:               
+  Data Transfer address    io.addr                               
+  Gossip address           gossip.addr                           
+  Supervisor address       supervisor.addr                       
+  Clustering address       clustering.addr                       
+Labels                     1=2,a=b                               
+Created at                 2000-01-01T00:00:00Z (a long time ago)
+Updated at                 2001-01-01T00:00:00Z (a long time ago)
+Version                    some-version                          
+Available capacity         500 MiB/1.0 GiB (474 MiB in use)      
+
+Local volume deployments:
+  DEPLOYMENT ID            VOLUME                                  NAMESPACE       HEALTH  TYPE     SIZE   
+  deployID                 volumeName                              namespaceName   online  master   1.0 GiB
+  deployID2                volumeName2                             namespaceName2  ready   replica  2.0 GiB
+`,
+			wantErr: nil,
+		},
+		{
+			name: "describe node with no volumes ok",
+
+			node: &output.NodeDescription{
+				Node: output.Node{
+					ID:     "bananaID",
+					Name:   "bananaName",
+					Health: health.NodeOnline,
+					Capacity: capacity.Stats{
+						Total:     humanize.GiByte,
+						Available: 500 * humanize.MiByte,
+						Free:      550 * humanize.MiByte,
+					},
+					IOAddr:         "io.addr",
+					SupervisorAddr: "supervisor.addr",
+					GossipAddr:     "gossip.addr",
+					ClusteringAddr: "clustering.addr",
+					Labels: labels.Set{
+						"a": "b",
+						"1": "2",
+					},
+					CreatedAt: createdTime,
+					UpdatedAt: updatedTime,
+					Version:   "some-version",
+				},
+				HostedVolumes: nil,
+			},
+
+			wantOutput: `ID                       bananaID                              
+Name                     bananaName                            
+Health                   online                                
+Addresses:             
+  Data Transfer address  io.addr                               
+  Gossip address         gossip.addr                           
+  Supervisor address     supervisor.addr                       
+  Clustering address     clustering.addr                       
+Labels                   1=2,a=b                               
+Created at               2000-01-01T00:00:00Z (a long time ago)
+Updated at               2001-01-01T00:00:00Z (a long time ago)
+Version                  some-version                          
+Available capacity       500 MiB/1.0 GiB (474 MiB in use)      
+`,
+			wantErr: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		var tt = tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			d := NewDisplayer(&mockTimeFormatter{Str: "a long time ago"})
+			w := &bytes.Buffer{}
+
+			gotErr := d.DescribeNode(context.Background(), w, tt.node)
+			if gotErr != tt.wantErr {
+				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+			}
+
+			gotOutput := w.String()
+			if gotOutput != tt.wantOutput {
+				pretty.Ldiff(t, gotOutput, tt.wantOutput)
+				t.Errorf("got output: \n%v\n\nwant: \n%v\n", gotOutput, tt.wantOutput)
 			}
 		})
 	}
