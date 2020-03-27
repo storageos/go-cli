@@ -311,8 +311,8 @@ func (d *Displayer) describeVolume(ctx context.Context, w io.Writer, volume *out
 	table.AddRow("AttachedOn", attachedOnString)
 	table.AddRow("Namespace", fmt.Sprintf("%s (%s)", volume.NamespaceName, volume.Namespace))
 	table.AddRow("Labels", volume.Labels.String())
-	table.AddRow("FileSystem", volume.Filesystem.String())
-	table.AddRow("Size", volume.SizeBytes)
+	table.AddRow("Filesystem", volume.Filesystem.String())
+	table.AddRow("Size", fmt.Sprintf("%v (%v bytes)", humanize.IBytes(volume.SizeBytes), volume.SizeBytes))
 
 	table.AddRow("Version", volume.Version)
 	table.AddRow("Created at", d.timeToHuman(volume.CreatedAt))
@@ -322,13 +322,15 @@ func (d *Displayer) describeVolume(ctx context.Context, w io.Writer, volume *out
 	table.AddRow("Master:")
 	d.describeMaster(table, volume.Master)
 
-	table.AddRow("", "")
-	table.AddRow("Replicas:")
-	for i, rep := range volume.Replicas {
-		if i > 0 {
-			table.AddRow("", "")
+	if len(volume.Replicas) > 0 {
+		table.AddRow("", "")
+		table.AddRow("Replicas:")
+		for i, rep := range volume.Replicas {
+			if i > 0 {
+				table.AddRow("", "")
+			}
+			d.describeReplica(table, volume.SizeBytes, rep)
 		}
-		d.describeReplica(table, volume.SizeBytes, rep)
 	}
 
 	_, err := fmt.Fprintln(w, table)

@@ -867,8 +867,8 @@ Description      banana description
 AttachedOn       banana-node-a (banana-node-a-id)                                                
 Namespace        banana-namespace (banana-namespace-id)                                          
 Labels           kiwi=42,pear=42                                                                 
-FileSystem       ext4                                                                            
-Size             1073741824                                                                      
+Filesystem       ext4                                                                            
+Size             1.0 GiB (1073741824 bytes)                                                      
 Version          42                                                                              
 Created at       2000-01-01T00:00:00Z (xx aeons ago)                                             
 Updated at       2000-01-01T00:00:00Z (xx aeons ago)                                             
@@ -894,6 +894,55 @@ Replicas:
   Health         syncing                                                                         
   Promotable     false                                                                           
   Sync Progress  768.00 MiB / 1.00 GiB [##########################........] 75.00%  -  ETA: 20m0s
+`,
+			wantErr: nil,
+		},
+		{
+			name: "describe volume with no replicas ok",
+
+			volume: &output.Volume{
+				ID:             "bananaID",
+				Name:           "banana-name",
+				Description:    "banana description",
+				AttachedOn:     "banana-node-a-id",
+				AttachedOnName: "banana-node-a",
+				Namespace:      "banana-namespace-id",
+				NamespaceName:  "banana-namespace",
+				Labels: labels.Set{
+					"kiwi": "42",
+					"pear": "42",
+				},
+				Filesystem: volume.FsTypeFromString("ext4"),
+				SizeBytes:  humanize.GiByte,
+				Master: &output.Deployment{
+					ID:         "bananaDeploymentID1",
+					Node:       "banana-node1-id",
+					NodeName:   "banana-node1",
+					Health:     "ready",
+					Promotable: true,
+				},
+				Replicas:  []*output.Deployment{},
+				CreatedAt: mockTime,
+				UpdatedAt: mockTime,
+				Version:   "42",
+			},
+
+			wantOutput: `ID           bananaID                              
+Name         banana-name                           
+Description  banana description                    
+AttachedOn   banana-node-a (banana-node-a-id)      
+Namespace    banana-namespace (banana-namespace-id)
+Labels       kiwi=42,pear=42                       
+Filesystem   ext4                                  
+Size         1.0 GiB (1073741824 bytes)            
+Version      42                                    
+Created at   2000-01-01T00:00:00Z (xx aeons ago)   
+Updated at   2000-01-01T00:00:00Z (xx aeons ago)   
+                                                   
+Master:    
+  ID         bananaDeploymentID1                   
+  Node       banana-node1 (banana-node1-id)        
+  Health     ready                                 
 `,
 			wantErr: nil,
 		},
@@ -1056,8 +1105,8 @@ Description      banana description
 AttachedOn       banana-node-a (banana-node-a-id)                                                
 Namespace        banana-namespace (banana-namespace-id)                                          
 Labels           kiwi=42,pear=42                                                                 
-FileSystem       ext4                                                                            
-Size             1073741824                                                                      
+Filesystem       ext4                                                                            
+Size             1.0 GiB (1073741824 bytes)                                                      
 Version          42                                                                              
 Created at       2000-01-01T00:00:00Z (xx aeons ago)                                             
 Updated at       2000-01-01T00:00:00Z (xx aeons ago)                                             
@@ -1090,8 +1139,8 @@ Description      kiwi description
 AttachedOn       kiwi-node-a (kiwi-node-a-id)                                                    
 Namespace        kiwi-namespace (kiwi-namespace-id)                                              
 Labels           kiwi=42,pear=42                                                                 
-FileSystem       ext4                                                                            
-Size             1073741824                                                                      
+Filesystem       ext4                                                                            
+Size             1.0 GiB (1073741824 bytes)                                                      
 Version          42                                                                              
 Created at       2000-01-01T00:00:00Z (xx aeons ago)                                             
 Updated at       2000-01-01T00:00:00Z (xx aeons ago)                                             

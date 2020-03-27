@@ -8,17 +8,18 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
+	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/selectors"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 var (
-	errNoNamespaceSpecified = errors.New("must specify a namespace to get a volume from")
-	errMissingVolume        = errors.New("must specify a volume to describe")
+	errNoNamespaceSpecified = errors.New("must specify a namespace to describe volumes from")
 )
 
 type volumeCommand struct {
@@ -38,6 +39,11 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		return err
 	}
 
+	set, err := selectors.NewSetFromStrings(c.selectors...)
+	if err != nil {
+		return err
+	}
+
 	var ns *namespace.Resource
 
 	if useIDs {
@@ -52,44 +58,56 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		}
 	}
 
-	volumes := make([]*volume.Resource, 0)
-	var vol *volume.Resource
-	for _, v := range args {
+	switch len(args) {
+	case 1:
+		var vol *volume.Resource
+		var err error
+
 		if useIDs {
-			vol, err = c.client.GetVolume(ctx, ns.ID, id.Volume(v))
-			if err != nil {
-				return err
-			}
+			vol, err = c.client.GetVolume(ctx, ns.ID, id.Volume(args[0]))
 		} else {
-			vol, err = c.client.GetVolumeByName(ctx, ns.ID, v)
-			if err != nil {
-				return err
-			}
+			vol, err = c.client.GetVolumeByName(ctx, ns.ID, args[0])
+		}
+		if err != nil {
+			return err
 		}
 
-		volumes = append(volumes, vol)
-	}
+		nodes, err := c.getNodeMapping(ctx)
+		if err != nil {
+			return err
+		}
 
-	nodes, err := c.getNodeMapping(ctx)
-	if err != nil {
-		return err
-	}
-
-	outputVols := make([]*output.Volume, 0, len(volumes))
-
-	for _, vol := range volumes {
 		outputVol, err := output.NewVolume(vol, ns, nodes)
 		if err != nil {
 			return err
 		}
 
-		outputVols = append(outputVols, outputVol)
-	}
+		return c.display.DescribeVolume(ctx, c.writer, outputVol)
 
-	switch len(outputVols) {
-	case 1:
-		return c.display.DescribeVolume(ctx, c.writer, outputVols[0])
 	default:
+		volumes, err := c.listVolumes(ctx, ns.ID, args)
+		if err != nil {
+			return err
+		}
+
+		volumes = set.FilterVolumes(volumes)
+
+		nodes, err := c.getNodeMapping(ctx)
+		if err != nil {
+			return err
+		}
+
+		outputVols := make([]*output.Volume, 0, len(volumes))
+
+		for _, vol := range volumes {
+			outputVol, err := output.NewVolume(vol, ns, nodes)
+			if err != nil {
+				return err
+			}
+
+			outputVols = append(outputVols, outputVol)
+		}
+
 		return c.display.DescribeListVolumes(ctx, c.writer, outputVols)
 	}
 }
@@ -110,6 +128,26 @@ func (c *volumeCommand) getNodeMapping(ctx context.Context) (map[id.Node]*node.R
 	return nodes, nil
 }
 
+// listVolumes requests a list of volume resources using the configured API
+// client, filtering using vols (if provided) as c's configuration dictates.
+func (c *volumeCommand) listVolumes(ctx context.Context, ns id.Namespace, vols []string) ([]*volume.Resource, error) {
+	useIDs, err := c.config.UseIDs()
+	if err != nil {
+		return nil, err
+	}
+
+	if !useIDs {
+		return c.client.GetNamespaceVolumesByName(ctx, ns, vols...)
+	}
+
+	volIDs := []id.Volume{}
+	for _, uid := range vols {
+		volIDs = append(volIDs, id.Volume(uid))
+	}
+
+	return c.client.GetNamespaceVolumes(ctx, ns, volIDs...)
+}
+
 func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 	c := &volumeCommand{
 		config: config,
@@ -120,8 +158,10 @@ func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command
 	cobraCommand := &cobra.Command{
 		Aliases: []string{"volumes"},
 		Use:     "volume [volume names...]",
-		Short:   "Show detailed information for a volume",
+		Short:   "Show detailed information for volumes",
 		Example: `
+$ storageos describe volumes
+
 $ storageos describe volume --namespace my-namespace-name my-volume-name
 `,
 
@@ -138,16 +178,13 @@ $ storageos describe volume --namespace my-namespace-name my-volume-name
 			}
 			c.namespace = ns
 
-			if len(args) < 1 {
-				return errMissingVolume
-			}
-
 			return nil
 		}),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
+				runwrappers.EnsureNamespaceSetWhenUseIDs(c.config),
 				runwrappers.EnsureTargetOrSelectors(&c.selectors),
 			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
@@ -157,6 +194,8 @@ $ storageos describe volume --namespace my-namespace-name my-volume-name
 		// we don't need to barf the usage template.
 		SilenceUsage: true,
 	}
+
+	flagutil.SupportSelectors(cobraCommand.Flags(), &c.selectors)
 
 	return cobraCommand
 }
