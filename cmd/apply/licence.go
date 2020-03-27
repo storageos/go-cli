@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
-	"code.storageos.net/storageos/c2-cli/output/jsonformat"
+	"code.storageos.net/storageos/c2-cli/output"
 )
 
 var errConflictingLicenceSources = errors.New("must specify exactly one input source to read a product licence from")
@@ -47,17 +47,13 @@ func (c *licenceCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, arg
 		return err
 	}
 
-	return c.display.UpdateLicence(ctx, c.writer, updated)
+	return c.display.UpdateLicence(ctx, c.writer, output.NewLicence(updated))
 }
 
 func newLicence(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 	c := &licenceCommand{
 		config: config,
 		client: client,
-		display: jsonformat.NewDisplayer(
-			jsonformat.DefaultEncodingIndent,
-		),
-
 		writer: w,
 	}
 
@@ -73,6 +69,8 @@ $ echo "<licence file contents>" | storageos apply licence --from-stdin
 		Args: cobra.NoArgs,
 
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			c.display = SelectDisplayer(c.config)
+
 			if c.fromStdin && c.fromFilepath != "" {
 				return errConflictingLicenceSources
 			}

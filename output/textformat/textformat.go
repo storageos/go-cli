@@ -196,6 +196,21 @@ func (d *Displayer) AttachVolume(ctx context.Context, w io.Writer) error {
 	return err
 }
 
+// UpdateLicence prints all the detailed information about a new licence, after
+// it has been correctly updated.
+func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *output.Licence) error {
+	fmt.Fprintf(w, "Licence applied to cluster %s.\n\n", licence.ClusterID.String())
+
+	table, write := createTable(nil)
+
+	table.AddRow("Expiration:", d.timeToHuman(licence.ExpiresAt))
+	table.AddRow("Capacity:", humanize.IBytes(licence.ClusterCapacityBytes))
+	table.AddRow("Kind:", licence.Kind)
+	table.AddRow("Customer name:", licence.CustomerName)
+
+	return write(w)
+}
+
 // DescribeNode prints all the detailed information about a node
 func (d *Displayer) DescribeNode(ctx context.Context, w io.Writer, node *output.NodeDescription) error {
 	return d.describeNode(ctx, w, node)

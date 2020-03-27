@@ -40,7 +40,7 @@ type Licence struct {
 func NewCluster(c *cluster.Resource) *Cluster {
 	return &Cluster{
 		ID:                    c.ID,
-		Licence:               newLicence(c.Licence),
+		Licence:               NewLicence(c.Licence),
 		DisableTelemetry:      c.DisableTelemetry,
 		DisableCrashReporting: c.DisableCrashReporting,
 		DisableVersionCheck:   c.DisableVersionCheck,
@@ -52,7 +52,9 @@ func NewCluster(c *cluster.Resource) *Cluster {
 	}
 }
 
-func newLicence(l *cluster.Licence) *Licence {
+// NewLicence returns a new licence object that contains all the info needed
+// to be outputted.
+func NewLicence(l *cluster.Licence) *Licence {
 	return &Licence{
 		ClusterID:            l.ClusterID,
 		ExpiresAt:            l.ExpiresAt,

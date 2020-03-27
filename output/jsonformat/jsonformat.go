@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"io"
 
-	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/output"
 )
 
@@ -46,7 +45,7 @@ func (d *Displayer) CreateVolume(ctx context.Context, w io.Writer, volume *outpu
 // -----------------------------------------------------------------------------
 
 // UpdateLicence encodes licence as JSON, writing the result to w.
-func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *cluster.Licence) error {
+func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *output.Licence) error {
 	return d.encode(w, licence)
 }
 
