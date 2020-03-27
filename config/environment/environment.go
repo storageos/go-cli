@@ -21,7 +21,7 @@ const (
 	CommandTimeoutVar = "STORAGEOS_API_TIMEOUT"
 	// UsernameVar keys the environment variable from which we source the
 	// username of the StorageOS account to authenticate with.
-	UsernameVar = "STORAGEOS_USER_NAME"
+	UsernameVar = "STORAGEOS_USERNAME"
 	// PasswordVar keys the environment variable from which we source the
 	// password of the StorageOS account to authenticate with.
 	PasswordVar = "STORAGEOS_PASSWORD" // #nosec G101
