@@ -10,29 +10,29 @@ import (
 
 // Cluster defines a type that contains all the info needed to be outputted.
 type Cluster struct {
-	ID id.Cluster `json:"id"`
+	ID id.Cluster `json:"id" yaml:"id"`
 
-	Licence *Licence `json:"licence"`
+	Licence *Licence `json:"licence" yaml:"licence"`
 
-	DisableTelemetry      bool `json:"disableTelemetry"`
-	DisableCrashReporting bool `json:"disableCrashReporting"`
-	DisableVersionCheck   bool `json:"disableVersionCheck"`
+	DisableTelemetry      bool `json:"disableTelemetry" yaml:"disableTelemetry"`
+	DisableCrashReporting bool `json:"disableCrashReporting" yaml:"disableCrashReporting"`
+	DisableVersionCheck   bool `json:"disableVersionCheck" yaml:"disableVersionCheck"`
 
-	LogLevel  cluster.LogLevel  `json:"logLevel"`
-	LogFormat cluster.LogFormat `json:"logFormat"`
+	LogLevel  cluster.LogLevel  `json:"logLevel" yaml:"logLevel"`
+	LogFormat cluster.LogFormat `json:"logFormat" yaml:"logFormat"`
 
-	CreatedAt time.Time       `json:"createdAt"`
-	UpdatedAt time.Time       `json:"updatedAt"`
-	Version   version.Version `json:"version"`
+	CreatedAt time.Time       `json:"createdAt" yaml:"createdAt"`
+	UpdatedAt time.Time       `json:"updatedAt" yaml:"updatedAt"`
+	Version   version.Version `json:"version" yaml:"version"`
 }
 
 // Licence defines a type that contains all the info needed to be outputted.
 type Licence struct {
-	ClusterID            id.Cluster `json:"clusterId"`
-	ExpiresAt            time.Time  `json:"expiresAt"`
-	ClusterCapacityBytes uint64     `json:"clusterCapacityBytes"`
-	Kind                 string     `json:"kind"`
-	CustomerName         string     `json:"customerName"`
+	ClusterID            id.Cluster `json:"clusterID" yaml:"clusterID"`
+	ExpiresAt            time.Time  `json:"expiresAt" yaml:"expiresAt"`
+	ClusterCapacityBytes uint64     `json:"clusterCapacityBytes" yaml:"clusterCapacityBytes"`
+	Kind                 string     `json:"kind" yaml:"kind"`
+	CustomerName         string     `json:"customerName" yaml:"customerName"`
 }
 
 // NewCluster returns a new Cluster object that contains all the info needed

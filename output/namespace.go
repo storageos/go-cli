@@ -12,13 +12,13 @@ import (
 // Namespace defines a type that contains all the info we need to output a
 // namespace.
 type Namespace struct {
-	ID     id.Namespace `json:"id"`
-	Name   string       `json:"name"`
-	Labels labels.Set   `json:"labels"`
+	ID     id.Namespace `json:"id" yaml:"id"`
+	Name   string       `json:"name" yaml:"name"`
+	Labels labels.Set   `json:"labels" yaml:"labels"`
 
-	CreatedAt time.Time       `json:"createdAt"`
-	UpdatedAt time.Time       `json:"updatedAt"`
-	Version   version.Version `json:"version"`
+	CreatedAt time.Time       `json:"createdAt" yaml:"createdAt"`
+	UpdatedAt time.Time       `json:"updatedAt" yaml:"updatedAt"`
+	Version   version.Version `json:"version" yaml:"version"`
 }
 
 // NewNamespace returns a new Namespace object that contains all the info needed

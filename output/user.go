@@ -12,21 +12,21 @@ import (
 // User encapsulates the information required to output a StorageOS user account
 // to a display.
 type User struct {
-	ID       id.User `json:"id"`
-	Username string  `json:"name"`
+	ID       id.User `json:"id" yaml:"id"`
+	Username string  `json:"name" yaml:"name"`
 
-	IsAdmin   bool            `json:"isAdmin"`
-	Groups    []PolicyGroup   `json:"groups"`
-	CreatedAt time.Time       `json:"createdAt"`
-	UpdatedAt time.Time       `json:"updatedAt"`
-	Version   version.Version `json:"version"`
+	IsAdmin   bool            `json:"isAdmin" yaml:"isAdmin"`
+	Groups    []PolicyGroup   `json:"groups" yaml:"groups"`
+	CreatedAt time.Time       `json:"createdAt" yaml:"createdAt"`
+	UpdatedAt time.Time       `json:"updatedAt" yaml:"updatedAt"`
+	Version   version.Version `json:"version" yaml:"version"`
 }
 
 // PolicyGroup encapsulates the information required to output policy groups
 // to a display.
 type PolicyGroup struct {
-	ID   id.PolicyGroup `json:"id"`
-	Name string         `json:"name"`
+	ID   id.PolicyGroup `json:"id" yaml:"id"`
+	Name string         `json:"name" yaml:"name"`
 }
 
 // NewUser creates a new User output representation using extra details from

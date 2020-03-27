@@ -15,40 +15,40 @@ import (
 // Volume defines a type that includes all the info that a volume should have to
 // be outputted
 type Volume struct {
-	ID             id.Volume       `json:"id"`
-	Name           string          `json:"name"`
-	Description    string          `json:"description"`
-	AttachedOn     id.Node         `json:"attachedOn"`
-	AttachedOnName string          `json:"attachedOnName"`
-	Namespace      id.Namespace    `json:"namespaceID"`
-	NamespaceName  string          `json:"namespaceName"`
-	Labels         labels.Set      `json:"labels"`
-	Filesystem     volume.FsType   `json:"filesystem"`
-	SizeBytes      uint64          `json:"sizeBytes"`
-	Master         *Deployment     `json:"master"`
-	Replicas       []*Deployment   `json:"replicas"`
-	CreatedAt      time.Time       `json:"createdAt"`
-	UpdatedAt      time.Time       `json:"updatedAt"`
-	Version        version.Version `json:"version"`
+	ID             id.Volume       `json:"id" yaml:"id"`
+	Name           string          `json:"name" yaml:"name"`
+	Description    string          `json:"description" yaml:"description"`
+	AttachedOn     id.Node         `json:"attachedOn" yaml:"attachedOn"`
+	AttachedOnName string          `json:"attachedOnName" yaml:"attachedOnName"`
+	Namespace      id.Namespace    `json:"namespaceID" yaml:"namespaceID"`
+	NamespaceName  string          `json:"namespaceName" yaml:"namespaceName"`
+	Labels         labels.Set      `json:"labels" yaml:"labels"`
+	Filesystem     volume.FsType   `json:"filesystem" yaml:"filesystem"`
+	SizeBytes      uint64          `json:"sizeBytes" yaml:"sizeBytes"`
+	Master         *Deployment     `json:"master" yaml:"master"`
+	Replicas       []*Deployment   `json:"replicas" yaml:"replicas"`
+	CreatedAt      time.Time       `json:"createdAt" yaml:"createdAt"`
+	UpdatedAt      time.Time       `json:"updatedAt" yaml:"updatedAt"`
+	Version        version.Version `json:"version" yaml:"version"`
 }
 
 // Deployment defines a type that includes all the info that a deployment should
 // have to be outputted
 type Deployment struct {
-	ID           id.Deployment      `json:"id"`
-	Node         id.Node            `json:"nodeID"`
-	NodeName     string             `json:"nodeName"`
-	Health       health.VolumeState `json:"health"`
-	Promotable   bool               `json:"promotable"`
-	SyncProgress *SyncProgress      `json:"syncProgress,omitempty"`
+	ID           id.Deployment      `json:"id" yaml:"id"`
+	Node         id.Node            `json:"nodeID" yaml:"nodeID"`
+	NodeName     string             `json:"nodeName" yaml:"nodeName"`
+	Health       health.VolumeState `json:"health" yaml:"health"`
+	Promotable   bool               `json:"promotable" yaml:"promotable"`
+	SyncProgress *SyncProgress      `json:"syncProgress,omitempty" yaml:"syncProgress,omitempty"`
 }
 
 // SyncProgress defines a type that includes all the info that a SyncProgress
 // should have to be outputted
 type SyncProgress struct {
-	BytesRemaining            uint64 `json:"bytesRemaining"`
-	ThroughputBytes           uint64 `json:"throughputBytes"`
-	EstimatedSecondsRemaining uint64 `json:"estimatedSecondsRemaining"`
+	BytesRemaining            uint64 `json:"bytesRemaining" yaml:"bytesRemaining"`
+	ThroughputBytes           uint64 `json:"throughputBytes" yaml:"throughputBytes"`
+	EstimatedSecondsRemaining uint64 `json:"estimatedSecondsRemaining" yaml:"estimatedSecondsRemaining"`
 }
 
 // NewVolume creates a new Volume output representation using extra details
