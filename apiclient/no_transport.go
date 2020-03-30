@@ -73,7 +73,7 @@ func (t *noTransport) CreateUser(ctx context.Context, username, password string,
 	return nil, ErrNoTransportConfigured
 }
 
-func (t *noTransport) CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error) {
+func (t *noTransport) CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string, params *CreateVolumeRequestParams) (*volume.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 

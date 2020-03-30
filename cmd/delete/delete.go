@@ -40,6 +40,7 @@ type Client interface {
 // display the results gathered by the "delete" verb commands.
 type Displayer interface {
 	DeleteVolume(ctx context.Context, w io.Writer, confirmation output.VolumeDeletion) error
+	DeleteVolumeAsync(ctx context.Context, w io.Writer) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "delete" verb.

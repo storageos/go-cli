@@ -11,7 +11,9 @@ import (
 	"github.com/alecthomas/units"
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
+	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -47,10 +49,27 @@ type volumeCommand struct {
 	sizeStr     string
 	labelPairs  []string
 
+	useAsync bool
+
 	writer io.Writer
 }
 
 func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args []string) error {
+
+	var createVolumeRequestParams *apiclient.CreateVolumeRequestParams
+
+	// If asynchrony is specified then source the timeout and initialise the params.
+	if c.useAsync {
+		timeout, err := c.config.CommandTimeout()
+		if err != nil {
+			return err
+		}
+
+		createVolumeRequestParams = &apiclient.CreateVolumeRequestParams{
+			AsyncMax: timeout,
+		}
+	}
+
 	// Convert the flag values to the desired types/units
 	labelSet, err := labels.NewSetFromPairs(c.labelPairs)
 	if err != nil {
@@ -99,9 +118,16 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		volume.FsTypeFromString(c.fsType),
 		uint64(sizeBytes),
 		labelSet,
+		createVolumeRequestParams,
 	)
 	if err != nil {
 		return err
+	}
+
+	// If the request was async then write our "request submitted" message
+	// and return.
+	if c.useAsync {
+		return c.display.CreateVolumeAsync(ctx, c.writer)
 	}
 
 	nodes, err := c.getNodeMapping(ctx)
@@ -220,6 +246,8 @@ $ storageos create volume --replicas 1 --hint-master reliable-node-1,reliable-no
 	cobraCommand.Flags().Uint64VarP(&c.withReplicas, "replicas", "r", 0, "the number of replicated copies of the volume to maintain")
 	cobraCommand.Flags().StringVarP(&c.sizeStr, "size", "s", "5GiB", "the capacity to provision the volume with")
 	cobraCommand.Flags().BoolVar(&c.useThrottle, "throttle", false, "deprioritises the volume's traffic by reducing the rate of disk I/O")
+
+	flagutil.SupportAsync(cobraCommand.Flags(), &c.useAsync)
 
 	return cobraCommand
 }

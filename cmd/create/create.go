@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -35,7 +36,7 @@ type ConfigProvider interface {
 // to reasonably implement the "create" verb commands.
 type Client interface {
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
-	CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labelSet labels.Set) (*volume.Resource, error)
+	CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labelSet labels.Set, params *apiclient.CreateVolumeRequestParams) (*volume.Resource, error)
 
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
 	GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error)
@@ -50,6 +51,7 @@ type Client interface {
 type Displayer interface {
 	CreateUser(ctx context.Context, w io.Writer, user *output.User) error
 	CreateVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
+	CreateVolumeAsync(ctx context.Context, w io.Writer) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "create"

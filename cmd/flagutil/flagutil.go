@@ -32,3 +32,12 @@ func SupportCAS(flagSet *pflag.FlagSet, p *string) func() bool {
 		return flagSet.Changed(casName)
 	}
 }
+
+// SupportAsync registers a boolean flag for enabling asynchronous command
+// behaviour in flagSet, storing the value provided in p. The default for the
+// flag is to not perform requests asynchronously.
+//
+// It will replace the flag lookup for "async".
+func SupportAsync(flagSet *pflag.FlagSet, p *bool) {
+	flagSet.BoolVar(p, "async", false, "perform the operation asynchronously, using the configured timeout duration")
+}

@@ -50,6 +50,12 @@ func (d *Displayer) CreateVolume(ctx context.Context, w io.Writer, volume *outpu
 	return write(w)
 }
 
+// CreateVolumeAsync writes a successful request submission string to w.
+func (d *Displayer) CreateVolumeAsync(ctx context.Context, w io.Writer) error {
+	_, err := fmt.Fprintln(w, "volume provision request accepted")
+	return err
+}
+
 // -----------------------------------------------------------------------------
 // GET
 // -----------------------------------------------------------------------------
@@ -432,6 +438,12 @@ func (d *Displayer) DetachVolume(ctx context.Context, w io.Writer) error {
 // to w.
 func (d *Displayer) DeleteVolume(ctx context.Context, w io.Writer, confirmation output.VolumeDeletion) error {
 	_, err := fmt.Fprintf(w, "deleted volume %v from namespace %v\n", confirmation.ID, confirmation.Namespace)
+	return err
+}
+
+// DeleteVolumeAsync writes a successful request submission string to w.
+func (d *Displayer) DeleteVolumeAsync(ctx context.Context, w io.Writer) error {
+	_, err := fmt.Fprintln(w, "volume deletion request accepted")
 	return err
 }
 

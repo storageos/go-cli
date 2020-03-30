@@ -131,7 +131,7 @@ func (m *mockTransport) CreateUser(ctx context.Context, username, password strin
 	return m.CreateUserResource, m.CreateUserError
 }
 
-func (m *mockTransport) CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error) {
+func (m *mockTransport) CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string, params *CreateVolumeRequestParams) (*volume.Resource, error) {
 	return m.CreateVolumeResource, m.CreateVolumeError
 }
 

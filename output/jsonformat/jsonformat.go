@@ -40,6 +40,11 @@ func (d *Displayer) CreateVolume(ctx context.Context, w io.Writer, volume *outpu
 	return d.encode(w, volume)
 }
 
+// CreateVolumeAsync writes nothing to w.
+func (d *Displayer) CreateVolumeAsync(ctx context.Context, w io.Writer) error {
+	return nil
+}
+
 // -----------------------------------------------------------------------------
 // UPDATE
 // -----------------------------------------------------------------------------
@@ -141,6 +146,11 @@ func (d *Displayer) DescribeListVolumes(ctx context.Context, w io.Writer, volume
 // result to w.
 func (d *Displayer) DeleteVolume(ctx context.Context, w io.Writer, confirmation output.VolumeDeletion) error {
 	return d.encode(w, confirmation)
+}
+
+// DeleteVolumeAsync writes nothing to w.
+func (d *Displayer) DeleteVolumeAsync(ctx context.Context, w io.Writer) error {
+	return nil
 }
 
 // -----------------------------------------------------------------------------

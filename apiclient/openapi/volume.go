@@ -14,11 +14,29 @@ import (
 
 // CreateVolume requests the creation of a new volume through the StorageOS API
 // using the provided parameters.
-func (o *OpenAPI) CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error) {
+//
+// The behaviour of the operation is dictated by params:
+//
+//
+//  Asynchrony:
+//  - If params is nil or params.AsyncMax is empty/zero valued then the create
+//  request is performed synchronously.
+//  - If params.AsyncMax is set, the request is performed asynchronously using
+//  the duration given as the maximum amount of time allowed for the request
+//  before it times out.
+func (o *OpenAPI) CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string, params *apiclient.CreateVolumeRequestParams) (*volume.Resource, error) {
 
 	fsType, err := o.codec.encodeFsType(fs)
 	if err != nil {
 		return nil, err
+	}
+
+	var asyncMax optional.String = optional.EmptyString()
+
+	if params != nil {
+		if params.AsyncMax != 0 {
+			asyncMax = optional.NewString(params.AsyncMax.String())
+		}
 	}
 
 	createData := openapi.CreateVolumeData{
@@ -30,9 +48,14 @@ func (o *OpenAPI) CreateVolume(ctx context.Context, namespace id.Namespace, name
 		SizeBytes:   sizeBytes,
 	}
 
-	// TODO(CP-3928): Creation of volumes can be done asynchronously, this should be
-	// supported via setting the CreateVolumeOpts values when adding --async
-	model, resp, err := o.client.DefaultApi.CreateVolume(ctx, namespace.String(), createData, nil)
+	model, resp, err := o.client.DefaultApi.CreateVolume(
+		ctx,
+		namespace.String(),
+		createData,
+		&openapi.CreateVolumeOpts{
+			AsyncMax: asyncMax,
+		},
+	)
 	if err != nil {
 		switch v := mapOpenAPIError(err, resp).(type) {
 		case badRequestError:

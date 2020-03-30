@@ -101,16 +101,32 @@ func NewVolumeNameNotFoundError(name string) VolumeNotFoundError {
 	}
 }
 
+// CreateVolumeRequestParams contains optional request parameters for a create
+// volume operation.
+type CreateVolumeRequestParams struct {
+	AsyncMax time.Duration
+}
+
 // CreateVolume requests the creation of a new StorageOS volume in namespace
 // from the provided fields. If successful the created resource for the volume
 // is returned to the caller.
-func (c *Client) CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labelSet labels.Set) (*volume.Resource, error) {
+//
+// The behaviour of the operation is dictated by params:
+//
+//
+//  Asynchrony:
+//  - If params is nil or params.AsyncMax is empty/zero valued then the create
+//  request is performed synchronously.
+//  - If params.AsyncMax is set, the request is performed asynchronously using
+//  the duration given as the maximum amount of time allowed for the request
+//  before it times out.
+func (c *Client) CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labelSet labels.Set, params *CreateVolumeRequestParams) (*volume.Resource, error) {
 	_, err := c.authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return c.transport.CreateVolume(ctx, namespace, name, description, fs, sizeBytes, labelSet)
+	return c.transport.CreateVolume(ctx, namespace, name, description, fs, sizeBytes, labelSet, params)
 }
 
 // GetVolume requests basic information for the volume resource which

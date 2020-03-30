@@ -30,6 +30,8 @@ type volumeCommand struct {
 	useCAS     func() bool
 	casVersion string
 
+	useAsync bool
+
 	writer io.Writer
 }
 
@@ -37,6 +39,23 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 	useIDs, err := c.config.UseIDs()
 	if err != nil {
 		return err
+	}
+
+	params := &apiclient.DeleteVolumeRequestParams{}
+
+	if c.useCAS() {
+		params.CASVersion = version.FromString(c.casVersion)
+	}
+
+	// If asynchrony is specified then source the timeout and set the
+	// async timeout from it.
+	if c.useAsync {
+		timeout, err := c.config.CommandTimeout()
+		if err != nil {
+			return err
+		}
+
+		params.AsyncMax = timeout
 	}
 
 	namespaceID := id.Namespace(c.namespace)
@@ -58,11 +77,6 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		volumeID = vol.ID
 	}
 
-	params := &apiclient.DeleteVolumeRequestParams{}
-	if c.useCAS() {
-		params.CASVersion = version.FromString(c.casVersion)
-	}
-
 	err = c.client.DeleteVolume(
 		ctx,
 		namespaceID,
@@ -71,6 +85,12 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 	)
 	if err != nil {
 		return err
+	}
+
+	// Display the "request submitted" message if it was async, instead of
+	// the deletion confirmation below.
+	if c.useAsync {
+		return c.display.DeleteVolumeAsync(ctx, c.writer)
 	}
 
 	return c.display.DeleteVolume(
@@ -131,6 +151,7 @@ $ storagoes delete volume --namespace my-namespace my-old-volume
 	}
 
 	c.useCAS = flagutil.SupportCAS(cobraCommand.Flags(), &c.casVersion)
+	flagutil.SupportAsync(cobraCommand.Flags(), &c.useAsync)
 
 	return cobraCommand
 }
