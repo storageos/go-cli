@@ -66,6 +66,16 @@ func (d *Displayer) GetDiagnostics(ctx context.Context, w io.Writer, outputPath 
 	return d.encode(w, output)
 }
 
+// GetUser encodes resources as YAML, writing the result to w.
+func (d *Displayer) GetUser(ctx context.Context, w io.Writer, user *output.User) error {
+	return d.encode(w, user)
+}
+
+// GetUsers encodes resources as YAML, writing the result to w.
+func (d *Displayer) GetUsers(ctx context.Context, w io.Writer, users []*output.User) error {
+	return d.encode(w, users)
+}
+
 // GetNode encodes resource as YAML, writing the result to w.
 func (d *Displayer) GetNode(ctx context.Context, w io.Writer, resource *output.Node) error {
 	return d.encode(w, resource)

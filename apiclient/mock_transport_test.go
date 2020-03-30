@@ -20,6 +20,9 @@ type mockTransport struct {
 	GetClusterResource *cluster.Resource
 	GetClusterError    error
 
+	GetUserResource *user.Resource
+	GetUserError    error
+
 	GetDiagnosticsReadCloser io.ReadCloser
 	GetDiagnosticsErr        error
 
@@ -43,6 +46,9 @@ type mockTransport struct {
 
 	ListPolicyGroupsResource []*policygroup.Resource
 	ListPolicyGroupsError    error
+
+	ListUsersResource []*user.Resource
+	ListUserError     error
 
 	CreateUserResource *user.Resource
 	CreateUserError    error
@@ -79,6 +85,14 @@ func (m *mockTransport) Authenticate(ctx context.Context, username, password str
 
 func (m *mockTransport) GetCluster(ctx context.Context) (*cluster.Resource, error) {
 	return m.GetClusterResource, m.GetClusterError
+}
+
+func (m *mockTransport) GetUser(ctx context.Context, username id.User) (*user.Resource, error) {
+	return m.GetUserResource, m.GetUserError
+}
+
+func (m *mockTransport) ListUsers(ctx context.Context) ([]*user.Resource, error) {
+	return m.ListUsersResource, m.ListUserError
 }
 
 func (m *mockTransport) GetDiagnostics(ctx context.Context) (io.ReadCloser, error) {

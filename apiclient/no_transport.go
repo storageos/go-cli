@@ -33,6 +33,10 @@ func (t *noTransport) GetDiagnostics(ctx context.Context) (io.ReadCloser, error)
 	return nil, ErrNoTransportConfigured
 }
 
+func (t *noTransport) GetUser(ctx context.Context, username id.User) (*user.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
 func (t *noTransport) GetNode(ctx context.Context, nodeID id.Node) (*node.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
@@ -58,6 +62,10 @@ func (t *noTransport) ListNamespaces(ctx context.Context) ([]*namespace.Resource
 }
 
 func (t *noTransport) ListPolicyGroups(ctx context.Context) ([]*policygroup.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
+func (t *noTransport) ListUsers(ctx context.Context) ([]*user.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 

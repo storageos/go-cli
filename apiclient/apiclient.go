@@ -57,7 +57,9 @@ type Transport interface {
 	ListVolumes(ctx context.Context, namespaceID id.Namespace) ([]*volume.Resource, error)
 	ListNamespaces(ctx context.Context) ([]*namespace.Resource, error)
 	ListPolicyGroups(ctx context.Context) ([]*policygroup.Resource, error)
+	ListUsers(ctx context.Context) ([]*user.Resource, error)
 
+	GetUser(ctx context.Context, username id.User) (*user.Resource, error)
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
 	CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string) (*volume.Resource, error)
 

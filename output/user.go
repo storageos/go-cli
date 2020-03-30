@@ -55,3 +55,21 @@ func NewUser(user *user.Resource, policyGroups map[id.PolicyGroup]*policygroup.R
 		Version:   user.Version,
 	}, nil
 }
+
+// NewUsers creates a new list of the output representations of the user
+// resource
+func NewUsers(users []*user.Resource, policyGroups map[id.PolicyGroup]*policygroup.Resource) ([]*User, error) {
+	outputUsers := make([]*User, 0, len(users))
+
+	for _, u := range users {
+		newUser, err := NewUser(u, policyGroups)
+		if err != nil {
+			return nil, err
+		}
+
+		outputUsers = append(outputUsers, newUser)
+	}
+
+	return outputUsers, nil
+
+}

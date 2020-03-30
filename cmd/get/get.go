@@ -16,6 +16,8 @@ import (
 	"code.storageos.net/storageos/c2-cli/output/textformat"
 	"code.storageos.net/storageos/c2-cli/output/yamlformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/policygroup"
+	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
@@ -34,6 +36,13 @@ type Client interface {
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
 	GetDiagnostics(ctx context.Context) (io.ReadCloser, error)
 
+	GetUser(ctx context.Context, userID id.User) (*user.Resource, error)
+	GetUserByName(ctx context.Context, username string) (*user.Resource, error)
+	GetAllUsers(ctx context.Context) ([]*user.Resource, error)
+	GetListUsers(ctx context.Context, uIDs []id.User) ([]*user.Resource, error)
+	GetListUsersByUsername(ctx context.Context, usernames []string) ([]*user.Resource, error)
+
+	GetListPolicyGroups(ctx context.Context, gids ...id.PolicyGroup) ([]*policygroup.Resource, error)
 	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
 	GetNodeByName(ctx context.Context, name string) (*node.Resource, error)
 	GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
@@ -56,6 +65,8 @@ type Client interface {
 // display the results gathered by the "get" verb commands.
 type Displayer interface {
 	GetCluster(ctx context.Context, w io.Writer, cluster *output.Cluster) error
+	GetUser(ctx context.Context, w io.Writer, user *output.User) error
+	GetUsers(ctx context.Context, w io.Writer, users []*output.User) error
 	GetDiagnostics(ctx context.Context, w io.Writer, outputPath string) error
 	GetNode(ctx context.Context, w io.Writer, node *output.Node) error
 	GetListNodes(ctx context.Context, w io.Writer, nodes []*output.Node) error
@@ -78,6 +89,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 		newNode(os.Stdout, client, config),
 		newNamespace(os.Stdout, client, config),
 		newVolume(os.Stdout, client, config),
+		newUser(os.Stdout, client, config),
 	)
 
 	return command

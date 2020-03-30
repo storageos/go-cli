@@ -76,6 +76,22 @@ func (d *Displayer) GetDiagnostics(ctx context.Context, w io.Writer, outputPath 
 	return err
 }
 
+// GetUser creates human-readable strings, writing the result to w.
+func (d *Displayer) GetUser(ctx context.Context, w io.Writer, user *output.User) error {
+	table, write := createTable(userHeaders)
+	d.printUser(table, user)
+	return write(w)
+}
+
+// GetUsers creates human-readable strings, writing the result to w.
+func (d *Displayer) GetUsers(ctx context.Context, w io.Writer, users []*output.User) error {
+	table, write := createTable(userHeaders)
+	for _, u := range users {
+		d.printUser(table, u)
+	}
+	return write(w)
+}
+
 // GetNode creates human-readable strings, writing the result to w.
 func (d *Displayer) GetNode(ctx context.Context, w io.Writer, resource *output.Node) error {
 	table, write := createTable(nodeHeaders)

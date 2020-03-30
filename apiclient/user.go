@@ -51,6 +51,41 @@ func NewInvalidUserCreationError(details string) InvalidUserCreationError {
 	}
 }
 
+// UserNotFoundError indicates that the API could not find the StorageOS user
+// specified.
+type UserNotFoundError struct {
+	msg string
+
+	uid  id.User
+	name string
+}
+
+// Error returns an error message indicating that the user with a given
+// ID or name was not found, as configured.
+func (e UserNotFoundError) Error() string {
+	return e.msg
+}
+
+// NewUserNotFoundError returns a UserNotFoundError using details as the
+// the error message. This can be used when provided an opaque but detailed
+// error strings.
+func NewUserNotFoundError(details string, uID id.User) UserNotFoundError {
+	return UserNotFoundError{
+		msg: details,
+		uid: uID,
+	}
+}
+
+// NewUserNameNotFoundError returns a UserNotFoundError for the user
+// with name, constructing a user friendly message and storing the name inside
+// the error.
+func NewUserNameNotFoundError(name string) UserNotFoundError {
+	return UserNotFoundError{
+		msg:  fmt.Sprintf("user with name %v not found", name),
+		name: name,
+	}
+}
+
 // CreateUser requests the creation of a new StorageOS user account from the
 // provided fields. If successful the created resource for the user account
 // is returned to the caller.
@@ -72,4 +107,106 @@ func (c *Client) CreateUser(
 		withAdmin,
 		groups...,
 	)
+}
+
+// GetUser requests the details of a StorageOS user account and returns it to
+// the caller.
+func (c *Client) GetUser(ctx context.Context, userID id.User) (*user.Resource, error) {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.transport.GetUser(ctx, userID)
+}
+
+// GetUserByName requests the details of a StorageOS user account and returns it to
+// the caller.
+func (c *Client) GetUserByName(ctx context.Context, username string) (*user.Resource, error) {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	list, err := c.transport.ListUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, u := range list {
+		if u.Username == username {
+			return u, nil
+		}
+	}
+
+	return nil, NewUserNameNotFoundError(username)
+}
+
+// GetAllUsers returns the list of all StorageOS user accounts
+func (c *Client) GetAllUsers(ctx context.Context) ([]*user.Resource, error) {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.transport.ListUsers(ctx)
+}
+
+// GetListUsers returns all the users with the ID listed in the uIDs parameter.
+func (c *Client) GetListUsers(ctx context.Context, uIDs []id.User) ([]*user.Resource, error) {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	list, err := c.transport.ListUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	toMap := make(map[id.User]*user.Resource)
+	for _, u := range list {
+		toMap[u.ID] = u
+	}
+
+	filtered := make([]*user.Resource, 0)
+	for _, id := range uIDs {
+		user, ok := toMap[id]
+		if !ok {
+			return nil, NewUserNotFoundError("user not found", id)
+		}
+		filtered = append(filtered, user)
+	}
+
+	return filtered, nil
+}
+
+// GetListUsersByUsername returns all the users with the username listed in the
+// usernames parameter.
+func (c *Client) GetListUsersByUsername(ctx context.Context, usernames []string) ([]*user.Resource, error) {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	list, err := c.transport.ListUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	toMap := make(map[string]*user.Resource)
+	for _, u := range list {
+		toMap[u.Username] = u
+	}
+
+	filtered := make([]*user.Resource, 0)
+	for _, username := range usernames {
+		user, ok := toMap[username]
+		if !ok {
+			return nil, NewUserNameNotFoundError(username)
+		}
+		filtered = append(filtered, user)
+	}
+
+	return filtered, nil
 }
