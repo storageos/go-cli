@@ -1,45 +1,51 @@
-# Controlplane v2 (c2) CLI
+# StorageOS CLI
 
-This is a work-in-progress repository for the c2 CLI MVP. Once cleaned-up and 
-ready for use with the c2 release candidate the release process and vendoring
-will likely need some alteration if migrating to a new public git repository.
+StorageOS client for Mac/Linux/Windows.
 
-## Building
+See also [Command Line
+Reference](http://docs.storageos.com/docs/reference/cli/).
 
-To build the CLI correctly the makefile should be used currently, as it is 
-responsible for setting the application version via the linker flags (used
-for version commands and the advertised user-agent etc.).
+## Getting started
 
-```shell
-$ make build
-
-...
-```
-
-For building releases, please ensure `gox` is installed:
+The CLI client needs to know the StorageOS server address, username and
+password. This config can be passed via command line flags, or environemnt
+variables:
 
 ```bash
-$ go get github.com/mitchellh/gox
+% storageos env
+The StorageOS CLI allows the user to provide their own defaults for some configuration settings through environment variables.
+
+Available Settings:
+  STORAGEOS_ENDPOINTS      Sets the default StorageOS API endpoint for the CLI to connect to
+  STORAGEOS_API_TIMEOUT    Specifies the default duration which the CLI will give a command to complete
+                           before aborting with a timeout
+  STORAGEOS_USER_NAME      Sets the default username provided by the CLI for authentication
+  STORAGEOS_PASSWORD       Sets the default password provided by the CLI for authentication
+  STORAGEOS_USE_IDS        When set to true, the CLI will use provided values as IDs instead of names for
+                           existing resources
+  STORAGEOS_NAMESPACE      Specifies the default namespace for the CLI to operate in
+  STORAGEOS_OUTPUT_FORMAT  Specifies the default format used by the CLI for output
 ```
 
-## OpenAPI generated client code
+## Binary Installation (Linux)
 
-At time of writing the openapi-generator produces some incorrect types for
-the generated client code. Currently the CLI will use the fixed up generated 
-code stored in `pkg/openapi`, but using a replace directive in the `go.mod` file
-treats it as an external module dependency.
+```bash
+sudo -i
+curl -skSL https://github.com/storageos/go-cli/releases/latest/download/storageos_linux_amd64 > /usr/local/bin/storageos
+chmod +x /usr/local/bin/storageos
+exit
+```
 
-This allows flexibility down the line. We can choose to manually vendor the 
-openapi code directly in `pkg` and remove it from the `go.mod` file/vendor dir
-or we can remove it from `pkg` and host the generated code at a repository so 
-that it can be imported by the go module system and leverage versioning.
+## Binary Installation (Mac)
 
-## API version semantics
+```bash
+sudo -i
+curl -skSL https://github.com/storageos/go-cli/releases/latest/download/storageos_darwin_amd64 > /usr/local/bin/storageos
+chmod +x /usr/local/bin/storageos
+exit
+```
 
-For all resource update operations in the StorageOS API an entity version *must*
-be provided. This helps to prevent writes being lost. For resource deletion 
-operations the API allows users to specify the `ignore-version` header to force
-deletion even when an outdated version is specified. This can be the default 
-behaviour when specifying the target by its ID, but when specifying the target
-by name a version should be specified as name based operations will be two-step
-(fetch list, find name then perform delete operation by the ID).
+## Usage
+
+Run `storageos` to get usage information.
+

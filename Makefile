@@ -1,6 +1,6 @@
 ###############################################################################
 #	The -docker targets run in the c2 build container, specified here:
-BUILD_CONTAINER ?= soegarots/c2-make:101ea1e8b6d8c7f16bf5ce03040b478d
+BUILD_CONTAINER ?= soegarots/c2-make:9738772b295c7cfb9d2629a366e3abeb
 ###############################################################################
 
 SHELL := /usr/bin/env bash
@@ -12,7 +12,7 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 # version information
-SEMANTIC_VERSION ?= "2.0.0-beta"
+SEMANTIC_VERSION ?= "2.0.0-rc.1"
 
 # build flags
 LDFLAGS		+= -X main.Version=$(SEMANTIC_VERSION)
@@ -67,8 +67,12 @@ release: release-binaries shasum
 .PHONY: release-binaries
 release-binaries:
 	@echo "++ Building storageos release binaries"
-	gox -verbose -output="bin/release/{{.Dir}}_{{.OS}}_{{.Arch}}" \
-		-ldflags "${LDFLAGS}" -osarch="linux/amd64 darwin/amd64 windows/amd64"
+	gox \
+	-mod=vendor \
+	-verbose \
+	-output="bin/release/storageos_{{.OS}}_{{.Arch}}" \
+	-ldflags "${LDFLAGS}" \
+	-osarch="linux/amd64 darwin/amd64 windows/amd64"
 
 SHASUM := $(shell command -v shasum 2> /dev/null)
 .PHONY: shasum
@@ -124,7 +128,7 @@ test-junit:
 #? clean: remove any generated files
 .PHONY: clean
 clean:
-	-rm bin/*
+	-rm -rf bin/*
 	-rm coverage.out
 	-rm -rf .build-tmp
 	-rm unit_test.output
