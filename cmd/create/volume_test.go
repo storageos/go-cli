@@ -101,50 +101,6 @@ func TestSetKnownLabels(t *testing.T) {
 				"storageos.com/throttle":   "false",
 			},
 		},
-		{
-			name: "sets storageos.com/hint.master when given",
-
-			cmd: &volumeCommand{
-				hintMaster: []string{"node-a", "node-b", "node-c"},
-
-				// defaults of true
-				useCaching:     true,
-				useCompression: true,
-			},
-			inputLabels: labels.Set{
-				"arbitrary-label": "arbitrary-value",
-			},
-
-			wantLabels: labels.Set{
-				"arbitrary-label":           "arbitrary-value",
-				"storageos.com/nocache":     "false",
-				"storageos.com/nocompress":  "false",
-				"storageos.com/hint.master": "node-a,node-b,node-c",
-				"storageos.com/throttle":    "false",
-			},
-		},
-		{
-			name: "sets storageos.com/hint.replicas when given",
-
-			cmd: &volumeCommand{
-				hintReplicas: []string{"node-a", "node-b", "node-c"},
-
-				// defaults of true
-				useCaching:     true,
-				useCompression: true,
-			},
-			inputLabels: labels.Set{
-				"arbitrary-label": "arbitrary-value",
-			},
-
-			wantLabels: labels.Set{
-				"arbitrary-label":             "arbitrary-value",
-				"storageos.com/nocache":       "false",
-				"storageos.com/nocompress":    "false",
-				"storageos.com/hint.replicas": "node-a,node-b,node-c",
-				"storageos.com/throttle":      "false",
-			},
-		},
 	}
 
 	for _, tt := range tests {
