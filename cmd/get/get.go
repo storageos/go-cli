@@ -43,6 +43,7 @@ type Client interface {
 	GetListUsersByUsername(ctx context.Context, usernames []string) ([]*user.Resource, error)
 
 	GetListPolicyGroups(ctx context.Context, gids ...id.PolicyGroup) ([]*policygroup.Resource, error)
+	GetAllNodes(ctx context.Context) ([]*node.Resource, error)
 	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
 	GetNodeByName(ctx context.Context, name string) (*node.Resource, error)
 	GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)

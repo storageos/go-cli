@@ -119,6 +119,7 @@ func TestDisplayer_GetCluster(t *testing.T) {
 		name          string
 		timeHumanizer output.TimeHumanizer
 		resource      *cluster.Resource
+		nodes         []*node.Resource
 		wantW         string
 		wantErr       bool
 	}{
@@ -135,6 +136,26 @@ func TestDisplayer_GetCluster(t *testing.T) {
 				},
 				CreatedAt: mockTime,
 			},
+			nodes: []*node.Resource{
+				{
+					ID:     "bananaNodeID",
+					Name:   "bananaNodeName",
+					IOAddr: "127.0.0.1",
+					Health: health.NodeOnline,
+				},
+				{
+					ID:     "kiwiNodeID",
+					Name:   "kiwiNodeName",
+					IOAddr: "127.0.0.2",
+					Health: health.NodeOnline,
+				},
+				{
+					ID:     "pearNodeID",
+					Name:   "pearNodeName",
+					IOAddr: "127.0.0.3",
+					Health: health.NodeOffline,
+				},
+			},
 			wantW: `ID:               bananaCluster                      
 Licence:                                             
   expiration:     2000-01-01T00:00:00Z (xx aeons ago)
@@ -143,6 +164,9 @@ Licence:
   customer name:  bananaCustomer                     
 Created at:       2000-01-01T00:00:00Z (xx aeons ago)
 Updated at:       0001-01-01T00:00:00Z (xx aeons ago)
+Nodes:            3                                  
+  Healthy:        2                                  
+  Unhealthy:      1                                  
 `,
 			wantErr: false,
 		},
@@ -156,7 +180,7 @@ Updated at:       0001-01-01T00:00:00Z (xx aeons ago)
 			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
 			w := &bytes.Buffer{}
 
-			err := d.GetCluster(context.Background(), w, output.NewCluster(tt.resource))
+			err := d.GetCluster(context.Background(), w, output.NewCluster(tt.resource, tt.nodes))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetCluster() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -1080,6 +1104,113 @@ Available capacity       500 MiB/1.0 GiB (474 MiB in use)
 			if gotOutput != tt.wantOutput {
 				pretty.Ldiff(t, gotOutput, tt.wantOutput)
 				t.Errorf("got output: \n%v\n\nwant: \n%v\n", gotOutput, tt.wantOutput)
+			}
+		})
+	}
+}
+
+func TestDisplayer_DescribeCluster(t *testing.T) {
+	t.Parallel()
+
+	var mockTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name          string
+		timeHumanizer output.TimeHumanizer
+		resource      *cluster.Resource
+		nodes         []*node.Resource
+		wantW         string
+		wantErr       bool
+	}{
+		{
+			name: "print cluster",
+			resource: &cluster.Resource{
+				ID: "bananaCluster",
+				Licence: &cluster.Licence{
+					ClusterID:            "bananaCluster",
+					ExpiresAt:            mockTime,
+					ClusterCapacityBytes: 42 * humanize.GiByte,
+					Kind:                 "bananaLicence",
+					CustomerName:         "bananaCustomer",
+				},
+				DisableTelemetry:      false,
+				DisableCrashReporting: true,
+				DisableVersionCheck:   false,
+				LogLevel:              "debug",
+				LogFormat:             "default",
+				CreatedAt:             mockTime,
+				UpdatedAt:             mockTime,
+				Version:               "42",
+			},
+			nodes: []*node.Resource{
+				{
+					ID:     "bananaNodeID",
+					Name:   "bananaNodeName",
+					IOAddr: "127.0.0.1",
+					Health: health.NodeOnline,
+				},
+				{
+					ID:     "kiwiNodeID",
+					Name:   "kiwiNodeName",
+					IOAddr: "127.0.0.2",
+					Health: health.NodeOnline,
+				},
+				{
+					ID:     "pearNodeID",
+					Name:   "pearNodeName",
+					IOAddr: "127.0.0.3",
+					Health: health.NodeOffline,
+				},
+			},
+			wantW: `ID:               bananaCluster                      
+Licence:                                             
+  expiration:     2000-01-01T00:00:00Z (xx aeons ago)
+  capacity:       42 GiB (45097156608)               
+  kind:           bananaLicence                      
+  customer name:  bananaCustomer                     
+Version:          42                                 
+Created at:       2000-01-01T00:00:00Z (xx aeons ago)
+Updated at:       2000-01-01T00:00:00Z (xx aeons ago)
+Telemetry:        Enabled                            
+Crash Reporting:  Disabled                           
+Version Check:    Enabled                            
+Log Level:        debug                              
+Log Format:       default                            
+Nodes:                                               
+  ID:             bananaNodeID                       
+  Name:           bananaNodeName                     
+  Health:         online                             
+  Address:        127.0.0.1                          
+                                                     
+  ID:             kiwiNodeID                         
+  Name:           kiwiNodeName                       
+  Health:         online                             
+  Address:        127.0.0.2                          
+                                                     
+  ID:             pearNodeID                         
+  Name:           pearNodeName                       
+  Health:         offline                            
+  Address:        127.0.0.3                          
+`,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
+			w := &bytes.Buffer{}
+
+			err := d.DescribeCluster(context.Background(), w, output.NewCluster(tt.resource, tt.nodes))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetCluster() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotW := w.String(); gotW != tt.wantW {
+				t.Errorf("GetCluster() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
 			}
 		})
 	}

@@ -53,6 +53,21 @@ func (c *Client) GetNode(ctx context.Context, uid id.Node) (*node.Resource, erro
 	return c.transport.GetNode(ctx, uid)
 }
 
+// GetAllNodes returns all the node resources in the cluster.
+func (c *Client) GetAllNodes(ctx context.Context) ([]*node.Resource, error) {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	nodes, err := c.transport.ListNodes(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nodes, nil
+}
+
 // GetNodeByName requests basic information for the node resource which has
 // name.
 //
