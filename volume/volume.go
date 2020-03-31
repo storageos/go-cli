@@ -23,14 +23,6 @@ const (
 	// LabelThrottle is a StorageOS volume label which when enabled deprioritises
 	// the volume's traffic by reducing disk I/O rate.
 	LabelThrottle = "storageos.com/throttle"
-	// LabelHintMaster is a StorageOS volume label holding a list of nodes. When set,
-	// placement of the volume master on one of the nodes present in the list is
-	// preferred.
-	LabelHintMaster = "storageos.com/hint.master"
-	// LabelHintReplicas is a StorageOS volume label holding a list of nodes. When
-	// set, placement of volume replicas on nodes present in the list is
-	// preferred.
-	LabelHintReplicas = "storageos.com/hint.replicas"
 )
 
 // FsType indicates the kind of filesystem which a volume has been given.

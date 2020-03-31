@@ -12,7 +12,7 @@ const (
 	DefaultAPIEndpoint = "http://localhost:5705"
 	// DefaultCommandTimeout is a sensible command timeout duration to use when
 	// none has been specified.
-	DefaultCommandTimeout = 5 * time.Second
+	DefaultCommandTimeout = 15 * time.Second
 	// DefaultUsername defines a fallback username which the CLI will
 	// attempt to use in the credentials presented to the StorageOS API for
 	// authentication.

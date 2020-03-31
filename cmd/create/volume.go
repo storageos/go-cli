@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-	"strings"
 
 	"github.com/alecthomas/units"
 	"github.com/spf13/cobra"
@@ -40,8 +39,6 @@ type volumeCommand struct {
 	useCompression bool
 	useThrottle    bool
 	withReplicas   uint64
-	hintMaster     []string
-	hintReplicas   []string
 
 	// Core volume configuration settings
 	description string
@@ -173,16 +170,6 @@ func (c *volumeCommand) setKnownLabels(original labels.Set) {
 	if c.withReplicas > 0 {
 		original[volume.LabelReplicas] = strconv.FormatUint(c.withReplicas, 10)
 	}
-
-	// If master or replica hints have been provided then rejoin the specified
-	// hints and set the appropriate labels.
-	if len(c.hintMaster) > 0 {
-		original[volume.LabelHintMaster] = strings.Join(c.hintMaster, ",")
-	}
-
-	if len(c.hintReplicas) > 0 {
-		original[volume.LabelHintReplicas] = strings.Join(c.hintReplicas, ",")
-	}
 }
 
 func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
@@ -198,7 +185,7 @@ func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command
 		Example: `
 $ storageos create volume --description "This volume contains the data for my app" --fs-type "ext4" --labels env=prod,rack=db-1 --size 10GiB --namespace my-namespace-name my-app
 
-$ storageos create volume --replicas 1 --hint-master reliable-node-1,reliable-node-2 --namespace my-namespace-name my-replicated-app
+$ storageos create volume --replicas 1 --namespace my-namespace-name my-replicated-app
 `,
 
 		Args: argwrappers.WrapInvalidArgsError(func(cmd *cobra.Command, args []string) error {
@@ -240,8 +227,6 @@ $ storageos create volume --replicas 1 --hint-master reliable-node-1,reliable-no
 	cobraCommand.Flags().BoolVar(&c.useCompression, "compress", true, "compress data stored by the volume at rest and during transit")
 	cobraCommand.Flags().StringVarP(&c.description, "description", "d", "", "a human-friendly description to give the volume")
 	cobraCommand.Flags().StringVarP(&c.fsType, "fs-type", "f", "ext4", "the filesystem to format the new volume with once provisioned")
-	cobraCommand.Flags().StringSliceVar(&c.hintMaster, "hint-master", []string{}, "an optional list of preferred nodes for placement of the volume master")
-	cobraCommand.Flags().StringArrayVar(&c.hintReplicas, "hint-replicas", []string{}, "an optional list of preferred nodes for placement of volume replicas")
 	cobraCommand.Flags().StringSliceVarP(&c.labelPairs, "labels", "l", []string{}, "an optional set of labels to assign to the new volume, provided as a comma-separated list of key=value pairs")
 	cobraCommand.Flags().Uint64VarP(&c.withReplicas, "replicas", "r", 0, "the number of replicated copies of the volume to maintain")
 	cobraCommand.Flags().StringVarP(&c.sizeStr, "size", "s", "5GiB", "the capacity to provision the volume with")
