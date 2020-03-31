@@ -73,6 +73,20 @@ func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *outpu
 	table.AddRow("Created at:", d.timeToHuman(resource.CreatedAt))
 	table.AddRow("Updated at:", d.timeToHuman(resource.UpdatedAt))
 
+	// nodes
+	healthy, unhealthy := 0, 0
+	for _, n := range resource.Nodes {
+		if n.Health == health.NodeOnline {
+			healthy++
+		} else {
+			unhealthy++
+		}
+	}
+
+	table.AddRow("Nodes:", len(resource.Nodes))
+	table.AddRow("  Healthy:", healthy)
+	table.AddRow("  Unhealthy:", unhealthy)
+
 	return write(w)
 }
 
@@ -216,6 +230,40 @@ func createTable(headers []interface{}) (*uitable.Table, func(io.Writer) error) 
 func (d *Displayer) AttachVolume(ctx context.Context, w io.Writer) error {
 	_, err := fmt.Fprintln(w, "volume attached")
 	return err
+}
+
+// DescribeCluster encodes a cluster as JSON, writing the result to w.
+func (d *Displayer) DescribeCluster(ctx context.Context, w io.Writer, c *output.Cluster) error {
+	table, write := createTable(nil)
+
+	capacity := fmt.Sprintf("%s (%d)", humanize.IBytes(c.Licence.ClusterCapacityBytes), c.Licence.ClusterCapacityBytes)
+
+	table.AddRow("ID:", c.ID)
+	table.AddRow("Licence:", "")
+	table.AddRow("  expiration:", d.timeToHuman(c.Licence.ExpiresAt))
+	table.AddRow("  capacity:", capacity)
+	table.AddRow("  kind:", c.Licence.Kind)
+	table.AddRow("  customer name:", c.Licence.CustomerName)
+	table.AddRow("Version:", c.Version)
+	table.AddRow("Created at:", d.timeToHuman(c.CreatedAt))
+	table.AddRow("Updated at:", d.timeToHuman(c.UpdatedAt))
+	table.AddRow("Telemetry:", d.disableToHuman(c.DisableTelemetry))
+	table.AddRow("Crash Reporting:", d.disableToHuman(c.DisableCrashReporting))
+	table.AddRow("Version Check:", d.disableToHuman(c.DisableVersionCheck))
+	table.AddRow("Log Level:", c.LogLevel.String())
+	table.AddRow("Log Format:", c.LogFormat.String())
+	table.AddRow("Nodes:", "")
+	for i, n := range c.Nodes {
+		if i > 0 {
+			table.AddRow("", "")
+		}
+		table.AddRow("  ID:", n.ID.String())
+		table.AddRow("  Name:", n.Name)
+		table.AddRow("  Health:", n.Health)
+		table.AddRow("  Address:", n.IOAddr)
+	}
+
+	return write(w)
 }
 
 // UpdateLicence prints all the detailed information about a new licence, after
@@ -426,6 +474,13 @@ func (d *Displayer) timeToHuman(t time.Time) string {
 	humanized := d.timeHumanizer.TimeToHuman(t)
 	rfc := t.Format(time.RFC3339)
 	return fmt.Sprintf("%s (%s)", rfc, humanized)
+}
+
+func (d *Displayer) disableToHuman(b bool) string {
+	if b {
+		return "Disabled"
+	}
+	return "Enabled"
 }
 
 // DetachVolume writes a success message to the writer

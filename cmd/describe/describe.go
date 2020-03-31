@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
@@ -30,9 +31,11 @@ type ConfigProvider interface {
 // Client describes the functionality required by the CLI application
 // to reasonably implement the "describe" verb commands.
 type Client interface {
+	GetCluster(ctx context.Context) (*cluster.Resource, error)
+
 	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
 	GetNodeByName(ctx context.Context, name string) (*node.Resource, error)
-
+	GetAllNodes(ctx context.Context) ([]*node.Resource, error)
 	GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
 	GetListNodesByName(ctx context.Context, names ...string) ([]*node.Resource, error)
 
@@ -50,6 +53,7 @@ type Client interface {
 // Displayer defines the functionality required by the CLI application
 // to display the results gathered by the "describe" verb commands.
 type Displayer interface {
+	DescribeCluster(ctx context.Context, w io.Writer, c *output.Cluster) error
 	DescribeNode(ctx context.Context, w io.Writer, node *output.NodeDescription) error
 	DescribeListNodes(ctx context.Context, w io.Writer, nodes []*output.NodeDescription) error
 	DescribeVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
@@ -66,6 +70,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command.AddCommand(
 		newNode(os.Stdout, client, config),
 		newVolume(os.Stdout, client, config),
+		newCluster(os.Stdout, client, config),
 	)
 
 	return command

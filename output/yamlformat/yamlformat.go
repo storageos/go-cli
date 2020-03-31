@@ -115,6 +115,11 @@ func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, volumes []*
 // DESCRIBE
 // -----------------------------------------------------------------------------
 
+// DescribeCluster encodes a cluster as YAML, writing the result to w.
+func (d *Displayer) DescribeCluster(ctx context.Context, w io.Writer, c *output.Cluster) error {
+	return d.encode(w, c)
+}
+
 // DescribeNode encodes node as YAML, writing the result to w.
 func (d *Displayer) DescribeNode(ctx context.Context, w io.Writer, node *output.NodeDescription) error {
 	return d.encode(w, node)
