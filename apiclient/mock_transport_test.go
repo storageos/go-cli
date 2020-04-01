@@ -38,7 +38,7 @@ type mockTransport struct {
 	ListNodesResource []*node.Resource
 	ListNodesError    error
 
-	ListVolumesResource []*volume.Resource
+	ListVolumesResource map[id.Namespace][]*volume.Resource
 	ListVolumesError    error
 
 	ListNamespacesResource []*namespace.Resource
@@ -123,7 +123,7 @@ func (m *mockTransport) ListNodes(ctx context.Context) ([]*node.Resource, error)
 }
 
 func (m *mockTransport) ListVolumes(ctx context.Context, namespaceID id.Namespace) ([]*volume.Resource, error) {
-	return m.ListVolumesResource, m.ListVolumesError
+	return m.ListVolumesResource[namespaceID], m.ListVolumesError
 }
 
 func (m *mockTransport) ListNamespaces(ctx context.Context) ([]*namespace.Resource, error) {

@@ -3831,7 +3831,7 @@ func (a *DefaultApiService) ListPolicyGroups(ctx _context.Context) ([]PolicyGrou
 }
 
 /*
-ListUsers Fetch the list of users
+GetListUsers Fetch the list of users
 Fetch the list of users of the cluster.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 @return []User

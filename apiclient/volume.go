@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/pkg/version"
@@ -216,33 +218,67 @@ func (c *Client) GetAllVolumes(ctx context.Context) ([]*volume.Resource, error) 
 		return nil, err
 	}
 
-	return c.fetchAllVolumes(ctx)
+	return c.fetchAllVolumesParallel(ctx)
 }
 
-// fetchAllVolumes requests the list of all namespaces from the StorageOS API,
-// then requests the list of volumes within each namespace, returning an
-// aggregate list of the volumes returned.
+// fetchAllVolumesParallel requests the list of all namespaces from the
+// StorageOS API, then requests the list of volumes within each namespace,
+// calling all of them in parallel, returning an aggregate list of the volumes
+// returned.
 //
 // If access is not granted when listing volumes for a retrieved namespace it
 // is noted but will not return an error. Only if access is denied for all
 // attempts will this return a permissions error.
-func (c *Client) fetchAllVolumes(ctx context.Context) ([]*volume.Resource, error) {
+//
+// If any of the call returns an error:
+//  - the context is canceled so all pending requests are cut
+//  - this method returns an error
+func (c *Client) fetchAllVolumesParallel(ctx context.Context) ([]*volume.Resource, error) {
 	namespaces, err := c.transport.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	volumes := []*volume.Resource{}
+	// The derived Context is canceled the first time a function passed to Go
+	// returns a non-nil error or the first time Wait returns, whichever occurs
+	// first.
+	group, ctx := errgroup.WithContext(ctx)
+
+	results := make(chan []*volume.Resource, len(namespaces))
 
 	for _, ns := range namespaces {
-		nsvols, err := c.transport.ListVolumes(ctx, ns.ID)
-		switch {
-		case err == nil, errors.As(err, &UnauthorisedError{}):
-			// For an unauthorised error, ignore - its not fatal to the operation.
-		default:
-			return nil, err
-		}
-		volumes = append(volumes, nsvols...)
+		ns := ns
+
+		// Go calls the given function in a new goroutine.
+		//
+		// The first call to return a non-nil error cancels the group; its error
+		// will be returned by Wait.
+		group.Go(func() error {
+
+			nsvols, err := c.transport.ListVolumes(ctx, ns.ID)
+			switch {
+			case err == nil, errors.As(err, &UnauthorisedError{}):
+				// For an unauthorised error, ignore - its not fatal to the operation.
+			default:
+				return err
+			}
+
+			results <- nsvols
+			return nil
+		})
+	}
+
+	// blocks until all function calls from the Go method have returned
+	if err := group.Wait(); err != nil {
+		return nil, err
+	}
+
+	close(results)
+
+	// merge the results
+	volumes := []*volume.Resource{}
+	for r := range results {
+		volumes = append(volumes, r...)
 	}
 
 	return volumes, nil

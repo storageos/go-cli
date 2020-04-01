@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/kr/pretty"
@@ -32,12 +33,14 @@ func TestGetVolumeByName(t *testing.T) {
 
 			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
-				ListVolumesResource: []*volume.Resource{
-					&volume.Resource{
-						Name: "possibly-arthur",
-					},
-					&volume.Resource{
-						Name: "definitely-alan",
+				ListVolumesResource: map[id.Namespace][]*volume.Resource{
+					"arbitrary-namespace-id": {
+						&volume.Resource{
+							Name: "possibly-arthur",
+						},
+						&volume.Resource{
+							Name: "definitely-alan",
+						},
 					},
 				},
 			},
@@ -54,12 +57,14 @@ func TestGetVolumeByName(t *testing.T) {
 
 			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
-				ListVolumesResource: []*volume.Resource{
-					&volume.Resource{
-						Name: "possibly-arthur",
-					},
-					&volume.Resource{
-						Name: "not-alan",
+				ListVolumesResource: map[id.Namespace][]*volume.Resource{
+					"arbitrary-namespace-id": {
+						&volume.Resource{
+							Name: "possibly-arthur",
+						},
+						&volume.Resource{
+							Name: "not-alan",
+						},
 					},
 				},
 			},
@@ -129,23 +134,58 @@ func TestFetchAllVolumes(t *testing.T) {
 					{
 						ID: "namespace-42",
 					},
-				},
-				ListVolumesResource: []*volume.Resource{
 					{
-						ID: "volume-1",
+						ID: "namespace-43",
 					},
 					{
-						ID: "volume-2",
+						ID: "namespace-44",
+					},
+				},
+				ListVolumesResource: map[id.Namespace][]*volume.Resource{
+					"namespace-42": {
+						{
+							ID: "volume-1",
+						},
+						{
+							ID: "volume-2",
+						},
+					},
+					"namespace-43": {
+						{
+							ID: "volume-3",
+						},
+						{
+							ID: "volume-4",
+						},
+					},
+					"namespace-44": {
+						{
+							ID: "volume-5",
+						},
+						{
+							ID: "volume-6",
+						},
 					},
 				},
 			},
-
 			wantVolumes: []*volume.Resource{
 				{
 					ID: "volume-1",
 				},
 				{
 					ID: "volume-2",
+				},
+				{
+					ID: "volume-3",
+				},
+				{
+					ID: "volume-4",
+				},
+				{
+					ID: "volume-5",
+				},
+				{
+					ID: "volume-6",
 				},
 			},
 			wantErr: nil,
@@ -160,12 +200,14 @@ func TestFetchAllVolumes(t *testing.T) {
 						ID: "namespace-42",
 					},
 				},
-				ListVolumesResource: []*volume.Resource{
-					{
-						ID: "volume-1",
-					},
-					{
-						ID: "volume-2",
+				ListVolumesResource: map[id.Namespace][]*volume.Resource{
+					"namespace-42": {
+						{
+							ID: "volume-1",
+						},
+						{
+							ID: "volume-2",
+						},
 					},
 				},
 				ListVolumesError: UnauthorisedError{"not allowed"},
@@ -221,10 +263,15 @@ func TestFetchAllVolumes(t *testing.T) {
 				t.Fatalf("got error configuring client transport: %v", err)
 			}
 
-			gotVolumes, gotErr := client.fetchAllVolumes(context.Background())
+			gotVolumes, gotErr := client.fetchAllVolumesParallel(context.Background())
 			if !reflect.DeepEqual(gotErr, tt.wantErr) {
 				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
 			}
+
+			// sort in order to compare
+			sort.Slice(gotVolumes, func(i, j int) bool {
+				return gotVolumes[i].ID.String() < gotVolumes[j].ID.String()
+			})
 
 			if !reflect.DeepEqual(gotVolumes, tt.wantVolumes) {
 				pretty.Ldiff(t, gotVolumes, tt.wantVolumes)
