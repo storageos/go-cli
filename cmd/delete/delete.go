@@ -34,6 +34,7 @@ type Client interface {
 	GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error)
 
 	DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *apiclient.DeleteVolumeRequestParams) error
+	DeleteNamespace(ctx context.Context, uid id.Namespace, params *apiclient.DeleteNamespaceRequestParams) error
 }
 
 // Displayer defines the functionality required by the CLI application to
@@ -41,6 +42,7 @@ type Client interface {
 type Displayer interface {
 	DeleteVolume(ctx context.Context, w io.Writer, confirmation output.VolumeDeletion) error
 	DeleteVolumeAsync(ctx context.Context, w io.Writer) error
+	DeleteNamespace(ctx context.Context, w io.Writer, confirmation output.NamespaceDeletion) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "delete" verb.
@@ -52,6 +54,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 
 	command.AddCommand(
 		newVolume(os.Stdout, client, config),
+		newNamespace(os.Stdout, client, config),
 	)
 
 	return command

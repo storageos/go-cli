@@ -3,6 +3,8 @@ package openapi
 import (
 	"context"
 
+	"github.com/antihax/optional"
+
 	"code.storageos.net/storageos/openapi"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
@@ -74,4 +76,48 @@ func (o *OpenAPI) CreateNamespace(ctx context.Context, name string, labels map[s
 	}
 
 	return o.codec.decodeNamespace(model)
+}
+
+// DeleteNamespace makes a delete request for a namespace given its ID.
+//
+// The behaviour of the operation is dictated by params:
+//
+//
+// 	Version constraints:
+// 	- If params is nil or params.CASVersion is empty then the delete request is
+// 	unconditional
+// 	- If params.CASVersion is set, the request is conditional upon it matching
+// 	the volume entity's version as seen by the server.
+func (o *OpenAPI) DeleteNamespace(ctx context.Context, uid id.Namespace, params *apiclient.DeleteNamespaceRequestParams) error {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	var casVersion string
+	var ignoreVersion optional.Bool = optional.NewBool(true)
+
+	if params != nil {
+		if params.CASVersion.String() != "" {
+			ignoreVersion = optional.NewBool(false)
+			casVersion = params.CASVersion.String()
+		}
+	}
+
+	resp, err := o.client.DefaultApi.DeleteNamespace(
+		ctx,
+		uid.String(),
+		casVersion,
+		&openapi.DeleteNamespaceOpts{
+			IgnoreVersion: ignoreVersion,
+		},
+	)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return apiclient.NewNamespaceNotFoundError(uid)
+		default:
+			return v
+		}
+	}
+
+	return nil
 }

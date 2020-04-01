@@ -118,7 +118,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 		Use:   "attach",
 		Short: "Attach a volume to a node",
 		Example: `
-$ storageos attach volume --namespace my-namespace-name my-volume my-node
+$ storageos attach --namespace my-namespace-name my-volume my-node
 `,
 
 		Args: argwrappers.WrapInvalidArgsError(func(cmd *cobra.Command, args []string) error {

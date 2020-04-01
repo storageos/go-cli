@@ -160,6 +160,12 @@ func (d *Displayer) DeleteVolumeAsync(ctx context.Context, w io.Writer) error {
 	return nil
 }
 
+// DeleteNamespace encodes the namespace deletion confirmation as YAML, writing
+// the result to w
+func (d *Displayer) DeleteNamespace(ctx context.Context, w io.Writer, confirmation output.NamespaceDeletion) error {
+	return d.encode(w, confirmation)
+}
+
 // -----------------------------------------------------------------------------
 // OTHER
 // -----------------------------------------------------------------------------

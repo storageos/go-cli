@@ -7,7 +7,14 @@ import (
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
+
+// DeleteNamespaceRequestParams contains optional request parameters for a
+// delete namespace operation.
+type DeleteNamespaceRequestParams struct {
+	CASVersion version.Version
+}
 
 // NamespaceNotFoundError indicates that the API could not find the StorageOS
 // namespace specified.
@@ -99,6 +106,25 @@ func (c *Client) CreateNamespace(ctx context.Context, name string, labelSet labe
 	}
 
 	return c.transport.CreateNamespace(ctx, name, labelSet)
+}
+
+// DeleteNamespace makes a delete request for a namespace given its id.
+//
+// The behaviour of the operation is dictated by params:
+//
+//
+// 	Version constraints:
+// 	- If params is nil or params.CASVersion is empty then the delete request is
+// 	unconditional
+// 	- If params.CASVersion is set, the request is conditional upon it matching
+// 	the volume entity's version as seen by the server.
+func (c *Client) DeleteNamespace(ctx context.Context, uid id.Namespace, params *DeleteNamespaceRequestParams) error {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return err
+	}
+
+	return c.transport.DeleteNamespace(ctx, uid, params)
 }
 
 // GetNamespace requests basic information for the namespace resource which

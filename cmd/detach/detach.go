@@ -121,7 +121,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 		Use:   "detach",
 		Short: "Detach a volume from its current location",
 		Example: `
-$ storageos detach volume --namespace my-namespace-name my-volume
+$ storageos detach --namespace my-namespace-name my-volume
 `,
 
 		Args: argwrappers.WrapInvalidArgsError(func(cmd *cobra.Command, args []string) error {
