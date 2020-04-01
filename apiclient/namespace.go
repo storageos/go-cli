@@ -6,6 +6,7 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/labels"
 )
 
 // NamespaceNotFoundError indicates that the API could not find the StorageOS
@@ -42,6 +43,62 @@ func NewNamespaceNameNotFoundError(name string) NamespaceNotFoundError {
 	return NamespaceNotFoundError{
 		name: name,
 	}
+}
+
+// NamespaceExistsError is returned when a namespace creation request is sent to
+// a cluster where that name is already in use.
+type NamespaceExistsError struct {
+	name string
+}
+
+// Error returns an error message indicating that a namespace name is already in
+// use.
+func (e NamespaceExistsError) Error() string {
+	return fmt.Sprintf("namespace name %s is already in use", e.name)
+}
+
+// NewNamespaceExistsError returns an error indicating that a namespace with
+// that name already exists.
+func NewNamespaceExistsError(name string) NamespaceExistsError {
+	return NamespaceExistsError{
+		name: name,
+	}
+}
+
+// InvalidNamespaceCreationError is returned when a namespace creation request
+// sent to the StorageOS API is invalid.
+type InvalidNamespaceCreationError struct {
+	details string
+}
+
+// Error returns an error message indicating that a namespace creation request
+// made to the StorageOS API is invalid, including details if available.
+func (e InvalidNamespaceCreationError) Error() string {
+	msg := "namespace creation request is invalid"
+	if e.details != "" {
+		msg = fmt.Sprintf("%v: %v", msg, e.details)
+	}
+	return msg
+}
+
+// NewInvalidNamespaceCreationError returns an InvalidNamespaceCreationError,
+// using details to provide information about what must be corrected.
+func NewInvalidNamespaceCreationError(details string) InvalidNamespaceCreationError {
+	return InvalidNamespaceCreationError{
+		details: details,
+	}
+}
+
+// CreateNamespace requests the creation of a new StorageOS namespace from the
+// provided fields. If successful the created resource for the namespace is
+// returned to the caller.
+func (c *Client) CreateNamespace(ctx context.Context, name string, labelSet labels.Set) (*namespace.Resource, error) {
+	_, err := c.authenticate(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.transport.CreateNamespace(ctx, name, labelSet)
 }
 
 // GetNamespace requests basic information for the namespace resource which

@@ -45,6 +45,11 @@ func (d *Displayer) CreateVolumeAsync(ctx context.Context, w io.Writer) error {
 	return nil
 }
 
+// CreateNamespace encodes namespace as JSON, writing the result to w.
+func (d *Displayer) CreateNamespace(ctx context.Context, w io.Writer, namespace *output.Namespace) error {
+	return d.encode(w, namespace)
+}
+
 // -----------------------------------------------------------------------------
 // UPDATE
 // -----------------------------------------------------------------------------

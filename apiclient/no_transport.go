@@ -77,6 +77,10 @@ func (t *noTransport) CreateVolume(ctx context.Context, namespaceID id.Namespace
 	return nil, ErrNoTransportConfigured
 }
 
+func (t *noTransport) CreateNamespace(ctx context.Context, name string, labels map[string]string) (*namespace.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
 func (t *noTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource, licenceKey []byte) (*cluster.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }

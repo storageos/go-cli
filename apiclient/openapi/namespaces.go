@@ -3,6 +3,8 @@ package openapi
 import (
 	"context"
 
+	"code.storageos.net/storageos/openapi"
+
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
@@ -49,4 +51,27 @@ func (o *OpenAPI) ListNamespaces(ctx context.Context) ([]*namespace.Resource, er
 	}
 
 	return namespaces, nil
+}
+
+// CreateNamespace requests the creation of a new namespace through the
+// StorageOS API using the provided parameters.
+func (o *OpenAPI) CreateNamespace(ctx context.Context, name string, labels map[string]string) (*namespace.Resource, error) {
+	createData := openapi.CreateNamespaceData{
+		Name:   name,
+		Labels: labels,
+	}
+
+	model, resp, err := o.client.DefaultApi.CreateNamespace(ctx, createData)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case badRequestError:
+			return nil, apiclient.NewInvalidNamespaceCreationError(v.msg)
+		case conflictError:
+			return nil, apiclient.NewNamespaceExistsError(name)
+		default:
+			return nil, v
+		}
+	}
+
+	return o.codec.decodeNamespace(model)
 }

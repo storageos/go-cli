@@ -56,6 +56,19 @@ func (d *Displayer) CreateVolumeAsync(ctx context.Context, w io.Writer) error {
 	return err
 }
 
+// CreateNamespace builds a human friendly representation of resource, writing
+// the result to w.
+func (d *Displayer) CreateNamespace(ctx context.Context, w io.Writer, namespace *output.Namespace) error {
+	table, write := createTable(namespaceHeaders)
+
+	// Humanized
+	age := d.timeHumanizer.TimeToHuman(namespace.CreatedAt)
+
+	table.AddRow(namespace.Name, age)
+
+	return write(w)
+}
+
 // -----------------------------------------------------------------------------
 // GET
 // -----------------------------------------------------------------------------

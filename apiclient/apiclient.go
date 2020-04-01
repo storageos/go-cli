@@ -47,6 +47,7 @@ type ConfigProvider interface {
 type Transport interface {
 	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
 
+	GetUser(ctx context.Context, username id.User) (*user.Resource, error)
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
 	GetNode(ctx context.Context, nodeID id.Node) (*node.Resource, error)
 	GetVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume) (*volume.Resource, error)
@@ -59,9 +60,9 @@ type Transport interface {
 	ListPolicyGroups(ctx context.Context) ([]*policygroup.Resource, error)
 	ListUsers(ctx context.Context) ([]*user.Resource, error)
 
-	GetUser(ctx context.Context, username id.User) (*user.Resource, error)
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
 	CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string, params *CreateVolumeRequestParams) (*volume.Resource, error)
+	CreateNamespace(ctx context.Context, name string, labels map[string]string) (*namespace.Resource, error)
 
 	UpdateCluster(ctx context.Context, resource *cluster.Resource, licenceKey []byte) (*cluster.Resource, error)
 

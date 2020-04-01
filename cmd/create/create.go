@@ -37,6 +37,7 @@ type ConfigProvider interface {
 type Client interface {
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
 	CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labelSet labels.Set, params *apiclient.CreateVolumeRequestParams) (*volume.Resource, error)
+	CreateNamespace(ctx context.Context, name string, labelSet labels.Set) (*namespace.Resource, error)
 
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
 	GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error)
@@ -52,6 +53,7 @@ type Displayer interface {
 	CreateUser(ctx context.Context, w io.Writer, user *output.User) error
 	CreateVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
 	CreateVolumeAsync(ctx context.Context, w io.Writer) error
+	CreateNamespace(ctx context.Context, w io.Writer, namespace *output.Namespace) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "create"
@@ -65,6 +67,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command.AddCommand(
 		newUser(os.Stdout, client, config),
 		newVolume(os.Stdout, client, config),
+		newNamespace(os.Stdout, client, config),
 	)
 
 	return command
