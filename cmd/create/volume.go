@@ -143,7 +143,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 // getNodeMapping fetches the list of nodes from the API and builds a map from
 // their ID to the full resource.
 func (c *volumeCommand) getNodeMapping(ctx context.Context) (map[id.Node]*node.Resource, error) {
-	nodeList, err := c.client.GetListNodes(ctx)
+	nodeList, err := c.client.GetListNodesByUID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -214,6 +214,7 @@ $ storageos create volume --replicas 1 --namespace my-namespace-name my-replicat
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
 				runwrappers.EnsureNamespaceSetWhenUseIDs(c.config),
+				runwrappers.AuthenticateClient(c.config, c.client),
 				runwrappers.HandleLicenceError(client),
 			)(c.runWithCtx)
 

@@ -42,32 +42,6 @@ func NewNodeNameNotFoundError(name string) NodeNotFoundError {
 	}
 }
 
-// GetNode requests basic information for the node resource which
-// corresponds to uid from the StorageOS API.
-func (c *Client) GetNode(ctx context.Context, uid id.Node) (*node.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.transport.GetNode(ctx, uid)
-}
-
-// GetAllNodes returns all the node resources in the cluster.
-func (c *Client) GetAllNodes(ctx context.Context) ([]*node.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	nodes, err := c.transport.ListNodes(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return nodes, nil
-}
-
 // GetNodeByName requests basic information for the node resource which has
 // name.
 //
@@ -79,12 +53,7 @@ func (c *Client) GetAllNodes(ctx context.Context) ([]*node.Resource, error) {
 // in the cluster from the StorageOS API and returning the first node where the
 // name matches.
 func (c *Client) GetNodeByName(ctx context.Context, name string) (*node.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	nodes, err := c.transport.ListNodes(ctx)
+	nodes, err := c.Transport.ListNodes(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -98,18 +67,13 @@ func (c *Client) GetNodeByName(ctx context.Context, name string) (*node.Resource
 	return nil, NewNodeNameNotFoundError(name)
 }
 
-// GetListNodes requests a list containing basic information on each
+// GetListNodesByUID requests a list containing basic information on each
 // node resource in the cluster.
 //
 // The returned list is filtered using uids so that it contains only those
 // resources which have a matching ID. Omitting uids will skip the filtering.
-func (c *Client) GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	nodes, err := c.transport.ListNodes(ctx)
+func (c *Client) GetListNodesByUID(ctx context.Context, uids ...id.Node) ([]*node.Resource, error) {
+	nodes, err := c.Transport.ListNodes(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -123,12 +87,7 @@ func (c *Client) GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Res
 // The returned list is filtered using names so that it contains only those
 // resources which have a matching name. Omitting names will skip the filtering.
 func (c *Client) GetListNodesByName(ctx context.Context, names ...string) ([]*node.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	nodes, err := c.transport.ListNodes(ctx)
+	nodes, err := c.Transport.ListNodes(ctx)
 	if err != nil {
 		return nil, err
 	}

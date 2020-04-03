@@ -24,6 +24,9 @@ import (
 // ConfigProvider specifies the configuration settings which commands require
 // access to.
 type ConfigProvider interface {
+	Username() (string, error)
+	Password() (string, error)
+
 	CommandTimeout() (time.Duration, error)
 	UseIDs() (bool, error)
 	Namespace() (string, error)
@@ -33,33 +36,36 @@ type ConfigProvider interface {
 // Client defines the functionality required by the CLI application to
 // reasonably implement the "get" verb commands.
 type Client interface {
+	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
+
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
 	GetDiagnostics(ctx context.Context) (io.ReadCloser, error)
 
 	GetUser(ctx context.Context, userID id.User) (*user.Resource, error)
 	GetUserByName(ctx context.Context, username string) (*user.Resource, error)
-	GetAllUsers(ctx context.Context) ([]*user.Resource, error)
-	GetListUsers(ctx context.Context, uIDs []id.User) ([]*user.Resource, error)
+	ListUsers(ctx context.Context) ([]*user.Resource, error)
+	GetListUsersByUID(ctx context.Context, uIDs []id.User) ([]*user.Resource, error)
 	GetListUsersByUsername(ctx context.Context, usernames []string) ([]*user.Resource, error)
 
-	GetListPolicyGroups(ctx context.Context, gids ...id.PolicyGroup) ([]*policygroup.Resource, error)
-	GetAllNodes(ctx context.Context) ([]*node.Resource, error)
+	GetListPolicyGroupsByUID(ctx context.Context, gids ...id.PolicyGroup) ([]*policygroup.Resource, error)
+
+	ListNodes(ctx context.Context) ([]*node.Resource, error)
 	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
 	GetNodeByName(ctx context.Context, name string) (*node.Resource, error)
-	GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
+	GetListNodesByUID(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
 	GetListNodesByName(ctx context.Context, names ...string) ([]*node.Resource, error)
 
 	GetVolume(ctx context.Context, namespaceID id.Namespace, uid id.Volume) (*volume.Resource, error)
 	GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error)
 	GetAllVolumes(ctx context.Context) ([]*volume.Resource, error)
-	GetNamespaceVolumes(ctx context.Context, namespaceID id.Namespace, uids ...id.Volume) ([]*volume.Resource, error)
+	GetNamespaceVolumesByUID(ctx context.Context, namespaceID id.Namespace, uids ...id.Volume) ([]*volume.Resource, error)
 	GetNamespaceVolumesByName(ctx context.Context, namespaceID id.Namespace, names ...string) ([]*volume.Resource, error)
 
 	GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
-	GetListNamespaces(ctx context.Context, uids ...id.Namespace) ([]*namespace.Resource, error)
+	GetListNamespacesByUID(ctx context.Context, uids ...id.Namespace) ([]*namespace.Resource, error)
 	GetListNamespacesByName(ctx context.Context, name ...string) ([]*namespace.Resource, error)
-	GetAllNamespaces(ctx context.Context) ([]*namespace.Resource, error)
+	ListNamespaces(ctx context.Context) ([]*namespace.Resource, error)
 }
 
 // Displayer defines the functionality required by the CLI application to

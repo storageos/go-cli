@@ -76,6 +76,7 @@ $ storageos create namespace --labels env=prod,rack=db-1 my-namespace-name
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
 				runwrappers.EnsureNamespaceSetWhenUseIDs(c.config),
+				runwrappers.AuthenticateClient(c.config, c.client),
 				runwrappers.HandleLicenceError(client),
 			)(c.runWithCtx)
 

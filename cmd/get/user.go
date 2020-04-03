@@ -30,7 +30,7 @@ func (c *userCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 
 	switch len(args) {
 	case 0:
-		users, err := c.client.GetAllUsers(ctx)
+		users, err := c.client.ListUsers(ctx)
 		if err != nil {
 			return err
 		}
@@ -58,7 +58,7 @@ func (c *userCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 			}
 		}
 
-		policyGroups, err := c.client.GetListPolicyGroups(ctx, u.Groups...)
+		policyGroups, err := c.client.GetListPolicyGroupsByUID(ctx, u.Groups...)
 		if err != nil {
 			return err
 		}
@@ -85,7 +85,7 @@ func (c *userCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 				ids = append(ids, id.User(arg))
 			}
 
-			users, err = c.client.GetListUsers(ctx, ids)
+			users, err = c.client.GetListUsersByUID(ctx, ids)
 			if err != nil {
 				return err
 			}
@@ -112,7 +112,7 @@ func (c *userCommand) toOutputUsers(ctx context.Context, users []*user.Resource)
 		groups = append(groups, u.Groups...)
 	}
 
-	policyGroups, err := c.client.GetListPolicyGroups(ctx, groups...)
+	policyGroups, err := c.client.GetListPolicyGroupsByUID(ctx, groups...)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +153,10 @@ $ storageos get user --use-ids my-userid-1 my-userid-2
 		}),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			run := runwrappers.RunWithTimeout(c.config)(c.runWithCtx)
+			run := runwrappers.Chain(
+				runwrappers.RunWithTimeout(c.config),
+				runwrappers.AuthenticateClient(c.config, c.client),
+			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},
 

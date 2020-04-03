@@ -86,49 +86,10 @@ func NewUserNameNotFoundError(name string) UserNotFoundError {
 	}
 }
 
-// CreateUser requests the creation of a new StorageOS user account from the
-// provided fields. If successful the created resource for the user account
-// is returned to the caller.
-func (c *Client) CreateUser(
-	ctx context.Context,
-	username, password string,
-	withAdmin bool,
-	groups ...id.PolicyGroup,
-) (*user.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.transport.CreateUser(
-		ctx,
-		username,
-		password,
-		withAdmin,
-		groups...,
-	)
-}
-
-// GetUser requests the details of a StorageOS user account and returns it to
-// the caller.
-func (c *Client) GetUser(ctx context.Context, userID id.User) (*user.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.transport.GetUser(ctx, userID)
-}
-
-// GetUserByName requests the details of a StorageOS user account and returns it to
-// the caller.
+// GetUserByName requests the details of a StorageOS user account with username
+// and returns it to the caller.
 func (c *Client) GetUserByName(ctx context.Context, username string) (*user.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	list, err := c.transport.ListUsers(ctx)
+	list, err := c.Transport.ListUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -142,24 +103,9 @@ func (c *Client) GetUserByName(ctx context.Context, username string) (*user.Reso
 	return nil, NewUserNameNotFoundError(username)
 }
 
-// GetAllUsers returns the list of all StorageOS user accounts
-func (c *Client) GetAllUsers(ctx context.Context) ([]*user.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.transport.ListUsers(ctx)
-}
-
-// GetListUsers returns all the users with the ID listed in the uIDs parameter.
-func (c *Client) GetListUsers(ctx context.Context, uIDs []id.User) ([]*user.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	list, err := c.transport.ListUsers(ctx)
+// GetListUsersByUID returns all the users with the ID listed in the uids parameter.
+func (c *Client) GetListUsersByUID(ctx context.Context, uids []id.User) ([]*user.Resource, error) {
+	list, err := c.Transport.ListUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +116,7 @@ func (c *Client) GetListUsers(ctx context.Context, uIDs []id.User) ([]*user.Reso
 	}
 
 	filtered := make([]*user.Resource, 0)
-	for _, id := range uIDs {
+	for _, id := range uids {
 		user, ok := toMap[id]
 		if !ok {
 			return nil, NewUserNotFoundError("user not found", id)
@@ -184,12 +130,7 @@ func (c *Client) GetListUsers(ctx context.Context, uIDs []id.User) ([]*user.Reso
 // GetListUsersByUsername returns all the users with the username listed in the
 // usernames parameter.
 func (c *Client) GetListUsersByUsername(ctx context.Context, usernames []string) ([]*user.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	list, err := c.transport.ListUsers(ctx)
+	list, err := c.Transport.ListUsers(ctx)
 	if err != nil {
 		return nil, err
 	}

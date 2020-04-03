@@ -48,18 +48,13 @@ func NewPolicyGroupNameNotFoundError(name string) PolicyGroupNotFoundError {
 	}
 }
 
-// GetListPolicyGroups requests a list containing basic information on each
+// GetListPolicyGroupsByUID requests a list containing basic information on each
 // policy group configured for the cluster.
 //
 // The returned list is filtered using gids so that it contains  only those
 // resources which have a matching GID. Omitting gids  will skip the filtering.
-func (c *Client) GetListPolicyGroups(ctx context.Context, gids ...id.PolicyGroup) ([]*policygroup.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	policyGroups, err := c.transport.ListPolicyGroups(ctx)
+func (c *Client) GetListPolicyGroupsByUID(ctx context.Context, gids ...id.PolicyGroup) ([]*policygroup.Resource, error) {
+	policyGroups, err := c.Transport.ListPolicyGroups(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -73,12 +68,7 @@ func (c *Client) GetListPolicyGroups(ctx context.Context, gids ...id.PolicyGroup
 // The returned list is filtered using name so that it contains  only those
 // resources which have a matching name. Omitting gids  will skip the filtering.
 func (c *Client) GetListPolicyGroupsByName(ctx context.Context, names ...string) ([]*policygroup.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	policyGroups, err := c.transport.ListPolicyGroups(ctx)
+	policyGroups, err := c.Transport.ListPolicyGroups(ctx)
 	if err != nil {
 		return nil, err
 	}

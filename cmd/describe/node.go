@@ -142,7 +142,7 @@ func (c *nodeCommand) describeListNodes(ctx context.Context, refs []string) ([]*
 		for i, ref := range refs {
 			uids[i] = id.Node(ref)
 		}
-		nodeList, err = c.client.GetListNodes(ctx, uids...)
+		nodeList, err = c.client.GetListNodesByUID(ctx, uids...)
 	}
 	if err != nil {
 		return nil, nil, err
@@ -166,7 +166,7 @@ func (c *nodeCommand) describeListNodes(ctx context.Context, refs []string) ([]*
 }
 
 func (c *nodeCommand) getNamespaceForID(ctx context.Context) (map[id.Namespace]*namespace.Resource, error) {
-	namespaces, err := c.client.GetAllNamespaces(ctx)
+	namespaces, err := c.client.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -203,6 +203,7 @@ $ storageos describe node my-node-name
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
 				runwrappers.EnsureTargetOrSelectors(&c.selectors),
+				runwrappers.AuthenticateClient(c.config, c.client),
 			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},

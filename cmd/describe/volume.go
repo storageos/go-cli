@@ -115,7 +115,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 // getNodeMapping fetches the list of nodes from the API and builds a map from
 // their ID to the full resource.
 func (c *volumeCommand) getNodeMapping(ctx context.Context) (map[id.Node]*node.Resource, error) {
-	nodeList, err := c.client.GetListNodes(ctx)
+	nodeList, err := c.client.ListNodes(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ func (c *volumeCommand) listVolumes(ctx context.Context, ns id.Namespace, vols [
 		volIDs = append(volIDs, id.Volume(uid))
 	}
 
-	return c.client.GetNamespaceVolumes(ctx, ns, volIDs...)
+	return c.client.GetNamespaceVolumesByUID(ctx, ns, volIDs...)
 }
 
 func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
@@ -186,6 +186,7 @@ $ storageos describe volume --namespace my-namespace-name my-volume-name
 				runwrappers.RunWithTimeout(c.config),
 				runwrappers.EnsureNamespaceSetWhenUseIDs(c.config),
 				runwrappers.EnsureTargetOrSelectors(&c.selectors),
+				runwrappers.AuthenticateClient(c.config, c.client),
 			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},

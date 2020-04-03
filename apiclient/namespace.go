@@ -6,7 +6,6 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
-	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
 
@@ -96,48 +95,6 @@ func NewInvalidNamespaceCreationError(details string) InvalidNamespaceCreationEr
 	}
 }
 
-// CreateNamespace requests the creation of a new StorageOS namespace from the
-// provided fields. If successful the created resource for the namespace is
-// returned to the caller.
-func (c *Client) CreateNamespace(ctx context.Context, name string, labelSet labels.Set) (*namespace.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.transport.CreateNamespace(ctx, name, labelSet)
-}
-
-// DeleteNamespace makes a delete request for a namespace given its id.
-//
-// The behaviour of the operation is dictated by params:
-//
-//
-// 	Version constraints:
-// 	- If params is nil or params.CASVersion is empty then the delete request is
-// 	unconditional
-// 	- If params.CASVersion is set, the request is conditional upon it matching
-// 	the volume entity's version as seen by the server.
-func (c *Client) DeleteNamespace(ctx context.Context, uid id.Namespace, params *DeleteNamespaceRequestParams) error {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return err
-	}
-
-	return c.transport.DeleteNamespace(ctx, uid, params)
-}
-
-// GetNamespace requests basic information for the namespace resource which
-// corresponds to uid from the StorageOS API.
-func (c *Client) GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.transport.GetNamespace(ctx, uid)
-}
-
 // GetNamespaceByName requests basic information for the namespace resource
 // which has the given name.
 //
@@ -149,12 +106,7 @@ func (c *Client) GetNamespace(ctx context.Context, uid id.Namespace) (*namespace
 // namespaces from the StorageOS API and returning the first one where the
 // name matches.
 func (c *Client) GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	namespaces, err := c.transport.ListNamespaces(ctx)
+	namespaces, err := c.Transport.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -168,14 +120,14 @@ func (c *Client) GetNamespaceByName(ctx context.Context, name string) (*namespac
 	return nil, NewNamespaceNameNotFoundError(name)
 }
 
-// GetListNamespaces requests a list of namespace resources present in the
+// GetListNamespacesByUID requests a list of namespace resources present in the
 // cluster.
 //
 // The returned list is filtered using uids so that it contains only those
 // namespace resources which have a matching ID. If no uids are given then
 // all namespaces are returned.
-func (c *Client) GetListNamespaces(ctx context.Context, uids ...id.Namespace) ([]*namespace.Resource, error) {
-	resources, err := c.GetAllNamespaces(ctx)
+func (c *Client) GetListNamespacesByUID(ctx context.Context, uids ...id.Namespace) ([]*namespace.Resource, error) {
+	resources, err := c.Transport.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -190,23 +142,12 @@ func (c *Client) GetListNamespaces(ctx context.Context, uids ...id.Namespace) ([
 // namespaces resources which have a matching name. If no names are given then
 // all namespaces are returned.
 func (c *Client) GetListNamespacesByName(ctx context.Context, names ...string) ([]*namespace.Resource, error) {
-	resources, err := c.GetAllNamespaces(ctx)
+	resources, err := c.Transport.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return filterNamespacesForNames(resources, names...)
-}
-
-// GetAllNamespaces requests a list containing basic information for every namespace
-// in the StorageOS cluster.
-func (c *Client) GetAllNamespaces(ctx context.Context) ([]*namespace.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.transport.ListNamespaces(ctx)
 }
 
 // filterNamespacesForNames will return a subset of namespaces containing

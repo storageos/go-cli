@@ -20,8 +20,7 @@ func TestGetVolumeByName(t *testing.T) {
 	tests := []struct {
 		name string
 
-		configProvider *mockConfigProvider
-		transport      *mockTransport
+		transport *mockTransport
 
 		volumeName string
 
@@ -31,7 +30,6 @@ func TestGetVolumeByName(t *testing.T) {
 		{
 			name: "ok",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				ListVolumesResource: map[id.Namespace][]*volume.Resource{
 					"arbitrary-namespace-id": {
@@ -55,7 +53,6 @@ func TestGetVolumeByName(t *testing.T) {
 		{
 			name: "volume with name does not exist",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				ListVolumesResource: map[id.Namespace][]*volume.Resource{
 					"arbitrary-namespace-id": {
@@ -80,7 +77,6 @@ func TestGetVolumeByName(t *testing.T) {
 		{
 			name: "error getting list of volumes",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				ListVolumesError: errors.New("bananas"),
 			},
@@ -97,7 +93,7 @@ func TestGetVolumeByName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			client := New(tt.configProvider)
+			client := New()
 			if err := client.ConfigureTransport(tt.transport); err != nil {
 				t.Fatalf("got error configuring client transport: %v", err)
 			}
@@ -258,7 +254,7 @@ func TestFetchAllVolumes(t *testing.T) {
 		var tt = tt
 		t.Run(tt.name, func(t *testing.T) {
 
-			client := New(&mockConfigProvider{})
+			client := New()
 			if err := client.ConfigureTransport(tt.transport); err != nil {
 				t.Fatalf("got error configuring client transport: %v", err)
 			}
@@ -507,8 +503,7 @@ func TestClientAttachVolume(t *testing.T) {
 	tests := []struct {
 		name string
 
-		configProvider *mockConfigProvider
-		transport      *mockTransport
+		transport *mockTransport
 
 		nsID   id.Namespace
 		volID  id.Volume
@@ -522,7 +517,6 @@ func TestClientAttachVolume(t *testing.T) {
 		{
 			name: "ok",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				AuthenticateError: nil,
 				AttachError:       nil,
@@ -538,27 +532,8 @@ func TestClientAttachVolume(t *testing.T) {
 			wantNodeID:      "bananaNode",
 		},
 		{
-			name: "attach authenticate error",
-
-			configProvider: &mockConfigProvider{},
-			transport: &mockTransport{
-				AuthenticateError: mockErr,
-				AttachError:       nil,
-			},
-
-			nsID:   "bananaNamespace",
-			volID:  "bananaVolume",
-			nodeID: "bananaNode",
-
-			wantErr:         mockErr,
-			wantNamespaceID: "",
-			wantVolumeID:    "",
-			wantNodeID:      "",
-		},
-		{
 			name: "attach transport error",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				AuthenticateError: nil,
 				AttachError:       mockErr,
@@ -578,7 +553,7 @@ func TestClientAttachVolume(t *testing.T) {
 		var tt = tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			client := New(tt.configProvider)
+			client := New()
 			if err := client.ConfigureTransport(tt.transport); err != nil {
 				t.Fatalf("got error configuring client transport: %v", err)
 			}

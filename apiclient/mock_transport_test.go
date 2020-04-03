@@ -8,6 +8,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -138,11 +139,11 @@ func (m *mockTransport) CreateUser(ctx context.Context, username, password strin
 	return m.CreateUserResource, m.CreateUserError
 }
 
-func (m *mockTransport) CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string, params *CreateVolumeRequestParams) (*volume.Resource, error) {
+func (m *mockTransport) CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels labels.Set, params *CreateVolumeRequestParams) (*volume.Resource, error) {
 	return m.CreateVolumeResource, m.CreateVolumeError
 }
 
-func (m *mockTransport) CreateNamespace(ctx context.Context, name string, labels map[string]string) (*namespace.Resource, error) {
+func (m *mockTransport) CreateNamespace(ctx context.Context, name string, labels labels.Set) (*namespace.Resource, error) {
 	return m.CreateNamespaceResource, m.CreateNamespaceError
 }
 

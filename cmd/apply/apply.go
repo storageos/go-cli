@@ -13,10 +13,14 @@ import (
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/output/textformat"
 	"code.storageos.net/storageos/c2-cli/output/yamlformat"
+	"code.storageos.net/storageos/c2-cli/user"
 )
 
 // ConfigProvider specifies the configuration
 type ConfigProvider interface {
+	Username() (string, error)
+	Password() (string, error)
+
 	CommandTimeout() (time.Duration, error)
 	OutputFormat() (output.Format, error)
 }
@@ -24,6 +28,8 @@ type ConfigProvider interface {
 // Client defines the functionality required by the CLI application to
 // reasonably implement the "apply" verb commands.
 type Client interface {
+	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
+
 	UpdateLicence(ctx context.Context, licenceKey []byte) (*cluster.Licence, error)
 }
 

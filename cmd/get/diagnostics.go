@@ -86,7 +86,10 @@ $ storageos get diagnostics --output-file ~/my-diagnostics
 		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			run := runwrappers.RunWithTimeout(c.config)(c.runWithCtx)
+			run := runwrappers.Chain(
+				runwrappers.RunWithTimeout(c.config),
+				runwrappers.AuthenticateClient(c.config, c.client),
+			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},
 

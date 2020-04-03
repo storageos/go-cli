@@ -41,7 +41,7 @@ func main() {
 		),
 	)
 
-	client := apiclient.New(configProvider)
+	client := apiclient.New()
 
 	app := cmd.InitCommand(
 		client,

@@ -9,6 +9,7 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
@@ -24,7 +25,7 @@ import (
 //  - If params.AsyncMax is set, the request is performed asynchronously using
 //  the duration given as the maximum amount of time allowed for the request
 //  before it times out.
-func (o *OpenAPI) CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string, params *apiclient.CreateVolumeRequestParams) (*volume.Resource, error) {
+func (o *OpenAPI) CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels labels.Set, params *apiclient.CreateVolumeRequestParams) (*volume.Resource, error) {
 
 	fsType, err := o.codec.encodeFsType(fs)
 	if err != nil {

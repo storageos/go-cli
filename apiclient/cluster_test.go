@@ -32,8 +32,7 @@ func TestUpdateLicence(t *testing.T) {
 	tests := []struct {
 		name string
 
-		configProvider *mockConfigProvider
-		transport      *mockTransport
+		transport *mockTransport
 
 		opaqueKey []byte
 
@@ -43,7 +42,6 @@ func TestUpdateLicence(t *testing.T) {
 		{
 			name: "ok",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				GetClusterResource: &cluster.Resource{
 					ID:                    "some-cluster-id",
@@ -83,7 +81,6 @@ func TestUpdateLicence(t *testing.T) {
 		{
 			name: "fails to fetch current cluster configuration",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				GetClusterError: errors.New("oh bananas"),
 			},
@@ -96,7 +93,6 @@ func TestUpdateLicence(t *testing.T) {
 		{
 			name: "fails to apply new licence key",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				GetClusterResource: &cluster.Resource{
 					ID:                    "some-cluster-id",
@@ -128,7 +124,7 @@ func TestUpdateLicence(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			client := New(tt.configProvider)
+			client := New()
 			if err := client.ConfigureTransport(tt.transport); err != nil {
 				t.Fatalf("got error configuring client transport: %v", err)
 			}

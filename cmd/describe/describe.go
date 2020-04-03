@@ -16,12 +16,16 @@ import (
 	"code.storageos.net/storageos/c2-cli/output/textformat"
 	"code.storageos.net/storageos/c2-cli/output/yamlformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 // ConfigProvider specifies the configuration settings which commands require
 // access to.
 type ConfigProvider interface {
+	Username() (string, error)
+	Password() (string, error)
+
 	CommandTimeout() (time.Duration, error)
 	UseIDs() (bool, error)
 	OutputFormat() (output.Format, error)
@@ -31,23 +35,25 @@ type ConfigProvider interface {
 // Client describes the functionality required by the CLI application
 // to reasonably implement the "describe" verb commands.
 type Client interface {
+	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
+
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
 
 	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
 	GetNodeByName(ctx context.Context, name string) (*node.Resource, error)
-	GetAllNodes(ctx context.Context) ([]*node.Resource, error)
-	GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
+	ListNodes(ctx context.Context) ([]*node.Resource, error)
+	GetListNodesByUID(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
 	GetListNodesByName(ctx context.Context, names ...string) ([]*node.Resource, error)
 
 	GetVolume(ctx context.Context, namespace id.Namespace, vid id.Volume) (*volume.Resource, error)
 	GetVolumeByName(ctx context.Context, namespace id.Namespace, name string) (*volume.Resource, error)
-	GetNamespaceVolumes(ctx context.Context, namespaceID id.Namespace, volIDs ...id.Volume) ([]*volume.Resource, error)
+	GetNamespaceVolumesByUID(ctx context.Context, namespaceID id.Namespace, volIDs ...id.Volume) ([]*volume.Resource, error)
 	GetNamespaceVolumesByName(ctx context.Context, namespaceID id.Namespace, names ...string) ([]*volume.Resource, error)
 	GetAllVolumes(ctx context.Context) ([]*volume.Resource, error)
 
 	GetNamespace(ctx context.Context, namespaceID id.Namespace) (*namespace.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
-	GetAllNamespaces(ctx context.Context) ([]*namespace.Resource, error)
+	ListNamespaces(ctx context.Context) ([]*namespace.Resource, error)
 }
 
 // Displayer defines the functionality required by the CLI application

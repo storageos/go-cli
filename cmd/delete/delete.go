@@ -15,12 +15,16 @@ import (
 	"code.storageos.net/storageos/c2-cli/output/textformat"
 	"code.storageos.net/storageos/c2-cli/output/yamlformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 // ConfigProvider specifies the configuration settings which commands require
 // access to.
 type ConfigProvider interface {
+	Username() (string, error)
+	Password() (string, error)
+
 	CommandTimeout() (time.Duration, error)
 	UseIDs() (bool, error)
 	Namespace() (string, error)
@@ -30,6 +34,8 @@ type ConfigProvider interface {
 // Client defines the functionality required by the CLI application to
 // reasonably implement the "delete" verb commands.
 type Client interface {
+	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
+
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 	GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error)
 

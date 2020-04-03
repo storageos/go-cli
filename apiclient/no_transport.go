@@ -8,6 +8,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -73,11 +74,11 @@ func (t *noTransport) CreateUser(ctx context.Context, username, password string,
 	return nil, ErrNoTransportConfigured
 }
 
-func (t *noTransport) CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels map[string]string, params *CreateVolumeRequestParams) (*volume.Resource, error) {
+func (t *noTransport) CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels labels.Set, params *CreateVolumeRequestParams) (*volume.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 
-func (t *noTransport) CreateNamespace(ctx context.Context, name string, labels map[string]string) (*namespace.Resource, error) {
+func (t *noTransport) CreateNamespace(ctx context.Context, name string, labels labels.Set) (*namespace.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 

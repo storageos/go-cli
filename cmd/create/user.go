@@ -83,7 +83,7 @@ func (c *userCommand) createUser(ctx context.Context, _ *cobra.Command, _ []stri
 			groupIDs = append(groupIDs, id.PolicyGroup(gid))
 		}
 
-		policyGroups, err = c.client.GetListPolicyGroups(ctx, groupIDs...)
+		policyGroups, err = c.client.GetListPolicyGroupsByUID(ctx, groupIDs...)
 		if err != nil {
 			return err
 		}
@@ -188,7 +188,10 @@ $ storageos create user --with-username=alice --with-admin=true
 		}),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			run := runwrappers.RunWithTimeout(c.config)(c.createUser)
+			run := runwrappers.Chain(
+				runwrappers.RunWithTimeout(c.config),
+				runwrappers.AuthenticateClient(c.config, c.client),
+			)(c.createUser)
 
 			return run(context.Background(), cmd, args)
 		},

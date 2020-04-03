@@ -26,6 +26,9 @@ import (
 // ConfigProvider specifies the configuration settings which commands require
 // access to.
 type ConfigProvider interface {
+	Username() (string, error)
+	Password() (string, error)
+
 	CommandTimeout() (time.Duration, error)
 	UseIDs() (bool, error)
 	Namespace() (string, error)
@@ -35,6 +38,8 @@ type ConfigProvider interface {
 // Client describes the functionality required by the CLI application
 // to reasonably implement the "create" verb commands.
 type Client interface {
+	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
+
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
 	CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labelSet labels.Set, params *apiclient.CreateVolumeRequestParams) (*volume.Resource, error)
 	CreateNamespace(ctx context.Context, name string, labelSet labels.Set) (*namespace.Resource, error)
@@ -42,8 +47,8 @@ type Client interface {
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
 	GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
-	GetListNodes(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
-	GetListPolicyGroups(ctx context.Context, gids ...id.PolicyGroup) ([]*policygroup.Resource, error)
+	GetListNodesByUID(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
+	GetListPolicyGroupsByUID(ctx context.Context, gids ...id.PolicyGroup) ([]*policygroup.Resource, error)
 	GetListPolicyGroupsByName(ctx context.Context, names ...string) ([]*policygroup.Resource, error)
 }
 
