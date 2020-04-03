@@ -3,7 +3,10 @@
 package environment
 
 import (
+	"bytes"
+	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -27,7 +30,7 @@ const (
 	PasswordVar = "STORAGEOS_PASSWORD" // #nosec G101
 	// PasswordCommandVar keys the environment variable from which we optionally
 	// source the password of the StorageOS account to authenticate with through
-	// command execution. TODO(CP-3919)
+	// command execution.
 	PasswordCommandVar = "STORAGEOS_PASSWORD_COMMAND" // #nosec G101
 	// UseIDsVar keys the environment variable from which we source the setting
 	// which determines whether existing StorageOS API resources are specified
@@ -65,12 +68,10 @@ var EnvConfigHelp = []struct {
 		Name: PasswordVar,
 		Help: "Sets the default password provided by the CLI for authentication",
 	},
-	//  TODO(CP-3919): Uncomment/refine this when implemented.
-	//
-	// {
-	// 	Name: PasswordCommandVar,
-	// 	Help: "If set the default password provided by the CLI for authentication is sourced from the output produced by executing the command",
-	// },
+	{
+		Name: PasswordCommandVar,
+		Help: "If set the default password provided by the CLI for authentication is sourced from the output produced by executing the command",
+	},
 	{
 		Name: UseIDsVar,
 		Help: "When set to true, the CLI will use provided values as IDs instead of names for existing resources",
@@ -132,6 +133,23 @@ func (env *Provider) Username() (string, error) {
 // the environment if set. If not set in the environment then env's fallback
 // is used.
 func (env *Provider) Password() (string, error) {
+	passwordCommand := os.Getenv(PasswordCommandVar)
+	if passwordCommand != "" {
+		cmd := exec.Command(passwordCommand)
+		b := &bytes.Buffer{}
+		cmd.Stdout = b
+		err := cmd.Run()
+		if err != nil {
+			switch v := err.(type) {
+			case *exec.ExitError:
+				return "", fmt.Errorf("password command exited with error code %d", v.ExitCode())
+			default:
+				return "", err
+			}
+		}
+		return strings.TrimSpace(b.String()), nil
+	}
+
 	password := os.Getenv(PasswordVar)
 	if password == "" {
 		return env.fallback.Password()

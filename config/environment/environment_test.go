@@ -2,7 +2,10 @@ package environment
 
 import (
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"testing"
@@ -11,6 +14,38 @@ import (
 
 func TestEnvironmentProvider(t *testing.T) {
 	t.Parallel()
+
+	createShellScript := func(cmd string) string {
+		file, err := ioutil.TempFile("", "storageos_cli_pwd_cmd.*.sh")
+		if err != nil {
+			t.Fatalf("error creating an empty file for password sourcing command")
+		}
+		defer file.Close()
+
+		_, err = file.WriteString("#!/bin/sh\n" + cmd)
+		if err != nil {
+			t.Fatalf("error writing content in password sourcing command")
+		}
+
+		err = file.Chmod(0777)
+		if err != nil {
+			t.Fatalf("error on changing permissions on password sourcing command")
+		}
+
+		return file.Name()
+	}
+
+	defer func() {
+		files, err := filepath.Glob(os.TempDir() + "/storageos_cli_pwd_cmd.*")
+		if err != nil {
+			panic(err)
+		}
+		for _, f := range files {
+			if err := os.Remove(f); err != nil {
+				panic(err)
+			}
+		}
+	}()
 
 	tests := []struct {
 		name string
@@ -209,6 +244,48 @@ func TestEnvironmentProvider(t *testing.T) {
 
 			wantValue: "",
 			wantErr:   errors.New("bananas"),
+		},
+		{
+			name: "fetch password with password command",
+
+			setenv: func(t *testing.T) {
+				path := createShellScript("echo 'verysecret'")
+
+				err := os.Setenv(PasswordCommandVar, path)
+				if err != nil {
+					t.Fatalf("got unexpected error setting up env: %v", err)
+				}
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("dont call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.Password()
+			},
+
+			wantValue: "verysecret",
+			wantErr:   nil,
+		},
+		{
+			name: "fetch password with failing password command",
+
+			setenv: func(t *testing.T) {
+				path := createShellScript("exit 42")
+
+				err := os.Setenv(PasswordCommandVar, path)
+				if err != nil {
+					t.Fatalf("got unexpected error setting up env: %v", err)
+				}
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("dont call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.Password()
+			},
+
+			wantValue: "",
+			wantErr:   fmt.Errorf("password command exited with error code 42"),
 		},
 		{
 			name: "fetch use-ids when set",
