@@ -77,12 +77,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 			return err
 		}
 
-		outputVol, err := output.NewVolume(vol, ns, nodes)
-		if err != nil {
-			return err
-		}
-
-		return c.display.DescribeVolume(ctx, c.writer, outputVol)
+		return c.display.DescribeVolume(ctx, c.writer, output.NewVolume(vol, ns, nodes))
 
 	default:
 		volumes, err := c.listVolumes(ctx, ns.ID, args)
@@ -100,12 +95,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		outputVols := make([]*output.Volume, 0, len(volumes))
 
 		for _, vol := range volumes {
-			outputVol, err := output.NewVolume(vol, ns, nodes)
-			if err != nil {
-				return err
-			}
-
-			outputVols = append(outputVols, outputVol)
+			outputVols = append(outputVols, output.NewVolume(vol, ns, nodes))
 		}
 
 		return c.display.DescribeListVolumes(ctx, c.writer, outputVols)

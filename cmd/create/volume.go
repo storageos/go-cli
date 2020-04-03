@@ -132,12 +132,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		return err
 	}
 
-	outputVol, err := output.NewVolume(vol, ns, nodes)
-	if err != nil {
-		return err
-	}
-
-	return c.display.CreateVolume(ctx, c.writer, outputVol)
+	return c.display.CreateVolume(ctx, c.writer, output.NewVolume(vol, ns, nodes))
 }
 
 // getNodeMapping fetches the list of nodes from the API and builds a map from

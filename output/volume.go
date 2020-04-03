@@ -59,17 +59,7 @@ type VolumeDeletion struct {
 
 // NewVolume creates a new Volume output representation using extra details
 // from the provided parameters.
-func NewVolume(vol *volume.Resource, ns *namespace.Resource, nodes map[id.Node]*node.Resource) (*Volume, error) {
-	outputMaster, err := newDeployment(vol.Master, nodes)
-	if err != nil {
-		return nil, err
-	}
-
-	outputReplicas, err := newDeployments(vol.Replicas, nodes)
-	if err != nil {
-		return nil, err
-	}
-
+func NewVolume(vol *volume.Resource, ns *namespace.Resource, nodes map[id.Node]*node.Resource) *Volume {
 	var attachedOnName string
 
 	attachedOn, ok := nodes[vol.AttachedOn]
@@ -78,7 +68,7 @@ func NewVolume(vol *volume.Resource, ns *namespace.Resource, nodes map[id.Node]*
 		attachedOnName = attachedOn.Name
 	case vol.AttachedOn == "":
 	default:
-		return nil, NewMissingRequiredNodeErr(vol.AttachedOn)
+		attachedOnName = unknownResourceName
 	}
 
 	return &Volume{
@@ -92,24 +82,26 @@ func NewVolume(vol *volume.Resource, ns *namespace.Resource, nodes map[id.Node]*
 		Labels:         vol.Labels,
 		Filesystem:     vol.Filesystem,
 		SizeBytes:      vol.SizeBytes,
-		Master:         outputMaster,
-		Replicas:       outputReplicas,
+		Master:         newDeployment(vol.Master, nodes),
+		Replicas:       newDeployments(vol.Replicas, nodes),
 		CreatedAt:      vol.CreatedAt,
 		UpdatedAt:      vol.UpdatedAt,
 		Version:        vol.Version,
-	}, nil
+	}
 }
 
-func newDeployment(dep *volume.Deployment, nodes map[id.Node]*node.Resource) (*Deployment, error) {
+func newDeployment(dep *volume.Deployment, nodes map[id.Node]*node.Resource) *Deployment {
+	nodeName := unknownResourceName
+
 	n, ok := nodes[dep.Node]
-	if !ok {
-		return nil, NewMissingRequiredNodeErr(dep.Node)
+	if ok {
+		nodeName = n.Name
 	}
 
 	outputDep := &Deployment{
 		ID:         dep.ID,
 		Node:       dep.Node,
-		NodeName:   n.Name,
+		NodeName:   nodeName,
 		Health:     dep.Health,
 		Promotable: dep.Promotable,
 	}
@@ -119,19 +111,15 @@ func newDeployment(dep *volume.Deployment, nodes map[id.Node]*node.Resource) (*D
 		outputDep.SyncProgress = newSyncProgress(dep.SyncProgress)
 	}
 
-	return outputDep, nil
+	return outputDep
 }
 
-func newDeployments(deployments []*volume.Deployment, nodes map[id.Node]*node.Resource) ([]*Deployment, error) {
+func newDeployments(deployments []*volume.Deployment, nodes map[id.Node]*node.Resource) []*Deployment {
 	outputDeployments := make([]*Deployment, 0, len(deployments))
 	for _, d := range deployments {
-		encoded, err := newDeployment(d, nodes)
-		if err != nil {
-			return nil, err
-		}
-		outputDeployments = append(outputDeployments, encoded)
+		outputDeployments = append(outputDeployments, newDeployment(d, nodes))
 	}
-	return outputDeployments, nil
+	return outputDeployments
 }
 
 func newSyncProgress(sync *volume.SyncProgress) *SyncProgress {

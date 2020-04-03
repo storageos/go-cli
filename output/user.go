@@ -31,17 +31,18 @@ type PolicyGroup struct {
 
 // NewUser creates a new User output representation using extra details from
 // the provided parameters.
-func NewUser(user *user.Resource, policyGroups map[id.PolicyGroup]*policygroup.Resource) (*User, error) {
+func NewUser(user *user.Resource, policyGroups map[id.PolicyGroup]*policygroup.Resource) *User {
 	outputGroups := make([]PolicyGroup, 0, len(user.Groups))
 	for _, gid := range user.Groups {
+		groupName := unknownResourceName
 		group, ok := policyGroups[gid]
-		if !ok {
-			return nil, NewMissingRequiredPolicyGroupErr(gid)
+		if ok {
+			groupName = group.Name
 		}
 
 		outputGroups = append(outputGroups, PolicyGroup{
 			ID:   gid,
-			Name: group.Name,
+			Name: groupName,
 		})
 	}
 
@@ -53,23 +54,17 @@ func NewUser(user *user.Resource, policyGroups map[id.PolicyGroup]*policygroup.R
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		Version:   user.Version,
-	}, nil
+	}
 }
 
 // NewUsers creates a new list of the output representations of the user
 // resource
-func NewUsers(users []*user.Resource, policyGroups map[id.PolicyGroup]*policygroup.Resource) ([]*User, error) {
+func NewUsers(users []*user.Resource, policyGroups map[id.PolicyGroup]*policygroup.Resource) []*User {
 	outputUsers := make([]*User, 0, len(users))
 
 	for _, u := range users {
-		newUser, err := NewUser(u, policyGroups)
-		if err != nil {
-			return nil, err
-		}
-
-		outputUsers = append(outputUsers, newUser)
+		outputUsers = append(outputUsers, NewUser(u, policyGroups))
 	}
 
-	return outputUsers, nil
-
+	return outputUsers
 }

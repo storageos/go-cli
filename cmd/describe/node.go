@@ -39,12 +39,11 @@ func (c *nodeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 			return err
 		}
 
-		nodeDescription, err := output.NewNodeDescription(n, hostedVols, namespaceForID)
-		if err != nil {
-			return err
-		}
-
-		return c.display.DescribeNode(ctx, c.writer, nodeDescription)
+		return c.display.DescribeNode(
+			ctx,
+			c.writer,
+			output.NewNodeDescription(n, hostedVols, namespaceForID),
+		)
 	default:
 		set, err := selectors.NewSetFromStrings(c.selectors...)
 		if err != nil {
@@ -64,11 +63,10 @@ func (c *nodeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 		nodeDescriptions := []*output.NodeDescription{}
 
 		for _, n := range set.FilterNodes(nodes) {
-			d, err := output.NewNodeDescription(n, hostedVolsMap[n.ID], namespaceForID)
-			if err != nil {
-				return err
-			}
-			nodeDescriptions = append(nodeDescriptions, d)
+			nodeDescriptions = append(
+				nodeDescriptions,
+				output.NewNodeDescription(n, hostedVolsMap[n.ID], namespaceForID),
+			)
 		}
 
 		return c.display.DescribeListNodes(ctx, c.writer, nodeDescriptions)

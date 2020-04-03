@@ -72,12 +72,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 				return errMissingNamespace
 			}
 
-			outputVol, err := output.NewVolume(v, ns, nodes)
-			if err != nil {
-				return err
-			}
-
-			outputVolumes = append(outputVolumes, outputVol)
+			outputVolumes = append(outputVolumes, output.NewVolume(v, ns, nodes))
 		}
 
 		return c.display.GetListVolumes(
@@ -110,12 +105,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 			return err
 		}
 
-		outputVol, err := output.NewVolume(v, namespace, nodes)
-		if err != nil {
-			return err
-		}
-
-		return c.display.GetVolume(ctx, c.writer, outputVol)
+		return c.display.GetVolume(ctx, c.writer, output.NewVolume(v, namespace, nodes))
 
 	default:
 		volumes, err := c.listVolumes(ctx, namespaceID, args)
@@ -148,12 +138,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 				return errMissingNamespace
 			}
 
-			outputVol, err := output.NewVolume(v, ns, nodes)
-			if err != nil {
-				return err
-			}
-
-			outputVolumes = append(outputVolumes, outputVol)
+			outputVolumes = append(outputVolumes, output.NewVolume(v, ns, nodes))
 		}
 
 		return c.display.GetListVolumes(

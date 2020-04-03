@@ -105,12 +105,7 @@ func (c *userCommand) createUser(ctx context.Context, _ *cobra.Command, _ []stri
 		return err
 	}
 
-	outputUser, err := output.NewUser(user, groupMapping)
-	if err != nil {
-		return err
-	}
-
-	return c.display.CreateUser(ctx, c.writer, outputUser)
+	return c.display.CreateUser(ctx, c.writer, output.NewUser(user, groupMapping))
 }
 
 func (c *userCommand) getMappingForGroups(ctx context.Context, policyGroupList []*policygroup.Resource) (map[id.PolicyGroup]*policygroup.Resource, error) {

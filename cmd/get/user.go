@@ -68,12 +68,7 @@ func (c *userCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 			groupMapping[p.ID] = p
 		}
 
-		outputUser, err := output.NewUser(u, groupMapping)
-		if err != nil {
-			return err
-		}
-
-		return c.display.GetUser(ctx, c.writer, outputUser)
+		return c.display.GetUser(ctx, c.writer, output.NewUser(u, groupMapping))
 
 	default: // more than 1
 		var users []*user.Resource
@@ -122,12 +117,7 @@ func (c *userCommand) toOutputUsers(ctx context.Context, users []*user.Resource)
 		groupMapping[p.ID] = p
 	}
 
-	outputUsers, err := output.NewUsers(users, groupMapping)
-	if err != nil {
-		return nil, err
-	}
-
-	return outputUsers, nil
+	return output.NewUsers(users, groupMapping), nil
 }
 
 func newUser(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
