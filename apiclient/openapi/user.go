@@ -3,6 +3,8 @@ package openapi
 import (
 	"context"
 
+	"github.com/antihax/optional"
+
 	"code.storageos.net/storageos/openapi"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
@@ -78,4 +80,48 @@ func (o *OpenAPI) ListUsers(ctx context.Context) ([]*user.Resource, error) {
 	}
 
 	return users, nil
+}
+
+// DeleteUser makes a delete request for a user given its ID.
+//
+// The behaviour of the operation is dictated by params:
+//
+//
+// 	Version constraints:
+// 	- If params is nil or params.CASVersion is empty then the delete request is
+// 	unconditional
+// 	- If params.CASVersion is set, the request is conditional upon it matching
+// 	the volume entity's version as seen by the server.
+func (o *OpenAPI) DeleteUser(ctx context.Context, uid id.User, params *apiclient.DeleteUserRequestParams) error {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	var casVersion string
+	var ignoreVersion optional.Bool = optional.NewBool(true)
+
+	if params != nil {
+		if params.CASVersion.String() != "" {
+			ignoreVersion = optional.NewBool(false)
+			casVersion = params.CASVersion.String()
+		}
+	}
+
+	resp, err := o.client.DefaultApi.DeleteUser(
+		ctx,
+		uid.String(),
+		casVersion,
+		&openapi.DeleteUserOpts{
+			IgnoreVersion: ignoreVersion,
+		},
+	)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return apiclient.NewUserNotFoundError(v.msg, uid)
+		default:
+			return v
+		}
+	}
+
+	return nil
 }

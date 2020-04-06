@@ -152,6 +152,12 @@ func (d *Displayer) DescribeListVolumes(ctx context.Context, w io.Writer, volume
 // DELETE
 // -----------------------------------------------------------------------------
 
+// DeleteUser encodes the user deletion confirmation as JSON, writing the
+// results to w.
+func (d *Displayer) DeleteUser(ctx context.Context, w io.Writer, confirmation output.UserDeletion) error {
+	return d.encode(w, confirmation)
+}
+
 // DeleteVolume encodes the volume deletion confirmation as JSON, writing the
 // result to w.
 func (d *Displayer) DeleteVolume(ctx context.Context, w io.Writer, confirmation output.VolumeDeletion) error {

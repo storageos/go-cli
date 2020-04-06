@@ -128,6 +128,15 @@ type Transport interface {
 	// 	- If params.CASVersion is set, the request is conditional upon it matching
 	// 	the volume entity's version as seen by the server.
 	DeleteNamespace(ctx context.Context, uid id.Namespace, params *DeleteNamespaceRequestParams) error
+	// DeleteUser makes a delete request for a user given its id.
+	// The behaviour of the operation is dictated by params:
+	//
+	// Version constraints:
+	//  - If params is nil or params.CASVersion is empty then the delete request is
+	//    unconditional
+	//  - If params.CASVersion is set, the request is conditional upon it matching
+	//    the volume entity's version as seen by the server.
+	DeleteUser(ctx context.Context, uid id.User, params *DeleteUserRequestParams) error
 
 	// AttachVolume requests volumeID in namespaceID is attached to nodeID.
 	AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error

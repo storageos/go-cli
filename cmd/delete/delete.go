@@ -36,9 +36,11 @@ type ConfigProvider interface {
 type Client interface {
 	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
 
+	GetUserByName(ctx context.Context, username string) (*user.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 	GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error)
 
+	DeleteUser(ctx context.Context, uid id.User, params *apiclient.DeleteUserRequestParams) error
 	DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *apiclient.DeleteVolumeRequestParams) error
 	DeleteNamespace(ctx context.Context, uid id.Namespace, params *apiclient.DeleteNamespaceRequestParams) error
 }
@@ -46,6 +48,7 @@ type Client interface {
 // Displayer defines the functionality required by the CLI application to
 // display the results gathered by the "delete" verb commands.
 type Displayer interface {
+	DeleteUser(ctx context.Context, w io.Writer, confirmation output.UserDeletion) error
 	DeleteVolume(ctx context.Context, w io.Writer, confirmation output.VolumeDeletion) error
 	DeleteVolumeAsync(ctx context.Context, w io.Writer) error
 	DeleteNamespace(ctx context.Context, w io.Writer, confirmation output.NamespaceDeletion) error
@@ -61,6 +64,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command.AddCommand(
 		newVolume(os.Stdout, client, config),
 		newNamespace(os.Stdout, client, config),
+		newUser(os.Stdout, client, config),
 	)
 
 	return command

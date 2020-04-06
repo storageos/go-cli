@@ -502,6 +502,12 @@ func (d *Displayer) DetachVolume(ctx context.Context, w io.Writer) error {
 	return err
 }
 
+// DeleteUser writes a message containing the user deletion confirmation to w.
+func (d *Displayer) DeleteUser(ctx context.Context, w io.Writer, confirmation output.UserDeletion) error {
+	_, err := fmt.Fprintf(w, "deleted user %s\n", confirmation.ID.String())
+	return err
+}
+
 // DeleteVolume writes a message containing the volume deletion confirmation
 // to w.
 func (d *Displayer) DeleteVolume(ctx context.Context, w io.Writer, confirmation output.VolumeDeletion) error {

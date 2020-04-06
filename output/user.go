@@ -68,3 +68,9 @@ func NewUsers(users []*user.Resource, policyGroups map[id.PolicyGroup]*policygro
 
 	return outputUsers
 }
+
+// UserDeletion defines a user deletion confirmation output
+// representation.
+type UserDeletion struct {
+	ID id.User `json:"id" yaml:"id"`
+}

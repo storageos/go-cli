@@ -5,8 +5,15 @@ import (
 	"fmt"
 
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/user"
 )
+
+// DeleteUserRequestParams contains optional request parameters for a
+// delete user operation.
+type DeleteUserRequestParams struct {
+	CASVersion version.Version
+}
 
 // UserExistsError is returned when a user creation request is sent to the
 // StorageOS API for an already taken username.
