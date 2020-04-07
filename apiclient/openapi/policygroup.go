@@ -3,6 +3,10 @@ package openapi
 import (
 	"context"
 
+	"github.com/antihax/optional"
+
+	"code.storageos.net/storageos/openapi"
+
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/policygroup"
@@ -49,4 +53,47 @@ func (o *OpenAPI) ListPolicyGroups(ctx context.Context) ([]*policygroup.Resource
 	}
 
 	return policyGroups, nil
+}
+
+// DeletePolicyGroup makes a delete request for a policy group given its ID.
+//
+// The behaviour of the operation is dictated by params:
+//
+// 	Version constraints:
+//  - If params is nil or params.CASVersion is empty then the delete request is
+//    unconditional
+//  - If params.CASVersion is set, the request is conditional upon it matching
+//    the volume entity's version as seen by the server.
+func (o *OpenAPI) DeletePolicyGroup(ctx context.Context, uid id.PolicyGroup, params *apiclient.DeletePolicyGroupRequestParams) error {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	var casVersion string
+	var ignoreVersion optional.Bool = optional.NewBool(true)
+
+	if params != nil {
+		if params.CASVersion.String() != "" {
+			ignoreVersion = optional.NewBool(false)
+			casVersion = params.CASVersion.String()
+		}
+	}
+
+	resp, err := o.client.DefaultApi.DeletePolicyGroup(
+		ctx,
+		uid.String(),
+		casVersion,
+		&openapi.DeletePolicyGroupOpts{
+			IgnoreVersion: ignoreVersion,
+		},
+	)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return apiclient.NewPolicyGroupIDNotFoundError(uid)
+		default:
+			return v
+		}
+	}
+
+	return nil
 }

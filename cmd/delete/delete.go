@@ -15,6 +15,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/output/textformat"
 	"code.storageos.net/storageos/c2-cli/output/yamlformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
@@ -39,10 +40,12 @@ type Client interface {
 	GetUserByName(ctx context.Context, username string) (*user.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 	GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error)
+	GetPolicyGroupByName(ctx context.Context, name string) (*policygroup.Resource, error)
 
 	DeleteUser(ctx context.Context, uid id.User, params *apiclient.DeleteUserRequestParams) error
 	DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *apiclient.DeleteVolumeRequestParams) error
 	DeleteNamespace(ctx context.Context, uid id.Namespace, params *apiclient.DeleteNamespaceRequestParams) error
+	DeletePolicyGroup(ctx context.Context, uid id.PolicyGroup, params *apiclient.DeletePolicyGroupRequestParams) error
 }
 
 // Displayer defines the functionality required by the CLI application to
@@ -52,6 +55,7 @@ type Displayer interface {
 	DeleteVolume(ctx context.Context, w io.Writer, confirmation output.VolumeDeletion) error
 	DeleteVolumeAsync(ctx context.Context, w io.Writer) error
 	DeleteNamespace(ctx context.Context, w io.Writer, confirmation output.NamespaceDeletion) error
+	DeletePolicyGroup(ctx context.Context, w io.Writer, confirmation output.PolicyGroupDeletion) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "delete" verb.
@@ -64,6 +68,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command.AddCommand(
 		newVolume(os.Stdout, client, config),
 		newNamespace(os.Stdout, client, config),
+		newPolicyGroup(os.Stdout, client, config),
 		newUser(os.Stdout, client, config),
 	)
 

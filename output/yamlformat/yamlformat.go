@@ -182,6 +182,12 @@ func (d *Displayer) DeleteNamespace(ctx context.Context, w io.Writer, confirmati
 	return d.encode(w, confirmation)
 }
 
+// DeletePolicyGroup encodes the policy group deletion confirmation as YAML, writing
+// the result to w
+func (d *Displayer) DeletePolicyGroup(ctx context.Context, w io.Writer, confirmation output.PolicyGroupDeletion) error {
+	return d.encode(w, confirmation)
+}
+
 // -----------------------------------------------------------------------------
 // OTHER
 // -----------------------------------------------------------------------------

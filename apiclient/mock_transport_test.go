@@ -81,6 +81,10 @@ type mockTransport struct {
 	DeleteNamespaceParam *DeleteNamespaceRequestParams
 	DeleteNamespaceError error
 
+	DeletePolicyGroupID    id.PolicyGroup
+	DeletePolicyGroupParam *DeletePolicyGroupRequestParams
+	DeletePolicyGroupError error
+
 	AttachGotNamespace id.Namespace
 	AttachGotVolume    id.Volume
 	AttachGotNode      id.Node
@@ -181,6 +185,12 @@ func (m *mockTransport) DeleteNamespace(ctx context.Context, uid id.Namespace, p
 	m.DeleteNamespaceID = uid
 	m.DeleteNamespaceParam = params
 	return m.DeleteNamespaceError
+}
+
+func (m *mockTransport) DeletePolicyGroup(ctx context.Context, uid id.PolicyGroup, params *DeletePolicyGroupRequestParams) error {
+	m.DeletePolicyGroupID = uid
+	m.DeletePolicyGroupParam = params
+	return m.DeletePolicyGroupError
 }
 
 func (m *mockTransport) AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error {

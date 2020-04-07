@@ -553,6 +553,13 @@ func (d *Displayer) DeleteVolumeAsync(ctx context.Context, w io.Writer) error {
 	return err
 }
 
+// DeletePolicyGroup encodes the policy group deletion confirmation as JSON, writing
+// the result to w
+func (d *Displayer) DeletePolicyGroup(ctx context.Context, w io.Writer, confirmation output.PolicyGroupDeletion) error {
+	_, err := fmt.Fprintf(w, "deleted policy group %s\n", confirmation.ID.String())
+	return err
+}
+
 // NewDisplayer initialises a Displayer which prints human readable strings
 // StorageOS to output CLI results.
 func NewDisplayer(timeHumanizer output.TimeHumanizer) *Displayer {

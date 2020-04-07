@@ -102,6 +102,10 @@ func (t *noTransport) DeleteNamespace(ctx context.Context, uid id.Namespace, par
 	return ErrNoTransportConfigured
 }
 
+func (t *noTransport) DeletePolicyGroup(ctx context.Context, uid id.PolicyGroup, params *DeletePolicyGroupRequestParams) error {
+	return ErrNoTransportConfigured
+}
+
 func (t *noTransport) AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error {
 	return ErrNoTransportConfigured
 }

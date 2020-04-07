@@ -5,8 +5,15 @@ import (
 	"fmt"
 
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 )
+
+// DeletePolicyGroupRequestParams contains optional request parameters for a
+// delete policy group operation.
+type DeletePolicyGroupRequestParams struct {
+	CASVersion version.Version
+}
 
 // PolicyGroupNotFoundError indicates that the API could not find the policy
 // group specified.
