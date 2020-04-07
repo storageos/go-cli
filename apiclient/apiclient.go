@@ -60,7 +60,9 @@ type Transport interface {
 	// GetDiagnostics requests a new diagnostics bundle for the cluster
 	// from the StorageOS API.
 	GetDiagnostics(ctx context.Context) (io.ReadCloser, error)
-
+	// GetPolicyGroup requests a new policy group resource which corresponds to
+	// uid from the StorageOS API.
+	GetPolicyGroup(ctx context.Context, uid id.PolicyGroup) (*policygroup.Resource, error)
 	// ListNodes returns all the node resources in the cluster.
 	ListNodes(ctx context.Context) ([]*node.Resource, error)
 	// ListVolumes returns all the user resources in the cluster.

@@ -119,6 +119,16 @@ func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, volumes []*
 	return d.encode(w, volumes)
 }
 
+// GetPolicyGroup encodes resource as JSON, writing the result to w.
+func (d *Displayer) GetPolicyGroup(ctx context.Context, w io.Writer, group *output.PolicyGroup) error {
+	return d.encode(w, group)
+}
+
+// GetListPolicyGroups encodes resources as JSON, writing the result to w.
+func (d *Displayer) GetListPolicyGroups(ctx context.Context, w io.Writer, groups []*output.PolicyGroup) error {
+	return d.encode(w, groups)
+}
+
 // -----------------------------------------------------------------------------
 // DESCRIBE
 // -----------------------------------------------------------------------------

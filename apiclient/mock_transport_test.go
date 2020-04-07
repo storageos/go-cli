@@ -36,6 +36,9 @@ type mockTransport struct {
 	GetNamespaceResource *namespace.Resource
 	GetNamespaceError    error
 
+	GetPolicyGroupResource *policygroup.Resource
+	GetPolicyGroupError    error
+
 	ListNodesResource []*node.Resource
 	ListNodesError    error
 
@@ -121,6 +124,10 @@ func (m *mockTransport) GetVolume(ctx context.Context, namespaceID id.Namespace,
 
 func (m *mockTransport) GetNamespace(ctx context.Context, namespaceID id.Namespace) (*namespace.Resource, error) {
 	return m.GetNamespaceResource, m.GetNamespaceError
+}
+
+func (m *mockTransport) GetPolicyGroup(ctx context.Context, uid id.PolicyGroup) (*policygroup.Resource, error) {
+	return m.GetPolicyGroupResource, m.GetPolicyGroupError
 }
 
 func (m *mockTransport) ListNodes(ctx context.Context) ([]*node.Resource, error) {

@@ -3,8 +3,29 @@ package openapi
 import (
 	"context"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
+	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 )
+
+// GetPolicyGroup requests the policy group with uid from the StorageOS API,
+// translating it into a *policygroup.Resource.
+func (o *OpenAPI) GetPolicyGroup(ctx context.Context, uid id.PolicyGroup) (*policygroup.Resource, error) {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	model, resp, err := o.client.DefaultApi.GetPolicyGroup(ctx, uid.String())
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return nil, apiclient.NewPolicyGroupIDNotFoundError(uid)
+		default:
+			return nil, v
+		}
+	}
+
+	return o.codec.decodePolicyGroup(model)
+}
 
 // ListPolicyGroups returns a list of all policy groups from the StorageOS API,
 // translating each one to a *policygroup.Resource.

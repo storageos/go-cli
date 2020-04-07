@@ -19,10 +19,11 @@ import (
 )
 
 var (
-	nodeHeaders      = []interface{}{"NAME", "HEALTH", "AGE", "LABELS"}
-	namespaceHeaders = []interface{}{"NAME", "AGE"}
-	userHeaders      = []interface{}{"NAME", "ROLE", "AGE", "GROUPS"}
-	volumeHeaders    = []interface{}{"NAMESPACE", "NAME", "SIZE", "LOCATION", "ATTACHED ON", "REPLICAS", "AGE"}
+	nodeHeaders        = []interface{}{"NAME", "HEALTH", "AGE", "LABELS"}
+	namespaceHeaders   = []interface{}{"NAME", "AGE"}
+	userHeaders        = []interface{}{"NAME", "ROLE", "AGE", "GROUPS"}
+	volumeHeaders      = []interface{}{"NAMESPACE", "NAME", "SIZE", "LOCATION", "ATTACHED ON", "REPLICAS", "AGE"}
+	policyGroupHeaders = []interface{}{"NAME", "USERS", "SPECS", "AGE"}
 )
 
 // Displayer is a type which creates human-readable strings and writes them to
@@ -180,6 +181,30 @@ func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, resources [
 	for _, vol := range resources {
 		d.printVolume(table, vol)
 	}
+	return write(w)
+}
+
+// GetPolicyGroup creates human-readable strings, writing the result to w.
+func (d *Displayer) GetPolicyGroup(ctx context.Context, w io.Writer, group *output.PolicyGroup) error {
+	table, write := createTable(policyGroupHeaders)
+
+	// Humanized
+	age := d.timeHumanizer.TimeToHuman(group.CreatedAt)
+	table.AddRow(group.Name, len(group.Users), len(group.Specs), age)
+
+	return write(w)
+}
+
+// GetListPolicyGroups creates human-readable strings, writing the result to w.
+func (d *Displayer) GetListPolicyGroups(ctx context.Context, w io.Writer, groups []*output.PolicyGroup) error {
+	table, write := createTable(policyGroupHeaders)
+
+	for _, pg := range groups {
+		// Humanized
+		age := d.timeHumanizer.TimeToHuman(pg.CreatedAt)
+		table.AddRow(pg.Name, len(pg.Users), len(pg.Specs), age)
+	}
+
 	return write(w)
 }
 

@@ -50,6 +50,10 @@ func (t *noTransport) GetNamespace(ctx context.Context, namespaceID id.Namespace
 	return nil, ErrNoTransportConfigured
 }
 
+func (t *noTransport) GetPolicyGroup(ctx context.Context, uid id.PolicyGroup) (*policygroup.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
 func (t *noTransport) ListNodes(ctx context.Context) ([]*node.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }

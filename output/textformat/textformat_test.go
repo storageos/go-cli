@@ -16,6 +16,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/capacity"
 	"code.storageos.net/storageos/c2-cli/pkg/health"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
@@ -765,6 +766,203 @@ kiwiaName      xx aeons ago
 			}
 			if gotW := w.String(); gotW != tt.wantW {
 				t.Errorf("GetListNamespaces() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
+			}
+		})
+	}
+}
+
+func TestDisplayer_GetPolicyGroup(t *testing.T) {
+	t.Parallel()
+
+	var mockTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name     string
+		resource *policygroup.Resource
+		wantW    string
+		wantErr  bool
+	}{
+		{
+			name: "print policy group",
+			resource: &policygroup.Resource{
+				ID:   "bananaID",
+				Name: "bananaName",
+				Users: []*policygroup.Member{
+					{
+						ID:       "member1",
+						Username: "memberName1",
+					},
+					{
+						ID:       "member2",
+						Username: "memberName2",
+					},
+				},
+				Specs: []*policygroup.Spec{
+					{
+						NamespaceID:  "bananaNamespace1",
+						ResourceType: "*",
+						ReadOnly:     false,
+					},
+					{
+						NamespaceID:  "bananaNamespace2",
+						ResourceType: "volume",
+						ReadOnly:     true,
+					},
+				},
+				CreatedAt: mockTime,
+				UpdatedAt: mockTime,
+				Version:   "42",
+			},
+			wantW: `NAME        USERS  SPECS  AGE         
+bananaName  2      2      xx aeons ago
+`,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
+			w := &bytes.Buffer{}
+			err := d.GetPolicyGroup(context.Background(), w, output.NewPolicyGroup(tt.resource))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetPolicyGroup() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotW := w.String(); gotW != tt.wantW {
+				t.Errorf("GetPolicyGroup() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
+			}
+		})
+	}
+}
+
+func TestDisplayer_GetListPolicyGroups(t *testing.T) {
+	t.Parallel()
+
+	var mockTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name      string
+		resources []*policygroup.Resource
+		wantW     string
+		wantErr   bool
+	}{
+		{
+			name: "print policy groups",
+			resources: []*policygroup.Resource{
+				{
+					ID:   "bananaID",
+					Name: "bananaName",
+					Users: []*policygroup.Member{
+						{
+							ID:       "member1",
+							Username: "memberName1",
+						},
+						{
+							ID:       "member2",
+							Username: "memberName2",
+						},
+					},
+					Specs: []*policygroup.Spec{
+						{
+							NamespaceID:  "bananaNamespace1",
+							ResourceType: "*",
+							ReadOnly:     false,
+						},
+						{
+							NamespaceID:  "bananaNamespace2",
+							ResourceType: "volume",
+							ReadOnly:     true,
+						},
+					},
+					CreatedAt: mockTime,
+					UpdatedAt: mockTime,
+					Version:   "42",
+				},
+				{
+					ID:   "pineappleID",
+					Name: "pineappleName",
+					Users: []*policygroup.Member{
+						{
+							ID:       "member1",
+							Username: "memberName1",
+						},
+					},
+					Specs: []*policygroup.Spec{
+						{
+							NamespaceID:  "pineappleNamespace1",
+							ResourceType: "*",
+							ReadOnly:     false,
+						},
+						{
+							NamespaceID:  "pineappleNamespace2",
+							ResourceType: "volume",
+							ReadOnly:     true,
+						},
+						{
+							NamespaceID:  "pineappleNamespace3",
+							ResourceType: "volume",
+							ReadOnly:     true,
+						},
+					},
+					CreatedAt: mockTime,
+					UpdatedAt: mockTime,
+					Version:   "42",
+				},
+				{
+					ID:   "kiwiID",
+					Name: "kiwiName",
+					Users: []*policygroup.Member{
+						{
+							ID:       "member1",
+							Username: "memberName1",
+						},
+						{
+							ID:       "member2",
+							Username: "memberName2",
+						},
+					},
+					Specs: []*policygroup.Spec{
+						{
+							NamespaceID:  "kiwiNamespace1",
+							ResourceType: "*",
+							ReadOnly:     false,
+						},
+						{
+							NamespaceID:  "kiwiNamespace2",
+							ResourceType: "volume",
+							ReadOnly:     true,
+						},
+					},
+					CreatedAt: mockTime,
+					UpdatedAt: mockTime,
+					Version:   "42",
+				},
+			},
+			wantW: `NAME           USERS  SPECS  AGE         
+bananaName     2      2      xx aeons ago
+pineappleName  1      3      xx aeons ago
+kiwiName       2      2      xx aeons ago
+`,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
+			w := &bytes.Buffer{}
+			err := d.GetListPolicyGroups(context.Background(), w, output.NewPolicyGroups(tt.resources))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetListPolicyGroups() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotW := w.String(); gotW != tt.wantW {
+				t.Errorf("GetListPolicyGroups() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
 			}
 		})
 	}

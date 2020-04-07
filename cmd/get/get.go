@@ -47,6 +47,9 @@ type Client interface {
 	GetListUsersByUID(ctx context.Context, uIDs []id.User) ([]*user.Resource, error)
 	GetListUsersByUsername(ctx context.Context, usernames []string) ([]*user.Resource, error)
 
+	GetPolicyGroup(ctx context.Context, pgID id.PolicyGroup) (*policygroup.Resource, error)
+	GetPolicyGroupByName(ctx context.Context, name string) (*policygroup.Resource, error)
+	GetListPolicyGroupsByName(ctx context.Context, names ...string) ([]*policygroup.Resource, error)
 	GetListPolicyGroupsByUID(ctx context.Context, gids ...id.PolicyGroup) ([]*policygroup.Resource, error)
 
 	ListNodes(ctx context.Context) ([]*node.Resource, error)
@@ -78,6 +81,8 @@ type Displayer interface {
 	GetNode(ctx context.Context, w io.Writer, node *output.Node) error
 	GetListNodes(ctx context.Context, w io.Writer, nodes []*output.Node) error
 	GetNamespace(ctx context.Context, w io.Writer, namespace *output.Namespace) error
+	GetPolicyGroup(ctx context.Context, w io.Writer, group *output.PolicyGroup) error
+	GetListPolicyGroups(ctx context.Context, w io.Writer, groups []*output.PolicyGroup) error
 	GetListNamespaces(ctx context.Context, w io.Writer, namespaces []*output.Namespace) error
 	GetVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
 	GetListVolumes(ctx context.Context, w io.Writer, volumes []*output.Volume) error
@@ -97,6 +102,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 		newNamespace(os.Stdout, client, config),
 		newVolume(os.Stdout, client, config),
 		newUser(os.Stdout, client, config),
+		newPolicyGroup(os.Stdout, client, config),
 	)
 
 	return command

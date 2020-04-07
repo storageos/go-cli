@@ -22,13 +22,6 @@ type User struct {
 	Version   version.Version `json:"version" yaml:"version"`
 }
 
-// PolicyGroup encapsulates the information required to output policy groups
-// to a display.
-type PolicyGroup struct {
-	ID   id.PolicyGroup `json:"id" yaml:"id"`
-	Name string         `json:"name" yaml:"name"`
-}
-
 // NewUser creates a new User output representation using extra details from
 // the provided parameters.
 func NewUser(user *user.Resource, policyGroups map[id.PolicyGroup]*policygroup.Resource) *User {

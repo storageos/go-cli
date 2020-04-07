@@ -62,6 +62,22 @@ func (c *Client) GetListPolicyGroupsByUID(ctx context.Context, gids ...id.Policy
 	return filterPolicyGroupsForIDs(policyGroups, gids...)
 }
 
+// GetPolicyGroupByName requests a policy group given its name
+func (c *Client) GetPolicyGroupByName(ctx context.Context, name string) (*policygroup.Resource, error) {
+	policyGroups, err := c.Transport.ListPolicyGroups(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range policyGroups {
+		if p.Name == name {
+			return p, nil
+		}
+	}
+
+	return nil, NewPolicyGroupNameNotFoundError(name)
+}
+
 // GetListPolicyGroupsByName requests a list containing basic information on each
 // policy group configured for the cluster.
 //
