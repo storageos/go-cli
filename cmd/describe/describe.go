@@ -16,6 +16,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/output/textformat"
 	"code.storageos.net/storageos/c2-cli/output/yamlformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
@@ -45,6 +46,11 @@ type Client interface {
 	GetListNodesByUID(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
 	GetListNodesByName(ctx context.Context, names ...string) ([]*node.Resource, error)
 
+	GetPolicyGroup(ctx context.Context, pgID id.PolicyGroup) (*policygroup.Resource, error)
+	GetPolicyGroupByName(ctx context.Context, name string) (*policygroup.Resource, error)
+	GetListPolicyGroupsByName(ctx context.Context, names ...string) ([]*policygroup.Resource, error)
+	GetListPolicyGroupsByUID(ctx context.Context, gids ...id.PolicyGroup) ([]*policygroup.Resource, error)
+
 	GetVolume(ctx context.Context, namespace id.Namespace, vid id.Volume) (*volume.Resource, error)
 	GetVolumeByName(ctx context.Context, namespace id.Namespace, name string) (*volume.Resource, error)
 	GetNamespaceVolumesByUID(ctx context.Context, namespaceID id.Namespace, volIDs ...id.Volume) ([]*volume.Resource, error)
@@ -64,6 +70,8 @@ type Displayer interface {
 	DescribeListNodes(ctx context.Context, w io.Writer, nodes []*output.NodeDescription) error
 	DescribeVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
 	DescribeListVolumes(ctx context.Context, w io.Writer, volumes []*output.Volume) error
+	DescribePolicyGroup(ctx context.Context, w io.Writer, group *output.PolicyGroup) error
+	DescribeListPolicyGroups(ctx context.Context, w io.Writer, groups []*output.PolicyGroup) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "describe" verb.
@@ -77,6 +85,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 		newNode(os.Stdout, client, config),
 		newVolume(os.Stdout, client, config),
 		newCluster(os.Stdout, client, config),
+		newPolicyGroup(os.Stdout, client, config),
 	)
 
 	return command

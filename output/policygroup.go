@@ -3,6 +3,7 @@ package output
 import (
 	"time"
 
+	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/policygroup"
@@ -23,9 +24,10 @@ type PolicyGroup struct {
 // Spec encapsulates a policy specification API resource belonging to a policy
 // group as a data type.
 type Spec struct {
-	NamespaceID  id.Namespace `json:"namespaceID" yaml:"namespaceID"`
-	ResourceType string       `json:"resourceType" yaml:"resourceType"`
-	ReadOnly     bool         `json:"readOnly" yaml:"readOnly"`
+	NamespaceID   id.Namespace `json:"namespaceID" yaml:"namespaceID"`
+	NamespaceName string       `json:"namespaceName" yaml:"namespaceName"`
+	ResourceType  string       `json:"resourceType" yaml:"resourceType"`
+	ReadOnly      bool         `json:"readOnly" yaml:"readOnly"`
 }
 
 // Member represents the details of a user that is a member of a policy group.
@@ -36,9 +38,34 @@ type Member struct {
 
 // NewPolicyGroup returns a new PolicyGroup object that contains all the info needed
 // to be outputted.
-func NewPolicyGroup(n *policygroup.Resource) *PolicyGroup {
-	users := make([]*Member, 0, len(n.Users))
-	for _, u := range n.Users {
+func NewPolicyGroup(n *policygroup.Resource, namespaces []*namespace.Resource) *PolicyGroup {
+	nameMapping := map[id.Namespace]string{}
+	for _, ns := range namespaces {
+		nameMapping[ns.ID] = ns.Name
+	}
+
+	return newPolicyGroupWithNames(n, nameMapping)
+}
+
+// NewPolicyGroups returns a list of PolicyGroup objects that contains all the info
+// needed to be outputted.
+func NewPolicyGroups(pg []*policygroup.Resource, namespaces []*namespace.Resource) []*PolicyGroup {
+	nameMapping := map[id.Namespace]string{}
+	for _, ns := range namespaces {
+		nameMapping[ns.ID] = ns.Name
+	}
+
+	policyGroups := make([]*PolicyGroup, 0, len(pg))
+	for _, n := range pg {
+		policyGroups = append(policyGroups, newPolicyGroupWithNames(n, nameMapping))
+	}
+	return policyGroups
+}
+
+func newPolicyGroupWithNames(pg *policygroup.Resource, nameMapping map[id.Namespace]string) *PolicyGroup {
+	// users
+	users := make([]*Member, 0, len(pg.Users))
+	for _, u := range pg.Users {
 		users = append(
 			users,
 			&Member{
@@ -48,37 +75,35 @@ func NewPolicyGroup(n *policygroup.Resource) *PolicyGroup {
 		)
 	}
 
-	specs := make([]*Spec, 0, len(n.Specs))
-	for _, s := range n.Specs {
+	// specs
+	specs := make([]*Spec, 0, len(pg.Specs))
+	for _, s := range pg.Specs {
+
+		namespaceName := s.NamespaceID.String()
+		if name, ok := nameMapping[s.NamespaceID]; ok {
+			namespaceName = name
+		}
+
 		specs = append(
 			specs,
 			&Spec{
-				NamespaceID:  s.NamespaceID,
-				ResourceType: s.ResourceType,
-				ReadOnly:     s.ReadOnly,
+				NamespaceID:   s.NamespaceID,
+				NamespaceName: namespaceName,
+				ResourceType:  s.ResourceType,
+				ReadOnly:      s.ReadOnly,
 			},
 		)
 	}
 
 	return &PolicyGroup{
-		ID:        n.ID,
-		Name:      n.Name,
+		ID:        pg.ID,
+		Name:      pg.Name,
 		Users:     users,
 		Specs:     specs,
-		CreatedAt: n.CreatedAt,
-		UpdatedAt: n.UpdatedAt,
-		Version:   n.Version,
+		CreatedAt: pg.CreatedAt,
+		UpdatedAt: pg.UpdatedAt,
+		Version:   pg.Version,
 	}
-}
-
-// NewPolicyGroups returns a list of PolicyGroup objects that contains all the info
-// needed to be outputted.
-func NewPolicyGroups(pg []*policygroup.Resource) []*PolicyGroup {
-	policyGroups := make([]*PolicyGroup, 0, len(pg))
-	for _, n := range pg {
-		policyGroups = append(policyGroups, NewPolicyGroup(n))
-	}
-	return policyGroups
 }
 
 // PolicyGroupDeletion defines a policy group deletion confirmation output

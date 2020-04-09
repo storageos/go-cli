@@ -155,6 +155,16 @@ func (d *Displayer) DescribeListVolumes(ctx context.Context, w io.Writer, volume
 	return d.encode(w, volumes)
 }
 
+// DescribePolicyGroup encodes policy group as YAML, writing the result to w
+func (d *Displayer) DescribePolicyGroup(ctx context.Context, w io.Writer, group *output.PolicyGroup) error {
+	return d.encode(w, group)
+}
+
+// DescribeListPolicyGroups encodes policy groups as YAML, writing the result to w
+func (d *Displayer) DescribeListPolicyGroups(ctx context.Context, w io.Writer, groups []*output.PolicyGroup) error {
+	return d.encode(w, groups)
+}
+
 // -----------------------------------------------------------------------------
 // DELETE
 // -----------------------------------------------------------------------------
