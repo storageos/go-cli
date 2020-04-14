@@ -200,17 +200,26 @@ func (d *Displayer) describeReplica(table *uitable.Table, size uint64, replica *
 	table.AddRow("  Health", replica.Health.String())
 	table.AddRow("  Promotable", replica.Promotable)
 	if replica.Health == health.ReplicaSyncing {
-		barStr, err := syncProgressBarString(
-			replica.SyncProgress.BytesRemaining,
-			size,
-			replica.SyncProgress.EstimatedSecondsRemaining,
-		)
-		if err != nil {
-			recap := fmt.Sprintf("%d/%d", size-replica.SyncProgress.BytesRemaining, size)
-			table.AddRow("  Sync Progress", recap)
-		} else {
-			table.AddRow("  Sync Progress", barStr)
-		}
+		d.describeSyncProgress(table, size, replica.SyncProgress)
+	}
+}
+
+func (d *Displayer) describeSyncProgress(table *uitable.Table, size uint64, progress *output.SyncProgress) {
+	if progress == nil {
+		table.AddRow("  Sync Progress", "n/a")
+		return
+	}
+
+	barStr, err := syncProgressBarString(
+		progress.BytesRemaining,
+		size,
+		progress.EstimatedSecondsRemaining,
+	)
+	if err != nil {
+		recap := fmt.Sprintf("%d/%d", size-progress.BytesRemaining, size)
+		table.AddRow("  Sync Progress", recap)
+	} else {
+		table.AddRow("  Sync Progress", barStr)
 	}
 }
 

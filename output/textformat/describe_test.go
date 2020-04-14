@@ -456,6 +456,71 @@ Master:
 `,
 			wantErr: nil,
 		},
+		{
+			name: "describe volume ok with missing sync progress",
+
+			volume: &output.Volume{
+				ID:             "bananaID",
+				Name:           "banana-name",
+				Description:    "banana description",
+				AttachedOn:     "banana-node-a-id",
+				AttachedOnName: "banana-node-a",
+				Namespace:      "banana-namespace-id",
+				NamespaceName:  "banana-namespace",
+				Labels: labels.Set{
+					"kiwi": "42",
+					"pear": "42",
+				},
+				Filesystem: volume.FsTypeFromString("ext4"),
+				SizeBytes:  humanize.GiByte,
+				Master: &output.Deployment{
+					ID:         "bananaDeploymentID1",
+					Node:       "banana-node1-id",
+					NodeName:   "banana-node1",
+					Health:     "ready",
+					Promotable: true,
+				},
+				Replicas: []*output.Deployment{
+					{
+						ID:           "bananaDeploymentID2",
+						Node:         "banana-node2-id",
+						NodeName:     "banana-node2",
+						Health:       health.ReplicaSyncing,
+						Promotable:   false,
+						SyncProgress: nil,
+					},
+				},
+				CreatedAt: mockTime,
+				UpdatedAt: mockTime,
+				Version:   "42",
+			},
+
+			wantOutput: `ID               bananaID                              
+Name             banana-name                           
+Description      banana description                    
+AttachedOn       banana-node-a (banana-node-a-id)      
+Namespace        banana-namespace (banana-namespace-id)
+Labels           kiwi=42,pear=42                       
+Filesystem       ext4                                  
+Size             1.0 GiB (1073741824 bytes)            
+Version          42                                    
+Created at       2000-01-01T00:00:00Z (xx aeons ago)   
+Updated at       2000-01-01T00:00:00Z (xx aeons ago)   
+                                                       
+Master:        
+  ID             bananaDeploymentID1                   
+  Node           banana-node1 (banana-node1-id)        
+  Health         ready                                 
+                                                       
+Replicas:      
+  ID             bananaDeploymentID2                   
+  Node           banana-node2 (banana-node2-id)        
+  Health         syncing                               
+  Promotable     false                                 
+  Sync Progress  n/a                                   
+`,
+			wantErr: nil,
+		},
 	}
 	for _, tt := range tests {
 		var tt = tt
