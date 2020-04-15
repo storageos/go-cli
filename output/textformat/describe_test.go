@@ -15,8 +15,10 @@ import (
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/capacity"
 	"code.storageos.net/storageos/c2-cli/pkg/health"
+	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/policygroup"
+	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
@@ -1179,6 +1181,217 @@ Version     44
 				pretty.Ldiff(t, gotOutput, tt.wantOutput)
 				// gotOutput = strings.ReplaceAll(w.String(), " ", "•")
 				// gotOutput = strings.ReplaceAll(gotOutput, "\n", "%\n")
+				t.Errorf("got output: \n%v\n\nwant: \n%v\n", gotOutput, tt.wantOutput)
+			}
+		})
+	}
+}
+
+func TestDisplayer_DescribeUser(t *testing.T) {
+	t.Parallel()
+
+	var mockTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name string
+
+		usr          *user.Resource
+		policyGroups []*policygroup.Resource
+
+		wantOutput string
+		wantErr    error
+	}{
+		{
+			name: "describe user ok",
+			usr: &user.Resource{
+				ID:       "bananaID",
+				Username: "bananaUsername",
+				IsAdmin:  false,
+				Groups: []id.PolicyGroup{
+					"banana-policy-id",
+					"pineapple-policy-id",
+				},
+				CreatedAt: mockTime,
+				UpdatedAt: mockTime,
+				Version:   "42",
+			},
+			policyGroups: []*policygroup.Resource{
+				{
+					ID:   "banana-policy-id",
+					Name: "banana-policy-name",
+				},
+				{
+					ID:   "kiwi-policy-id",
+					Name: "kiwi-policy-name",
+				},
+				{
+					ID:   "pineapple-policy-id",
+					Name: "pineapple-policy-name",
+				},
+			},
+			wantOutput: `ID          bananaID                           
+Username    bananaUsername                     
+Admin       false                              
+Version     42                                 
+Created at  2000-01-01T00:00:00Z (xx aeons ago)
+Updated at  2000-01-01T00:00:00Z (xx aeons ago)
+Policies:                                      
+         -  banana-policy-name                 
+         -  pineapple-policy-name              
+`,
+			wantErr: nil,
+		},
+		{
+			name: "describe user with no policy ok",
+
+			usr: &user.Resource{
+				ID:        "bananaID",
+				Username:  "bananaUsername",
+				IsAdmin:   false,
+				Groups:    []id.PolicyGroup{},
+				CreatedAt: mockTime,
+				UpdatedAt: mockTime,
+				Version:   "42",
+			},
+			policyGroups: []*policygroup.Resource{
+				{
+					ID:   "banana-policy-id",
+					Name: "banana-policy-name",
+				},
+				{
+					ID:   "kiwi-policy-id",
+					Name: "kiwi-policy-name",
+				},
+				{
+					ID:   "pineapple-policy-id",
+					Name: "pineapple-policy-name",
+				},
+			},
+			wantOutput: `ID          bananaID                           
+Username    bananaUsername                     
+Admin       false                              
+Version     42                                 
+Created at  2000-01-01T00:00:00Z (xx aeons ago)
+Updated at  2000-01-01T00:00:00Z (xx aeons ago)
+Policies:   []                                 
+`,
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
+			w := &bytes.Buffer{}
+
+			gotErr := d.DescribeUser(context.Background(), w, output.NewUser(tt.usr, tt.policyGroups))
+			if gotErr != tt.wantErr {
+				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+				return
+			}
+
+			gotOutput := w.String()
+			if gotOutput != tt.wantOutput {
+				pretty.Ldiff(t, gotOutput, tt.wantOutput)
+				t.Errorf("got output: \n%v\n\nwant: \n%v\n", gotOutput, tt.wantOutput)
+			}
+		})
+	}
+}
+
+func TestDisplayer_DescribeListUsers(t *testing.T) {
+	t.Parallel()
+
+	var mockTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name string
+
+		users        []*user.Resource
+		policyGroups []*policygroup.Resource
+
+		wantOutput string
+		wantErr    error
+	}{
+		{
+			name: "describe volume ok",
+			users: []*user.Resource{
+				{
+					ID:       "bananaID",
+					Username: "bananaUsername",
+					IsAdmin:  false,
+					Groups: []id.PolicyGroup{
+						"banana-policy-id",
+						"pineapple-policy-id",
+					},
+					CreatedAt: mockTime,
+					UpdatedAt: mockTime,
+					Version:   "42",
+				},
+				{
+					ID:        "kiwiID",
+					Username:  "kiwiUsername",
+					IsAdmin:   true,
+					Groups:    nil,
+					CreatedAt: mockTime,
+					UpdatedAt: mockTime,
+					Version:   "42",
+				},
+			},
+			policyGroups: []*policygroup.Resource{
+				{
+					ID:   "banana-policy-id",
+					Name: "banana-policy-name",
+				},
+				{
+					ID:   "kiwi-policy-id",
+					Name: "kiwi-policy-name",
+				},
+				{
+					ID:   "pineapple-policy-id",
+					Name: "pineapple-policy-name",
+				},
+			},
+			wantOutput: `ID          bananaID                           
+Username    bananaUsername                     
+Admin       false                              
+Version     42                                 
+Created at  2000-01-01T00:00:00Z (xx aeons ago)
+Updated at  2000-01-01T00:00:00Z (xx aeons ago)
+Policies:                                      
+         -  banana-policy-name                 
+         -  pineapple-policy-name              
+
+ID          kiwiID                             
+Username    kiwiUsername                       
+Admin       true                               
+Version     42                                 
+Created at  2000-01-01T00:00:00Z (xx aeons ago)
+Updated at  2000-01-01T00:00:00Z (xx aeons ago)
+Policies:   []                                 
+`,
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
+			w := &bytes.Buffer{}
+
+			gotErr := d.DescribeListUsers(context.Background(), w, output.NewUsers(tt.users, tt.policyGroups))
+			if gotErr != tt.wantErr {
+				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+				return
+			}
+
+			gotOutput := w.String()
+			if gotOutput != tt.wantOutput {
+				pretty.Ldiff(t, gotOutput, tt.wantOutput)
 				t.Errorf("got output: \n%v\n\nwant: \n%v\n", gotOutput, tt.wantOutput)
 			}
 		})

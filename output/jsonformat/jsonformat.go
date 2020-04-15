@@ -168,6 +168,16 @@ func (d *Displayer) DescribeListPolicyGroups(ctx context.Context, w io.Writer, g
 	return d.encode(w, groups)
 }
 
+// DescribeUser encodes user as JSON, writing the result to w
+func (d *Displayer) DescribeUser(ctx context.Context, w io.Writer, user *output.User) error {
+	return d.encode(w, user)
+}
+
+// DescribeListUsers encodes users as JSON, writing the result to w
+func (d *Displayer) DescribeListUsers(ctx context.Context, w io.Writer, users []*output.User) error {
+	return d.encode(w, users)
+}
+
 // -----------------------------------------------------------------------------
 // DELETE
 // -----------------------------------------------------------------------------

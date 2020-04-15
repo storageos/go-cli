@@ -39,7 +39,9 @@ type Client interface {
 	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
 
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
-
+	GetUser(ctx context.Context, userID id.User) (*user.Resource, error)
+	GetUserByName(ctx context.Context, username string) (*user.Resource, error)
+	ListUsers(ctx context.Context) ([]*user.Resource, error)
 	GetNode(ctx context.Context, uid id.Node) (*node.Resource, error)
 	GetNodeByName(ctx context.Context, name string) (*node.Resource, error)
 	ListNodes(ctx context.Context) ([]*node.Resource, error)
@@ -70,6 +72,8 @@ type Displayer interface {
 	DescribeListNodes(ctx context.Context, w io.Writer, nodes []*output.NodeDescription) error
 	DescribeVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
 	DescribeListVolumes(ctx context.Context, w io.Writer, volumes []*output.Volume) error
+	DescribeUser(ctx context.Context, w io.Writer, user *output.User) error
+	DescribeListUsers(ctx context.Context, w io.Writer, users []*output.User) error
 	DescribePolicyGroup(ctx context.Context, w io.Writer, group *output.PolicyGroup) error
 	DescribeListPolicyGroups(ctx context.Context, w io.Writer, groups []*output.PolicyGroup) error
 }
@@ -86,6 +90,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 		newVolume(os.Stdout, client, config),
 		newCluster(os.Stdout, client, config),
 		newPolicyGroup(os.Stdout, client, config),
+		newUser(os.Stdout, client, config),
 	)
 
 	return command

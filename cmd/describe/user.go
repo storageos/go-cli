@@ -1,4 +1,4 @@
-package get
+package describe
 
 import (
 	"context"
@@ -21,40 +21,23 @@ type userCommand struct {
 }
 
 func (c *userCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args []string) error {
-
 	useIDs, err := c.config.UseIDs()
 	if err != nil {
 		return err
 	}
 
 	switch len(args) {
-	case 0:
-		users, err := c.client.ListUsers(ctx)
-		if err != nil {
-			return err
-		}
-
-		outputUsers, err := c.toOutputUsers(ctx, users)
-		if err != nil {
-			return err
-		}
-
-		return c.display.GetUsers(ctx, c.writer, outputUsers)
-
 	case 1:
 		var u *user.Resource
+		var err error
 
 		if useIDs {
-			uID := id.User(args[0])
-			u, err = c.client.GetUser(ctx, uID)
-			if err != nil {
-				return err
-			}
+			u, err = c.client.GetUser(ctx, id.User(args[0]))
 		} else {
 			u, err = c.client.GetUserByName(ctx, args[0])
-			if err != nil {
-				return err
-			}
+		}
+		if err != nil {
+			return err
 		}
 
 		policyGroups, err := c.client.GetListPolicyGroupsByUID(ctx, u.Groups...)
@@ -62,51 +45,33 @@ func (c *userCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 			return err
 		}
 
-		return c.display.GetUser(ctx, c.writer, output.NewUser(u, policyGroups))
+		return c.display.DescribeUser(ctx, c.writer, output.NewUser(u, policyGroups))
 
-	default: // more than 1
-		var users []*user.Resource
-
-		if useIDs {
-
-			ids := make([]id.User, 0, len(args))
-			for _, arg := range args {
-				ids = append(ids, id.User(arg))
-			}
-
-			users, err = c.client.GetListUsersByUID(ctx, ids)
-			if err != nil {
-				return err
-			}
-
-		} else {
-			users, err = c.client.GetListUsersByUsername(ctx, args)
-			if err != nil {
-				return err
-			}
-		}
-
-		outputUsers, err := c.toOutputUsers(ctx, users)
+	default:
+		// get all users
+		users, err := c.client.ListUsers(ctx)
 		if err != nil {
 			return err
 		}
 
-		return c.display.GetUsers(ctx, c.writer, outputUsers)
-	}
-}
+		// get a merged list of all policy groups
+		groups := make([]id.PolicyGroup, 0)
+		for _, u := range users {
+			groups = append(groups, u.Groups...)
+		}
 
-func (c *userCommand) toOutputUsers(ctx context.Context, users []*user.Resource) ([]*output.User, error) {
-	groups := make([]id.PolicyGroup, 0)
-	for _, u := range users {
-		groups = append(groups, u.Groups...)
-	}
+		policyGroups, err := c.client.GetListPolicyGroupsByUID(ctx, groups...)
+		if err != nil {
+			return err
+		}
 
-	policyGroups, err := c.client.GetListPolicyGroupsByUID(ctx, groups...)
-	if err != nil {
-		return nil, err
-	}
+		outputUsers := make([]*output.User, 0, len(users))
+		for _, u := range users {
+			outputUsers = append(outputUsers, output.NewUser(u, policyGroups))
+		}
 
-	return output.NewUsers(users, policyGroups), nil
+		return c.display.DescribeListUsers(ctx, c.writer, outputUsers)
+	}
 }
 
 func newUser(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
@@ -115,15 +80,17 @@ func newUser(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 		client: client,
 		writer: w,
 	}
+
 	cobraCommand := &cobra.Command{
 		Aliases: []string{"users"},
 		Use:     "user [user names...]",
-		Short:   "Fetch user details",
+		Short:   "Show detailed information for users",
 		Example: `
-$ storageos get user my-username
-$ storageos get user my-username-1 my-username-2
-$ storageos get user --use-ids my-userid
-$ storageos get user --use-ids my-userid-1 my-userid-2
+$ storageos describe users
+$ storageos describe user my-username
+$ storageos describe user my-username-1 my-username-2
+$ storageos describe user --use-ids my-userid
+$ storageos describe user --use-ids my-userid-1 my-userid-2
 `,
 
 		PreRunE: argwrappers.WrapInvalidArgsError(func(_ *cobra.Command, args []string) error {
@@ -139,7 +106,7 @@ $ storageos get user --use-ids my-userid-1 my-userid-2
 			return run(context.Background(), cmd, args)
 		},
 
-		// If a legitimate error occurs as part of the VERB user command
+		// If a legitimate error occurs as part of the VERB volume command
 		// we don't need to barf the usage template.
 		SilenceUsage: true,
 	}

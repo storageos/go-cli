@@ -89,11 +89,6 @@ func (c *userCommand) createUser(ctx context.Context, _ *cobra.Command, _ []stri
 		}
 	}
 
-	groupMapping, err := c.getMappingForGroups(ctx, policyGroups)
-	if err != nil {
-		return err
-	}
-
 	user, err := c.client.CreateUser(
 		ctx,
 		c.username,
@@ -105,16 +100,7 @@ func (c *userCommand) createUser(ctx context.Context, _ *cobra.Command, _ []stri
 		return err
 	}
 
-	return c.display.CreateUser(ctx, c.writer, output.NewUser(user, groupMapping))
-}
-
-func (c *userCommand) getMappingForGroups(ctx context.Context, policyGroupList []*policygroup.Resource) (map[id.PolicyGroup]*policygroup.Resource, error) {
-	policyGroups := map[id.PolicyGroup]*policygroup.Resource{}
-	for _, g := range policyGroupList {
-		policyGroups[g.ID] = g
-	}
-
-	return policyGroups, nil
+	return c.display.CreateUser(ctx, c.writer, output.NewUser(user, policyGroups))
 }
 
 // promptForPassword will interactively request a password from the user,

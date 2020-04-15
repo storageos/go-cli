@@ -111,8 +111,8 @@ func filterPolicyGroupsForNames(policyGroups []*policygroup.Resource, names ...s
 		return policyGroups, nil
 	}
 
+	// implicitly removes also duplicates, if any, in the names list
 	retrieved := map[string]*policygroup.Resource{}
-
 	for _, g := range policyGroups {
 		retrieved[g.Name] = g
 	}
@@ -141,8 +141,8 @@ func filterPolicyGroupsForIDs(policyGroups []*policygroup.Resource, gids ...id.P
 		return policyGroups, nil
 	}
 
+	// implicitly removes also duplicates, if any, in the gids list
 	retrieved := map[id.PolicyGroup]*policygroup.Resource{}
-
 	for _, g := range policyGroups {
 		retrieved[g.ID] = g
 	}

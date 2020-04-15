@@ -24,13 +24,38 @@ type User struct {
 
 // NewUser creates a new User output representation using extra details from
 // the provided parameters.
-func NewUser(user *user.Resource, policyGroups map[id.PolicyGroup]*policygroup.Resource) *User {
+func NewUser(user *user.Resource, policyGroups []*policygroup.Resource) *User {
+	nameMapping := map[id.PolicyGroup]string{}
+	for _, pg := range policyGroups {
+		nameMapping[pg.ID] = pg.Name
+	}
+
+	return newUserWithPolicyGroup(user, nameMapping)
+}
+
+// NewUsers creates a new list of the output representations of the user
+// resource
+func NewUsers(users []*user.Resource, policyGroups []*policygroup.Resource) []*User {
+	nameMapping := map[id.PolicyGroup]string{}
+	for _, pg := range policyGroups {
+		nameMapping[pg.ID] = pg.Name
+	}
+
+	outputUsers := make([]*User, 0, len(users))
+	for _, u := range users {
+		outputUsers = append(outputUsers, newUserWithPolicyGroup(u, nameMapping))
+	}
+
+	return outputUsers
+}
+
+func newUserWithPolicyGroup(user *user.Resource, groups map[id.PolicyGroup]string) *User {
 	outputGroups := make([]PolicyGroup, 0, len(user.Groups))
 	for _, gid := range user.Groups {
 		groupName := unknownResourceName
-		group, ok := policyGroups[gid]
+		name, ok := groups[gid]
 		if ok {
-			groupName = group.Name
+			groupName = name
 		}
 
 		outputGroups = append(outputGroups, PolicyGroup{
@@ -48,18 +73,6 @@ func NewUser(user *user.Resource, policyGroups map[id.PolicyGroup]*policygroup.R
 		UpdatedAt: user.UpdatedAt,
 		Version:   user.Version,
 	}
-}
-
-// NewUsers creates a new list of the output representations of the user
-// resource
-func NewUsers(users []*user.Resource, policyGroups map[id.PolicyGroup]*policygroup.Resource) []*User {
-	outputUsers := make([]*User, 0, len(users))
-
-	for _, u := range users {
-		outputUsers = append(outputUsers, NewUser(u, policyGroups))
-	}
-
-	return outputUsers
 }
 
 // UserDeletion defines a user deletion confirmation output

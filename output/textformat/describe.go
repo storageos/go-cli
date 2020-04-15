@@ -290,3 +290,51 @@ func (d *Displayer) describePolicyGroup(ctx context.Context, w io.Writer, group 
 	_, err := fmt.Fprintln(w, table)
 	return err
 }
+
+// DescribeUser prints all the detailed information about a user
+func (d *Displayer) DescribeUser(ctx context.Context, w io.Writer, user *output.User) error {
+	return d.describeUser(ctx, w, user)
+}
+
+// DescribeListUsers prints all the detailed information about a list of users
+func (d *Displayer) DescribeListUsers(ctx context.Context, w io.Writer, users []*output.User) error {
+	for i, v := range users {
+		if i > 0 {
+			_, err := w.Write([]byte("\n"))
+			if err != nil {
+				return err
+			}
+		}
+
+		err := d.describeUser(ctx, w, v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (d *Displayer) describeUser(ctx context.Context, w io.Writer, user *output.User) error {
+	table := uitable.New()
+	table.Separator = "  "
+
+	table.AddRow("ID", user.ID.String())
+	table.AddRow("Username", user.Username)
+	table.AddRow("Admin", user.IsAdmin)
+
+	table.AddRow("Version", user.Version)
+	table.AddRow("Created at", d.timeToHuman(user.CreatedAt))
+	table.AddRow("Updated at", d.timeToHuman(user.UpdatedAt))
+
+	if len(user.Groups) == 0 {
+		table.AddRow("Policies:", "[]")
+	} else {
+		table.AddRow("Policies:", "")
+		for _, g := range user.Groups {
+			table.AddRow("         -", g.Name)
+		}
+	}
+
+	_, err := fmt.Fprintln(w, table)
+	return err
+}
