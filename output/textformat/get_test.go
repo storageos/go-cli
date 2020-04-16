@@ -545,9 +545,9 @@ func TestDisplayer_GetListNamespaces(t *testing.T) {
 					Version:   "42",
 				},
 				{
-					ID:        "kiwiaID",
-					Name:      "kiwiaName",
-					Labels:    map[string]string{"kiwiaKey": "kiwiaValue"},
+					ID:        "kiwiID",
+					Name:      "kiwiName",
+					Labels:    map[string]string{"kiwiKey": "kiwiValue"},
 					CreatedAt: mockTime,
 					UpdatedAt: mockTime,
 					Version:   "42",
@@ -556,7 +556,7 @@ func TestDisplayer_GetListNamespaces(t *testing.T) {
 			wantW: `NAME           AGE         
 bananaName     xx aeons ago
 pineappleName  xx aeons ago
-kiwiaName      xx aeons ago
+kiwiName       xx aeons ago
 `,
 			wantErr: false,
 		},

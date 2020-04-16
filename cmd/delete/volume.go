@@ -113,7 +113,7 @@ func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command
 		Example: `
 $ storageos delete volume my-test-volume my-unneeded-volume
 
-$ storagoes delete volume --namespace my-namespace my-old-volume
+$ storageos delete volume --namespace my-namespace my-old-volume
 `,
 
 		Args: argwrappers.WrapInvalidArgsError(func(_ *cobra.Command, args []string) error {

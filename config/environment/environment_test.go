@@ -67,7 +67,7 @@ func TestEnvironmentProvider(t *testing.T) {
 				}
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.APIEndpoints()
@@ -114,7 +114,7 @@ func TestEnvironmentProvider(t *testing.T) {
 				}
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.CommandTimeout()
@@ -161,7 +161,7 @@ func TestEnvironmentProvider(t *testing.T) {
 				}
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Username()
@@ -208,7 +208,7 @@ func TestEnvironmentProvider(t *testing.T) {
 				}
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Password()
@@ -257,7 +257,7 @@ func TestEnvironmentProvider(t *testing.T) {
 				}
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Password()
@@ -278,7 +278,7 @@ func TestEnvironmentProvider(t *testing.T) {
 				}
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Password()
@@ -297,7 +297,7 @@ func TestEnvironmentProvider(t *testing.T) {
 				}
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.UseIDs()
@@ -316,7 +316,7 @@ func TestEnvironmentProvider(t *testing.T) {
 				}
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.UseIDs()
@@ -367,7 +367,7 @@ func TestEnvironmentProvider(t *testing.T) {
 				}
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Namespace()

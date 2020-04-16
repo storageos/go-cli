@@ -290,7 +290,7 @@ func TestFilterVolumesForNames(t *testing.T) {
 		wantErr     error
 	}{
 		{
-			name: "dont filter when no names provided",
+			name: "don't filter when no names provided",
 
 			volumes: []*volume.Resource{
 				&volume.Resource{
@@ -399,7 +399,7 @@ func TestFilterVolumesForUIDs(t *testing.T) {
 		wantErr     error
 	}{
 		{
-			name: "dont filter when no uids provided",
+			name: "don't filter when no uids provided",
 
 			volumes: []*volume.Resource{
 				&volume.Resource{

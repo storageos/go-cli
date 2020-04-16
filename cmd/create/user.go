@@ -182,7 +182,7 @@ $ storageos create user --with-username=alice --with-admin=true
 
 	cobraCommand.Flags().StringVar(&c.username, "with-username", "", "the username to assign")
 	cobraCommand.Flags().StringVar(&c.password, "with-password", "", "the password to assign to the user. If not specified, this will be prompted for.")
-	cobraCommand.Flags().BoolVar(&c.createAsAdmin, "with-admin", false, "control whether the user is given administrative priviledges")
+	cobraCommand.Flags().BoolVar(&c.createAsAdmin, "with-admin", false, "control whether the user is given administrative privileges")
 	cobraCommand.Flags().StringArrayVar(&c.groups, "with-groups", []string{}, "the list of policy groups to assign to the user")
 
 	return cobraCommand

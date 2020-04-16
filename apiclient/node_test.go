@@ -116,7 +116,7 @@ func TestFilterNodesForNames(t *testing.T) {
 		wantErr   error
 	}{
 		{
-			name: "dont filter when no names provided",
+			name: "don't filter when no names provided",
 
 			nodes: []*node.Resource{
 				&node.Resource{
@@ -224,7 +224,7 @@ func TestFilterNodesForUIDs(t *testing.T) {
 		wantErr   error
 	}{
 		{
-			name: "dont filter when no uids provided",
+			name: "don't filter when no uids provided",
 
 			nodes: []*node.Resource{
 				&node.Resource{

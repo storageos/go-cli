@@ -63,6 +63,9 @@ type mockTransport struct {
 	CreateNamespaceResource *namespace.Resource
 	CreateNamespaceError    error
 
+	CreatePolicyGroupResource *policygroup.Resource
+	CreatePolicyGroupError    error
+
 	UpdateClusterResource      *cluster.Resource
 	UpdateClusterError         error
 	UpdateClusterGotResource   *cluster.Resource
@@ -160,6 +163,10 @@ func (m *mockTransport) CreateVolume(ctx context.Context, namespaceID id.Namespa
 
 func (m *mockTransport) CreateNamespace(ctx context.Context, name string, labels labels.Set) (*namespace.Resource, error) {
 	return m.CreateNamespaceResource, m.CreateNamespaceError
+}
+
+func (m *mockTransport) CreatePolicyGroup(ctx context.Context, name string, specs []*policygroup.Spec) (*policygroup.Resource, error) {
+	return m.CreatePolicyGroupResource, m.CreatePolicyGroupError
 }
 
 func (m *mockTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource, licenceKey []byte) (*cluster.Resource, error) {

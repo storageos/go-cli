@@ -19,7 +19,7 @@ import (
 const (
 	// LicenceCapabilityErrorCode is the exit code used by the CLI
 	// when a command failed due to an API client licence capability error
-	// occuring. This exit code indicates that a requested operation could
+	// occurring. This exit code indicates that a requested operation could
 	// not be completed with the current product licence.
 	LicenceCapabilityErrorCode = 5
 

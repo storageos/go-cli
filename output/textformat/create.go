@@ -41,3 +41,15 @@ func (d *Displayer) CreateNamespace(ctx context.Context, w io.Writer, namespace 
 
 	return write(w)
 }
+
+// CreatePolicyGroup builds a human friendly representation of resource, writing
+// the result to w.
+func (d *Displayer) CreatePolicyGroup(ctx context.Context, w io.Writer, group *output.PolicyGroup) error {
+	table, write := createTable(policyGroupHeaders)
+
+	// Humanized
+	age := d.timeHumanizer.TimeToHuman(group.CreatedAt)
+	table.AddRow(group.Name, len(group.Users), len(group.Specs), age)
+
+	return write(w)
+}

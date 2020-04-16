@@ -30,7 +30,7 @@ func TestFlagProvider(t *testing.T) {
 				"--" + APIEndpointsFlag, "2.2.2.2:5705",
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.APIEndpoints()
@@ -74,7 +74,7 @@ func TestFlagProvider(t *testing.T) {
 				"--" + CommandTimeoutFlag, "10s",
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.CommandTimeout()
@@ -118,7 +118,7 @@ func TestFlagProvider(t *testing.T) {
 				"--" + UsernameFlag, "a-username",
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Username()
@@ -162,7 +162,7 @@ func TestFlagProvider(t *testing.T) {
 				"--" + PasswordFlag, "verysecret",
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Password()
@@ -206,7 +206,7 @@ func TestFlagProvider(t *testing.T) {
 				"--" + UseIDsFlag, "true",
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.UseIDs()
@@ -250,7 +250,7 @@ func TestFlagProvider(t *testing.T) {
 				"--" + NamespaceFlag, "my-namespace",
 			},
 			fallback: &mockProvider{
-				GetError: errors.New("dont call me"),
+				GetError: errors.New("don't call me"),
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Namespace()

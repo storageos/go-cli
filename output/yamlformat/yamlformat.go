@@ -47,6 +47,11 @@ func (d *Displayer) CreateNamespace(ctx context.Context, w io.Writer, namespace 
 	return d.encode(w, namespace)
 }
 
+// CreatePolicyGroup encodes group as YAML, writing the result to w.
+func (d *Displayer) CreatePolicyGroup(ctx context.Context, w io.Writer, group *output.PolicyGroup) error {
+	return d.encode(w, group)
+}
+
 // -----------------------------------------------------------------------------
 // UPDATE
 // -----------------------------------------------------------------------------

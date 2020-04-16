@@ -43,6 +43,7 @@ type Client interface {
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
 	CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labelSet labels.Set, params *apiclient.CreateVolumeRequestParams) (*volume.Resource, error)
 	CreateNamespace(ctx context.Context, name string, labelSet labels.Set) (*namespace.Resource, error)
+	CreatePolicyGroup(ctx context.Context, name string, specs []*policygroup.Spec) (*policygroup.Resource, error)
 
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
 	GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error)
@@ -50,6 +51,8 @@ type Client interface {
 	GetListNodesByUID(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)
 	GetListPolicyGroupsByUID(ctx context.Context, gids ...id.PolicyGroup) ([]*policygroup.Resource, error)
 	GetListPolicyGroupsByName(ctx context.Context, names ...string) ([]*policygroup.Resource, error)
+
+	ListNamespaces(ctx context.Context) ([]*namespace.Resource, error)
 }
 
 // Displayer describes the functionality required by the CLI application
@@ -59,6 +62,7 @@ type Displayer interface {
 	CreateVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
 	CreateVolumeAsync(ctx context.Context, w io.Writer) error
 	CreateNamespace(ctx context.Context, w io.Writer, namespace *output.Namespace) error
+	CreatePolicyGroup(ctx context.Context, w io.Writer, group *output.PolicyGroup) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "create"
@@ -73,6 +77,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 		newUser(os.Stdout, client, config),
 		newVolume(os.Stdout, client, config),
 		newNamespace(os.Stdout, client, config),
+		newPolicyGroup(os.Stdout, client, config),
 	)
 
 	return command

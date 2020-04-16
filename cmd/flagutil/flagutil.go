@@ -1,4 +1,4 @@
-// Package flagutil exports utility functions focussed on command flag sets.
+// Package flagutil exports utility functions focused on command flag sets.
 // Its purpose is to provide consistency for commands across different packages
 // that share a given flag.
 package flagutil

@@ -86,6 +86,10 @@ func (t *noTransport) CreateNamespace(ctx context.Context, name string, labels l
 	return nil, ErrNoTransportConfigured
 }
 
+func (t *noTransport) CreatePolicyGroup(ctx context.Context, name string, specs []*policygroup.Spec) (*policygroup.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
 func (t *noTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource, licenceKey []byte) (*cluster.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }

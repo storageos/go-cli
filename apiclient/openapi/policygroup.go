@@ -12,6 +12,38 @@ import (
 	"code.storageos.net/storageos/c2-cli/policygroup"
 )
 
+// CreatePolicyGroup requests the creation of a new policy group through the
+// StorageOS API using the provided parameters.
+func (o *OpenAPI) CreatePolicyGroup(ctx context.Context, name string, specs []*policygroup.Spec) (*policygroup.Resource, error) {
+	slice := make([]openapi.PoliciesSpecs, 0, len(specs))
+	for _, s := range specs {
+		slice = append(slice, openapi.PoliciesSpecs{
+			NamespaceID:  s.NamespaceID.String(),
+			ResourceType: s.ResourceType,
+			ReadOnly:     s.ReadOnly,
+		})
+	}
+
+	createData := openapi.CreatePolicyGroupData{
+		Name:  name,
+		Specs: &slice,
+	}
+
+	model, resp, err := o.client.DefaultApi.CreatePolicyGroup(ctx, createData)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case badRequestError:
+			return nil, apiclient.NewInvalidPolicyGroupCreationError(v.msg)
+		case conflictError:
+			return nil, apiclient.NewPolicyGroupExistsError(name)
+		default:
+			return nil, v
+		}
+	}
+
+	return o.codec.decodePolicyGroup(model)
+}
+
 // GetPolicyGroup requests the policy group with uid from the StorageOS API,
 // translating it into a *policygroup.Resource.
 func (o *OpenAPI) GetPolicyGroup(ctx context.Context, uid id.PolicyGroup) (*policygroup.Resource, error) {

@@ -55,6 +55,50 @@ func NewPolicyGroupNameNotFoundError(name string) PolicyGroupNotFoundError {
 	}
 }
 
+// PolicyGroupExistsError is returned when a policy group creation request is sent to
+// a cluster where that name is already in use.
+type PolicyGroupExistsError struct {
+	name string
+}
+
+// Error returns an error message indicating that a policy group name is already in
+// use.
+func (e PolicyGroupExistsError) Error() string {
+	return fmt.Sprintf("policy group name %s is already in use", e.name)
+}
+
+// NewPolicyGroupExistsError returns an error indicating that a policy group with
+// that name already exists.
+func NewPolicyGroupExistsError(name string) PolicyGroupExistsError {
+	return PolicyGroupExistsError{
+		name: name,
+	}
+}
+
+// InvalidPolicyGroupCreationError is returned when a policy group creation
+// request sent to the StorageOS API is invalid.
+type InvalidPolicyGroupCreationError struct {
+	details string
+}
+
+// Error returns an error message indicating that a policy group creation
+// request made to the StorageOS API is invalid, including details if available.
+func (e InvalidPolicyGroupCreationError) Error() string {
+	msg := "policy group creation request is invalid"
+	if e.details != "" {
+		msg = fmt.Sprintf("%v: %v", msg, e.details)
+	}
+	return msg
+}
+
+// NewInvalidPolicyGroupCreationError returns an InvalidPolicyGroupCreationError,
+// using details to provide information about what must be corrected.
+func NewInvalidPolicyGroupCreationError(details string) InvalidPolicyGroupCreationError {
+	return InvalidPolicyGroupCreationError{
+		details: details,
+	}
+}
+
 // GetListPolicyGroupsByUID requests a list containing basic information on each
 // policy group configured for the cluster.
 //

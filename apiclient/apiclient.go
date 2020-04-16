@@ -96,6 +96,10 @@ type Transport interface {
 	// provided fields. If successful the created resource for the namespace is
 	// returned to the caller.
 	CreateNamespace(ctx context.Context, name string, labels labels.Set) (*namespace.Resource, error)
+	// Create requests the creation of a new StorageOS policy group from the
+	// provided fields. If successful the created resource for the policy group
+	// is returned to the caller.
+	CreatePolicyGroup(ctx context.Context, name string, specs []*policygroup.Spec) (*policygroup.Resource, error)
 
 	// UpdateCluster attempts to perform an update of the cluster configuration
 	// through the StorageOS API using resource and licenceKey as the update values.
