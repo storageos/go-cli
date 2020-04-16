@@ -138,6 +138,16 @@ func (d *Displayer) DescribeCluster(ctx context.Context, w io.Writer, c *output.
 	return d.encode(w, c)
 }
 
+// DescribeNamespace encodes a namespace as JSON, writing the result to w.
+func (d *Displayer) DescribeNamespace(ctx context.Context, w io.Writer, namespace *output.Namespace) error {
+	return d.encode(w, namespace)
+}
+
+// DescribeListNamespaces encodes a list of namespaces as JSON, writing the result to w.
+func (d *Displayer) DescribeListNamespaces(ctx context.Context, w io.Writer, namespaces []*output.Namespace) error {
+	return d.encode(w, namespaces)
+}
+
 // DescribeNode encodes node as JSON, writing the result to w.
 func (d *Displayer) DescribeNode(ctx context.Context, w io.Writer, node *output.NodeDescription) error {
 	return d.encode(w, node)

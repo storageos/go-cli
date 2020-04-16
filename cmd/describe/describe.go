@@ -62,12 +62,16 @@ type Client interface {
 	GetNamespace(ctx context.Context, namespaceID id.Namespace) (*namespace.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 	ListNamespaces(ctx context.Context) ([]*namespace.Resource, error)
+	GetListNamespacesByName(ctx context.Context, names ...string) ([]*namespace.Resource, error)
+	GetListNamespacesByUID(ctx context.Context, uids ...id.Namespace) ([]*namespace.Resource, error)
 }
 
 // Displayer defines the functionality required by the CLI application
 // to display the results gathered by the "describe" verb commands.
 type Displayer interface {
 	DescribeCluster(ctx context.Context, w io.Writer, c *output.Cluster) error
+	DescribeNamespace(ctx context.Context, w io.Writer, namespace *output.Namespace) error
+	DescribeListNamespaces(ctx context.Context, w io.Writer, namespaces []*output.Namespace) error
 	DescribeNode(ctx context.Context, w io.Writer, node *output.NodeDescription) error
 	DescribeListNodes(ctx context.Context, w io.Writer, nodes []*output.NodeDescription) error
 	DescribeVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
@@ -91,6 +95,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 		newCluster(os.Stdout, client, config),
 		newPolicyGroup(os.Stdout, client, config),
 		newUser(os.Stdout, client, config),
+		newNamespace(os.Stdout, client, config),
 	)
 
 	return command

@@ -13,7 +13,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/health"
 )
 
-// DescribeCluster encodes a cluster as JSON, writing the result to w.
+// DescribeCluster prints all the detailed information about a cluster
 func (d *Displayer) DescribeCluster(ctx context.Context, w io.Writer, c *output.Cluster) error {
 	table, write := createTable(nil)
 
@@ -43,6 +43,46 @@ func (d *Displayer) DescribeCluster(ctx context.Context, w io.Writer, c *output.
 		table.AddRow("  Health:", n.Health)
 		table.AddRow("  Address:", n.IOAddr)
 	}
+
+	return write(w)
+}
+
+// DescribeNamespace prints all the detailed information about a namespace
+func (d *Displayer) DescribeNamespace(ctx context.Context, w io.Writer, ns *output.Namespace) error {
+	return d.describeNamespace(ctx, w, ns)
+}
+
+// DescribeListNamespaces prints all the detailed information about a list of
+// namespaces
+func (d *Displayer) DescribeListNamespaces(ctx context.Context, w io.Writer, namespaces []*output.Namespace) error {
+	for i, ns := range namespaces {
+		if i != 0 {
+			if _, err := fmt.Fprintln(w); err != nil {
+				return err
+			}
+		}
+
+		if err := d.describeNamespace(ctx, w, ns); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (d *Displayer) describeNamespace(ctx context.Context, w io.Writer, ns *output.Namespace) error {
+	table, write := createTable(nil)
+
+	table.AddRow("ID:", ns.ID)
+	table.AddRow("Name:", ns.Name)
+	if len(ns.Labels) == 0 {
+		table.AddRow("Labels:", "-")
+	} else {
+		table.AddRow("Labels:", ns.Labels.String())
+	}
+
+	table.AddRow("Version:", ns.Version)
+	table.AddRow("Created at:", d.timeToHuman(ns.CreatedAt))
+	table.AddRow("Updated at:", d.timeToHuman(ns.UpdatedAt))
 
 	return write(w)
 }

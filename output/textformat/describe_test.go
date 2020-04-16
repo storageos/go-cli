@@ -208,7 +208,7 @@ func TestDisplayer_DescribeCluster(t *testing.T) {
 		wantErr       bool
 	}{
 		{
-			name: "print cluster",
+			name: "describe cluster",
 			resource: &cluster.Resource{
 				ID: "bananaCluster",
 				Licence: &cluster.Licence{
@@ -291,11 +291,155 @@ Nodes:
 
 			err := d.DescribeCluster(context.Background(), w, output.NewCluster(tt.resource, tt.nodes))
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetCluster() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("DescribeCluster() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if gotW := w.String(); gotW != tt.wantW {
-				t.Errorf("GetCluster() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
+				t.Errorf("DescribeCluster() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
+			}
+		})
+	}
+}
+
+func TestDisplayer_DescribeNamespace(t *testing.T) {
+	t.Parallel()
+
+	var mockTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name          string
+		timeHumanizer output.TimeHumanizer
+		resource      *namespace.Resource
+		wantW         string
+		wantErr       bool
+	}{
+		{
+			name: "describe namespace",
+			resource: &namespace.Resource{
+				ID:   "bananaNamespaceID",
+				Name: "bananaNamespaceName",
+				Labels: labels.Set{
+					"bananaKey": "bananaValue",
+					"kiwiKey":   "kiwiValue",
+				},
+				CreatedAt: mockTime,
+				UpdatedAt: mockTime,
+				Version:   "42",
+			},
+			wantW: `ID:          bananaNamespaceID                      
+Name:        bananaNamespaceName                    
+Labels:      bananaKey=bananaValue,kiwiKey=kiwiValue
+Version:     42                                     
+Created at:  2000-01-01T00:00:00Z (xx aeons ago)    
+Updated at:  2000-01-01T00:00:00Z (xx aeons ago)    
+`,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
+			w := &bytes.Buffer{}
+
+			err := d.DescribeNamespace(context.Background(), w, output.NewNamespace(tt.resource))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DescribeNamespace() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotW := w.String(); gotW != tt.wantW {
+				t.Errorf("DescribeNamespace() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
+			}
+		})
+	}
+}
+
+func TestDisplayer_DescribeListNamespaces(t *testing.T) {
+	t.Parallel()
+
+	var mockTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name          string
+		timeHumanizer output.TimeHumanizer
+		resource      []*namespace.Resource
+		wantW         string
+		wantErr       bool
+	}{
+		{
+			name: "describe namespace",
+			resource: []*namespace.Resource{
+				{
+					ID:   "bananaNamespaceID",
+					Name: "bananaNamespaceName",
+					Labels: labels.Set{
+						"bananaKey": "bananaValue",
+						"kiwiKey":   "kiwiValue",
+					},
+					CreatedAt: mockTime,
+					UpdatedAt: mockTime,
+					Version:   "42",
+				},
+				{
+					ID:        "kiwiNamespaceID",
+					Name:      "kiwiNamespaceName",
+					Labels:    labels.Set{},
+					CreatedAt: mockTime,
+					UpdatedAt: mockTime,
+					Version:   "43",
+				},
+				{
+					ID:        "pineappleNamespaceID",
+					Name:      "pineappleNamespaceName",
+					Labels:    labels.Set{},
+					CreatedAt: mockTime,
+					UpdatedAt: mockTime,
+					Version:   "44",
+				},
+			},
+			wantW: `ID:          bananaNamespaceID                      
+Name:        bananaNamespaceName                    
+Labels:      bananaKey=bananaValue,kiwiKey=kiwiValue
+Version:     42                                     
+Created at:  2000-01-01T00:00:00Z (xx aeons ago)    
+Updated at:  2000-01-01T00:00:00Z (xx aeons ago)    
+
+ID:          kiwiNamespaceID                    
+Name:        kiwiNamespaceName                  
+Labels:      -                                  
+Version:     43                                 
+Created at:  2000-01-01T00:00:00Z (xx aeons ago)
+Updated at:  2000-01-01T00:00:00Z (xx aeons ago)
+
+ID:          pineappleNamespaceID               
+Name:        pineappleNamespaceName             
+Labels:      -                                  
+Version:     44                                 
+Created at:  2000-01-01T00:00:00Z (xx aeons ago)
+Updated at:  2000-01-01T00:00:00Z (xx aeons ago)
+`,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
+			w := &bytes.Buffer{}
+
+			err := d.DescribeListNamespaces(context.Background(), w, output.NewNamespaces(tt.resource))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DescribeListNamespaces() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotW := w.String(); gotW != tt.wantW {
+				t.Errorf("DescribeListNamespaces() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
 			}
 		})
 	}
