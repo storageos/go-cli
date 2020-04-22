@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/spf13/pflag"
+
+	"code.storageos.net/storageos/c2-cli/output"
 )
 
 func TestFlagProvider(t *testing.T) {
@@ -282,6 +284,105 @@ func TestFlagProvider(t *testing.T) {
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Namespace()
+			},
+
+			wantValue: "",
+			wantErr:   errors.New("bananas"),
+		},
+
+		{
+			name: "fetch output format when set",
+			arguments: []string{
+				"--" + OutputFormatFlag, "text",
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("don't call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.OutputFormat()
+			},
+
+			wantValue: output.Text,
+			wantErr:   nil,
+		},
+		{
+			name: "fetch output format has invalid value",
+
+			arguments: []string{
+				"--" + OutputFormatFlag, "notAFormat",
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("don't call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.OutputFormat()
+			},
+
+			wantValue: output.Unknown,
+			wantErr:   output.ErrInvalidFormat,
+		},
+		{
+			name:      "fetch output format falls back when not set",
+			arguments: []string{},
+			fallback: &mockProvider{
+				GetOutput: output.JSON,
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.OutputFormat()
+			},
+
+			wantValue: output.JSON,
+			wantErr:   nil,
+		},
+		{
+			name:      "fetch output format fall back errors",
+			arguments: []string{},
+			fallback: &mockProvider{
+				GetError: errors.New("bananas"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.OutputFormat()
+			},
+
+			wantValue: output.Unknown,
+			wantErr:   errors.New("bananas"),
+		},
+		{
+			name: "fetch config file path when set",
+			arguments: []string{
+				"--" + ConfigFileFlag, ".test_config_file",
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("don't call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.ConfigFilePath()
+			},
+
+			wantValue: ".test_config_file",
+			wantErr:   nil,
+		},
+		{
+			name:      "fetch config file path falls back when not set",
+			arguments: []string{},
+			fallback: &mockProvider{
+				GetConfigFilePath: "fallBack_path",
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.ConfigFilePath()
+			},
+
+			wantValue: "fallBack_path",
+			wantErr:   nil,
+		},
+		{
+			name:      "fetch config file path fall back errors",
+			arguments: []string{},
+			fallback: &mockProvider{
+				GetError: errors.New("bananas"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.ConfigFilePath()
 			},
 
 			wantValue: "",

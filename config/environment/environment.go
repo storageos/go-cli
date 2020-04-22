@@ -43,6 +43,9 @@ const (
 	// OutputFormatVar keys the environment variable from which we source the output
 	// format to use when we print out the results.
 	OutputFormatVar = "STORAGEOS_OUTPUT_FORMAT"
+	// ConfigFilePathVar keys the environment variable from which we source the
+	// config file path to use when we load configs from file.
+	ConfigFilePathVar = "STORAGEOS_CONFIG"
 )
 
 // EnvConfigHelp holds the list of environment variable used to source
@@ -83,6 +86,10 @@ var EnvConfigHelp = []struct {
 	{
 		Name: OutputFormatVar,
 		Help: "Specifies the default format used by the CLI for output",
+	},
+	{
+		Name: ConfigFilePathVar,
+		Help: "Specifies the default path used by the CLI for the config file",
 	},
 }
 
@@ -198,6 +205,17 @@ func (env *Provider) OutputFormat() (output.Format, error) {
 	}
 
 	return outputType, nil
+}
+
+// ConfigFilePath sources the config file path taken from the environment, if set.
+// If not set, the env's fallback is used.
+func (env *Provider) ConfigFilePath() (string, error) {
+	path := os.Getenv(ConfigFilePathVar)
+	if path == "" {
+		return env.fallback.ConfigFilePath()
+	}
+
+	return path, nil
 }
 
 // NewProvider returns a configuration provider which sources

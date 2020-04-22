@@ -41,13 +41,13 @@ func TestFormatFromString(t *testing.T) {
 			name:    "toml",
 			s:       "toml",
 			want:    Unknown,
-			wantErr: errInvalidFormat,
+			wantErr: ErrInvalidFormat,
 		},
 		{
 			name:    "xml",
 			s:       "xml",
 			want:    Unknown,
-			wantErr: errInvalidFormat,
+			wantErr: ErrInvalidFormat,
 		},
 	}
 	for _, tt := range tests {

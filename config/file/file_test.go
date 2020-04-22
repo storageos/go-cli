@@ -1,73 +1,35 @@
-package environment
+package file
 
 import (
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strconv"
 	"testing"
 	"time"
 
+	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/output"
 )
 
-func TestEnvironmentProvider(t *testing.T) {
+func TestFileProvider(t *testing.T) {
 	t.Parallel()
-
-	createShellScript := func(cmd string) string {
-		file, err := ioutil.TempFile("", "storageos_cli_pwd_cmd.*.sh")
-		if err != nil {
-			t.Fatalf("error creating an empty file for password sourcing command")
-		}
-		defer file.Close()
-
-		_, err = file.WriteString("#!/bin/sh\n" + cmd)
-		if err != nil {
-			t.Fatalf("error writing content in password sourcing command")
-		}
-
-		err = file.Chmod(0777)
-		if err != nil {
-			t.Fatalf("error on changing permissions on password sourcing command")
-		}
-
-		return file.Name()
-	}
-
-	defer func() {
-		files, err := filepath.Glob(os.TempDir() + "/storageos_cli_pwd_cmd.*")
-		if err != nil {
-			panic(err)
-		}
-		for _, f := range files {
-			if err := os.Remove(f); err != nil {
-				panic(err)
-			}
-		}
-	}()
-
 	tests := []struct {
 		name string
 
-		setenv     func(t *testing.T)
-		fallback   *mockProvider
-		fetchValue func(p *Provider) (interface{}, error)
+		fileContent string
 
-		wantValue interface{}
-		wantErr   error
+		fallback   config.Provider
+		fetchValue func(p *Provider) (interface{}, error)
+		wantErr    error
+		wantValue  interface{}
 	}{
 		{
 			name: "fetch api endpoints when set",
 
-			setenv: func(t *testing.T) {
-				err := os.Setenv(APIEndpointsVar, "1.1.1.1:5705,2.2.2.2:5705")
-				if err != nil {
-					t.Fatalf("got unexpected error setting up env: %v", err)
-				}
-			},
+			fileContent: "---\nendpoints:\n  - 1.1.1.1:5705\n  - 2.2.2.2:5705\n",
 			fallback: &mockProvider{
 				GetError: errors.New("don't call me"),
 			},
@@ -81,7 +43,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch api endpoints falls back when not set",
 
-			setenv: func(t *testing.T) {},
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetAPIEndpoints: []string{"1.1.1.1:5705", "2.2.2.2:5705"},
 			},
@@ -93,9 +55,23 @@ func TestEnvironmentProvider(t *testing.T) {
 			wantErr:   nil,
 		},
 		{
+			name: "fetch api endpoints falls back when empty",
+
+			fileContent: "---\nendpoints: []\n",
+			fallback: &mockProvider{
+				GetError: errors.New("don't call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.APIEndpoints()
+			},
+
+			wantValue: ([]string)(nil),
+			wantErr:   errMissingEndpoints,
+		},
+		{
 			name: "fetch api endpoints fall back errors",
 
-			setenv: func(t *testing.T) {},
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetError: errors.New("bananas"),
 			},
@@ -109,12 +85,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch command timeout when set",
 
-			setenv: func(t *testing.T) {
-				err := os.Setenv(CommandTimeoutVar, "10s")
-				if err != nil {
-					t.Fatalf("got unexpected error setting up env: %v", err)
-				}
-			},
+			fileContent: "---\ntimeout: 10s\n",
 			fallback: &mockProvider{
 				GetError: errors.New("don't call me"),
 			},
@@ -128,7 +99,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch command timeout falls back when not set",
 
-			setenv: func(t *testing.T) {},
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetCommandTimeout: time.Second,
 			},
@@ -142,7 +113,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch command timeout fall back errors",
 
-			setenv: func(t *testing.T) {},
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetError: errors.New("bananas"),
 			},
@@ -156,12 +127,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch username when set",
 
-			setenv: func(t *testing.T) {
-				err := os.Setenv(UsernameVar, "jeff")
-				if err != nil {
-					t.Fatalf("got unexpected error setting up env: %v", err)
-				}
-			},
+			fileContent: "---\nusername: jeff\n",
 			fallback: &mockProvider{
 				GetError: errors.New("don't call me"),
 			},
@@ -175,7 +141,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch username falls back when not set",
 
-			setenv: func(t *testing.T) {},
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetUsername: "username",
 			},
@@ -189,7 +155,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch username fall back errors",
 
-			setenv: func(t *testing.T) {},
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetError: errors.New("bananas"),
 			},
@@ -201,28 +167,23 @@ func TestEnvironmentProvider(t *testing.T) {
 			wantErr:   errors.New("bananas"),
 		},
 		{
-			name: "fetch password when set",
+			name: "fetch password returns error when password set",
 
-			setenv: func(t *testing.T) {
-				err := os.Setenv(PasswordVar, "verysecret")
-				if err != nil {
-					t.Fatalf("got unexpected error setting up env: %v", err)
-				}
-			},
+			fileContent: "---\npassword: verysecret\n",
 			fallback: &mockProvider{
-				GetError: errors.New("don't call me"),
+				GetPassword: "somedefault",
 			},
 			fetchValue: func(p *Provider) (interface{}, error) {
 				return p.Password()
 			},
 
-			wantValue: "verysecret",
-			wantErr:   nil,
+			wantValue: "",
+			wantErr:   errPasswordForbidden,
 		},
 		{
 			name: "fetch password falls back when not set",
 
-			setenv: func(t *testing.T) {},
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetPassword: "somedefault",
 			},
@@ -236,7 +197,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch password fall back errors",
 
-			setenv: func(t *testing.T) {},
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetError: errors.New("bananas"),
 			},
@@ -248,56 +209,9 @@ func TestEnvironmentProvider(t *testing.T) {
 			wantErr:   errors.New("bananas"),
 		},
 		{
-			name: "fetch password with password command",
-
-			setenv: func(t *testing.T) {
-				path := createShellScript("echo 'verysecret'")
-
-				err := os.Setenv(PasswordCommandVar, path)
-				if err != nil {
-					t.Fatalf("got unexpected error setting up env: %v", err)
-				}
-			},
-			fallback: &mockProvider{
-				GetError: errors.New("don't call me"),
-			},
-			fetchValue: func(p *Provider) (interface{}, error) {
-				return p.Password()
-			},
-
-			wantValue: "verysecret",
-			wantErr:   nil,
-		},
-		{
-			name: "fetch password with failing password command",
-
-			setenv: func(t *testing.T) {
-				path := createShellScript("exit 42")
-
-				err := os.Setenv(PasswordCommandVar, path)
-				if err != nil {
-					t.Fatalf("got unexpected error setting up env: %v", err)
-				}
-			},
-			fallback: &mockProvider{
-				GetError: errors.New("don't call me"),
-			},
-			fetchValue: func(p *Provider) (interface{}, error) {
-				return p.Password()
-			},
-
-			wantValue: "",
-			wantErr:   fmt.Errorf("password command exited with error code 42"),
-		},
-		{
 			name: "fetch use-ids when set",
 
-			setenv: func(t *testing.T) {
-				err := os.Setenv(UseIDsVar, "true")
-				if err != nil {
-					t.Fatalf("got unexpected error setting up env: %v", err)
-				}
-			},
+			fileContent: "---\nuse-ids: true\n",
 			fallback: &mockProvider{
 				GetError: errors.New("don't call me"),
 			},
@@ -311,12 +225,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch use-ids has invalid value",
 
-			setenv: func(t *testing.T) {
-				err := os.Setenv(UseIDsVar, "notabool")
-				if err != nil {
-					t.Fatalf("got unexpected error setting up environment: %v", err)
-				}
-			},
+			fileContent: "---\nuse-ids: notabool\n",
 			fallback: &mockProvider{
 				GetError: errors.New("don't call me"),
 			},
@@ -334,7 +243,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch use-ids falls back when not set",
 
-			setenv: func(t *testing.T) {},
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetUseIDs: true,
 			},
@@ -348,7 +257,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch use-ids fall back errors",
 
-			setenv: func(t *testing.T) {},
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetError: errors.New("bananas"),
 			},
@@ -362,12 +271,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch namespace when set",
 
-			setenv: func(t *testing.T) {
-				err := os.Setenv(NamespaceVar, "my-namespace")
-				if err != nil {
-					t.Fatalf("got unexpected error setting up env: %v", err)
-				}
-			},
+			fileContent: "---\nnamespace: my-namespace\n",
 			fallback: &mockProvider{
 				GetError: errors.New("don't call me"),
 			},
@@ -381,7 +285,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch namespace falls back when not set",
 
-			setenv: func(t *testing.T) {},
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetNamespace: "my-namespace",
 			},
@@ -395,7 +299,7 @@ func TestEnvironmentProvider(t *testing.T) {
 		{
 			name: "fetch namespace fall back errors",
 
-			setenv: func(t *testing.T) {},
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetError: errors.New("bananas"),
 			},
@@ -406,16 +310,10 @@ func TestEnvironmentProvider(t *testing.T) {
 			wantValue: "",
 			wantErr:   errors.New("bananas"),
 		},
-
 		{
-			name: "fetch output format when set",
+			name:        "fetch output format when set",
+			fileContent: "---\noutput: text\n",
 
-			setenv: func(t *testing.T) {
-				err := os.Setenv(OutputFormatVar, "text")
-				if err != nil {
-					t.Fatalf("got unexpected error setting up env: %v", err)
-				}
-			},
 			fallback: &mockProvider{
 				GetError: errors.New("don't call me"),
 			},
@@ -427,14 +325,8 @@ func TestEnvironmentProvider(t *testing.T) {
 			wantErr:   nil,
 		},
 		{
-			name: "fetch output format has invalid value",
-
-			setenv: func(t *testing.T) {
-				err := os.Setenv(OutputFormatVar, "notAFormat")
-				if err != nil {
-					t.Fatalf("got unexpected error setting up environment: %v", err)
-				}
-			},
+			name:        "fetch output format has invalid value",
+			fileContent: "---\noutput: notAFormat\n",
 			fallback: &mockProvider{
 				GetError: errors.New("don't call me"),
 			},
@@ -446,9 +338,8 @@ func TestEnvironmentProvider(t *testing.T) {
 			wantErr:   output.ErrInvalidFormat,
 		},
 		{
-			name: "fetch output format falls back when not set",
-
-			setenv: func(t *testing.T) {},
+			name:        "fetch output format falls back when not set",
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetOutput: output.JSON,
 			},
@@ -460,9 +351,8 @@ func TestEnvironmentProvider(t *testing.T) {
 			wantErr:   nil,
 		},
 		{
-			name: "fetch output format fall back errors",
-
-			setenv: func(t *testing.T) {},
+			name:        "fetch output format fall back errors",
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetError: errors.New("bananas"),
 			},
@@ -474,28 +364,8 @@ func TestEnvironmentProvider(t *testing.T) {
 			wantErr:   errors.New("bananas"),
 		},
 		{
-			name: "fetch config file path when set",
-
-			setenv: func(t *testing.T) {
-				err := os.Setenv(ConfigFilePathVar, ".test_config_file")
-				if err != nil {
-					t.Fatalf("got unexpected error setting up env: %v", err)
-				}
-			},
-			fallback: &mockProvider{
-				GetError: errors.New("don't call me"),
-			},
-			fetchValue: func(p *Provider) (interface{}, error) {
-				return p.ConfigFilePath()
-			},
-
-			wantValue: ".test_config_file",
-			wantErr:   nil,
-		},
-		{
-			name: "fetch config file path falls back when not set",
-
-			setenv: func(t *testing.T) {},
+			name:        "fetch config file path falls back when not set",
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetConfigFilePath: "fallBack_path",
 			},
@@ -507,9 +377,8 @@ func TestEnvironmentProvider(t *testing.T) {
 			wantErr:   nil,
 		},
 		{
-			name: "fetch config file path fall back errors",
-
-			setenv: func(t *testing.T) {},
+			name:        "fetch config file path fall back errors",
+			fileContent: "---\n",
 			fallback: &mockProvider{
 				GetError: errors.New("bananas"),
 			},
@@ -522,17 +391,35 @@ func TestEnvironmentProvider(t *testing.T) {
 		},
 	}
 
+	dir, err := ioutil.TempDir("", "storageos")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
 	for _, tt := range tests {
 		var tt = tt
 		t.Run(tt.name, func(t *testing.T) {
-			// Handle the environment setup tear down
-			os.Clearenv()
-			defer os.Clearenv()
-			tt.setenv(t)
+			// t.Parallel()
+
+			f, err := ioutil.TempFile(dir, "config")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			fmt.Println(f.Name())
+
+			_, err = f.WriteString(tt.fileContent)
+			if err != nil {
+				t.Fatal(err)
+			}
+			f.Close()
 
 			p := NewProvider(tt.fallback)
 
-			// Attempt to fetch the value from the env provider
+			p.SetConfigProvider(&mockProvider{GetConfigFilePath: f.Name()})
+
+			// Attempt to fetch the value from the config file provider
 			gotValue, gotErr := tt.fetchValue(p)
 			if !reflect.DeepEqual(gotErr, tt.wantErr) {
 				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)

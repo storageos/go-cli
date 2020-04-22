@@ -17,6 +17,7 @@ type mockProvider struct {
 	GetUseIDs         bool
 	GetNamespace      string
 	GetOutput         output.Format
+	GetConfigFilePath string
 }
 
 var _ config.Provider = (*mockProvider)(nil)
@@ -47,4 +48,8 @@ func (m *mockProvider) Namespace() (string, error) {
 
 func (m *mockProvider) OutputFormat() (output.Format, error) {
 	return m.GetOutput, m.GetError
+}
+
+func (m *mockProvider) ConfigFilePath() (string, error) {
+	return m.GetConfigFilePath, m.GetError
 }

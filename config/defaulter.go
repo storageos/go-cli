@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
 	"time"
 
 	"code.storageos.net/storageos/c2-cli/output"
@@ -32,6 +34,26 @@ const (
 	// use text
 	DefaultOutput = output.Text
 )
+
+// DefaultConfigFile defines the default path for the config file to use in the
+// file provider.
+//
+// If $XDG_CONFIG_HOME is set, $XDG_CONFIG_HOME/storageos/config is used, else
+// if $HOME is set, $HOME/.config/storageos/config is used, else
+// use .storageos file in the working folder
+var DefaultConfigFile = ""
+
+func init() {
+	osConfigPath, err := os.UserConfigDir()
+	if err == nil {
+		DefaultConfigFile = filepath.Join(osConfigPath, "storageos", "config.yaml")
+		return
+	}
+
+	// if $HOME is not set use `.storageos` file
+	// in the working directory
+	DefaultConfigFile = ".storageos.yaml"
+}
 
 // Defaulter exports functionality to retrieve default values for the global
 // configuration settings.
@@ -77,6 +99,12 @@ func (d *Defaulter) Namespace() (string, error) {
 // OutputFormat returns the default output format of the command, that is output.Text
 func (d *Defaulter) OutputFormat() (output.Format, error) {
 	return DefaultOutput, nil
+}
+
+// ConfigFilePath returns the default config file path following the rules
+// defined in the DefaultConfigFile function.
+func (d *Defaulter) ConfigFilePath() (string, error) {
+	return DefaultConfigFile, nil
 }
 
 var _ Provider = (*Defaulter)(nil) // Ensure that the defaulter satisfies the exported interface

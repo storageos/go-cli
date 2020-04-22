@@ -39,6 +39,12 @@ const (
 	// ShortOutputFormatFlag keys the short flag from which the output format is
 	// sourced for commands that requires it
 	ShortOutputFormatFlag = "o"
+	// ConfigFileFlag keys the long flag from which the config file path is
+	// sourced for commands that requires it
+	ConfigFileFlag = "config"
+	// ShortConfigFileFlag keys the short flag from which the config file path
+	// is sourced for commands that requires it
+	ShortConfigFileFlag = "c"
 )
 
 // FlagSet describes a set of typed flag set accessors/setters required by the
@@ -166,6 +172,10 @@ func (flag *Provider) Namespace() (string, error) {
 func (flag *Provider) OutputFormat() (output.Format, error) {
 	out, err := flag.set.GetString(OutputFormatFlag)
 	if err != nil {
+		return 0, err
+	}
+
+	if !flag.set.Changed(OutputFormatFlag) {
 		return flag.fallback.OutputFormat()
 	}
 
@@ -175,6 +185,21 @@ func (flag *Provider) OutputFormat() (output.Format, error) {
 	}
 
 	return outputType, nil
+}
+
+// ConfigFilePath sources the config file path from flag's FlagSet. If the value
+// stored has not changed,, then flag's fallback is used.
+func (flag *Provider) ConfigFilePath() (string, error) {
+	path, err := flag.set.GetString(ConfigFileFlag)
+	if err != nil {
+		return "", err
+	}
+
+	if !flag.set.Changed(ConfigFileFlag) {
+		return flag.fallback.ConfigFilePath()
+	}
+
+	return path, nil
 }
 
 // NewProvider initialises a new flag based configuration provider backed by
@@ -219,6 +244,13 @@ func NewProvider(flagset FlagSet, fallback config.Provider) *Provider {
 		ShortOutputFormatFlag,
 		config.DefaultOutput.String(),
 		fmt.Sprintf("specifies the output format (one of %v)", output.ValidFormats),
+	)
+
+	flagset.StringP(
+		ConfigFileFlag,
+		ShortConfigFileFlag,
+		config.DefaultConfigFile,
+		"specifies the config file path",
 	)
 
 	return &Provider{

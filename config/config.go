@@ -19,4 +19,5 @@ type Provider interface {
 	UseIDs() (bool, error)
 	Namespace() (string, error)
 	OutputFormat() (output.Format, error)
+	ConfigFilePath() (string, error)
 }
