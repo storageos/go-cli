@@ -10,20 +10,30 @@ import (
 type mockProvider struct {
 	GetError error
 
-	GetAPIEndpoints   []string
-	GetCommandTimeout time.Duration
-	GetUsername       string
-	GetPassword       string
-	GetUseIDs         bool
-	GetNamespace      string
-	GetOutput         output.Format
-	GetConfigFilePath string
+	GetAuthCacheDisabled bool
+	GetAPIEndpoints      []string
+	GetCacheDir          string
+	GetCommandTimeout    time.Duration
+	GetUsername          string
+	GetPassword          string
+	GetUseIDs            bool
+	GetNamespace         string
+	GetOutput            output.Format
+	GetConfigFilePath    string
 }
 
 var _ config.Provider = (*mockProvider)(nil)
 
+func (m *mockProvider) AuthCacheDisabled() (bool, error) {
+	return m.GetAuthCacheDisabled, m.GetError
+}
+
 func (m *mockProvider) APIEndpoints() ([]string, error) {
 	return m.GetAPIEndpoints, m.GetError
+}
+
+func (m *mockProvider) CacheDir() (string, error) {
+	return m.GetCacheDir, m.GetError
 }
 
 func (m *mockProvider) CommandTimeout() (time.Duration, error) {

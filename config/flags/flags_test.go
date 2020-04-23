@@ -25,6 +25,50 @@ func TestFlagProvider(t *testing.T) {
 		wantErr   error
 	}{
 		{
+			name: "fetch auth cache disabled when set",
+
+			arguments: []string{
+				"--" + AuthCacheDisabledFlag, "true",
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("dont call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.AuthCacheDisabled()
+			},
+
+			wantValue: true,
+			wantErr:   nil,
+		},
+		{
+			name: "fetch auth cache disabled falls back when not set",
+
+			arguments: []string{},
+			fallback: &mockProvider{
+				GetAuthCacheDisabled: true,
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.AuthCacheDisabled()
+			},
+
+			wantValue: true,
+			wantErr:   nil,
+		},
+		{
+			name: "fetch auth cache disabled fall back errors",
+
+			arguments: []string{},
+			fallback: &mockProvider{
+				GetError: errors.New("bananas"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.AuthCacheDisabled()
+			},
+
+			wantValue: false,
+			wantErr:   errors.New("bananas"),
+		},
+		{
 			name: "fetch api endpoints config when set",
 
 			arguments: []string{
@@ -67,6 +111,50 @@ func TestFlagProvider(t *testing.T) {
 			},
 
 			wantValue: ([]string)(nil), // Typed nils are a stupid thing.
+			wantErr:   errors.New("bananas"),
+		},
+		{
+			name: "fetch cache dir config when set",
+
+			arguments: []string{
+				"--" + CacheDirFlag, "/tmp/.cache",
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("dont call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.CacheDir()
+			},
+
+			wantValue: "/tmp/.cache",
+			wantErr:   nil,
+		},
+		{
+			name: "fetch cache dir config falls back when not set",
+
+			arguments: []string{},
+			fallback: &mockProvider{
+				GetCacheDir: "/tmp/.cache",
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.CacheDir()
+			},
+
+			wantValue: "/tmp/.cache",
+			wantErr:   nil,
+		},
+		{
+			name: "fetch api endpoints config fall back errors",
+
+			arguments: []string{},
+			fallback: &mockProvider{
+				GetError: errors.New("bananas"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.CacheDir()
+			},
+
+			wantValue: "",
 			wantErr:   errors.New("bananas"),
 		},
 		{

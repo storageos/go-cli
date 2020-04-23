@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -36,7 +37,7 @@ type ConfigProvider interface {
 // Client defines the functionality required by the CLI application to
 // reasonably implement the "get" verb commands.
 type Client interface {
-	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
+	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
 
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
 	GetDiagnostics(ctx context.Context) (io.ReadCloser, error)

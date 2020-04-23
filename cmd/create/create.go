@@ -38,7 +38,7 @@ type ConfigProvider interface {
 // Client describes the functionality required by the CLI application
 // to reasonably implement the "create" verb commands.
 type Client interface {
-	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
+	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
 
 	CreateUser(ctx context.Context, username, password string, withAdmin bool, groups ...id.PolicyGroup) (*user.Resource, error)
 	CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labelSet labels.Set, params *apiclient.CreateVolumeRequestParams) (*volume.Resource, error)

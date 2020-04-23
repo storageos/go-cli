@@ -15,10 +15,9 @@ import (
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"os"
 	"strings"
-
 	"github.com/antihax/optional"
+	"os"
 )
 
 // Linger please
@@ -48,9 +47,9 @@ func (a *DefaultApiService) AttachVolume(ctx _context.Context, namespaceID strin
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/namespaces/{namespaceID}/volumes/{id}/attach"
-	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")) , -1)
 
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -176,16 +175,16 @@ AuthenticateUser Authenticate a user
 Generate a new JWT token for a user.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param authUserData
-@return User
+@return UserSession
 */
-func (a *DefaultApiService) AuthenticateUser(ctx _context.Context, authUserData AuthUserData) (User, *_nethttp.Response, error) {
+func (a *DefaultApiService) AuthenticateUser(ctx _context.Context, authUserData AuthUserData) (UserSession, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  User
+		localVarReturnValue  UserSession
 	)
 
 	// create path and map variables
@@ -235,7 +234,7 @@ func (a *DefaultApiService) AuthenticateUser(ctx _context.Context, authUserData 
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v User
+			var v UserSession
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -447,7 +446,7 @@ func (a *DefaultApiService) CreateNamespace(ctx _context.Context, createNamespac
 
 /*
 CreatePolicyGroup Create a new policy group
-Create a new policy group in the cluster - only administrators can create new policy groups.
+Create a new policy group in the cluster - only administrators can create new policy groups. 
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param createPolicyGroupData
 @return PolicyGroup
@@ -741,7 +740,7 @@ func (a *DefaultApiService) CreateUser(ctx _context.Context, createUserData Crea
 
 // CreateVolumeOpts Optional parameters for the method 'CreateVolume'
 type CreateVolumeOpts struct {
-	AsyncMax optional.String
+    AsyncMax optional.String
 }
 
 /*
@@ -751,7 +750,7 @@ Create a new volume in the given namespace
  * @param namespaceID ID of a Namespace
  * @param createVolumeData
  * @param optional nil or *CreateVolumeOpts - Optional Parameters:
- * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.
+ * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values. 
 @return Volume
 */
 func (a *DefaultApiService) CreateVolume(ctx _context.Context, namespaceID string, createVolumeData CreateVolumeData, localVarOptionals *CreateVolumeOpts) (Volume, *_nethttp.Response, error) {
@@ -766,7 +765,7 @@ func (a *DefaultApiService) CreateVolume(ctx _context.Context, namespaceID strin
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/namespaces/{namespaceID}/volumes"
-	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -931,16 +930,16 @@ func (a *DefaultApiService) CreateVolume(ctx _context.Context, namespaceID strin
 
 // DeleteAuthenticatedUserOpts Optional parameters for the method 'DeleteAuthenticatedUser'
 type DeleteAuthenticatedUserOpts struct {
-	IgnoreVersion optional.Bool
+    IgnoreVersion optional.Bool
 }
 
 /*
 DeleteAuthenticatedUser Delete the authenticated user
 Remove the authenticated user from the cluster.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DeleteAuthenticatedUserOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 */
 func (a *DefaultApiService) DeleteAuthenticatedUser(ctx _context.Context, version string, localVarOptionals *DeleteAuthenticatedUserOpts) (*_nethttp.Response, error) {
 	var (
@@ -1212,7 +1211,7 @@ func (a *DefaultApiService) DeleteAuthenticatedUserSessions(ctx _context.Context
 
 // DeleteNamespaceOpts Optional parameters for the method 'DeleteNamespace'
 type DeleteNamespaceOpts struct {
-	IgnoreVersion optional.Bool
+    IgnoreVersion optional.Bool
 }
 
 /*
@@ -1220,9 +1219,9 @@ DeleteNamespace Delete a namespace
 Remove the namespace identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a namespace
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DeleteNamespaceOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 */
 func (a *DefaultApiService) DeleteNamespace(ctx _context.Context, id string, version string, localVarOptionals *DeleteNamespaceOpts) (*_nethttp.Response, error) {
 	var (
@@ -1235,7 +1234,7 @@ func (a *DefaultApiService) DeleteNamespace(ctx _context.Context, id string, ver
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/namespaces/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1373,19 +1372,19 @@ func (a *DefaultApiService) DeleteNamespace(ctx _context.Context, id string, ver
 
 // DeleteNodeOpts Optional parameters for the method 'DeleteNode'
 type DeleteNodeOpts struct {
-	IgnoreVersion optional.Bool
-	AsyncMax      optional.String
+    IgnoreVersion optional.Bool
+    AsyncMax optional.String
 }
 
 /*
 DeleteNode Delete a node
-Remove the node identified by id. A node can only be deleted if it is currently offline.
+Remove the node identified by id. A node can only be deleted if it is currently offline. 
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a node
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DeleteNodeOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
- * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
+ * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values. 
 */
 func (a *DefaultApiService) DeleteNode(ctx _context.Context, id string, version string, localVarOptionals *DeleteNodeOpts) (*_nethttp.Response, error) {
 	var (
@@ -1398,7 +1397,7 @@ func (a *DefaultApiService) DeleteNode(ctx _context.Context, id string, version 
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/nodes/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1549,7 +1548,7 @@ func (a *DefaultApiService) DeleteNode(ctx _context.Context, id string, version 
 
 // DeletePolicyGroupOpts Optional parameters for the method 'DeletePolicyGroup'
 type DeletePolicyGroupOpts struct {
-	IgnoreVersion optional.Bool
+    IgnoreVersion optional.Bool
 }
 
 /*
@@ -1557,9 +1556,9 @@ DeletePolicyGroup Delete a policy group
 Remove the policy group identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a policy group
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DeletePolicyGroupOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 */
 func (a *DefaultApiService) DeletePolicyGroup(ctx _context.Context, id string, version string, localVarOptionals *DeletePolicyGroupOpts) (*_nethttp.Response, error) {
 	var (
@@ -1572,7 +1571,7 @@ func (a *DefaultApiService) DeletePolicyGroup(ctx _context.Context, id string, v
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/policies/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1710,7 +1709,7 @@ func (a *DefaultApiService) DeletePolicyGroup(ctx _context.Context, id string, v
 
 /*
 DeleteSessions Invalidate login sessions
-Invalidates active JWTs on a per-user basis, specified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose.
+Invalidates active JWTs on a per-user basis, specified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose. 
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a user
 */
@@ -1725,7 +1724,7 @@ func (a *DefaultApiService) DeleteSessions(ctx _context.Context, id string) (*_n
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/users/{id}/sessions"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1846,17 +1845,17 @@ func (a *DefaultApiService) DeleteSessions(ctx _context.Context, id string) (*_n
 
 // DeleteUserOpts Optional parameters for the method 'DeleteUser'
 type DeleteUserOpts struct {
-	IgnoreVersion optional.Bool
+    IgnoreVersion optional.Bool
 }
 
 /*
 DeleteUser Delete a user
-Remove the user identified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose.
+Remove the user identified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose. 
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a user
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DeleteUserOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 */
 func (a *DefaultApiService) DeleteUser(ctx _context.Context, id string, version string, localVarOptionals *DeleteUserOpts) (*_nethttp.Response, error) {
 	var (
@@ -1869,7 +1868,7 @@ func (a *DefaultApiService) DeleteUser(ctx _context.Context, id string, version 
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/users/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -1997,8 +1996,8 @@ func (a *DefaultApiService) DeleteUser(ctx _context.Context, id string, version 
 
 // DeleteVolumeOpts Optional parameters for the method 'DeleteVolume'
 type DeleteVolumeOpts struct {
-	IgnoreVersion optional.Bool
-	AsyncMax      optional.String
+    IgnoreVersion optional.Bool
+    AsyncMax optional.String
 }
 
 /*
@@ -2007,10 +2006,10 @@ Remove the volume identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespaceID ID of a Namespace
  * @param id ID of a Volume
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DeleteVolumeOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
- * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
+ * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values. 
 */
 func (a *DefaultApiService) DeleteVolume(ctx _context.Context, namespaceID string, id string, version string, localVarOptionals *DeleteVolumeOpts) (*_nethttp.Response, error) {
 	var (
@@ -2023,9 +2022,9 @@ func (a *DefaultApiService) DeleteVolume(ctx _context.Context, namespaceID strin
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/namespaces/{namespaceID}/volumes/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")) , -1)
 
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -2186,7 +2185,7 @@ func (a *DefaultApiService) DeleteVolume(ctx _context.Context, namespaceID strin
 
 // DetachVolumeOpts Optional parameters for the method 'DetachVolume'
 type DetachVolumeOpts struct {
-	IgnoreVersion optional.Bool
+    IgnoreVersion optional.Bool
 }
 
 /*
@@ -2195,9 +2194,9 @@ Detach the volume identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespaceID ID of a Namespace
  * @param id ID of a Volume
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
+ * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DetachVolumeOpts - Optional Parameters:
- * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 */
 func (a *DefaultApiService) DetachVolume(ctx _context.Context, namespaceID string, id string, version string, localVarOptionals *DetachVolumeOpts) (*_nethttp.Response, error) {
 	var (
@@ -2210,9 +2209,9 @@ func (a *DefaultApiService) DetachVolume(ctx _context.Context, namespaceID strin
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/namespaces/{namespaceID}/volumes/{id}/attach"
-	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")) , -1)
 
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -2618,7 +2617,7 @@ func (a *DefaultApiService) GetCluster(ctx _context.Context) (Cluster, *_nethttp
 
 /*
 GetDiagnostics Retrieves a diagnostics bundle from the target node
-Requests that the target node gathers detailed information about the state of the cluster, using it to then build and return a bundle which can be used for troubleshooting. The request will only be served when the authenticated user is an administrator. The node will attempt to gather information about its local state, cluster-wide state and local state of other nodes in the cluster. If the cluster is unhealthy this may cause a slower response.
+Requests that the target node gathers detailed information about the state of the cluster, using it to then build and return a bundle which can be used for troubleshooting. The request will only be served when the authenticated user is an administrator. The node will attempt to gather information about its local state, cluster-wide state and local state of other nodes in the cluster. If the cluster is unhealthy this may cause a slower response. 
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 @return *os.File
 */
@@ -2759,7 +2758,7 @@ func (a *DefaultApiService) GetNamespace(ctx _context.Context, id string) (Names
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/namespaces/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -2906,7 +2905,7 @@ func (a *DefaultApiService) GetNode(ctx _context.Context, id string) (Node, *_ne
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/nodes/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -3043,7 +3042,7 @@ func (a *DefaultApiService) GetPolicyGroup(ctx _context.Context, id string) (Pol
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/policies/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -3190,7 +3189,7 @@ func (a *DefaultApiService) GetUser(ctx _context.Context, id string) (User, *_ne
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/users/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -3328,9 +3327,9 @@ func (a *DefaultApiService) GetVolume(ctx _context.Context, namespaceID string, 
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/namespaces/{namespaceID}/volumes/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")) , -1)
 
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -3831,7 +3830,7 @@ func (a *DefaultApiService) ListPolicyGroups(ctx _context.Context) ([]PolicyGrou
 }
 
 /*
-GetListUsers Fetch the list of users
+ListUsers Fetch the list of users
 Fetch the list of users of the cluster.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 @return []User
@@ -3973,7 +3972,7 @@ func (a *DefaultApiService) ListVolumes(ctx _context.Context, namespaceID string
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/namespaces/{namespaceID}/volumes"
-	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -4085,14 +4084,16 @@ func (a *DefaultApiService) ListVolumes(ctx _context.Context, namespaceID string
 RefreshJwt Refresh the JWT
 Obtain a fresh token with an updated expiry deadline.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+@return UserSession
 */
-func (a *DefaultApiService) RefreshJwt(ctx _context.Context) (*_nethttp.Response, error) {
+func (a *DefaultApiService) RefreshJwt(ctx _context.Context) (UserSession, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
+		localVarReturnValue  UserSession
 	)
 
 	// create path and map variables
@@ -4120,6 +4121,137 @@ func (a *DefaultApiService) RefreshJwt(ctx _context.Context) (*_nethttp.Response
 	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 200 {
+			var v UserSession
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+// SetReplicasOpts Optional parameters for the method 'SetReplicas'
+type SetReplicasOpts struct {
+    AsyncMax optional.String
+}
+
+/*
+SetReplicas Set the number of replicas to maintain for the volume.
+Set the number of replicas for the volume identified by id to the number specified in the request&#39;s body. This modifies the protected StorageOS system label \&quot;storageos.com/replicas\&quot;.
+ * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * @param namespaceID ID of a Namespace
+ * @param id ID of a Volume
+ * @param setReplicasRequest
+ * @param optional nil or *SetReplicasOpts - Optional Parameters:
+ * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values. 
+*/
+func (a *DefaultApiService) SetReplicas(ctx _context.Context, namespaceID string, id string, setReplicasRequest SetReplicasRequest, localVarOptionals *SetReplicasOpts) (*_nethttp.Response, error) {
+	var (
+		localVarHTTPMethod   = _nethttp.MethodPut
+		localVarPostBody     interface{}
+		localVarFormFileName string
+		localVarFileName     string
+		localVarFileBytes    []byte
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/namespaces/{namespaceID}/volumes/{id}/replicas"
+	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := _neturl.Values{}
+	localVarFormParams := _neturl.Values{}
+
+	if localVarOptionals != nil && localVarOptionals.AsyncMax.IsSet() {
+		localVarQueryParams.Add("async-max", parameterToString(localVarOptionals.AsyncMax.Value(), ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = &setReplicasRequest
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	if err != nil {
 		return nil, err
 	}
 
@@ -4139,7 +4271,57 @@ func (a *DefaultApiService) RefreshJwt(ctx _context.Context) (*_nethttp.Response
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
 		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 412 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -4582,7 +4764,7 @@ func (a *DefaultApiService) UpdateNamespace(ctx _context.Context, id string, upd
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/namespaces/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -4742,7 +4924,7 @@ func (a *DefaultApiService) UpdateNode(ctx _context.Context, id string, updateNo
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/nodes/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -4902,7 +5084,7 @@ func (a *DefaultApiService) UpdatePolicyGroup(ctx _context.Context, id string, u
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/policies/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -5044,7 +5226,7 @@ func (a *DefaultApiService) UpdatePolicyGroup(ctx _context.Context, id string, u
 
 /*
 UpdateUser Update a user
-Update the user identified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose.
+Update the user identified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose. 
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a user
  * @param updateUserData
@@ -5062,7 +5244,7 @@ func (a *DefaultApiService) UpdateUser(ctx _context.Context, id string, updateUs
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/users/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -5159,6 +5341,179 @@ func (a *DefaultApiService) UpdateUser(ctx _context.Context, id string, updateUs
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 412 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+/*
+UpdateVolume Update a volume
+Update the description and non-storageos labels configured for the volume identified by id.
+ * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * @param namespaceID ID of a Namespace
+ * @param id ID of a Volume
+ * @param updateVolumeData
+@return Volume
+*/
+func (a *DefaultApiService) UpdateVolume(ctx _context.Context, namespaceID string, id string, updateVolumeData UpdateVolumeData) (Volume, *_nethttp.Response, error) {
+	var (
+		localVarHTTPMethod   = _nethttp.MethodPut
+		localVarPostBody     interface{}
+		localVarFormFileName string
+		localVarFileName     string
+		localVarFileBytes    []byte
+		localVarReturnValue  Volume
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/namespaces/{namespaceID}/volumes/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"namespaceID"+"}", _neturl.QueryEscape(parameterToString(namespaceID, "")) , -1)
+
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(id, "")) , -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := _neturl.Values{}
+	localVarFormParams := _neturl.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = &updateVolumeData
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 200 {
+			var v Volume
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 412 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 451 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

@@ -22,8 +22,12 @@ type noTransport struct{}
 
 var _ Transport = (*noTransport)(nil)
 
-func (t *noTransport) Authenticate(ctx context.Context, username, password string) (*user.Resource, error) {
-	return nil, ErrNoTransportConfigured
+func (t *noTransport) Authenticate(ctx context.Context, username, password string) (AuthSession, error) {
+	return AuthSession{}, ErrNoTransportConfigured
+}
+
+func (t *noTransport) UseAuthSession(ctx context.Context, session AuthSession) error {
+	return ErrNoTransportConfigured
 }
 
 func (t *noTransport) GetCluster(ctx context.Context) (*cluster.Resource, error) {

@@ -62,6 +62,7 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**ListUsers**](docs/DefaultApi.md#listusers) | **Get** /users | Fetch the list of users
 *DefaultApi* | [**ListVolumes**](docs/DefaultApi.md#listvolumes) | **Get** /namespaces/{namespaceID}/volumes | Fetch the list of volumes in the given namespace
 *DefaultApi* | [**RefreshJwt**](docs/DefaultApi.md#refreshjwt) | **Post** /auth/refresh | Refresh the JWT
+*DefaultApi* | [**SetReplicas**](docs/DefaultApi.md#setreplicas) | **Put** /namespaces/{namespaceID}/volumes/{id}/replicas | Set the number of replicas to maintain for the volume.
 *DefaultApi* | [**Spec**](docs/DefaultApi.md#spec) | **Get** /openapi | Serves this openapi spec file
 *DefaultApi* | [**UpdateAuthenticatedUser**](docs/DefaultApi.md#updateauthenticateduser) | **Put** /users/self | Update the authenticated user&#39;s information
 *DefaultApi* | [**UpdateCluster**](docs/DefaultApi.md#updatecluster) | **Put** /cluster | Update the cluster&#39;s global configuration settings
@@ -69,6 +70,7 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**UpdateNode**](docs/DefaultApi.md#updatenode) | **Put** /nodes/{id} | Update a node
 *DefaultApi* | [**UpdatePolicyGroup**](docs/DefaultApi.md#updatepolicygroup) | **Put** /policies/{id} | Update a policy group
 *DefaultApi* | [**UpdateUser**](docs/DefaultApi.md#updateuser) | **Put** /users/{id} | Update a user
+*DefaultApi* | [**UpdateVolume**](docs/DefaultApi.md#updatevolume) | **Put** /namespaces/{namespaceID}/volumes/{id} | Update a volume
 
 
 ## Documentation For Models
@@ -94,12 +96,14 @@ Class | Method | HTTP request | Description
  - [Namespace](docs/Namespace.md)
  - [Node](docs/Node.md)
  - [NodeHealth](docs/NodeHealth.md)
+ - [PoliciesIdSpecs](docs/PoliciesIdSpecs.md)
  - [PoliciesSpecs](docs/PoliciesSpecs.md)
  - [PolicyGroup](docs/PolicyGroup.md)
  - [PolicyGroupUsers](docs/PolicyGroupUsers.md)
  - [ReplicaDeploymentInfo](docs/ReplicaDeploymentInfo.md)
  - [ReplicaDeploymentInfoAllOf](docs/ReplicaDeploymentInfoAllOf.md)
  - [ReplicaHealth](docs/ReplicaHealth.md)
+ - [SetReplicasRequest](docs/SetReplicasRequest.md)
  - [SyncProgress](docs/SyncProgress.md)
  - [UpdateAuthenticatedUserData](docs/UpdateAuthenticatedUserData.md)
  - [UpdateClusterData](docs/UpdateClusterData.md)
@@ -107,7 +111,11 @@ Class | Method | HTTP request | Description
  - [UpdateNodeData](docs/UpdateNodeData.md)
  - [UpdatePolicyGroupData](docs/UpdatePolicyGroupData.md)
  - [UpdateUserData](docs/UpdateUserData.md)
+ - [UpdateVolumeData](docs/UpdateVolumeData.md)
  - [User](docs/User.md)
+ - [UserSession](docs/UserSession.md)
+ - [UserSessionAllOf](docs/UserSessionAllOf.md)
+ - [UserSessionAllOfSession](docs/UserSessionAllOfSession.md)
  - [Volume](docs/Volume.md)
 
 

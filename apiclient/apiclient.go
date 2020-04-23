@@ -41,7 +41,10 @@ var (
 type Transport interface {
 	// Authenticate presents the username and password to the StorageOS API,
 	// requesting a new login session.
-	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
+	Authenticate(ctx context.Context, username, password string) (AuthSession, error)
+	// UseAuthSession configures the transport to re-use the provided auth
+	// session for its future requests.
+	UseAuthSession(ctx context.Context, session AuthSession) error
 
 	// GetUser requests the details of the StorageOS user account with uid and
 	// returns it to the caller.

@@ -33,6 +33,7 @@ Method | HTTP request | Description
 [**ListUsers**](DefaultApi.md#ListUsers) | **Get** /users | Fetch the list of users
 [**ListVolumes**](DefaultApi.md#ListVolumes) | **Get** /namespaces/{namespaceID}/volumes | Fetch the list of volumes in the given namespace
 [**RefreshJwt**](DefaultApi.md#RefreshJwt) | **Post** /auth/refresh | Refresh the JWT
+[**SetReplicas**](DefaultApi.md#SetReplicas) | **Put** /namespaces/{namespaceID}/volumes/{id}/replicas | Set the number of replicas to maintain for the volume.
 [**Spec**](DefaultApi.md#Spec) | **Get** /openapi | Serves this openapi spec file
 [**UpdateAuthenticatedUser**](DefaultApi.md#UpdateAuthenticatedUser) | **Put** /users/self | Update the authenticated user&#39;s information
 [**UpdateCluster**](DefaultApi.md#UpdateCluster) | **Put** /cluster | Update the cluster&#39;s global configuration settings
@@ -40,6 +41,7 @@ Method | HTTP request | Description
 [**UpdateNode**](DefaultApi.md#UpdateNode) | **Put** /nodes/{id} | Update a node
 [**UpdatePolicyGroup**](DefaultApi.md#UpdatePolicyGroup) | **Put** /policies/{id} | Update a policy group
 [**UpdateUser**](DefaultApi.md#UpdateUser) | **Put** /users/{id} | Update a user
+[**UpdateVolume**](DefaultApi.md#UpdateVolume) | **Put** /namespaces/{namespaceID}/volumes/{id} | Update a volume
 
 
 
@@ -81,7 +83,7 @@ Name | Type | Description  | Notes
 
 ## AuthenticateUser
 
-> User AuthenticateUser(ctx, authUserData)
+> UserSession AuthenticateUser(ctx, authUserData)
 
 Authenticate a user
 
@@ -97,7 +99,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**User**](User.md)
+[**UserSession**](UserSession.md)
 
 ### Authorization
 
@@ -1076,7 +1078,7 @@ Name | Type | Description  | Notes
 
 ## RefreshJwt
 
-> RefreshJwt(ctx, )
+> UserSession RefreshJwt(ctx, )
 
 Refresh the JWT
 
@@ -1088,7 +1090,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
- (empty response body)
+[**UserSession**](UserSession.md)
 
 ### Authorization
 
@@ -1097,6 +1099,55 @@ This endpoint does not need any parameter.
 ### HTTP request headers
 
 - **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SetReplicas
+
+> SetReplicas(ctx, namespaceID, id, setReplicasRequest, optional)
+
+Set the number of replicas to maintain for the volume.
+
+Set the number of replicas for the volume identified by id to the number specified in the request's body. This modifies the protected StorageOS system label \"storageos.com/replicas\".
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespaceID** | **string**| ID of a Namespace | 
+**id** | **string**| ID of a Volume | 
+**setReplicasRequest** | [**SetReplicasRequest**](SetReplicasRequest.md)|  | 
+ **optional** | ***SetReplicasOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a SetReplicasOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+ **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
@@ -1327,6 +1378,42 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**User**](User.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## UpdateVolume
+
+> Volume UpdateVolume(ctx, namespaceID, id, updateVolumeData)
+
+Update a volume
+
+Update the description and non-storageos labels configured for the volume identified by id.
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespaceID** | **string**| ID of a Namespace | 
+**id** | **string**| ID of a Volume | 
+**updateVolumeData** | [**UpdateVolumeData**](UpdateVolumeData.md)|  | 
+
+### Return type
+
+[**Volume**](Volume.md)
 
 ### Authorization
 

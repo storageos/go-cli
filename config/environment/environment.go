@@ -16,9 +16,15 @@ import (
 )
 
 const (
+	// AuthCacheDisabledVar keys the environment variable from which we source
+	// the configuration setting which decides whether the auth cache is disabled.
+	AuthCacheDisabledVar = "STORAGEOS_NO_AUTH_CACHE"
 	// APIEndpointsVar keys the environment variable from which we source the
 	// API host endpoints.
 	APIEndpointsVar = "STORAGEOS_ENDPOINTS"
+	// CacheDirVar keys the environment variable from which we source the
+	// directory to use as a data cache.
+	CacheDirVar = "STORAGEOS_CACHE_DIR"
 	// CommandTimeoutVar keys the environment variable from which we source the
 	// timeout for API operations.
 	CommandTimeoutVar = "STORAGEOS_API_TIMEOUT"
@@ -55,9 +61,17 @@ var EnvConfigHelp = []struct {
 	Help string
 }{
 	{
+		Name: AuthCacheDisabledVar,
+		Help: "Disables the caching of authenticated sessions by the CLI",
+	},
+	{
 		// TODO(CP-3924): Update this for multiple endpoints implementation
 		Name: APIEndpointsVar,
 		Help: "Sets the default StorageOS API endpoint for the CLI to connect to",
+	},
+	{
+		Name: CacheDirVar,
+		Help: "Sets the default directory for the CLI to cache re-usable data to",
 	},
 	{
 		Name: CommandTimeoutVar,
@@ -100,6 +114,18 @@ type Provider struct {
 	fallback config.Provider
 }
 
+// AuthCacheDisabled sources the configuration setting which determines if the
+// auth cache must be disabled from the environment if set. If not set then
+// env's fallback is used.
+func (env *Provider) AuthCacheDisabled() (bool, error) {
+	disabledString := os.Getenv(AuthCacheDisabledVar)
+	if disabledString == "" {
+		return env.fallback.AuthCacheDisabled()
+	}
+
+	return strconv.ParseBool(disabledString)
+}
+
 // APIEndpoints sources the list of comma-separated target API endpoints from
 // the environment if set. If not set in the environment then env's fallback
 // is used.
@@ -111,6 +137,17 @@ func (env *Provider) APIEndpoints() ([]string, error) {
 	endpoints := strings.Split(hostString, ",")
 
 	return endpoints, nil
+}
+
+// CacheDir sources the path to the directory for the CLI to use when caching
+// data from the environment if set. If not set in the environment then env's fallback is used.
+func (env *Provider) CacheDir() (string, error) {
+	cacheString := os.Getenv(CacheDirVar)
+	if cacheString == "" {
+		return env.fallback.CacheDir()
+	}
+
+	return cacheString, nil
 }
 
 // CommandTimeout sources the command timeout duration from the environment

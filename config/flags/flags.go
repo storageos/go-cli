@@ -11,9 +11,15 @@ import (
 )
 
 const (
+	// AuthCacheDisabledFlag keys the long flag which determines whether the
+	// CLI's auth cache must be disabled, if set.
+	AuthCacheDisabledFlag = "no-auth-cache"
 	// APIEndpointsFlag keys the long flag from which the list of API host
 	// endpoints are sourced, if set.
 	APIEndpointsFlag = "endpoints"
+	// CacheDirFlag keys the long flag from which the directory to cache data
+	// that can be re-used by later commands is stored in, if set.
+	CacheDirFlag = "cache-dir"
 	// CommandTimeoutFlag keys the long flag from which the timeout for API
 	// operations is sourced, if set.
 	CommandTimeoutFlag = "timeout"
@@ -72,6 +78,22 @@ type Provider struct {
 	fallback config.Provider
 }
 
+// AuthCacheDisabled sources the configuration setting which determines whether
+// the CLI must disable use of the auth cache from flag's FlagSet. If the value
+// stored has not changed then flag's fallback is used.
+func (flag *Provider) AuthCacheDisabled() (bool, error) {
+	disabled, err := flag.set.GetBool(AuthCacheDisabledFlag)
+	if err != nil {
+		return false, err
+	}
+
+	if !flag.set.Changed(AuthCacheDisabledFlag) {
+		return flag.fallback.AuthCacheDisabled()
+	}
+
+	return disabled, nil
+}
+
 // APIEndpoints sources the list of comma-separated target API endpoints from
 // flag's FlagSet. If the value stored has not changed then flag's fallback
 // is used.
@@ -86,6 +108,21 @@ func (flag *Provider) APIEndpoints() ([]string, error) {
 	}
 
 	return hosts, nil
+}
+
+// CacheDir sources the directory to use as the StorageOS CLI cache from flag's
+// FlagSet. If the value stored has not changed then flag's fallback is used.
+func (flag *Provider) CacheDir() (string, error) {
+	cacheDir, err := flag.set.GetString(CacheDirFlag)
+	if err != nil {
+		return "", err
+	}
+
+	if cacheDir == "" || !flag.set.Changed(CacheDirFlag) {
+		return flag.fallback.CacheDir()
+	}
+
+	return cacheDir, nil
 }
 
 // CommandTimeout sources the command timeout duration from flag's FlagSet.
@@ -208,10 +245,20 @@ func (flag *Provider) ConfigFilePath() (string, error) {
 func NewProvider(flagset FlagSet, fallback config.Provider) *Provider {
 
 	// Set up the flags for the config provider
+	flagset.Bool(
+		AuthCacheDisabledFlag,
+		config.DefaultAuthCacheDisabled,
+		"disable the CLI's caching of authentication sessions",
+	)
 	flagset.StringArray(
 		APIEndpointsFlag,
 		[]string{config.DefaultAPIEndpoint},
 		"set the list of endpoints which are used when connecting to the StorageOS API",
+	)
+	flagset.String(
+		CacheDirFlag,
+		config.GetDefaultCacheDir(),
+		"set the directory used by the StorageOS CLI to cache data that can be used for future commands",
 	)
 	flagset.Duration(
 		CommandTimeoutFlag,
@@ -249,7 +296,7 @@ func NewProvider(flagset FlagSet, fallback config.Provider) *Provider {
 	flagset.StringP(
 		ConfigFileFlag,
 		ShortConfigFileFlag,
-		config.DefaultConfigFile,
+		config.GetDefaultConfigFile(),
 		"specifies the config file path",
 	)
 

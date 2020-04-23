@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"time"
@@ -9,6 +10,9 @@ import (
 )
 
 const (
+	// DefaultAuthCacheDisabled is the default value indicating whether the CLI
+	// is to use the authentication cache.
+	DefaultAuthCacheDisabled = false
 	// DefaultAPIEndpoint is the default endpoint which the CLI will
 	// attempt to perform API operations with.
 	DefaultAPIEndpoint = "http://localhost:5705"
@@ -35,24 +39,34 @@ const (
 	DefaultOutput = output.Text
 )
 
-// DefaultConfigFile defines the default path for the config file to use in the
+// GetDefaultConfigFile determines the default path for the config file to use in the
 // file provider.
 //
 // If $XDG_CONFIG_HOME is set, $XDG_CONFIG_HOME/storageos/config is used, else
 // if $HOME is set, $HOME/.config/storageos/config is used, else
 // use .storageos file in the working folder
-var DefaultConfigFile = ""
-
-func init() {
+func GetDefaultConfigFile() string {
 	osConfigPath, err := os.UserConfigDir()
 	if err == nil {
-		DefaultConfigFile = filepath.Join(osConfigPath, "storageos", "config.yaml")
-		return
+		return filepath.Join(osConfigPath, "storageos", "config.yaml")
 	}
 
 	// if $HOME is not set use `.storageos` file
 	// in the working directory
-	DefaultConfigFile = ".storageos.yaml"
+	return ".storageos.yaml"
+
+}
+
+// GetDefaultCacheDir returns the default directory for the CLI to use
+// when caching data at runtime. If an empty path is returned, the CLI could
+// not determine the appropriate cache directory for the user.
+func GetDefaultCacheDir() string {
+	userCacheDir, err := os.UserCacheDir()
+	if err == nil {
+		return filepath.Join(userCacheDir, "storageos")
+	}
+
+	return ""
 }
 
 // Defaulter exports functionality to retrieve default values for the global
@@ -63,10 +77,30 @@ func init() {
 // the accessors methods, an error is allowed to be returned.
 type Defaulter struct{}
 
+// AuthCacheDisabled returns a bool indicating that the CLI's auth cache is not
+// disabled.
+func (d *Defaulter) AuthCacheDisabled() (bool, error) {
+	return DefaultAuthCacheDisabled, nil
+}
+
 // APIEndpoints returns a slice containing the string form of the default host
 // endpoint for the apiclient, http://localhost:5705.
 func (d *Defaulter) APIEndpoints() ([]string, error) {
 	return []string{DefaultAPIEndpoint}, nil
+}
+
+// CacheDir returns the default directory path which is used by the StorageOS
+// CLI to cache data that can be re-used by future commands to reduce overhead.
+//
+// If the CLI was unable to determine the user's cache directory then an error
+// is returned.
+func (d *Defaulter) CacheDir() (string, error) {
+	cacheDir := GetDefaultCacheDir()
+	if cacheDir == "" {
+		return "", errors.New("unable to determine user cache directory, try specifying one or disabling the auth cache")
+	}
+
+	return cacheDir, nil
 }
 
 // CommandTimeout returns the standard timeout for a single command, 5 seconds.
@@ -104,7 +138,7 @@ func (d *Defaulter) OutputFormat() (output.Format, error) {
 // ConfigFilePath returns the default config file path following the rules
 // defined in the DefaultConfigFile function.
 func (d *Defaulter) ConfigFilePath() (string, error) {
-	return DefaultConfigFile, nil
+	return GetDefaultConfigFile(), nil
 }
 
 var _ Provider = (*Defaulter)(nil) // Ensure that the defaulter satisfies the exported interface

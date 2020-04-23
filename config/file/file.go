@@ -33,6 +33,21 @@ type Provider struct {
 	err error
 }
 
+// AuthCacheDisabled sources the setting which determines whether the CLI must
+// disable use of the auth cache from the config file, if the field is set.
+// Otherwise the fallback provider is used.
+func (c *Provider) AuthCacheDisabled() (bool, error) {
+	if err := c.lazyInit(); err != nil {
+		return false, c.err
+	}
+
+	if c.configFile.IsSetAuthCacheDisabled {
+		return c.configFile.AuthCacheDisabled, nil
+	}
+
+	return c.fallback.AuthCacheDisabled()
+}
+
 // APIEndpoints sources the list of comma-separated target API endpoints from
 // the config file, if the field is set. Otherwise the fallback provider
 // is used.
@@ -45,6 +60,20 @@ func (c *Provider) APIEndpoints() ([]string, error) {
 		return c.configFile.APIEndpoints, nil
 	}
 	return c.fallback.APIEndpoints()
+}
+
+// CacheDir sources the path to the directory for the CLI to use when caching
+// data from the config file, if the field is set. Otherwise the fallback provider is used.
+func (c *Provider) CacheDir() (string, error) {
+	if err := c.lazyInit(); err != nil {
+		return "", c.err
+	}
+
+	if c.configFile.IsSetCacheDir {
+		return c.configFile.CacheDir, nil
+	}
+
+	return c.fallback.CacheDir()
 }
 
 // CommandTimeout sources the command timeout duration from the config file,
@@ -186,7 +215,7 @@ func (c *Provider) parse() error {
 	if err != nil {
 		if os.IsNotExist(err) {
 
-			if configFile == config.DefaultConfigFile {
+			if configFile == config.GetDefaultConfigFile() {
 
 				// default file doesn't exists
 				// likely the user is not using it
@@ -214,6 +243,16 @@ func (c *Provider) parse() error {
 		return errBadYAMLFile(err)
 	}
 
+	if conf.RawAuthCacheDisabled != nil {
+		b, err := strconv.ParseBool(*conf.RawAuthCacheDisabled)
+		if err != nil {
+			return err
+		}
+
+		conf.IsSetAuthCacheDisabled = true
+		conf.AuthCacheDisabled = b
+	}
+
 	if conf.RawAPIEndpoints != nil {
 		if len(*conf.RawAPIEndpoints) == 0 {
 			return errMissingEndpoints
@@ -221,6 +260,15 @@ func (c *Provider) parse() error {
 
 		conf.IsSetAPIEndpoints = true
 		conf.APIEndpoints = *conf.RawAPIEndpoints
+	}
+
+	if conf.RawCacheDir != nil {
+		if len(*conf.RawCacheDir) == 0 {
+			return errMissingCacheDir
+		}
+
+		conf.IsSetCacheDir = true
+		conf.CacheDir = *conf.RawCacheDir
 	}
 
 	if conf.RawCommandTimeout != nil {

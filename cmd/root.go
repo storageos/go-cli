@@ -2,13 +2,16 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/blang/semver"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
+	"code.storageos.net/storageos/c2-cli/apiclient/cache"
 	"code.storageos.net/storageos/c2-cli/apiclient/openapi"
 	"code.storageos.net/storageos/c2-cli/cmd/apply"
 	"code.storageos.net/storageos/c2-cli/cmd/attach"
@@ -44,12 +47,49 @@ To be notified about stable releases and latest features, sign up at https://my.
 		PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
 			userAgent := strings.Join([]string{UserAgentPrefix, version.String()}, "/")
 
-			transport, err := openapi.NewOpenAPI(config, userAgent)
+			disabledAuthCache, err := config.AuthCacheDisabled()
 			if err != nil {
 				return err
 			}
 
-			return client.ConfigureTransport(transport)
+			transport, err := func() (apiclient.Transport, error) {
+				transport, err := openapi.NewOpenAPI(config, userAgent)
+				if err != nil {
+					return nil, err
+				}
+
+				if disabledAuthCache {
+					return transport, nil
+				}
+
+				// Ensure that the cache dir exists
+				cacheDir, err := config.CacheDir()
+				if err != nil {
+					return transport, nil
+				}
+
+				err = os.Mkdir(cacheDir, 0700)
+				switch {
+				case err == nil, os.IsExist(err):
+					// This is ok
+				default:
+					return nil, err
+				}
+
+				// Only wrap with caching if desired
+				return apiclient.NewAuthCachedTransport(
+					transport,
+					cache.NewSessionCache(config, time.Now, 5*time.Second),
+				), nil
+			}()
+			if err != nil {
+				return err
+			}
+
+			// Wrap the transport implementation in a re-authenticate layer.
+			return client.ConfigureTransport(
+				apiclient.NewTransportWithReauth(transport, config),
+			)
 		},
 
 		SilenceErrors: true,

@@ -20,7 +20,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/output/yamlformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/version"
-	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
@@ -44,7 +43,7 @@ type ConfigProvider interface {
 // Client describes the functionality required by the CLI application
 // to reasonably implement the "detach" verb commands.
 type Client interface {
-	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
+	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
 
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 	GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error)

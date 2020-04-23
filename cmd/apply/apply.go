@@ -8,12 +8,12 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/output/textformat"
 	"code.storageos.net/storageos/c2-cli/output/yamlformat"
-	"code.storageos.net/storageos/c2-cli/user"
 )
 
 // ConfigProvider specifies the configuration
@@ -28,7 +28,7 @@ type ConfigProvider interface {
 // Client defines the functionality required by the CLI application to
 // reasonably implement the "apply" verb commands.
 type Client interface {
-	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
+	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
 
 	UpdateLicence(ctx context.Context, licenceKey []byte) (*cluster.Licence, error)
 }

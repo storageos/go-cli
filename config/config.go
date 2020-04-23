@@ -12,7 +12,9 @@ import (
 // which a type must implement in order to be used for configuring the
 // application.
 type Provider interface {
+	AuthCacheDisabled() (bool, error)
 	APIEndpoints() ([]string, error)
+	CacheDir() (string, error)
 	CommandTimeout() (time.Duration, error)
 	Username() (string, error)
 	Password() (string, error)

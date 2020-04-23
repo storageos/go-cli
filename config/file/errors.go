@@ -6,6 +6,7 @@ import (
 )
 
 var (
+	errMissingCacheDir      = errors.New("config file error: cache directory path can't be set and empty")
 	errMissingEndpoints     = errors.New("config file error: endpoints can't be set and empty")
 	errMissingUsername      = errors.New("config file error: username can't be set and empty")
 	errMissingNamespace     = errors.New("config file error: namespace can't be set and empty")

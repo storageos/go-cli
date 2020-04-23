@@ -451,7 +451,7 @@ func TestDecodePolicyGroup(t *testing.T) {
 						Username: "username-2",
 					},
 				},
-				Specs: &[]openapi.PoliciesSpecs{
+				Specs: &[]openapi.PoliciesIdSpecs{
 					{
 						NamespaceID:  "namespace-id",
 						ResourceType: "resource-type",

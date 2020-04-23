@@ -27,6 +27,66 @@ func TestFileProvider(t *testing.T) {
 		wantValue  interface{}
 	}{
 		{
+			name: "fetch noAuthCache when set",
+
+			fileContent: "---\nnoAuthCache: true\n",
+			fallback: &mockProvider{
+				GetError: errors.New("don't call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.AuthCacheDisabled()
+			},
+
+			wantValue: true,
+			wantErr:   nil,
+		},
+		{
+			name: "fetch noAuthCache has invalid value",
+
+			fileContent: "---\nnoAuthCache: notabool\n",
+			fallback: &mockProvider{
+				GetError: errors.New("don't call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.AuthCacheDisabled()
+			},
+
+			wantValue: false,
+			wantErr: &strconv.NumError{
+				Func: "ParseBool",
+				Num:  "notabool",
+				Err:  strconv.ErrSyntax,
+			},
+		},
+		{
+			name: "fetch noAuthCache falls back when not set",
+
+			fileContent: "---\n",
+			fallback: &mockProvider{
+				GetAuthCacheDisabled: true,
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.AuthCacheDisabled()
+			},
+
+			wantValue: true,
+			wantErr:   nil,
+		},
+		{
+			name: "fetch noAuthCache fall back errors",
+
+			fileContent: "---\n",
+			fallback: &mockProvider{
+				GetError: errors.New("bananas"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.AuthCacheDisabled()
+			},
+
+			wantValue: false,
+			wantErr:   errors.New("bananas"),
+		},
+		{
 			name: "fetch api endpoints when set",
 
 			fileContent: "---\nendpoints:\n  - 1.1.1.1:5705\n  - 2.2.2.2:5705\n",
@@ -95,6 +155,48 @@ func TestFileProvider(t *testing.T) {
 
 			wantValue: 10 * time.Second,
 			wantErr:   nil,
+		},
+		{
+			name: "fetch cache dir when set",
+
+			fileContent: "---\ncacheDir: my-cacheDir\n",
+			fallback: &mockProvider{
+				GetError: errors.New("don't call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.CacheDir()
+			},
+
+			wantValue: "my-cacheDir",
+			wantErr:   nil,
+		},
+		{
+			name: "fetch cache dir falls back when not set",
+
+			fileContent: "---\n",
+			fallback: &mockProvider{
+				GetCacheDir: "my-cacheDir",
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.CacheDir()
+			},
+
+			wantValue: "my-cacheDir",
+			wantErr:   nil,
+		},
+		{
+			name: "fetch cache dir fall back errors",
+
+			fileContent: "---\n",
+			fallback: &mockProvider{
+				GetError: errors.New("bananas"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.CacheDir()
+			},
+
+			wantValue: "",
+			wantErr:   errors.New("bananas"),
 		},
 		{
 			name: "fetch command timeout falls back when not set",
@@ -209,9 +311,9 @@ func TestFileProvider(t *testing.T) {
 			wantErr:   errors.New("bananas"),
 		},
 		{
-			name: "fetch use-ids when set",
+			name: "fetch useIds when set",
 
-			fileContent: "---\nuse-ids: true\n",
+			fileContent: "---\nuseIds: true\n",
 			fallback: &mockProvider{
 				GetError: errors.New("don't call me"),
 			},
@@ -223,9 +325,9 @@ func TestFileProvider(t *testing.T) {
 			wantErr:   nil,
 		},
 		{
-			name: "fetch use-ids has invalid value",
+			name: "fetch useIds has invalid value",
 
-			fileContent: "---\nuse-ids: notabool\n",
+			fileContent: "---\nuseIds: notabool\n",
 			fallback: &mockProvider{
 				GetError: errors.New("don't call me"),
 			},
@@ -241,7 +343,7 @@ func TestFileProvider(t *testing.T) {
 			},
 		},
 		{
-			name: "fetch use-ids falls back when not set",
+			name: "fetch useIds falls back when not set",
 
 			fileContent: "---\n",
 			fallback: &mockProvider{
@@ -255,7 +357,7 @@ func TestFileProvider(t *testing.T) {
 			wantErr:   nil,
 		},
 		{
-			name: "fetch use-ids fall back errors",
+			name: "fetch useIds fall back errors",
 
 			fileContent: "---\n",
 			fallback: &mockProvider{

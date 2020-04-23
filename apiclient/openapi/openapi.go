@@ -3,10 +3,12 @@ package openapi
 import (
 	"context"
 	"errors"
+	"math"
 	"strings"
 	"sync"
+	"time"
 
-	"code.storageos.net/storageos/c2-cli/user"
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/openapi"
 )
 
@@ -36,11 +38,11 @@ type OpenAPI struct {
 // returned token in the Authorization header for future operations.
 //
 // The returned *user.Resource corresponds to the authenticated user.
-func (o *OpenAPI) Authenticate(ctx context.Context, username, password string) (*user.Resource, error) {
+func (o *OpenAPI) Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
-	model, resp, err := o.client.DefaultApi.AuthenticateUser(
+	userSession, resp, err := o.client.DefaultApi.AuthenticateUser(
 		ctx,
 		openapi.AuthUserData{
 			Username: username,
@@ -48,13 +50,43 @@ func (o *OpenAPI) Authenticate(ctx context.Context, username, password string) (
 		},
 	)
 	if err != nil {
-		return nil, mapOpenAPIError(err, resp)
+		return apiclient.AuthSession{}, mapOpenAPIError(err, resp)
 	}
 
-	token := strings.TrimPrefix(resp.Header.Get("Authorization"), "Bearer ")
+	token := userSession.Session.Token
+	// If the token was not decoded from the response body then check the header.
+	if token == "" {
+		token = strings.TrimPrefix(resp.Header.Get("Authorization"), "Bearer ")
+	}
+
+	// Set the authorization header to use the token.
 	o.client.GetConfig().AddDefaultHeader("Authorization", token)
 
-	return o.codec.decodeUser(model)
+	var expiresIn time.Duration
+
+	if userSession.Session.ExpiresInSeconds >= uint64(math.MaxInt64/time.Second) {
+		expiresIn = math.MaxInt64
+	} else {
+		expiresIn = time.Duration(userSession.Session.ExpiresInSeconds) * time.Second
+	}
+
+	return apiclient.NewAuthSession(token, time.Now().Add(expiresIn)), nil
+}
+
+// UseAuthSession configures o to use the provided authentication session for
+// future requests. Session must contain a non-empty token, but no clock based
+// checks are performed.
+func (o *OpenAPI) UseAuthSession(ctx context.Context, session apiclient.AuthSession) error {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+
+	if session.Token == "" {
+		return apiclient.ErrAuthSessionNoToken
+	}
+
+	// Set the authorization header to use the token.
+	o.client.GetConfig().AddDefaultHeader("Authorization", session.Token)
+	return nil
 }
 
 // NewOpenAPI initialises a new OpenAPI transport using config to source the

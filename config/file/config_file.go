@@ -24,29 +24,35 @@ import (
 //   we store an error in the Error field to return it as soon as the provider
 //   will receive calls.
 type ConfigFile struct {
-	RawAPIEndpoints   *[]string `json:"endpoints" yaml:"endpoints"`
-	RawCommandTimeout *string   `json:"timeout" yaml:"timeout"`
-	RawUsername       *string   `json:"username" yaml:"username"`
-	RawPassword       *string   `json:"password" yaml:"password"`
-	RawUseIDs         *string   `json:"use-ids" yaml:"use-ids"`
-	RawNamespace      *string   `json:"namespace" yaml:"namespace"`
-	RawOutputFormat   *string   `json:"output" yaml:"output"`
+	RawAuthCacheDisabled *string   `json:"noAuthCache" yaml:"noAuthCache"`
+	RawAPIEndpoints      *[]string `json:"endpoints" yaml:"endpoints"`
+	RawCacheDir          *string   `json:"cacheDir" yaml:"cacheDir"`
+	RawCommandTimeout    *string   `json:"timeout" yaml:"timeout"`
+	RawUsername          *string   `json:"username" yaml:"username"`
+	RawPassword          *string   `json:"password" yaml:"password"`
+	RawUseIDs            *string   `json:"useIds" yaml:"useIds"`
+	RawNamespace         *string   `json:"namespace" yaml:"namespace"`
+	RawOutputFormat      *string   `json:"output" yaml:"output"`
 	// TODO(CP-3913): Support TLS.
 
-	IsSetAPIEndpoints   bool
-	IsSetCommandTimeout bool
-	IsSetUsername       bool
-	IsSetUseIDs         bool
-	IsSetNamespace      bool
-	IsSetOutputFormat   bool
+	IsSetAuthCacheDisabled bool
+	IsSetAPIEndpoints      bool
+	IsSetCacheDir          bool
+	IsSetCommandTimeout    bool
+	IsSetUsername          bool
+	IsSetUseIDs            bool
+	IsSetNamespace         bool
+	IsSetOutputFormat      bool
 	// TODO(CP-3913): Support TLS.
 
-	APIEndpoints   []string
-	CommandTimeout time.Duration
-	UsernameStr    string
-	UseIDs         bool
-	NamespaceStr   string
-	OutputFormat   output.Format
+	AuthCacheDisabled bool
+	APIEndpoints      []string
+	CacheDir          string
+	CommandTimeout    time.Duration
+	UsernameStr       string
+	UseIDs            bool
+	NamespaceStr      string
+	OutputFormat      output.Format
 	// TODO(CP-3913): Support TLS.
 
 	Error error

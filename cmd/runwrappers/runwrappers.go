@@ -8,9 +8,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/pkg/cmdcontext"
-	"code.storageos.net/storageos/c2-cli/user"
 )
 
 var (
@@ -31,7 +31,7 @@ type CredentialsProvider interface {
 
 // AuthAPIClient defines an API client that can be authenticated.
 type AuthAPIClient interface {
-	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
+	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
 }
 
 // NamespacedCommandConfigProvider abstracts a type which provides

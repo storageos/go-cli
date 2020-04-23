@@ -60,6 +60,76 @@ func TestEnvironmentProvider(t *testing.T) {
 		wantErr   error
 	}{
 		{
+			name: "fetch auth cache disabled when set",
+
+			setenv: func(t *testing.T) {
+				err := os.Setenv(AuthCacheDisabledVar, "true")
+				if err != nil {
+					t.Fatalf("got unexpected error setting up env: %v", err)
+				}
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("dont call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.AuthCacheDisabled()
+			},
+
+			wantValue: true,
+			wantErr:   nil,
+		},
+		{
+			name: "fetch auth cache disabled has invalid value",
+
+			setenv: func(t *testing.T) {
+				err := os.Setenv(AuthCacheDisabledVar, "notabool")
+				if err != nil {
+					t.Fatalf("got unexpected error setting up environment: %v", err)
+				}
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("dont call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.AuthCacheDisabled()
+			},
+
+			wantValue: false,
+			wantErr: &strconv.NumError{
+				Func: "ParseBool",
+				Num:  "notabool",
+				Err:  strconv.ErrSyntax,
+			},
+		},
+		{
+			name: "fetch auth cache disabled falls back when not set",
+
+			setenv: func(t *testing.T) {},
+			fallback: &mockProvider{
+				GetAuthCacheDisabled: true,
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.AuthCacheDisabled()
+			},
+
+			wantValue: true,
+			wantErr:   nil,
+		},
+		{
+			name: "fetch auth cache disabled fall back errors",
+
+			setenv: func(t *testing.T) {},
+			fallback: &mockProvider{
+				GetError: errors.New("bananas"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.AuthCacheDisabled()
+			},
+
+			wantValue: false,
+			wantErr:   errors.New("bananas"),
+		},
+		{
 			name: "fetch api endpoints when set",
 
 			setenv: func(t *testing.T) {
@@ -104,6 +174,53 @@ func TestEnvironmentProvider(t *testing.T) {
 			},
 
 			wantValue: ([]string)(nil),
+			wantErr:   errors.New("bananas"),
+		},
+		{
+			name: "fetch cache dir when set",
+
+			setenv: func(t *testing.T) {
+				err := os.Setenv(CacheDirVar, "/tmp/.cache")
+				if err != nil {
+					t.Fatalf("got unexpected error setting up env: %v", err)
+				}
+			},
+			fallback: &mockProvider{
+				GetError: errors.New("dont call me"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.CacheDir()
+			},
+
+			wantValue: "/tmp/.cache",
+			wantErr:   nil,
+		},
+		{
+			name: "fetch cache dir falls back when not set",
+
+			setenv: func(t *testing.T) {},
+			fallback: &mockProvider{
+				GetCacheDir: "/tmp/.cache",
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.CacheDir()
+			},
+
+			wantValue: "/tmp/.cache",
+			wantErr:   nil,
+		},
+		{
+			name: "fetch cache dir fall back errors",
+
+			setenv: func(t *testing.T) {},
+			fallback: &mockProvider{
+				GetError: errors.New("bananas"),
+			},
+			fetchValue: func(p *Provider) (interface{}, error) {
+				return p.CacheDir()
+			},
+
+			wantValue: "",
 			wantErr:   errors.New("bananas"),
 		},
 		{

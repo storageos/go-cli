@@ -35,7 +35,7 @@ type ConfigProvider interface {
 // Client defines the functionality required by the CLI application to
 // reasonably implement the "delete" verb commands.
 type Client interface {
-	Authenticate(ctx context.Context, username, password string) (*user.Resource, error)
+	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
 
 	GetUserByName(ctx context.Context, username string) (*user.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
