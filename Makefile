@@ -54,6 +54,13 @@ install:
 # installation steps.
 .PHONY: lint
 lint:
+	md5sum go.mod > go.mod.md5
+	md5sum go.sum > go.sum.md5
+	go mod tidy
+	cat go.mod.md5 | md5sum -c 
+	cat go.sum.md5 | md5sum -c 
+	rm go.mod.md5
+	rm go.sum.md5
 	pre-commit run --all --hook-stage manual
 
 ###############################################################################
@@ -133,6 +140,8 @@ clean:
 	-rm -rf .build-tmp
 	-rm unit_test.output
 	-rm test_junit.xml
+	-rm go.mod.md5
+	-rm go.sum.md5
 
 #? help: prints this help message
 .PHONY: help

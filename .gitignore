@@ -1,1 +1,3 @@
 bin/*
+go.mod.md5
+go.sum.md5
