@@ -51,6 +51,7 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**GetAuthenticatedUser**](docs/DefaultApi.md#getauthenticateduser) | **Get** /users/self | Get the currently authenticated user&#39;s information
 *DefaultApi* | [**GetCluster**](docs/DefaultApi.md#getcluster) | **Get** /cluster | Retrieves the cluster&#39;s global configuration settings
 *DefaultApi* | [**GetDiagnostics**](docs/DefaultApi.md#getdiagnostics) | **Get** /diagnostics | Retrieves a diagnostics bundle from the target node
+*DefaultApi* | [**GetLicence**](docs/DefaultApi.md#getlicence) | **Get** /cluster/licence | Retrieves the cluster&#39;s licence information
 *DefaultApi* | [**GetNamespace**](docs/DefaultApi.md#getnamespace) | **Get** /namespaces/{id} | Fetch a namespace
 *DefaultApi* | [**GetNode**](docs/DefaultApi.md#getnode) | **Get** /nodes/{id} | Fetch a node
 *DefaultApi* | [**GetPolicyGroup**](docs/DefaultApi.md#getpolicygroup) | **Get** /policies/{id} | Fetch a policy group
@@ -66,6 +67,7 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**Spec**](docs/DefaultApi.md#spec) | **Get** /openapi | Serves this openapi spec file
 *DefaultApi* | [**UpdateAuthenticatedUser**](docs/DefaultApi.md#updateauthenticateduser) | **Put** /users/self | Update the authenticated user&#39;s information
 *DefaultApi* | [**UpdateCluster**](docs/DefaultApi.md#updatecluster) | **Put** /cluster | Update the cluster&#39;s global configuration settings
+*DefaultApi* | [**UpdateLicence**](docs/DefaultApi.md#updatelicence) | **Put** /cluster/licence | Update the licence global configuration settings
 *DefaultApi* | [**UpdateNamespace**](docs/DefaultApi.md#updatenamespace) | **Put** /namespaces/{id} | Update a namespace
 *DefaultApi* | [**UpdateNode**](docs/DefaultApi.md#updatenode) | **Put** /nodes/{id} | Update a node
 *DefaultApi* | [**UpdatePolicyGroup**](docs/DefaultApi.md#updatepolicygroup) | **Put** /policies/{id} | Update a policy group
@@ -107,6 +109,7 @@ Class | Method | HTTP request | Description
  - [SyncProgress](docs/SyncProgress.md)
  - [UpdateAuthenticatedUserData](docs/UpdateAuthenticatedUserData.md)
  - [UpdateClusterData](docs/UpdateClusterData.md)
+ - [UpdateLicence](docs/UpdateLicence.md)
  - [UpdateNamespaceData](docs/UpdateNamespaceData.md)
  - [UpdateNodeData](docs/UpdateNodeData.md)
  - [UpdatePolicyGroupData](docs/UpdatePolicyGroupData.md)

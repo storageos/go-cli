@@ -19,6 +19,7 @@ func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *out
 
 	table.AddRow("Expiration:", d.timeToHuman(licence.ExpiresAt))
 	table.AddRow("Capacity:", humanize.IBytes(licence.ClusterCapacityBytes))
+	table.AddRow("Used:", humanize.IBytes(licence.UsedBytes))
 	table.AddRow("Kind:", licence.Kind)
 	table.AddRow("Customer name:", licence.CustomerName)
 

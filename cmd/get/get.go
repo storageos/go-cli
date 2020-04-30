@@ -8,6 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/licence"
+
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -40,6 +42,7 @@ type Client interface {
 	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
 
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
+	GetLicence(ctx context.Context) (*licence.Resource, error)
 	GetDiagnostics(ctx context.Context) (io.ReadCloser, error)
 
 	GetUser(ctx context.Context, userID id.User) (*user.Resource, error)
@@ -76,6 +79,7 @@ type Client interface {
 // display the results gathered by the "get" verb commands.
 type Displayer interface {
 	GetCluster(ctx context.Context, w io.Writer, cluster *output.Cluster) error
+	GetLicence(ctx context.Context, w io.Writer, l *output.Licence) error
 	GetUser(ctx context.Context, w io.Writer, user *output.User) error
 	GetUsers(ctx context.Context, w io.Writer, users []*output.User) error
 	GetDiagnostics(ctx context.Context, w io.Writer, outputPath string) error
@@ -104,6 +108,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 		newVolume(os.Stdout, client, config),
 		newUser(os.Stdout, client, config),
 		newPolicyGroup(os.Stdout, client, config),
+		newLicence(os.Stdout, client, config),
 	)
 
 	return command

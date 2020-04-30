@@ -123,12 +123,12 @@ func (c *Client) GetListUsersByUID(ctx context.Context, uids []id.User) ([]*user
 	}
 
 	filtered := make([]*user.Resource, 0)
-	for _, id := range uids {
-		user, ok := toMap[id]
+	for _, idVar := range uids {
+		u, ok := toMap[idVar]
 		if !ok {
-			return nil, NewUserNotFoundError("user not found", id)
+			return nil, NewUserNotFoundError("user not found", idVar)
 		}
-		filtered = append(filtered, user)
+		filtered = append(filtered, u)
 	}
 
 	return filtered, nil
@@ -149,11 +149,11 @@ func (c *Client) GetListUsersByUsername(ctx context.Context, usernames []string)
 
 	filtered := make([]*user.Resource, 0)
 	for _, username := range usernames {
-		user, ok := toMap[username]
+		u, ok := toMap[username]
 		if !ok {
 			return nil, NewUserNameNotFoundError(username)
 		}
-		filtered = append(filtered, user)
+		filtered = append(filtered, u)
 	}
 
 	return filtered, nil

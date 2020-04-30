@@ -18,11 +18,6 @@ func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *outpu
 	table, write := createTable(nil)
 
 	table.AddRow("ID:", resource.ID)
-	table.AddRow("Licence:", "")
-	table.AddRow("  expiration:", d.timeToHuman(resource.Licence.ExpiresAt))
-	table.AddRow("  capacity:", humanize.IBytes(resource.Licence.ClusterCapacityBytes))
-	table.AddRow("  kind:", resource.Licence.Kind)
-	table.AddRow("  customer name:", resource.Licence.CustomerName)
 	table.AddRow("Created at:", d.timeToHuman(resource.CreatedAt))
 	table.AddRow("Updated at:", d.timeToHuman(resource.UpdatedAt))
 
@@ -39,6 +34,23 @@ func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *outpu
 	table.AddRow("Nodes:", len(resource.Nodes))
 	table.AddRow("  Healthy:", healthy)
 	table.AddRow("  Unhealthy:", unhealthy)
+
+	return write(w)
+}
+
+// GetLicence creates human-readable strings, writing the result to w.
+func (d *Displayer) GetLicence(ctx context.Context, w io.Writer, l *output.Licence) error {
+	table, write := createTable(nil)
+
+	clusterCapacity := fmt.Sprintf("%s (%d)", humanize.IBytes(l.ClusterCapacityBytes), l.ClusterCapacityBytes)
+	used := fmt.Sprintf("%s (%d)", humanize.IBytes(l.UsedBytes), l.UsedBytes)
+
+	table.AddRow("ClusterID:", l.ClusterID)
+	table.AddRow("Expiration:", d.timeToHuman(l.ExpiresAt))
+	table.AddRow("Capacity:", clusterCapacity)
+	table.AddRow("Used:", used)
+	table.AddRow("Kind:", l.Kind)
+	table.AddRow("Customer name:", l.CustomerName)
 
 	return write(w)
 }

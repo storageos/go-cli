@@ -200,8 +200,8 @@ paths:
       - jwt: []
       summary: Fetch the list of users
     post:
-      description: Create a new user in the cluster - only administrators can create
-        new users.
+      description: |
+        Create a new user in the cluster - only administrators can create new users.
       operationId: createUser
       requestBody:
         $ref: '#/components/requestBodies/CreateUserData'
@@ -1076,8 +1076,8 @@ paths:
       - jwt: []
       summary: Fetch the list of namespaces
     post:
-      description: Create a new namespace in the cluster - only administrators can
-        create new namespaces.
+      description: |
+        Create a new namespace in the cluster - only administrators can create new namespaces.
       operationId: createNamespace
       requestBody:
         $ref: '#/components/requestBodies/CreateNamespaceData'
@@ -2757,8 +2757,8 @@ paths:
       - jwt: []
       summary: Fetch a volume
     put:
-      description: Update the description and non-storageos labels configured for
-        the volume identified by id.
+      description: |
+        Update the description and non-storageos labels configured for the volume identified by id.
       operationId: updateVolume
       parameters:
       - description: ID of a Namespace
@@ -2813,8 +2813,8 @@ paths:
                   type: string
               title: UpdateVolumeData
               type: object
-        description: Update the volume description and label configuration to the
-          desired state. Alterations of StorageOS labels are rejected.
+        description: |
+          Update the volume description and label configuration to the desired state. Alterations of StorageOS labels are rejected.
         required: true
       responses:
         "200":
@@ -3026,8 +3026,8 @@ paths:
       - jwt: []
       summary: Detach the given volume
     post:
-      description: Attach the volume identified by id to the node identified in the
-        request's body.
+      description: |
+        Attach the volume identified by id to the node identified in the request's body.
       operationId: attachVolume
       parameters:
       - description: ID of a Namespace
@@ -3135,9 +3135,9 @@ paths:
       summary: Attach a volume to the given node
   /namespaces/{namespaceID}/volumes/{id}/replicas:
     put:
-      description: Set the number of replicas for the volume identified by id to the
-        number specified in the request's body. This modifies the protected StorageOS
-        system label "storageos.com/replicas".
+      description: |
+        Set the number of replicas for the volume identified by id to the number specified in the request's body. This modifies the protected StorageOS system label "storageos.com/replicas".
+        This request changes the desired replica count, and returns an error if changing the desired replica count failed. StorageOS satisfies the new replica configuration asynchronously.
       operationId: setReplicas
       parameters:
       - description: ID of a Namespace
@@ -3156,19 +3156,6 @@ paths:
         schema:
           $ref: '#/components/schemas/VolumeID'
         style: simple
-      - description: |
-          Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect.
-          The URL parameter value overrides the "async-max" header value, if any.
-          The value of this header defines the timeout duration for the request, it must be set to a valid duration string.
-          A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-          We reject negative or nil duration values.
-        explode: true
-        in: query
-        name: async-max
-        required: false
-        schema:
-          type: string
-        style: form
       requestBody:
         $ref: '#/components/requestBodies/SetReplicasRequest'
         content:
@@ -3198,8 +3185,13 @@ paths:
         description: Number of replicas
         required: true
       responses:
-        "200":
-          description: The volume's replica count was successfully updated.
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcceptedMessage'
+          description: |
+            An aynchronous request has been accepted
         "400":
           content:
             application/json:
@@ -3277,8 +3269,8 @@ paths:
       summary: Set the number of replicas to maintain for the volume.
   /cluster:
     get:
-      description: Retrieves the current global configuration settings in use by the
-        cluster.
+      description: |
+        Retrieves the current global configuration settings in use by the cluster.
       operationId: getCluster
       responses:
         "200":
@@ -3334,7 +3326,6 @@ paths:
           application/json:
             schema:
               example:
-                licenceKey: licenceKey
                 disableVersionCheck: false
                 disableCrashReporting: false
                 logFormat: json
@@ -3342,11 +3333,6 @@ paths:
                 disableTelemetry: false
                 version: NDI0MjQyNDI0MjQyNDI0MjQy
               properties:
-                licenceKey:
-                  description: |
-                    A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
-                    If this field is empty we assume that the called does not want to update the cluster's licence, and do not perform any operation.
-                  type: string
                 disableTelemetry:
                   default: false
                   description: |
@@ -3444,6 +3430,148 @@ paths:
       security:
       - jwt: []
       summary: Update the cluster's global configuration settings
+  /cluster/licence:
+    get:
+      description: |
+        Retrieves the cluster's current licence information
+      operationId: getLicence
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Licence'
+          description: The cluster's licence information.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Retrieves the cluster's licence information
+    put:
+      description: Update the cluster's licence.
+      operationId: updateLicence
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateLicence'
+        content:
+          application/json:
+            schema:
+              example:
+                licenceKey: licenceKey
+                version: NDI0MjQyNDI0MjQyNDI0MjQy
+              properties:
+                licenceKey:
+                  description: |
+                    A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
+                  type: string
+                version:
+                  description: |
+                    An opaque representation of an entity version at the time it was obtained from the API.
+                    All operations that mutate the entity must include this version field in the request unchanged.
+                    The format of this type is undefined and may change but the defined properties will not change.
+                  example: NDI0MjQyNDI0MjQyNDI0MjQy
+                  maxLength: 30
+                  type: string
+              title: UpdateLicence
+              type: object
+        description: |
+          A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Licence'
+          description: The provided licence was successfully applied.
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Update the licence global configuration settings
   /diagnostics:
     get:
       description: |
@@ -3585,6 +3713,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CreateUserData'
+      required: true
+    UpdateLicence:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateLicence'
       required: true
     CreatePolicyGroupData:
       content:
@@ -3984,12 +4118,6 @@ components:
     Cluster:
       example:
         disableVersionCheck: false
-        licence:
-          clusterCapacityBytes: 1000000
-          kind: unregistered
-          clusterID: c5666b58-b805-4215-ab4a-cb094948ccc6
-          expiresAt: 2019-03-10T13:42:42Z
-          customerName: Desmond
         createdAt: 2019-03-10T13:42:42Z
         disableCrashReporting: false
         logFormat: json
@@ -4005,8 +4133,6 @@ components:
           example: c5666b58-b805-4215-ab4a-cb094948ccc6
           readOnly: true
           type: string
-        licence:
-          $ref: '#/components/schemas/Licence'
         disableTelemetry:
           default: false
           description: Disables collection of telemetry data across the cluster.
@@ -4511,6 +4637,7 @@ components:
         clusterCapacityBytes: 1000000
         kind: unregistered
         clusterID: c5666b58-b805-4215-ab4a-cb094948ccc6
+        usedBytes: 42
         expiresAt: 2019-03-10T13:42:42Z
         customerName: Desmond
       properties:
@@ -4535,6 +4662,11 @@ components:
             This value if for the cluster, if provisioning a volume brings the cluster's total provisioned capacity above it the request will fail
           example: 1000000
           minimum: 0
+          type: uint64
+        usedBytes:
+          description: |
+            Sum of the size of all volumes in the cluster
+          example: 42
           type: uint64
         kind:
           description: |
@@ -5013,7 +5145,6 @@ components:
       type: object
     UpdateClusterData:
       example:
-        licenceKey: licenceKey
         disableVersionCheck: false
         disableCrashReporting: false
         logFormat: json
@@ -5021,11 +5152,6 @@ components:
         disableTelemetry: false
         version: NDI0MjQyNDI0MjQyNDI0MjQy
       properties:
-        licenceKey:
-          description: |
-            A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
-            If this field is empty we assume that the called does not want to update the cluster's licence, and do not perform any operation.
-          type: string
         disableTelemetry:
           default: false
           description: |
@@ -5057,6 +5183,25 @@ components:
           maxLength: 30
           type: string
       title: UpdateClusterData
+      type: object
+    UpdateLicence:
+      example:
+        licenceKey: licenceKey
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
+      properties:
+        licenceKey:
+          description: |
+            A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
+          type: string
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      title: UpdateLicence
       type: object
     UserSession_allOf_session:
       properties:

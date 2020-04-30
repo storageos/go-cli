@@ -22,6 +22,7 @@ Method | HTTP request | Description
 [**GetAuthenticatedUser**](DefaultApi.md#GetAuthenticatedUser) | **Get** /users/self | Get the currently authenticated user&#39;s information
 [**GetCluster**](DefaultApi.md#GetCluster) | **Get** /cluster | Retrieves the cluster&#39;s global configuration settings
 [**GetDiagnostics**](DefaultApi.md#GetDiagnostics) | **Get** /diagnostics | Retrieves a diagnostics bundle from the target node
+[**GetLicence**](DefaultApi.md#GetLicence) | **Get** /cluster/licence | Retrieves the cluster&#39;s licence information
 [**GetNamespace**](DefaultApi.md#GetNamespace) | **Get** /namespaces/{id} | Fetch a namespace
 [**GetNode**](DefaultApi.md#GetNode) | **Get** /nodes/{id} | Fetch a node
 [**GetPolicyGroup**](DefaultApi.md#GetPolicyGroup) | **Get** /policies/{id} | Fetch a policy group
@@ -37,6 +38,7 @@ Method | HTTP request | Description
 [**Spec**](DefaultApi.md#Spec) | **Get** /openapi | Serves this openapi spec file
 [**UpdateAuthenticatedUser**](DefaultApi.md#UpdateAuthenticatedUser) | **Put** /users/self | Update the authenticated user&#39;s information
 [**UpdateCluster**](DefaultApi.md#UpdateCluster) | **Put** /cluster | Update the cluster&#39;s global configuration settings
+[**UpdateLicence**](DefaultApi.md#UpdateLicence) | **Put** /cluster/licence | Update the licence global configuration settings
 [**UpdateNamespace**](DefaultApi.md#UpdateNamespace) | **Put** /namespaces/{id} | Update a namespace
 [**UpdateNode**](DefaultApi.md#UpdateNode) | **Put** /nodes/{id} | Update a node
 [**UpdatePolicyGroup**](DefaultApi.md#UpdatePolicyGroup) | **Put** /policies/{id} | Update a policy group
@@ -51,7 +53,7 @@ Method | HTTP request | Description
 
 Attach a volume to the given node
 
-Attach the volume identified by id to the node identified in the request's body.
+Attach the volume identified by id to the node identified in the request's body. 
 
 ### Required Parameters
 
@@ -121,7 +123,7 @@ No authorization required
 
 Create a new namespace
 
-Create a new namespace in the cluster - only administrators can create new namespaces.
+Create a new namespace in the cluster - only administrators can create new namespaces. 
 
 ### Required Parameters
 
@@ -189,7 +191,7 @@ Name | Type | Description  | Notes
 
 Create a new user
 
-Create a new user in the cluster - only administrators can create new users.
+Create a new user in the cluster - only administrators can create new users. 
 
 ### Required Parameters
 
@@ -697,7 +699,7 @@ This endpoint does not need any parameter.
 
 Retrieves the cluster's global configuration settings
 
-Retrieves the current global configuration settings in use by the cluster.
+Retrieves the current global configuration settings in use by the cluster. 
 
 ### Required Parameters
 
@@ -745,6 +747,36 @@ This endpoint does not need any parameter.
 
 - **Content-Type**: Not defined
 - **Accept**: application/gzip, application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetLicence
+
+> Licence GetLicence(ctx, )
+
+Retrieves the cluster's licence information
+
+Retrieves the cluster's current licence information 
+
+### Required Parameters
+
+This endpoint does not need any parameter.
+
+### Return type
+
+[**Licence**](Licence.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -1108,11 +1140,11 @@ This endpoint does not need any parameter.
 
 ## SetReplicas
 
-> SetReplicas(ctx, namespaceID, id, setReplicasRequest, optional)
+> AcceptedMessage SetReplicas(ctx, namespaceID, id, setReplicasRequest)
 
 Set the number of replicas to maintain for the volume.
 
-Set the number of replicas for the volume identified by id to the number specified in the request's body. This modifies the protected StorageOS system label \"storageos.com/replicas\".
+Set the number of replicas for the volume identified by id to the number specified in the request's body. This modifies the protected StorageOS system label \"storageos.com/replicas\". This request changes the desired replica count, and returns an error if changing the desired replica count failed. StorageOS satisfies the new replica configuration asynchronously. 
 
 ### Required Parameters
 
@@ -1123,23 +1155,10 @@ Name | Type | Description  | Notes
 **namespaceID** | **string**| ID of a Namespace | 
 **id** | **string**| ID of a Volume | 
 **setReplicasRequest** | [**SetReplicasRequest**](SetReplicasRequest.md)|  | 
- **optional** | ***SetReplicasOpts** | optional parameters | nil if no parameters
-
-### Optional Parameters
-
-Optional parameters are passed through a pointer to a SetReplicasOpts struct
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
-
-
- **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
 
 ### Return type
 
- (empty response body)
+[**AcceptedMessage**](AcceptedMessage.md)
 
 ### Authorization
 
@@ -1238,6 +1257,40 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Cluster**](Cluster.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## UpdateLicence
+
+> Licence UpdateLicence(ctx, updateLicence)
+
+Update the licence global configuration settings
+
+Update the cluster's licence.
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**updateLicence** | [**UpdateLicence**](UpdateLicence.md)|  | 
+
+### Return type
+
+[**Licence**](Licence.md)
 
 ### Authorization
 
@@ -1399,7 +1452,7 @@ Name | Type | Description  | Notes
 
 Update a volume
 
-Update the description and non-storageos labels configured for the volume identified by id.
+Update the description and non-storageos labels configured for the volume identified by id. 
 
 ### Required Parameters
 

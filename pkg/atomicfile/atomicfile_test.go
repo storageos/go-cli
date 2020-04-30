@@ -104,7 +104,7 @@ func TestWrite(t *testing.T) {
 				mustExist(t, txn.File.Name())
 				mustBeContent(t, txn.targetPath, existingContent)
 
-				txn.Abort()
+				_ = txn.Abort()
 			},
 		},
 		{
@@ -169,7 +169,7 @@ func TestWrite(t *testing.T) {
 			if _, err := io.WriteString(targetFile, existingContent); err != nil {
 				t.Fatal(err)
 			}
-			targetFile.Close()
+			_ = targetFile.Close()
 
 			// Initialise a new write txn for targetFile
 			txn, err := NewWrite(targetFile.Name())

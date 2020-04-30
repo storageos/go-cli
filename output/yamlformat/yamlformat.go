@@ -70,15 +70,20 @@ func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *outpu
 	return d.encode(w, resource)
 }
 
+// GetLicence encodes resource as YAML, writing the result to w.
+func (d *Displayer) GetLicence(ctx context.Context, w io.Writer, resource *output.Licence) error {
+	return d.encode(w, resource)
+}
+
 // GetDiagnostics encodes outputPath as YAML, writing the result to w.
 func (d *Displayer) GetDiagnostics(ctx context.Context, w io.Writer, outputPath string) error {
-	output := struct {
+	o := struct {
 		OutputPath string `yaml:"outputPath"`
 	}{
 		OutputPath: outputPath,
 	}
 
-	return d.encode(w, output)
+	return d.encode(w, o)
 }
 
 // GetUser encodes resources as YAML, writing the result to w.
@@ -138,6 +143,11 @@ func (d *Displayer) GetListPolicyGroups(ctx context.Context, w io.Writer, groups
 // DescribeCluster encodes a cluster as YAML, writing the result to w.
 func (d *Displayer) DescribeCluster(ctx context.Context, w io.Writer, c *output.Cluster) error {
 	return d.encode(w, c)
+}
+
+// DescribeLicence encodes a licence as YAML, writing the result to w.
+func (d *Displayer) DescribeLicence(ctx context.Context, w io.Writer, l *output.Licence) error {
+	return d.encode(w, l)
 }
 
 // DescribeNamespace encodes a namespace as YAML, writing the result to w.

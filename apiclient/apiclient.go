@@ -9,10 +9,12 @@ import (
 	"sync"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -51,6 +53,9 @@ type Transport interface {
 	GetUser(ctx context.Context, uid id.User) (*user.Resource, error)
 	// GetCluster returns the API resource representing the cluster.
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
+	// GetLicence returns the API resource representing the licence currently
+	// applied to the cluster.
+	GetLicence(ctx context.Context) (*licence.Resource, error)
 	// GetNode requests the node resource which corresponds to uid from the
 	// StorageOS API.
 	GetNode(ctx context.Context, nodeID id.Node) (*node.Resource, error)
@@ -105,8 +110,12 @@ type Transport interface {
 	CreatePolicyGroup(ctx context.Context, name string, specs []*policygroup.Spec) (*policygroup.Resource, error)
 
 	// UpdateCluster attempts to perform an update of the cluster configuration
-	// through the StorageOS API using resource and licenceKey as the update values.
-	UpdateCluster(ctx context.Context, resource *cluster.Resource, licenceKey []byte) (*cluster.Resource, error)
+	// through the StorageOS API using resource as the update value.
+	UpdateCluster(ctx context.Context, resource *cluster.Resource) (*cluster.Resource, error)
+	// UpdateLicence attempts to perform an update of the licence currently
+	// applied to the cluster through the StorageOS API.
+	// In case of success, it returns all the info of the licence just applied.
+	UpdateLicence(ctx context.Context, licence []byte, casVersion version.Version) (*licence.Resource, error)
 
 	// DeleteVolume makes a delete request for volumeID in namespaceID.
 	//

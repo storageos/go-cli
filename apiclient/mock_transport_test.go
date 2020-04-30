@@ -6,10 +6,12 @@ import (
 	"sync"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -28,6 +30,9 @@ type mockTransport struct {
 
 	GetClusterResource *cluster.Resource
 	GetClusterError    error
+
+	GetLicenceResource *licence.Resource
+	GetLicenceError    error
 
 	GetUserGotID    id.User
 	GetUserResource *user.Resource
@@ -96,10 +101,14 @@ type mockTransport struct {
 	CreatePolicyGroupResource *policygroup.Resource
 	CreatePolicyGroupError    error
 
-	UpdateClusterGotResource   *cluster.Resource
-	UpdateClusterGotLicenceKey []byte
-	UpdateClusterResource      *cluster.Resource
-	UpdateClusterError         error
+	UpdateClusterResource    *cluster.Resource
+	UpdateClusterError       error
+	UpdateClusterGotResource *cluster.Resource
+
+	UpdateLicenceGotLicence []byte
+	UpdateLicenceGotVersion version.Version
+	UpdateLicenceResource   *licence.Resource
+	UpdateLicenceError      error
 
 	DeleteUserGotID     id.User
 	DeleteUserGotParams *DeleteUserRequestParams
@@ -144,6 +153,10 @@ func (m *mockTransport) UseAuthSession(ctx context.Context, session AuthSession)
 
 func (m *mockTransport) GetCluster(ctx context.Context) (*cluster.Resource, error) {
 	return m.GetClusterResource, m.GetClusterError
+}
+
+func (m *mockTransport) GetLicence(ctx context.Context) (*licence.Resource, error) {
+	return m.GetLicenceResource, m.GetLicenceError
 }
 
 func (m *mockTransport) GetUser(ctx context.Context, uid id.User) (*user.Resource, error) {
@@ -230,10 +243,15 @@ func (m *mockTransport) CreatePolicyGroup(ctx context.Context, name string, spec
 	return m.CreatePolicyGroupResource, m.CreatePolicyGroupError
 }
 
-func (m *mockTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource, licenceKey []byte) (*cluster.Resource, error) {
+func (m *mockTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource) (*cluster.Resource, error) {
 	m.UpdateClusterGotResource = resource
-	m.UpdateClusterGotLicenceKey = licenceKey
 	return m.UpdateClusterResource, m.UpdateClusterError
+}
+
+func (m *mockTransport) UpdateLicence(ctx context.Context, licence []byte, casVersion version.Version) (*licence.Resource, error) {
+	m.UpdateLicenceGotLicence = licence
+	m.UpdateLicenceGotVersion = casVersion
+	return m.UpdateLicenceResource, m.UpdateLicenceError
 }
 
 func (m *mockTransport) DeleteUser(ctx context.Context, uid id.User, params *DeleteUserRequestParams) error {

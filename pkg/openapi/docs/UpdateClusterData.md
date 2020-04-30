@@ -4,7 +4,6 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**LicenceKey** | **string** | A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change. If this field is empty we assume that the called does not want to update the cluster&#39;s licence, and do not perform any operation.  | [optional] 
 **DisableTelemetry** | **bool** | Disables collection of telemetry data across the cluster.  | [optional] [default to false]
 **DisableCrashReporting** | **bool** | Disables collection of reports for any fatal crashes across the cluster.  | [optional] [default to false]
 **DisableVersionCheck** | **bool** | Disables the mechanism responsible for checking if there is an updated version of StorageOS available for installation.  | [optional] [default to false]

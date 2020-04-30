@@ -13,8 +13,6 @@ import (
 type Cluster struct {
 	ID id.Cluster `json:"id" yaml:"id"`
 
-	Licence *Licence `json:"licence" yaml:"licence"`
-
 	DisableTelemetry      bool `json:"disableTelemetry" yaml:"disableTelemetry"`
 	DisableCrashReporting bool `json:"disableCrashReporting" yaml:"disableCrashReporting"`
 	DisableVersionCheck   bool `json:"disableVersionCheck" yaml:"disableVersionCheck"`
@@ -29,21 +27,11 @@ type Cluster struct {
 	Nodes []*Node `json:"nodes" yaml:"nodes"`
 }
 
-// Licence defines a type that contains all the info needed to be outputted.
-type Licence struct {
-	ClusterID            id.Cluster `json:"clusterID" yaml:"clusterID"`
-	ExpiresAt            time.Time  `json:"expiresAt" yaml:"expiresAt"`
-	ClusterCapacityBytes uint64     `json:"clusterCapacityBytes" yaml:"clusterCapacityBytes"`
-	Kind                 string     `json:"kind" yaml:"kind"`
-	CustomerName         string     `json:"customerName" yaml:"customerName"`
-}
-
 // NewCluster returns a new Cluster object that contains all the info needed
 // to be outputted.
 func NewCluster(c *cluster.Resource, nodes []*node.Resource) *Cluster {
 	return &Cluster{
 		ID:                    c.ID,
-		Licence:               NewLicence(c.Licence),
 		DisableTelemetry:      c.DisableTelemetry,
 		DisableCrashReporting: c.DisableCrashReporting,
 		DisableVersionCheck:   c.DisableVersionCheck,
@@ -53,17 +41,5 @@ func NewCluster(c *cluster.Resource, nodes []*node.Resource) *Cluster {
 		UpdatedAt:             c.UpdatedAt,
 		Version:               c.Version,
 		Nodes:                 NewNodes(nodes),
-	}
-}
-
-// NewLicence returns a new licence object that contains all the info needed
-// to be outputted.
-func NewLicence(l *cluster.Licence) *Licence {
-	return &Licence{
-		ClusterID:            l.ClusterID,
-		ExpiresAt:            l.ExpiresAt,
-		ClusterCapacityBytes: l.ClusterCapacityBytes,
-		Kind:                 l.Kind,
-		CustomerName:         l.CustomerName,
 	}
 }

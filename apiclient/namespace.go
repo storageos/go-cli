@@ -198,10 +198,10 @@ func filterNamespacesForUIDs(namespaces []*namespace.Resource, uids ...id.Namesp
 
 	filtered := make([]*namespace.Resource, 0, len(uids))
 
-	for _, id := range uids {
-		ns, ok := retrieved[id]
+	for _, idVar := range uids {
+		ns, ok := retrieved[idVar]
 		if !ok {
-			return nil, NewNamespaceNotFoundError(id)
+			return nil, NewNamespaceNotFoundError(idVar)
 		}
 		filtered = append(filtered, ns)
 	}

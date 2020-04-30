@@ -146,10 +146,10 @@ func filterNodesForUIDs(nodes []*node.Resource, uids ...id.Node) ([]*node.Resour
 
 	filtered := make([]*node.Resource, 0, len(uids))
 
-	for _, id := range uids {
-		n, ok := retrieved[id]
+	for _, idVar := range uids {
+		n, ok := retrieved[idVar]
 		if !ok {
-			return nil, NewNodeNotFoundError(id)
+			return nil, NewNodeNotFoundError(idVar)
 		}
 		filtered = append(filtered, n)
 	}

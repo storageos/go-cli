@@ -8,8 +8,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/licence"
+
 	"code.storageos.net/storageos/c2-cli/apiclient"
-	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
@@ -45,7 +46,7 @@ type Client interface {
 	CreateNamespace(ctx context.Context, name string, labelSet labels.Set) (*namespace.Resource, error)
 	CreatePolicyGroup(ctx context.Context, name string, specs []*policygroup.Spec) (*policygroup.Resource, error)
 
-	GetCluster(ctx context.Context) (*cluster.Resource, error)
+	GetLicence(ctx context.Context) (*licence.Resource, error)
 	GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 	GetListNodesByUID(ctx context.Context, uids ...id.Node) ([]*node.Resource, error)

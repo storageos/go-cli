@@ -9,6 +9,8 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/kr/pretty"
 
+	"code.storageos.net/storageos/c2-cli/licence"
+
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -210,14 +212,7 @@ func TestDisplayer_DescribeCluster(t *testing.T) {
 		{
 			name: "describe cluster",
 			resource: &cluster.Resource{
-				ID: "bananaCluster",
-				Licence: &cluster.Licence{
-					ClusterID:            "bananaCluster",
-					ExpiresAt:            mockTime,
-					ClusterCapacityBytes: 42 * humanize.GiByte,
-					Kind:                 "bananaLicence",
-					CustomerName:         "bananaCustomer",
-				},
+				ID:                    "bananaCluster",
 				DisableTelemetry:      false,
 				DisableCrashReporting: true,
 				DisableVersionCheck:   false,
@@ -248,11 +243,6 @@ func TestDisplayer_DescribeCluster(t *testing.T) {
 				},
 			},
 			wantW: `ID:               bananaCluster                      
-Licence:                                             
-  expiration:     2000-01-01T00:00:00Z (xx aeons ago)
-  capacity:       42 GiB (45097156608)               
-  kind:           bananaLicence                      
-  customer name:  bananaCustomer                     
 Version:          42                                 
 Created at:       2000-01-01T00:00:00Z (xx aeons ago)
 Updated at:       2000-01-01T00:00:00Z (xx aeons ago)
@@ -296,6 +286,59 @@ Nodes:
 			}
 			if gotW := w.String(); gotW != tt.wantW {
 				t.Errorf("DescribeCluster() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
+			}
+		})
+	}
+}
+
+func TestDisplayer_DescribeLicence(t *testing.T) {
+	t.Parallel()
+
+	var mockTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name          string
+		timeHumanizer output.TimeHumanizer
+		resource      *licence.Resource
+		wantW         string
+		wantErr       bool
+	}{
+		{
+			name: "print licence",
+			resource: &licence.Resource{
+				ClusterID:            "bananaID",
+				ExpiresAt:            mockTime,
+				ClusterCapacityBytes: 42 * humanize.GiByte,
+				UsedBytes:            42 / 2 * humanize.GiByte,
+				Kind:                 "bananaKind",
+				CustomerName:         "bananaCustomer",
+			},
+			wantW: `ClusterID:      bananaID                           
+Expiration:     2000-01-01T00:00:00Z (xx aeons ago)
+Capacity:       42 GiB (45097156608)               
+Used:           21 GiB (22548578304)               
+Kind:           bananaKind                         
+Customer name:  bananaCustomer                     
+`,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
+			w := &bytes.Buffer{}
+
+			err := d.DescribeLicence(context.Background(), w, output.NewLicence(tt.resource))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DescribeLicence() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotW := w.String(); gotW != tt.wantW {
+				t.Errorf("DescribeLicence() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
 			}
 		})
 	}

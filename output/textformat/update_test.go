@@ -8,7 +8,8 @@ import (
 
 	"github.com/dustin/go-humanize"
 
-	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/licence"
+
 	"code.storageos.net/storageos/c2-cli/output"
 )
 
@@ -20,16 +21,17 @@ func TestDisplayer_UpdateLicence(t *testing.T) {
 	tests := []struct {
 		name          string
 		timeHumanizer output.TimeHumanizer
-		licence       *cluster.Licence
+		licence       *licence.Resource
 		wantW         string
 		wantErr       bool
 	}{
 		{
 			name: "print cluster",
-			licence: &cluster.Licence{
+			licence: &licence.Resource{
 				ClusterID:            "bananaCluster",
 				ExpiresAt:            mockTime,
 				ClusterCapacityBytes: 42 * humanize.GiByte,
+				UsedBytes:            42 / 2 * humanize.GiByte,
 				Kind:                 "bananaLicence",
 				CustomerName:         "bananaCustomer",
 			},
@@ -37,6 +39,7 @@ func TestDisplayer_UpdateLicence(t *testing.T) {
 
 Expiration:     2000-01-01T00:00:00Z (xx aeons ago)
 Capacity:       42 GiB                             
+Used:           21 GiB                             
 Kind:           bananaLicence                      
 Customer name:  bananaCustomer                     
 `,

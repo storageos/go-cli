@@ -5,6 +5,7 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/capacity"
@@ -26,14 +27,6 @@ func (c codec) decodeCluster(model openapi.Cluster) (*cluster.Resource, error) {
 	return &cluster.Resource{
 		ID: id.Cluster(model.Id),
 
-		Licence: &cluster.Licence{
-			ClusterID:            id.Cluster(model.Licence.ClusterID),
-			ExpiresAt:            model.Licence.ExpiresAt,
-			ClusterCapacityBytes: model.Licence.ClusterCapacityBytes,
-			Kind:                 model.Licence.Kind,
-			CustomerName:         model.Licence.CustomerName,
-		},
-
 		DisableTelemetry:      model.DisableTelemetry,
 		DisableCrashReporting: model.DisableCrashReporting,
 		DisableVersionCheck:   model.DisableVersionCheck,
@@ -44,6 +37,17 @@ func (c codec) decodeCluster(model openapi.Cluster) (*cluster.Resource, error) {
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
 		Version:   version.FromString(model.Version),
+	}, nil
+}
+
+func (c codec) decodeLicence(model openapi.Licence) (*licence.Resource, error) {
+	return &licence.Resource{
+		ClusterID:            id.Cluster(model.ClusterID),
+		ExpiresAt:            model.ExpiresAt,
+		ClusterCapacityBytes: model.ClusterCapacityBytes,
+		UsedBytes:            model.UsedBytes,
+		Kind:                 model.Kind,
+		CustomerName:         model.CustomerName,
 	}, nil
 }
 
@@ -145,10 +149,10 @@ func (c codec) decodePolicyGroup(model openapi.PolicyGroup) (*policygroup.Resour
 	users := []*policygroup.Member{}
 	if model.Users != nil {
 		users = make([]*policygroup.Member, 0, len(model.Users))
-		for _, user := range model.Users {
+		for _, u := range model.Users {
 			users = append(users, &policygroup.Member{
-				ID:       id.User(user.Id),
-				Username: user.Username,
+				ID:       id.User(u.Id),
+				Username: u.Username,
 			})
 		}
 	}

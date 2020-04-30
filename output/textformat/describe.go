@@ -17,14 +17,7 @@ import (
 func (d *Displayer) DescribeCluster(ctx context.Context, w io.Writer, c *output.Cluster) error {
 	table, write := createTable(nil)
 
-	capacity := fmt.Sprintf("%s (%d)", humanize.IBytes(c.Licence.ClusterCapacityBytes), c.Licence.ClusterCapacityBytes)
-
 	table.AddRow("ID:", c.ID)
-	table.AddRow("Licence:", "")
-	table.AddRow("  expiration:", d.timeToHuman(c.Licence.ExpiresAt))
-	table.AddRow("  capacity:", capacity)
-	table.AddRow("  kind:", c.Licence.Kind)
-	table.AddRow("  customer name:", c.Licence.CustomerName)
 	table.AddRow("Version:", c.Version)
 	table.AddRow("Created at:", d.timeToHuman(c.CreatedAt))
 	table.AddRow("Updated at:", d.timeToHuman(c.UpdatedAt))
@@ -43,6 +36,23 @@ func (d *Displayer) DescribeCluster(ctx context.Context, w io.Writer, c *output.
 		table.AddRow("  Health:", n.Health)
 		table.AddRow("  Address:", n.IOAddr)
 	}
+
+	return write(w)
+}
+
+// DescribeLicence prints all the detailed information about a licence
+func (d *Displayer) DescribeLicence(ctx context.Context, w io.Writer, l *output.Licence) error {
+	table, write := createTable(nil)
+
+	clusterCapacity := fmt.Sprintf("%s (%d)", humanize.IBytes(l.ClusterCapacityBytes), l.ClusterCapacityBytes)
+	used := fmt.Sprintf("%s (%d)", humanize.IBytes(l.UsedBytes), l.UsedBytes)
+
+	table.AddRow("ClusterID:", l.ClusterID)
+	table.AddRow("Expiration:", d.timeToHuman(l.ExpiresAt))
+	table.AddRow("Capacity:", clusterCapacity)
+	table.AddRow("Used:", used)
+	table.AddRow("Kind:", l.Kind)
+	table.AddRow("Customer name:", l.CustomerName)
 
 	return write(w)
 }

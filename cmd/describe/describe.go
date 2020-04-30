@@ -8,6 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/licence"
+
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -40,6 +42,7 @@ type Client interface {
 	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
 
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
+	GetLicence(ctx context.Context) (*licence.Resource, error)
 	GetUser(ctx context.Context, userID id.User) (*user.Resource, error)
 	GetUserByName(ctx context.Context, username string) (*user.Resource, error)
 	ListUsers(ctx context.Context) ([]*user.Resource, error)
@@ -71,6 +74,7 @@ type Client interface {
 // to display the results gathered by the "describe" verb commands.
 type Displayer interface {
 	DescribeCluster(ctx context.Context, w io.Writer, c *output.Cluster) error
+	DescribeLicence(ctx context.Context, w io.Writer, l *output.Licence) error
 	DescribeNamespace(ctx context.Context, w io.Writer, namespace *output.Namespace) error
 	DescribeListNamespaces(ctx context.Context, w io.Writer, namespaces []*output.Namespace) error
 	DescribeNode(ctx context.Context, w io.Writer, node *output.NodeDescription) error
@@ -97,6 +101,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 		newPolicyGroup(os.Stdout, client, config),
 		newUser(os.Stdout, client, config),
 		newNamespace(os.Stdout, client, config),
+		newLicence(os.Stdout, client, config),
 	)
 
 	return command

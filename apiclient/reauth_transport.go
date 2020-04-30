@@ -6,10 +6,12 @@ import (
 	"io"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -65,6 +67,21 @@ func (tr *TransportWithReauth) GetCluster(ctx context.Context) (*cluster.Resourc
 	err := tr.doWithReauth(ctx, func() error {
 		var err error
 		resource, err = tr.inner.GetCluster(ctx)
+
+		return err
+	})
+
+	return resource, err
+}
+
+// GetLicence wraps the inner transport'call with a reauthenticate and retry
+// upon encountering an authentication error.
+func (tr *TransportWithReauth) GetLicence(ctx context.Context) (*licence.Resource, error) {
+
+	var resource *licence.Resource
+	err := tr.doWithReauth(ctx, func() error {
+		var err error
+		resource, err = tr.inner.GetLicence(ctx)
 
 		return err
 	})
@@ -293,12 +310,27 @@ func (tr *TransportWithReauth) CreateNamespace(ctx context.Context, name string,
 
 // UpdateCluster wraps the inner transport's call with a reauthenticate and
 // retry upon encountering an authentication error.
-func (tr *TransportWithReauth) UpdateCluster(ctx context.Context, resource *cluster.Resource, licenceKey []byte) (*cluster.Resource, error) {
+func (tr *TransportWithReauth) UpdateCluster(ctx context.Context, c *cluster.Resource) (*cluster.Resource, error) {
 
 	var updated *cluster.Resource
 	err := tr.doWithReauth(ctx, func() error {
 		var err error
-		updated, err = tr.inner.UpdateCluster(ctx, resource, licenceKey)
+		updated, err = tr.inner.UpdateCluster(ctx, c)
+
+		return err
+	})
+
+	return updated, err
+}
+
+// UpdateLicence wraps the inner transport's call with a reauthenticate and
+// retry upon encountering an authentication error.
+func (tr *TransportWithReauth) UpdateLicence(ctx context.Context, lic []byte, casVersion version.Version) (*licence.Resource, error) {
+
+	var updated *licence.Resource
+	err := tr.doWithReauth(ctx, func() error {
+		var err error
+		updated, err = tr.inner.UpdateLicence(ctx, lic, casVersion)
 
 		return err
 	})
@@ -382,7 +414,7 @@ func (tr *TransportWithReauth) doWithReauth(ctx context.Context, fn func() error
 	originalErr := fn()
 
 	// If the returned error from fn indicates authentication failure then
-	// fetch credentials from the provider, reauthenticate and try the reuqest
+	// fetch credentials from the provider, reauthenticate and try the request
 	// one more time.
 	//
 	// This will reliably catch a cached auth session expiring.

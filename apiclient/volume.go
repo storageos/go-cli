@@ -261,10 +261,10 @@ func filterVolumesForUIDs(volumes []*volume.Resource, uids ...id.Volume) ([]*vol
 
 	filtered := make([]*volume.Resource, 0, len(uids))
 
-	for _, id := range uids {
-		v, ok := retrieved[id]
+	for _, idVar := range uids {
+		v, ok := retrieved[idVar]
 		if !ok {
-			return nil, NewVolumeIDNotFoundError(id)
+			return nil, NewVolumeIDNotFoundError(idVar)
 		}
 		filtered = append(filtered, v)
 	}

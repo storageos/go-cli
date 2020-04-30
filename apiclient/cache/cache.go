@@ -100,7 +100,7 @@ func (c *SessionCache) Put(username string, session apiclient.AuthSession) error
 
 	encoder := json.NewEncoder(txn)
 
-	// Try to encode the session to the cachefile
+	// Try to encode the session to the cache file
 	if err = encoder.Encode(session); err != nil {
 		// Error results in abort
 		_ = txn.Abort()

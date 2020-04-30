@@ -74,6 +74,7 @@ func TestValidFormats(t *testing.T) {
 		format, err := FormatFromString(f)
 		if err != nil {
 			t.Errorf("ValidFormats contains a non valid format: %s", f)
+			continue
 		}
 
 		if format.String() != f {

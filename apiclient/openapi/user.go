@@ -72,11 +72,11 @@ func (o *OpenAPI) ListUsers(ctx context.Context) ([]*user.Resource, error) {
 	users := make([]*user.Resource, 0, len(list))
 
 	for _, u := range list {
-		user, err := o.codec.decodeUser(u)
+		u, err := o.codec.decodeUser(u)
 		if err != nil {
 			return nil, err
 		}
-		users = append(users, user)
+		users = append(users, u)
 	}
 
 	return users, nil

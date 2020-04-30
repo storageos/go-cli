@@ -97,11 +97,11 @@ func (c *attachCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		volumeID = vol.ID
 
 		nodeName := args[1]
-		node, err := c.client.GetNodeByName(ctx, nodeName)
+		n, err := c.client.GetNodeByName(ctx, nodeName)
 		if err != nil {
 			return err
 		}
-		nodeID = node.ID
+		nodeID = n.ID
 	}
 
 	err = c.client.AttachVolume(ctx, namespaceID, volumeID, nodeID)

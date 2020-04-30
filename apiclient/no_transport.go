@@ -5,10 +5,12 @@ import (
 	"io"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -31,6 +33,10 @@ func (t *noTransport) UseAuthSession(ctx context.Context, session AuthSession) e
 }
 
 func (t *noTransport) GetCluster(ctx context.Context) (*cluster.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
+func (t *noTransport) GetLicence(ctx context.Context) (*licence.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 
@@ -94,7 +100,11 @@ func (t *noTransport) CreatePolicyGroup(ctx context.Context, name string, specs 
 	return nil, ErrNoTransportConfigured
 }
 
-func (t *noTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource, licenceKey []byte) (*cluster.Resource, error) {
+func (t *noTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource) (*cluster.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
+func (t *noTransport) UpdateLicence(ctx context.Context, licence []byte, casVersion version.Version) (*licence.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 

@@ -95,7 +95,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 			return err
 		}
 
-		namespace, err := c.client.GetNamespace(ctx, v.Namespace)
+		ns, err := c.client.GetNamespace(ctx, v.Namespace)
 		if err != nil {
 			return err
 		}
@@ -105,7 +105,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 			return err
 		}
 
-		return c.display.GetVolume(ctx, c.writer, output.NewVolume(v, namespace, nodes))
+		return c.display.GetVolume(ctx, c.writer, output.NewVolume(v, ns, nodes))
 
 	default:
 		volumes, err := c.listVolumes(ctx, namespaceID, args)

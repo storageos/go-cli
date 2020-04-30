@@ -541,7 +541,6 @@ func TestTransportWithReauth(t *testing.T) {
 					&cluster.Resource{
 						ID: "in",
 					},
-					[]byte("key"),
 				)
 				if gotErr != inner.UpdateClusterError {
 					t.Errorf("got error %v, want %v", gotErr, inner.UpdateClusterError)
@@ -557,7 +556,6 @@ func TestTransportWithReauth(t *testing.T) {
 				UpdateClusterGotResource: &cluster.Resource{
 					ID: "in",
 				},
-				UpdateClusterGotLicenceKey: []byte("key"),
 				UpdateClusterResource: &cluster.Resource{
 					ID: "out",
 				},
