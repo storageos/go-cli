@@ -118,6 +118,7 @@ To be notified about stable releases and latest features, sign up at https://my.
 	// Cobra subcommands which are not runnable and do not themselves have
 	// subcommands are added as additional help topics.
 	app.AddCommand(
+		newConfigFileHelpTopic(config),
 		newEnvConfigHelpTopic(),
 		newExitCodeHelpTopic(),
 	)

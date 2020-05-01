@@ -3,6 +3,8 @@
 package file
 
 import (
+	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"sync"
@@ -41,8 +43,8 @@ func (c *Provider) AuthCacheDisabled() (bool, error) {
 		return false, c.err
 	}
 
-	if c.configFile.IsSetAuthCacheDisabled {
-		return c.configFile.AuthCacheDisabled, nil
+	if c.configFile.isSetAuthCacheDisabled {
+		return c.configFile.authCacheDisabled, nil
 	}
 
 	return c.fallback.AuthCacheDisabled()
@@ -56,8 +58,8 @@ func (c *Provider) APIEndpoints() ([]string, error) {
 		return nil, c.err
 	}
 
-	if c.configFile.IsSetAPIEndpoints {
-		return c.configFile.APIEndpoints, nil
+	if c.configFile.isSetAPIEndpoints {
+		return c.configFile.apiEndpoints, nil
 	}
 	return c.fallback.APIEndpoints()
 }
@@ -69,8 +71,8 @@ func (c *Provider) CacheDir() (string, error) {
 		return "", c.err
 	}
 
-	if c.configFile.IsSetCacheDir {
-		return c.configFile.CacheDir, nil
+	if c.configFile.isSetCacheDir {
+		return c.configFile.cacheDir, nil
 	}
 
 	return c.fallback.CacheDir()
@@ -83,8 +85,8 @@ func (c *Provider) CommandTimeout() (time.Duration, error) {
 		return 0, c.err
 	}
 
-	if c.configFile.IsSetCommandTimeout {
-		return c.configFile.CommandTimeout, nil
+	if c.configFile.isSetCommandTimeout {
+		return c.configFile.commandTimeout, nil
 	}
 	return c.fallback.CommandTimeout()
 }
@@ -97,8 +99,8 @@ func (c *Provider) Username() (string, error) {
 		return "", c.err
 	}
 
-	if c.configFile.IsSetUsername {
-		return c.configFile.UsernameStr, nil
+	if c.configFile.isSetUsername {
+		return c.configFile.usernameStr, nil
 	}
 	return c.fallback.Username()
 }
@@ -121,8 +123,8 @@ func (c *Provider) UseIDs() (bool, error) {
 		return false, c.err
 	}
 
-	if c.configFile.IsSetUseIDs {
-		return c.configFile.UseIDs, nil
+	if c.configFile.isSetUseIDs {
+		return c.configFile.useIDs, nil
 	}
 	return c.fallback.UseIDs()
 }
@@ -135,8 +137,8 @@ func (c *Provider) Namespace() (string, error) {
 		return "", c.err
 	}
 
-	if c.configFile.IsSetNamespace {
-		return c.configFile.NamespaceStr, nil
+	if c.configFile.isSetNamespace {
+		return c.configFile.namespaceStr, nil
 	}
 	return c.fallback.Namespace()
 }
@@ -149,8 +151,8 @@ func (c *Provider) OutputFormat() (output.Format, error) {
 		return output.Unknown, c.err
 	}
 
-	if c.configFile.IsSetOutputFormat {
-		return c.configFile.OutputFormat, nil
+	if c.configFile.isSetOutputFormat {
+		return c.configFile.outputFormat, nil
 	}
 	return c.fallback.OutputFormat()
 }
@@ -185,37 +187,40 @@ func (c *Provider) lazyInit() error {
 
 	// if we never loaded the file, we do it once
 	c.once.Do(func() {
-		if c.configFile == nil {
-			c.err = c.parse()
+
+		path, err := c.configProvider.ConfigFilePath()
+		if err != nil {
+			c.err = err
+			return
+		}
+
+		err = c.parse(path)
+		if err != nil {
+			c.err = newParseError(err, path)
 		}
 	})
 
 	return c.err
 }
 
-func (c *Provider) parse() error {
+func (c *Provider) parse(path string) error {
 	// ensure at the end of this method,
 	// the provider has its configFile struct
 	defer func() {
 		if c.configFile == nil {
 			c.configFile = &ConfigFile{
 				// empty struct
-				// all IsSet* fields will be false
+				// all isSet* fields will be false
 				// and fallback methods will be used
 			}
 		}
 	}()
 
-	configFile, err := c.configProvider.ConfigFilePath()
-	if err != nil {
-		return err
-	}
-
-	reader, err := os.Open(configFile)
+	reader, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 
-			if configFile == config.GetDefaultConfigFile() {
+			if path == config.GetDefaultConfigFile() {
 
 				// default file doesn't exists
 				// likely the user is not using it
@@ -239,8 +244,15 @@ func (c *Provider) parse() error {
 
 	conf := &ConfigFile{}
 	err = dec.Decode(conf)
-	if err != nil {
-		return errBadYAMLFile(err)
+	switch err {
+	case nil:
+		// Continue to parse
+	case io.EOF:
+		// Warn but continue
+		fmt.Fprintf(os.Stderr, "Warning: specified config file %q is empty\n", path)
+		return nil
+	default:
+		return err
 	}
 
 	if conf.RawAuthCacheDisabled != nil {
@@ -249,8 +261,8 @@ func (c *Provider) parse() error {
 			return err
 		}
 
-		conf.IsSetAuthCacheDisabled = true
-		conf.AuthCacheDisabled = b
+		conf.isSetAuthCacheDisabled = true
+		conf.authCacheDisabled = b
 	}
 
 	if conf.RawAPIEndpoints != nil {
@@ -258,8 +270,8 @@ func (c *Provider) parse() error {
 			return errMissingEndpoints
 		}
 
-		conf.IsSetAPIEndpoints = true
-		conf.APIEndpoints = *conf.RawAPIEndpoints
+		conf.isSetAPIEndpoints = true
+		conf.apiEndpoints = *conf.RawAPIEndpoints
 	}
 
 	if conf.RawCacheDir != nil {
@@ -267,8 +279,8 @@ func (c *Provider) parse() error {
 			return errMissingCacheDir
 		}
 
-		conf.IsSetCacheDir = true
-		conf.CacheDir = *conf.RawCacheDir
+		conf.isSetCacheDir = true
+		conf.cacheDir = *conf.RawCacheDir
 	}
 
 	if conf.RawCommandTimeout != nil {
@@ -277,8 +289,8 @@ func (c *Provider) parse() error {
 			return err
 		}
 
-		conf.IsSetCommandTimeout = true
-		conf.CommandTimeout = dur
+		conf.isSetCommandTimeout = true
+		conf.commandTimeout = dur
 	}
 
 	if conf.RawUsername != nil {
@@ -286,8 +298,8 @@ func (c *Provider) parse() error {
 			return errMissingUsername
 		}
 
-		conf.IsSetUsername = true
-		conf.UsernameStr = *conf.RawUsername
+		conf.isSetUsername = true
+		conf.usernameStr = *conf.RawUsername
 	}
 
 	if conf.RawPassword != nil {
@@ -299,8 +311,8 @@ func (c *Provider) parse() error {
 		if err != nil {
 			return err
 		}
-		conf.IsSetUseIDs = true
-		conf.UseIDs = b
+		conf.isSetUseIDs = true
+		conf.useIDs = b
 	}
 
 	if conf.RawNamespace != nil {
@@ -308,8 +320,8 @@ func (c *Provider) parse() error {
 			return errMissingNamespace
 		}
 
-		conf.IsSetNamespace = true
-		conf.NamespaceStr = *conf.RawNamespace
+		conf.isSetNamespace = true
+		conf.namespaceStr = *conf.RawNamespace
 	}
 
 	if conf.RawOutputFormat != nil {
@@ -318,8 +330,8 @@ func (c *Provider) parse() error {
 			return err
 		}
 
-		conf.IsSetOutputFormat = true
-		conf.OutputFormat = outputType
+		conf.isSetOutputFormat = true
+		conf.outputFormat = outputType
 	}
 
 	// TODO(CP-3913): Support TLS.
