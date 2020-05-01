@@ -29,8 +29,8 @@ func (o *OpenAPI) UpdateLicence(ctx context.Context, licence []byte, casVersion 
 	defer o.mu.RUnlock()
 
 	updateData := openapi.UpdateLicence{
-		LicenceKey: string(licence),
-		Version:    casVersion.String(),
+		Key:     string(licence),
+		Version: casVersion.String(),
 	}
 
 	lic, resp, err := o.client.DefaultApi.UpdateLicence(ctx, updateData)
