@@ -59,6 +59,10 @@ const (
 	// due to an unexpected fatal error.
 	InternalErrorCode = 13
 
+	// LockedErrorCode is the exit code used by the CLI when a command fails
+	// because the target of an operation is locked.
+	LockedErrorCode = 14
+
 	// CommandTimedOutCode is the exit code which a command time out error
 	// maps to.
 	CommandTimedOutCode = 124
@@ -99,6 +103,10 @@ var exitCodeHelp = []struct {
 	{
 		code: TryAgainCode,
 		help: "Indicates command failure as the result of a transient error. It can be re-attempted without modification",
+	},
+	{
+		code: LockedErrorCode,
+		help: "The target entity is currently locked, resulting in a failure to meet the safety preconditions for the operation.",
 	},
 	{
 		code: InternalErrorCode,
@@ -179,6 +187,10 @@ func ExitCodeForError(err error) int {
 	case errors.As(err, &apiclient.InvalidStateTransitionError{}):
 
 		return InvalidStateCode
+
+	case errors.As(err, &apiclient.LockedError{}):
+
+		return LockedErrorCode
 
 	//
 	// Transient errors

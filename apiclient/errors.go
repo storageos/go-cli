@@ -89,6 +89,27 @@ func NewInvalidStateTransitionError(msg string) InvalidStateTransitionError {
 	}
 }
 
+// LockedError indicates that the requested operation cannot be performed
+// because a lock is held for the target resource.
+type LockedError struct {
+	msg string
+}
+
+func (e LockedError) Error() string {
+	if e.msg == "" {
+		return "requsted operation cannot be safely completed as the target resource is locked"
+	}
+	return e.msg
+}
+
+// NewLockedError returns a new LockedError using msg as an optional error
+// message if given.
+func NewLockedError(msg string) LockedError {
+	return LockedError{
+		msg: msg,
+	}
+}
+
 // LicenceCapabilityError indicates that the requested operation cannot be
 // carried out due to a licensing issue with the cluster.
 type LicenceCapabilityError struct {
