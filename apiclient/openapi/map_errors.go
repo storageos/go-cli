@@ -140,6 +140,9 @@ func mapOpenAPIError(err error, resp *http.Response) error {
 	case http.StatusUnprocessableEntity:
 		return apiclient.NewInvalidStateTransitionError(details)
 
+	case http.StatusLocked:
+		return apiclient.NewLockedError(details)
+
 	// TODO(CP-3925): This may need changing to present a friendly error, or
 	// it may be done up the call stack.
 	case http.StatusUnavailableForLegalReasons:
@@ -153,6 +156,11 @@ func mapOpenAPIError(err error, resp *http.Response) error {
 		return apiclient.NewStoreError(details)
 
 	default:
+		// If details were obtained from the error, decorate it - even when
+		// unknown.
+		if details != "" {
+			err = fmt.Errorf("%w: %v", err, details)
+		}
 		return err
 	}
 }
