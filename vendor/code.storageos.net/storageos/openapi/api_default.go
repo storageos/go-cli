@@ -1379,7 +1379,7 @@ type DeleteNodeOpts struct {
 
 /*
 DeleteNode Delete a node
-Remove the node identified by id. A node can only be deleted if it is currently offline.
+Remove the node identified by id. A node can only be deleted if it is currently offline and does not host any master deployments.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a node
  * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
@@ -1999,6 +1999,7 @@ func (a *DefaultApiService) DeleteUser(ctx _context.Context, id string, version 
 type DeleteVolumeOpts struct {
 	IgnoreVersion optional.Bool
 	AsyncMax      optional.String
+	OfflineDelete optional.Bool
 }
 
 /*
@@ -2011,6 +2012,7 @@ Remove the volume identified by id.
  * @param optional nil or *DeleteVolumeOpts - Optional Parameters:
  * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
  * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.
+ * @param "OfflineDelete" (optional.Bool) -  If set to true, enables deletion of a volume when all  deployments are offline, bypassing the host nodes which cannot be reached. An offline delete request will be rejected when either a) there are online deployments for the target volume or b) there is evidence that an unreachable node still has the volume master
 */
 func (a *DefaultApiService) DeleteVolume(ctx _context.Context, namespaceID string, id string, version string, localVarOptionals *DeleteVolumeOpts) (*_nethttp.Response, error) {
 	var (
@@ -2040,6 +2042,9 @@ func (a *DefaultApiService) DeleteVolume(ctx _context.Context, namespaceID strin
 	}
 	if localVarOptionals != nil && localVarOptionals.AsyncMax.IsSet() {
 		localVarQueryParams.Add("async-max", parameterToString(localVarOptionals.AsyncMax.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.OfflineDelete.IsSet() {
+		localVarQueryParams.Add("offline-delete", parameterToString(localVarOptionals.OfflineDelete.Value(), ""))
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

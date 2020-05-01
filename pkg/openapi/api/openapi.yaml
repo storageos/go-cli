@@ -1527,7 +1527,7 @@ paths:
     delete:
       description: |
         Remove the node identified by id.
-        A node can only be deleted if it is currently offline.
+        A node can only be deleted if it is currently offline and does not host any master deployments.
       operationId: deleteNode
       parameters:
       - description: ID of a node
@@ -1620,11 +1620,11 @@ paths:
           content:
             application/json:
               example:
-                error: node not offline
+                error: in use
               schema:
                 $ref: '#/components/schemas/Error'
           description: |
-            The request attempted to delete a node that is not currently offline.
+            A referenced entity is currently in use.
         "412":
           content:
             application/json:
@@ -2580,6 +2580,18 @@ paths:
         schema:
           type: string
         style: form
+      - description: |
+          If set to true, enables deletion of a volume when all  deployments are offline, bypassing the host nodes which cannot be reached.
+          An offline delete request will be rejected when either a) there are online deployments for the target volume or b) there is evidence that an unreachable node still has the volume master
+        explode: true
+        in: query
+        name: offline-delete
+        required: false
+        schema:
+          default: false
+          example: true
+          type: boolean
+        style: form
       responses:
         "200":
           description: The volume was successfully deleted.
@@ -3489,10 +3501,10 @@ paths:
           application/json:
             schema:
               example:
-                licenceKey: licenceKey
                 version: NDI0MjQyNDI0MjQyNDI0MjQy
+                key: key
               properties:
-                licenceKey:
+                key:
                   description: |
                     A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
                   type: string
@@ -4638,6 +4650,7 @@ components:
         kind: unregistered
         clusterID: c5666b58-b805-4215-ab4a-cb094948ccc6
         usedBytes: 42
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
         expiresAt: 2019-03-10T13:42:42Z
         customerName: Desmond
       properties:
@@ -4677,6 +4690,14 @@ components:
           description: |
             A user friendly reference to the customer
           example: Desmond
+          type: string
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
           type: string
       type: object
     AcceptedMessage:
@@ -5186,10 +5207,10 @@ components:
       type: object
     UpdateLicence:
       example:
-        licenceKey: licenceKey
         version: NDI0MjQyNDI0MjQyNDI0MjQy
+        key: key
       properties:
-        licenceKey:
+        key:
           description: |
             A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
           type: string
