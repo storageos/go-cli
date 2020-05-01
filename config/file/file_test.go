@@ -502,8 +502,6 @@ func TestFileProvider(t *testing.T) {
 	for _, tt := range tests {
 		var tt = tt
 		t.Run(tt.name, func(t *testing.T) {
-			// t.Parallel()
-
 			f, err := ioutil.TempFile(dir, "config")
 			if err != nil {
 				t.Fatal(err)
@@ -523,8 +521,16 @@ func TestFileProvider(t *testing.T) {
 
 			// Attempt to fetch the value from the config file provider
 			gotValue, gotErr := tt.fetchValue(p)
-			if !reflect.DeepEqual(gotErr, tt.wantErr) {
-				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+
+			switch gotErr.(type) {
+			case parseError:
+				if !reflect.DeepEqual(errors.Unwrap(gotErr), tt.wantErr) {
+					t.Errorf("got unwrapped error %v, want %v", errors.Unwrap(gotErr), tt.wantErr)
+				}
+			default:
+				if !reflect.DeepEqual(gotErr, tt.wantErr) {
+					t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+				}
 			}
 
 			if !reflect.DeepEqual(gotValue, tt.wantValue) {
