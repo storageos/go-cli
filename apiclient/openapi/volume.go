@@ -5,12 +5,12 @@ import (
 
 	"github.com/antihax/optional"
 
-	"code.storageos.net/storageos/openapi"
-
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/volume"
+	"code.storageos.net/storageos/openapi"
 )
 
 // CreateVolume requests the creation of a new volume through the StorageOS API
@@ -236,6 +236,30 @@ func (o *OpenAPI) DetachVolume(ctx context.Context, namespaceID id.Namespace, vo
 			IgnoreVersion: ignoreVersion,
 		},
 	)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return apiclient.NewVolumeNotFoundError(v.msg)
+		default:
+			return v
+		}
+	}
+
+	return nil
+}
+
+// SetReplicas changes the number of the replicas of a specified volume.
+// Operation is asynchronous, we return nil if the request has been accepted.
+func (o *OpenAPI) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, version version.Version) error {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	request := openapi.SetReplicasRequest{
+		Replicas: numReplicas,
+		Version:  version.String(),
+	}
+
+	_, resp, err := o.client.DefaultApi.SetReplicas(ctx, nsID.String(), volID.String(), request)
 	if err != nil {
 		switch v := mapOpenAPIError(err, resp).(type) {
 		case notFoundError:

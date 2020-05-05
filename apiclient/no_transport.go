@@ -108,6 +108,10 @@ func (t *noTransport) UpdateLicence(ctx context.Context, licence []byte, casVers
 	return nil, ErrNoTransportConfigured
 }
 
+func (t *noTransport) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, version version.Version) error {
+	return ErrNoTransportConfigured
+}
+
 func (t *noTransport) DeleteUser(ctx context.Context, uid id.User, params *DeleteUserRequestParams) error {
 	return ErrNoTransportConfigured
 }

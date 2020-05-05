@@ -1,4 +1,4 @@
-package apply
+package update
 
 import (
 	"context"
@@ -9,11 +9,13 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
-	"code.storageos.net/storageos/c2-cli/licence"
+	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/output/textformat"
 	"code.storageos.net/storageos/c2-cli/output/yamlformat"
+	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 // ConfigProvider specifies the configuration
@@ -22,32 +24,37 @@ type ConfigProvider interface {
 	Password() (string, error)
 
 	CommandTimeout() (time.Duration, error)
+	UseIDs() (bool, error)
 	OutputFormat() (output.Format, error)
+	Namespace() (string, error)
 }
 
 // Client defines the functionality required by the CLI application to
-// reasonably implement the "apply" verb commands.
+// reasonably implement the "update" verb commands.
 type Client interface {
 	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
 
-	UpdateLicence(ctx context.Context, licenceKey []byte, params *apiclient.UpdateLicenceRequestParams) (*licence.Resource, error)
+	SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, params *apiclient.SetReplicasRequestParams) error
+
+	GetVolumeByName(ctx context.Context, namespace id.Namespace, name string) (*volume.Resource, error)
+	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 }
 
 // Displayer defines the functionality required by the CLI application to
-// display the results returned by "apply" verb operations.
+// display the results returned by "update" verb operations.
 type Displayer interface {
-	UpdateLicence(ctx context.Context, w io.Writer, licence *output.Licence) error
+	SetReplicas(ctx context.Context, w io.Writer) error
 }
 
-// NewCommand configures the set of commands which are grouped by the "apply" verb.
+// NewCommand configures the set of commands which are grouped by the "update" verb.
 func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command := &cobra.Command{
-		Use:   "apply",
+		Use:   "update",
 		Short: "Make changes to existing resources",
 	}
 
 	command.AddCommand(
-		newLicence(os.Stdout, client, config),
+		newVolume(os.Stdout, client, config),
 	)
 
 	return command

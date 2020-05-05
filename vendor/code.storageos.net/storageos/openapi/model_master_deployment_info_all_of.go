@@ -9,7 +9,6 @@
  */
 
 package openapi
-
 // MasterDeploymentInfoAllOf struct for MasterDeploymentInfoAllOf
 type MasterDeploymentInfoAllOf struct {
 	Health MasterHealth `json:"health,omitempty"`

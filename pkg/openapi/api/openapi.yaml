@@ -1635,6 +1635,15 @@ paths:
           description: |
             The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
             The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "423":
+          content:
+            application/json:
+              example:
+                error: entity locked
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A lock is held for the target entity, preventing the operation to be carried out safely.
         "500":
           content:
             application/json:
@@ -2667,6 +2676,15 @@ paths:
           description: |
             An action was requested that cannot be performed on the entity in it's current state.
             As an example, this error might be returned when trying to delete a currently mounted volume.
+        "423":
+          content:
+            application/json:
+              example:
+                error: entity locked
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A lock is held for the target entity, preventing the operation to be carried out safely.
         "500":
           content:
             application/json:
@@ -3902,6 +3920,15 @@ components:
             $ref: '#/components/schemas/Error'
       description: |
         A referenced entity is currently in use.
+    Locked:
+      content:
+        application/json:
+          example:
+            error: entity locked
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: |
+        A lock is held for the target entity, preventing the operation to be carried out safely.
     Accepted:
       content:
         application/json:

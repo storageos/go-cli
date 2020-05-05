@@ -338,6 +338,17 @@ func (tr *TransportWithReauth) UpdateLicence(ctx context.Context, lic []byte, ca
 	return updated, err
 }
 
+// SetReplicas wraps the inner transport's call with a reauthenticate and retry
+// upon encountering an authentication error.
+func (tr *TransportWithReauth) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, version version.Version) error {
+
+	err := tr.doWithReauth(ctx, func() error {
+		return tr.inner.SetReplicas(ctx, nsID, volID, numReplicas, version)
+	})
+
+	return err
+}
+
 // DeleteVolume wraps the inner transport's call with a reauthenticate and retry
 // upon encountering an authentication error.
 func (tr *TransportWithReauth) DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DeleteVolumeRequestParams) error {

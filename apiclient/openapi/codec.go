@@ -48,6 +48,7 @@ func (c codec) decodeLicence(model openapi.Licence) (*licence.Resource, error) {
 		UsedBytes:            model.UsedBytes,
 		Kind:                 model.Kind,
 		CustomerName:         model.CustomerName,
+		Version:              version.FromString(model.Version),
 	}, nil
 }
 

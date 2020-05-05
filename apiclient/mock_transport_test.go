@@ -110,6 +110,12 @@ type mockTransport struct {
 	UpdateLicenceResource   *licence.Resource
 	UpdateLicenceError      error
 
+	SetReplicasGotNamespaceID id.Namespace
+	SetReplicasGotVolumeID    id.Volume
+	SetReplicasGotNumReplicas uint64
+	SetReplicasGotVersion     version.Version
+	SetReplicasError          error
+
 	DeleteUserGotID     id.User
 	DeleteUserGotParams *DeleteUserRequestParams
 	DeleteUserError     error
@@ -246,6 +252,14 @@ func (m *mockTransport) CreatePolicyGroup(ctx context.Context, name string, spec
 func (m *mockTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource) (*cluster.Resource, error) {
 	m.UpdateClusterGotResource = resource
 	return m.UpdateClusterResource, m.UpdateClusterError
+}
+
+func (m *mockTransport) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, version version.Version) error {
+	m.SetReplicasGotNamespaceID = nsID
+	m.SetReplicasGotVolumeID = volID
+	m.SetReplicasGotNumReplicas = numReplicas
+	m.SetReplicasGotVersion = version
+	return m.SetReplicasError
 }
 
 func (m *mockTransport) UpdateLicence(ctx context.Context, licence []byte, casVersion version.Version) (*licence.Resource, error) {
