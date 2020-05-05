@@ -61,6 +61,11 @@ func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *out
 	return d.encode(w, licence)
 }
 
+// SetReplicas writes nothing to w.
+func (d *Displayer) SetReplicas(ctx context.Context, w io.Writer) error {
+	return nil
+}
+
 // -----------------------------------------------------------------------------
 // GET
 // -----------------------------------------------------------------------------

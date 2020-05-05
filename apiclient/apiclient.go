@@ -116,6 +116,9 @@ type Transport interface {
 	// applied to the cluster through the StorageOS API.
 	// In case of success, it returns all the info of the licence just applied.
 	UpdateLicence(ctx context.Context, licence []byte, casVersion version.Version) (*licence.Resource, error)
+	// SetReplicas attempts to perform a change in the number of replicas
+	// of a specified volume. If everything is correct, job is accepted.
+	SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, version version.Version) error
 
 	// DeleteVolume makes a delete request for volumeID in namespaceID.
 	//

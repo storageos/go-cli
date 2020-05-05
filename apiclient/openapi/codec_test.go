@@ -7,6 +7,8 @@ import (
 
 	"github.com/kr/pretty"
 
+	"code.storageos.net/storageos/c2-cli/pkg/version"
+
 	"code.storageos.net/storageos/c2-cli/licence"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
@@ -44,6 +46,7 @@ func TestDecodeLicence(t *testing.T) {
 				UsedBytes:            42 / 2,
 				Kind:                 "mockLicence",
 				CustomerName:         "go testing framework",
+				Version:              "bananaVersion",
 			},
 
 			wantResource: &licence.Resource{
@@ -53,6 +56,7 @@ func TestDecodeLicence(t *testing.T) {
 				UsedBytes:            42 / 2,
 				Kind:                 "mockLicence",
 				CustomerName:         "go testing framework",
+				Version:              version.Version("bananaVersion"),
 			},
 			wantErr: nil,
 		},

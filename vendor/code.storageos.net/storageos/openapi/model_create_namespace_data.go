@@ -9,11 +9,10 @@
  */
 
 package openapi
-
 // CreateNamespaceData struct for CreateNamespaceData
 type CreateNamespaceData struct {
-	// The name of the namespace shown in the CLI and UI
+	// The name of the namespace shown in the CLI and UI 
 	Name string `json:"name,omitempty"`
-	// A set of arbitrary key value labels to apply to the entity.
+	// A set of arbitrary key value labels to apply to the entity. 
 	Labels map[string]string `json:"labels,omitempty"`
 }

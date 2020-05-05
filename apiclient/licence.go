@@ -16,15 +16,15 @@ type UpdateLicenceRequestParams struct {
 // UpdateLicence sends a new version of the licence to apply to the current
 // cluster. It returns the new licence resource if correctly applied.
 // It doesn't require a version but overwrite the licence using the last
-// available version from the cluster.
+// available version from the current licence.
 func (c *Client) UpdateLicence(ctx context.Context, licence []byte, params *UpdateLicenceRequestParams) (*licence.Resource, error) {
 
 	if params == nil {
-		cl, err := c.Transport.GetCluster(ctx)
+		l, err := c.Transport.GetLicence(ctx)
 		if err != nil {
 			return nil, err
 		}
-		return c.Transport.UpdateLicence(ctx, licence, cl.Version)
+		return c.Transport.UpdateLicence(ctx, licence, l.Version)
 	}
 
 	return c.Transport.UpdateLicence(ctx, licence, params.CASVersion)

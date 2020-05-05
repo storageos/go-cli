@@ -9,11 +9,10 @@
  */
 
 package openapi
-
 // UpdateLicence struct for UpdateLicence
 type UpdateLicence struct {
-	// A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
+	// A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change. 
 	Key string `json:"key,omitempty"`
-	// An opaque representation of an entity version at the time it was obtained from the API. All operations that mutate the entity must include this version field in the request unchanged. The format of this type is undefined and may change but the defined properties will not change.
+	// An opaque representation of an entity version at the time it was obtained from the API. All operations that mutate the entity must include this version field in the request unchanged. The format of this type is undefined and may change but the defined properties will not change. 
 	Version string `json:"version,omitempty"`
 }

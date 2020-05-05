@@ -25,3 +25,9 @@ func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *out
 
 	return write(w)
 }
+
+// SetReplicas writes nothing to w.
+func (d *Displayer) SetReplicas(ctx context.Context, w io.Writer) error {
+	_, err := fmt.Fprintln(w, "request to change number of replicas accepted")
+	return err
+}

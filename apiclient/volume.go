@@ -121,6 +121,12 @@ type DetachVolumeRequestParams struct {
 	CASVersion version.Version
 }
 
+// SetReplicasRequestParams contains optional request parameters for a set
+// replicas volume operation.
+type SetReplicasRequestParams struct {
+	CASVersion version.Version
+}
+
 // GetVolumeByName requests the volume resource which has name in namespace.
 //
 // The resource model for the API is build around using unique identifiers,
@@ -300,4 +306,26 @@ func filterVolumesForNames(volumes []*volume.Resource, names ...string) ([]*volu
 	}
 
 	return filtered, nil
+}
+
+// SetReplicas sends a new replica count number for updating the selected volume.
+//
+// The behaviour of the operation is dictated by params:
+//
+//  Version constraints:
+// 	- If params is nil or params.CASVersion is empty then the detach request is
+// 	unconditional
+// 	- If params.CASVersion is set, the request is conditional upon it matching
+// 	the volume entity's version as seen by the server.
+func (c *Client) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, params *SetReplicasRequestParams) error {
+
+	if params == nil || params.CASVersion == "" {
+		v, err := c.Transport.GetVolume(ctx, nsID, volID)
+		if err != nil {
+			return err
+		}
+		return c.Transport.SetReplicas(ctx, nsID, volID, numReplicas, v.Version)
+	}
+
+	return c.Transport.SetReplicas(ctx, nsID, volID, numReplicas, params.CASVersion)
 }

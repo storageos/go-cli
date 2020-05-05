@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"code.storageos.net/storageos/c2-cli/cmd/update"
+
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/apiclient/cache"
 	"code.storageos.net/storageos/c2-cli/apiclient/openapi"
@@ -106,6 +108,7 @@ To be notified about stable releases and latest features, sign up at https://my.
 
 	app.AddCommand(
 		apply.NewCommand(client, config),
+		update.NewCommand(client, config),
 		create.NewCommand(client, config),
 		get.NewCommand(client, config),
 		describe.NewCommand(client, config),
