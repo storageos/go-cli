@@ -31,6 +31,9 @@ var (
 // ConfigProvider specifies the configuration settings which commands require
 // access to.
 type ConfigProvider interface {
+	Username() (string, error)
+	Password() (string, error)
+
 	CommandTimeout() (time.Duration, error)
 	UseIDs() (bool, error)
 	Namespace() (string, error)
@@ -40,6 +43,8 @@ type ConfigProvider interface {
 // Client describes the functionality required by the CLI application
 // to reasonably implement the "detach" verb commands.
 type Client interface {
+	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
+
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 	GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error)
 	DetachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *apiclient.DetachVolumeRequestParams) error
@@ -121,7 +126,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 		Use:   "detach",
 		Short: "Detach a volume from its current location",
 		Example: `
-$ storageos detach volume --namespace my-namespace-name my-volume
+$ storageos detach --namespace my-namespace-name my-volume
 `,
 
 		Args: argwrappers.WrapInvalidArgsError(func(cmd *cobra.Command, args []string) error {
@@ -150,6 +155,7 @@ $ storageos detach volume --namespace my-namespace-name my-volume
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
 				runwrappers.EnsureNamespaceSetWhenUseIDs(c.config),
+				runwrappers.AuthenticateClient(c.config, c.client),
 			)(c.runWithCtx)
 
 			return run(context.Background(), cmd, args)

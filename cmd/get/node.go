@@ -84,7 +84,7 @@ func (c *nodeCommand) listNodes(ctx context.Context, refs []string) ([]*node.Res
 		uids[i] = id.Node(a)
 	}
 
-	return c.client.GetListNodes(ctx, uids...)
+	return c.client.GetListNodesByUID(ctx, uids...)
 }
 
 func newNode(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
@@ -108,6 +108,7 @@ $ storageos get node my-node-name
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
 				runwrappers.EnsureTargetOrSelectors(&c.selectors),
+				runwrappers.AuthenticateClient(c.config, c.client),
 			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},

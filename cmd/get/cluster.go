@@ -24,7 +24,7 @@ func (c *clusterCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, _ [
 		return err
 	}
 
-	nodes, err := c.client.GetAllNodes(ctx)
+	nodes, err := c.client.ListNodes(ctx)
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,10 @@ $ storageos get cluster
 		},
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			run := runwrappers.RunWithTimeout(c.config)(c.runWithCtx)
+			run := runwrappers.Chain(
+				runwrappers.RunWithTimeout(c.config),
+				runwrappers.AuthenticateClient(c.config, c.client),
+			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},
 

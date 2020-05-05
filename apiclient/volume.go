@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
 	"code.storageos.net/storageos/c2-cli/pkg/id"
-	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
@@ -107,41 +108,20 @@ type CreateVolumeRequestParams struct {
 	AsyncMax time.Duration
 }
 
-// CreateVolume requests the creation of a new StorageOS volume in namespace
-// from the provided fields. If successful the created resource for the volume
-// is returned to the caller.
-//
-// The behaviour of the operation is dictated by params:
-//
-//
-//  Asynchrony:
-//  - If params is nil or params.AsyncMax is empty/zero valued then the create
-//  request is performed synchronously.
-//  - If params.AsyncMax is set, the request is performed asynchronously using
-//  the duration given as the maximum amount of time allowed for the request
-//  before it times out.
-func (c *Client) CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labelSet labels.Set, params *CreateVolumeRequestParams) (*volume.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.transport.CreateVolume(ctx, namespace, name, description, fs, sizeBytes, labelSet, params)
+// DeleteVolumeRequestParams contains optional request parameters for a delete
+// volume operation.
+type DeleteVolumeRequestParams struct {
+	CASVersion version.Version
+	AsyncMax   time.Duration
 }
 
-// GetVolume requests basic information for the volume resource which
-// corresponds to uid in namespace from the StorageOS API.
-func (c *Client) GetVolume(ctx context.Context, namespace id.Namespace, volumeID id.Volume) (*volume.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.transport.GetVolume(ctx, namespace, volumeID)
+// DetachVolumeRequestParams contains optional request parameters for a detach
+// volume operation.
+type DetachVolumeRequestParams struct {
+	CASVersion version.Version
 }
 
-// GetVolumeByName requests basic information for the volume resource which has
-// name in namespace.
+// GetVolumeByName requests the volume resource which has name in namespace.
 //
 // The resource model for the API is build around using unique identifiers,
 // so this operation is inherently more expensive than the corresponding
@@ -151,12 +131,7 @@ func (c *Client) GetVolume(ctx context.Context, namespace id.Namespace, volumeID
 // volumes in the namespace from the StorageOS API and returning the first one
 // where the name matches.
 func (c *Client) GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	volumes, err := c.transport.ListVolumes(ctx, namespaceID)
+	volumes, err := c.Transport.ListVolumes(ctx, namespaceID)
 	if err != nil {
 		return nil, err
 	}
@@ -170,18 +145,13 @@ func (c *Client) GetVolumeByName(ctx context.Context, namespaceID id.Namespace, 
 	return nil, NewVolumeNameNotFoundError(name)
 }
 
-// GetNamespaceVolumes requests basic information for each volume resource in
+// GetNamespaceVolumesByUID requests basic information for each volume resource in
 // namespace from the StorageOS API.
 //
 // The returned list is filtered using uids so that it contains only those
 // resources which have a matching ID. Omitting uids will skip the filtering.
-func (c *Client) GetNamespaceVolumes(ctx context.Context, namespaceID id.Namespace, uids ...id.Volume) ([]*volume.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	volumes, err := c.transport.ListVolumes(ctx, namespaceID)
+func (c *Client) GetNamespaceVolumesByUID(ctx context.Context, namespaceID id.Namespace, uids ...id.Volume) ([]*volume.Resource, error) {
+	volumes, err := c.Transport.ListVolumes(ctx, namespaceID)
 	if err != nil {
 		return nil, err
 	}
@@ -195,12 +165,7 @@ func (c *Client) GetNamespaceVolumes(ctx context.Context, namespaceID id.Namespa
 // The returned list is filtered using names so that it contains only those
 // resources which have a matching name. Omitting names will skip the filtering.
 func (c *Client) GetNamespaceVolumesByName(ctx context.Context, namespaceID id.Namespace, names ...string) ([]*volume.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	volumes, err := c.transport.ListVolumes(ctx, namespaceID)
+	volumes, err := c.Transport.ListVolumes(ctx, namespaceID)
 	if err != nil {
 		return nil, err
 	}
@@ -211,38 +176,67 @@ func (c *Client) GetNamespaceVolumesByName(ctx context.Context, namespaceID id.N
 // GetAllVolumes requests basic information for each volume resource in every
 // namespace exposed by the StorageOS API to the authenticated user.
 func (c *Client) GetAllVolumes(ctx context.Context) ([]*volume.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.fetchAllVolumes(ctx)
+	return c.fetchAllVolumesParallel(ctx)
 }
 
-// fetchAllVolumes requests the list of all namespaces from the StorageOS API,
-// then requests the list of volumes within each namespace, returning an
-// aggregate list of the volumes returned.
+// fetchAllVolumesParallel requests the list of all namespaces from the
+// StorageOS API, then requests the list of volumes within each namespace,
+// calling all of them in parallel, returning an aggregate list of the volumes
+// returned.
 //
 // If access is not granted when listing volumes for a retrieved namespace it
 // is noted but will not return an error. Only if access is denied for all
 // attempts will this return a permissions error.
-func (c *Client) fetchAllVolumes(ctx context.Context) ([]*volume.Resource, error) {
-	namespaces, err := c.transport.ListNamespaces(ctx)
+//
+// If any of the call returns an error:
+//  - the context is canceled so all pending requests are cut
+//  - this method returns an error
+func (c *Client) fetchAllVolumesParallel(ctx context.Context) ([]*volume.Resource, error) {
+	namespaces, err := c.Transport.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	volumes := []*volume.Resource{}
+	// The derived Context is canceled the first time a function passed to Go
+	// returns a non-nil error or the first time Wait returns, whichever occurs
+	// first.
+	group, ctx := errgroup.WithContext(ctx)
+
+	results := make(chan []*volume.Resource, len(namespaces))
 
 	for _, ns := range namespaces {
-		nsvols, err := c.transport.ListVolumes(ctx, ns.ID)
-		switch {
-		case err == nil, errors.As(err, &UnauthorisedError{}):
-			// For an unauthorised error, ignore - its not fatal to the operation.
-		default:
-			return nil, err
-		}
-		volumes = append(volumes, nsvols...)
+		ns := ns
+
+		// Go calls the given function in a new goroutine.
+		//
+		// The first call to return a non-nil error cancels the group; its error
+		// will be returned by Wait.
+		group.Go(func() error {
+
+			nsvols, err := c.Transport.ListVolumes(ctx, ns.ID)
+			switch {
+			case err == nil, errors.As(err, &UnauthorisedError{}):
+				// For an unauthorised error, ignore - its not fatal to the operation.
+			default:
+				return err
+			}
+
+			results <- nsvols
+			return nil
+		})
+	}
+
+	// blocks until all function calls from the Go method have returned
+	if err := group.Wait(); err != nil {
+		return nil, err
+	}
+
+	close(results)
+
+	// merge the results
+	volumes := []*volume.Resource{}
+	for r := range results {
+		volumes = append(volumes, r...)
 	}
 
 	return volumes, nil
@@ -267,10 +261,10 @@ func filterVolumesForUIDs(volumes []*volume.Resource, uids ...id.Volume) ([]*vol
 
 	filtered := make([]*volume.Resource, 0, len(uids))
 
-	for _, id := range uids {
-		v, ok := retrieved[id]
+	for _, idVar := range uids {
+		v, ok := retrieved[idVar]
 		if !ok {
-			return nil, NewVolumeIDNotFoundError(id)
+			return nil, NewVolumeIDNotFoundError(idVar)
 		}
 		filtered = append(filtered, v)
 	}
@@ -306,73 +300,4 @@ func filterVolumesForNames(volumes []*volume.Resource, names ...string) ([]*volu
 	}
 
 	return filtered, nil
-}
-
-// DeleteVolumeRequestParams contains optional request parameters for a delete
-// volume operation.
-type DeleteVolumeRequestParams struct {
-	CASVersion version.Version
-	AsyncMax   time.Duration
-}
-
-// DeleteVolume makes a delete request for volumeID in namespaceID.
-//
-// The behaviour of the operation is dictated by params:
-//
-//
-// 	Version constraints:
-// 	- If params is nil or params.CASVersion is empty then the delete request is
-// 	unconditional
-// 	- If params.CASVersion is set, the request is conditional upon it matching
-// 	the volume entity's version as seen by the server.
-//
-//  Asynchrony:
-//  - If params is nil or params.AsyncMax is empty/zero valued then the delete
-//  request is performed synchronously.
-//  - If params.AsyncMax is set, the request is performed asynchronously using
-//  the duration given as the maximum amount of time allowed for the request
-//  before it times out.
-func (c *Client) DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DeleteVolumeRequestParams) error {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return err
-	}
-
-	return c.transport.DeleteVolume(ctx, namespaceID, volumeID, params)
-}
-
-// AttachVolume requests to attach a volume (namespace/volume) to a node
-// It requires authentication.
-func (c *Client) AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return err
-	}
-
-	return c.transport.AttachVolume(ctx, namespaceID, volumeID, nodeID)
-}
-
-// DetachVolumeRequestParams contains optional request parameters for a detach
-// volume operation.
-type DetachVolumeRequestParams struct {
-	CASVersion version.Version
-}
-
-// DetachVolume makes a detach request for volumeID in namespaceID.
-//
-// The behaviour of the operation is dictated by params:
-//
-//
-//  Version constraints:
-// 	- If params is nil or params.CASVersion is empty then the detach request is
-// 	unconditional
-// 	- If params.CASVersion is set, the request is conditional upon it matching
-// 	the volume entity's version as seen by the server.
-func (c *Client) DetachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DetachVolumeRequestParams) error {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return err
-	}
-
-	return c.transport.DetachVolume(ctx, namespaceID, volumeID, params)
 }

@@ -77,12 +77,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 			return err
 		}
 
-		outputVol, err := output.NewVolume(vol, ns, nodes)
-		if err != nil {
-			return err
-		}
-
-		return c.display.DescribeVolume(ctx, c.writer, outputVol)
+		return c.display.DescribeVolume(ctx, c.writer, output.NewVolume(vol, ns, nodes))
 
 	default:
 		volumes, err := c.listVolumes(ctx, ns.ID, args)
@@ -100,12 +95,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		outputVols := make([]*output.Volume, 0, len(volumes))
 
 		for _, vol := range volumes {
-			outputVol, err := output.NewVolume(vol, ns, nodes)
-			if err != nil {
-				return err
-			}
-
-			outputVols = append(outputVols, outputVol)
+			outputVols = append(outputVols, output.NewVolume(vol, ns, nodes))
 		}
 
 		return c.display.DescribeListVolumes(ctx, c.writer, outputVols)
@@ -115,7 +105,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 // getNodeMapping fetches the list of nodes from the API and builds a map from
 // their ID to the full resource.
 func (c *volumeCommand) getNodeMapping(ctx context.Context) (map[id.Node]*node.Resource, error) {
-	nodeList, err := c.client.GetListNodes(ctx)
+	nodeList, err := c.client.ListNodes(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +135,7 @@ func (c *volumeCommand) listVolumes(ctx context.Context, ns id.Namespace, vols [
 		volIDs = append(volIDs, id.Volume(uid))
 	}
 
-	return c.client.GetNamespaceVolumes(ctx, ns, volIDs...)
+	return c.client.GetNamespaceVolumesByUID(ctx, ns, volIDs...)
 }
 
 func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
@@ -186,6 +176,7 @@ $ storageos describe volume --namespace my-namespace-name my-volume-name
 				runwrappers.RunWithTimeout(c.config),
 				runwrappers.EnsureNamespaceSetWhenUseIDs(c.config),
 				runwrappers.EnsureTargetOrSelectors(&c.selectors),
+				runwrappers.AuthenticateClient(c.config, c.client),
 			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},

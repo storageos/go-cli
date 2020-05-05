@@ -1,1 +1,4 @@
 bin/*
+go.mod.md5
+go.sum.md5
+coverage.out

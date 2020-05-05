@@ -72,12 +72,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 				return errMissingNamespace
 			}
 
-			outputVol, err := output.NewVolume(v, ns, nodes)
-			if err != nil {
-				return err
-			}
-
-			outputVolumes = append(outputVolumes, outputVol)
+			outputVolumes = append(outputVolumes, output.NewVolume(v, ns, nodes))
 		}
 
 		return c.display.GetListVolumes(
@@ -100,7 +95,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 			return err
 		}
 
-		namespace, err := c.client.GetNamespace(ctx, v.Namespace)
+		ns, err := c.client.GetNamespace(ctx, v.Namespace)
 		if err != nil {
 			return err
 		}
@@ -110,12 +105,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 			return err
 		}
 
-		outputVol, err := output.NewVolume(v, namespace, nodes)
-		if err != nil {
-			return err
-		}
-
-		return c.display.GetVolume(ctx, c.writer, outputVol)
+		return c.display.GetVolume(ctx, c.writer, output.NewVolume(v, ns, nodes))
 
 	default:
 		volumes, err := c.listVolumes(ctx, namespaceID, args)
@@ -148,12 +138,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 				return errMissingNamespace
 			}
 
-			outputVol, err := output.NewVolume(v, ns, nodes)
-			if err != nil {
-				return err
-			}
-
-			outputVolumes = append(outputVolumes, outputVol)
+			outputVolumes = append(outputVolumes, output.NewVolume(v, ns, nodes))
 		}
 
 		return c.display.GetListVolumes(
@@ -168,7 +153,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 // (string) as value.
 // List of volumes in input is used to filter out all unnecessary namespaces
 func (c *volumeCommand) getNamespaces(ctx context.Context) (map[id.Namespace]*namespace.Resource, error) {
-	namespaces, err := c.client.GetAllNamespaces(ctx)
+	namespaces, err := c.client.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -232,13 +217,13 @@ func (c *volumeCommand) listVolumes(ctx context.Context, ns id.Namespace, vols [
 		volIDs = append(volIDs, id.Volume(uid))
 	}
 
-	return c.client.GetNamespaceVolumes(ctx, ns, volIDs...)
+	return c.client.GetNamespaceVolumesByUID(ctx, ns, volIDs...)
 }
 
 // getNodeMapping fetches the list of nodes from the API and builds a map from
 // their ID to the full resource.
 func (c *volumeCommand) getNodeMapping(ctx context.Context) (map[id.Node]*node.Resource, error) {
-	nodeList, err := c.client.GetListNodes(ctx)
+	nodeList, err := c.client.ListNodes(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -295,6 +280,7 @@ $ storageos get volume --namespace my-namespace-name my-volume-name
 				runwrappers.RunWithTimeout(c.config),
 				runwrappers.EnsureNamespaceSetWhenUseIDs(c.config),
 				runwrappers.EnsureTargetOrSelectors(&c.selectors),
+				runwrappers.AuthenticateClient(c.config, c.client),
 			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},

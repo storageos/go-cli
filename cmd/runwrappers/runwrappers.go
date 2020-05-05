@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/pkg/cmdcontext"
 )
@@ -20,6 +21,18 @@ var (
 	// specified a namespace ID, which is required when using IDs.
 	ErrMustSpecifyNamespaceID = errors.New("namespace ID must be specified when using resource IDs")
 )
+
+// CredentialsProvider is a type that source a set of authentication
+// credentials to provide to the StorageOS API.
+type CredentialsProvider interface {
+	Username() (string, error)
+	Password() (string, error)
+}
+
+// AuthAPIClient defines an API client that can be authenticated.
+type AuthAPIClient interface {
+	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
+}
 
 // NamespacedCommandConfigProvider abstracts a type which provides
 // configuration settings for commands that are namespaced and can use IDs.
@@ -57,6 +70,32 @@ func RunWithTimeout(provider cmdcontext.TimeoutProvider) WrapRunEWithContext {
 		return func(ctx context.Context, cmd *cobra.Command, args []string) error {
 			ctx, cancel := cmdcontext.WithTimeoutFromConfig(ctx, provider)
 			defer cancel()
+
+			return next(ctx, cmd, args)
+		}
+	}
+}
+
+// AuthenticateClient returns a wrapper function that uses provider to source
+// the credentials which it authenticates client with before executing the run
+// function it is given to wrap.
+func AuthenticateClient(provider CredentialsProvider, client AuthAPIClient) WrapRunEWithContext {
+	return func(next RunEWithContext) RunEWithContext {
+		return func(ctx context.Context, cmd *cobra.Command, args []string) error {
+			username, err := provider.Username()
+			if err != nil {
+				return err
+			}
+
+			password, err := provider.Password()
+			if err != nil {
+				return err
+			}
+
+			_, err = client.Authenticate(ctx, username, password)
+			if err != nil {
+				return err
+			}
 
 			return next(ctx, cmd, args)
 		}

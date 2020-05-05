@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
-	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
+	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/pkg/selectors"
 )
@@ -43,7 +43,7 @@ func TestExitCodeForError(t *testing.T) {
 			name: "decorated licence error from cli",
 			forErr: runwrappers.NewLicenceLimitError(
 				apiclient.NewLicenceCapabilityError("not licensed to do that"),
-				&cluster.Licence{CustomerName: "buddy"},
+				&licence.Resource{CustomerName: "buddy"},
 			),
 			wantCode: LicenceCapabilityErrorCode,
 		},

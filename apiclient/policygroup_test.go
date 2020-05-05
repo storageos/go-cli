@@ -23,7 +23,7 @@ func TestFilterPolicyGroupsForNames(t *testing.T) {
 		wantErr          error
 	}{
 		{
-			name: "dont filter when no names provided",
+			name: "don't filter when no names provided",
 
 			policyGroups: []*policygroup.Resource{
 				&policygroup.Resource{
@@ -132,7 +132,7 @@ func TestFilterPolicyGroupsForGIDs(t *testing.T) {
 		wantErr          error
 	}{
 		{
-			name: "dont filter when no gids provided",
+			name: "don't filter when no gids provided",
 
 			policyGroups: []*policygroup.Resource{
 				&policygroup.Resource{

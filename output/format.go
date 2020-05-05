@@ -26,7 +26,9 @@ var (
 		"text",
 	}
 
-	errInvalidFormat = fmt.Errorf("invalid output format string. Use one of %v", ValidFormats)
+	// ErrInvalidFormat is an error that is returned when the string passed to
+	// FormatFromString cannot be parsed in a valid output format.
+	ErrInvalidFormat = fmt.Errorf("invalid output format string. Use one of %v", ValidFormats)
 )
 
 // FormatFromString parses a string to understand which output format has been
@@ -42,7 +44,7 @@ func FormatFromString(s string) (Format, error) {
 	// Keep update the `ValidFormats` list on adding new
 
 	default:
-		return Unknown, errInvalidFormat
+		return Unknown, ErrInvalidFormat
 	}
 }
 

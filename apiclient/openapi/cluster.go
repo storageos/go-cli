@@ -22,8 +22,8 @@ func (o *OpenAPI) GetCluster(ctx context.Context) (*cluster.Resource, error) {
 }
 
 // UpdateCluster attempts to perform an update of the cluster configuration
-// through the StorageOS API using resource and licenceKey as the update values.
-func (o *OpenAPI) UpdateCluster(ctx context.Context, resource *cluster.Resource, licenceKey []byte) (*cluster.Resource, error) {
+// through the StorageOS API using resource as the update value.
+func (o *OpenAPI) UpdateCluster(ctx context.Context, resource *cluster.Resource) (*cluster.Resource, error) {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 
@@ -38,7 +38,6 @@ func (o *OpenAPI) UpdateCluster(ctx context.Context, resource *cluster.Resource,
 	}
 
 	updateData := openapi.UpdateClusterData{
-		LicenceKey:            string(licenceKey),
 		DisableTelemetry:      resource.DisableTelemetry,
 		DisableCrashReporting: resource.DisableCrashReporting,
 		DisableVersionCheck:   resource.DisableVersionCheck,

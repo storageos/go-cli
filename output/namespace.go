@@ -43,3 +43,9 @@ func NewNamespaces(ns []*namespace.Resource) []*Namespace {
 	}
 	return namespaces
 }
+
+// NamespaceDeletion defines a namespace deletion confirmation output
+// representation.
+type NamespaceDeletion struct {
+	ID id.Namespace `json:"id" yaml:"id"`
+}

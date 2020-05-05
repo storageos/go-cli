@@ -5,6 +5,8 @@ package output
 
 import "time"
 
+const unknownResourceName = "unknown"
+
 // TimeHumanizer represents a generic type able to transform a time.Time object
 // into a human-readable string.
 type TimeHumanizer interface {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/kr/pretty"
@@ -19,8 +20,7 @@ func TestGetVolumeByName(t *testing.T) {
 	tests := []struct {
 		name string
 
-		configProvider *mockConfigProvider
-		transport      *mockTransport
+		transport *mockTransport
 
 		volumeName string
 
@@ -30,14 +30,15 @@ func TestGetVolumeByName(t *testing.T) {
 		{
 			name: "ok",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
-				ListVolumesResource: []*volume.Resource{
-					&volume.Resource{
-						Name: "possibly-arthur",
-					},
-					&volume.Resource{
-						Name: "definitely-alan",
+				ListVolumesResource: map[id.Namespace][]*volume.Resource{
+					"arbitrary-namespace-id": {
+						&volume.Resource{
+							Name: "possibly-arthur",
+						},
+						&volume.Resource{
+							Name: "definitely-alan",
+						},
 					},
 				},
 			},
@@ -52,14 +53,15 @@ func TestGetVolumeByName(t *testing.T) {
 		{
 			name: "volume with name does not exist",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
-				ListVolumesResource: []*volume.Resource{
-					&volume.Resource{
-						Name: "possibly-arthur",
-					},
-					&volume.Resource{
-						Name: "not-alan",
+				ListVolumesResource: map[id.Namespace][]*volume.Resource{
+					"arbitrary-namespace-id": {
+						&volume.Resource{
+							Name: "possibly-arthur",
+						},
+						&volume.Resource{
+							Name: "not-alan",
+						},
 					},
 				},
 			},
@@ -75,7 +77,6 @@ func TestGetVolumeByName(t *testing.T) {
 		{
 			name: "error getting list of volumes",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				ListVolumesError: errors.New("bananas"),
 			},
@@ -92,7 +93,7 @@ func TestGetVolumeByName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			client := New(tt.configProvider)
+			client := New()
 			if err := client.ConfigureTransport(tt.transport); err != nil {
 				t.Fatalf("got error configuring client transport: %v", err)
 			}
@@ -129,23 +130,58 @@ func TestFetchAllVolumes(t *testing.T) {
 					{
 						ID: "namespace-42",
 					},
-				},
-				ListVolumesResource: []*volume.Resource{
 					{
-						ID: "volume-1",
+						ID: "namespace-43",
 					},
 					{
-						ID: "volume-2",
+						ID: "namespace-44",
+					},
+				},
+				ListVolumesResource: map[id.Namespace][]*volume.Resource{
+					"namespace-42": {
+						{
+							ID: "volume-1",
+						},
+						{
+							ID: "volume-2",
+						},
+					},
+					"namespace-43": {
+						{
+							ID: "volume-3",
+						},
+						{
+							ID: "volume-4",
+						},
+					},
+					"namespace-44": {
+						{
+							ID: "volume-5",
+						},
+						{
+							ID: "volume-6",
+						},
 					},
 				},
 			},
-
 			wantVolumes: []*volume.Resource{
 				{
 					ID: "volume-1",
 				},
 				{
 					ID: "volume-2",
+				},
+				{
+					ID: "volume-3",
+				},
+				{
+					ID: "volume-4",
+				},
+				{
+					ID: "volume-5",
+				},
+				{
+					ID: "volume-6",
 				},
 			},
 			wantErr: nil,
@@ -160,12 +196,14 @@ func TestFetchAllVolumes(t *testing.T) {
 						ID: "namespace-42",
 					},
 				},
-				ListVolumesResource: []*volume.Resource{
-					{
-						ID: "volume-1",
-					},
-					{
-						ID: "volume-2",
+				ListVolumesResource: map[id.Namespace][]*volume.Resource{
+					"namespace-42": {
+						{
+							ID: "volume-1",
+						},
+						{
+							ID: "volume-2",
+						},
 					},
 				},
 				ListVolumesError: UnauthorisedError{"not allowed"},
@@ -216,15 +254,20 @@ func TestFetchAllVolumes(t *testing.T) {
 		var tt = tt
 		t.Run(tt.name, func(t *testing.T) {
 
-			client := New(&mockConfigProvider{})
+			client := New()
 			if err := client.ConfigureTransport(tt.transport); err != nil {
 				t.Fatalf("got error configuring client transport: %v", err)
 			}
 
-			gotVolumes, gotErr := client.fetchAllVolumes(context.Background())
+			gotVolumes, gotErr := client.fetchAllVolumesParallel(context.Background())
 			if !reflect.DeepEqual(gotErr, tt.wantErr) {
 				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
 			}
+
+			// sort in order to compare
+			sort.Slice(gotVolumes, func(i, j int) bool {
+				return gotVolumes[i].ID.String() < gotVolumes[j].ID.String()
+			})
 
 			if !reflect.DeepEqual(gotVolumes, tt.wantVolumes) {
 				pretty.Ldiff(t, gotVolumes, tt.wantVolumes)
@@ -247,7 +290,7 @@ func TestFilterVolumesForNames(t *testing.T) {
 		wantErr     error
 	}{
 		{
-			name: "dont filter when no names provided",
+			name: "don't filter when no names provided",
 
 			volumes: []*volume.Resource{
 				&volume.Resource{
@@ -356,7 +399,7 @@ func TestFilterVolumesForUIDs(t *testing.T) {
 		wantErr     error
 	}{
 		{
-			name: "dont filter when no uids provided",
+			name: "don't filter when no uids provided",
 
 			volumes: []*volume.Resource{
 				&volume.Resource{
@@ -460,8 +503,7 @@ func TestClientAttachVolume(t *testing.T) {
 	tests := []struct {
 		name string
 
-		configProvider *mockConfigProvider
-		transport      *mockTransport
+		transport *mockTransport
 
 		nsID   id.Namespace
 		volID  id.Volume
@@ -475,7 +517,6 @@ func TestClientAttachVolume(t *testing.T) {
 		{
 			name: "ok",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				AuthenticateError: nil,
 				AttachError:       nil,
@@ -491,27 +532,8 @@ func TestClientAttachVolume(t *testing.T) {
 			wantNodeID:      "bananaNode",
 		},
 		{
-			name: "attach authenticate error",
-
-			configProvider: &mockConfigProvider{},
-			transport: &mockTransport{
-				AuthenticateError: mockErr,
-				AttachError:       nil,
-			},
-
-			nsID:   "bananaNamespace",
-			volID:  "bananaVolume",
-			nodeID: "bananaNode",
-
-			wantErr:         mockErr,
-			wantNamespaceID: "",
-			wantVolumeID:    "",
-			wantNodeID:      "",
-		},
-		{
 			name: "attach transport error",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				AuthenticateError: nil,
 				AttachError:       mockErr,
@@ -531,7 +553,7 @@ func TestClientAttachVolume(t *testing.T) {
 		var tt = tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			client := New(tt.configProvider)
+			client := New()
 			if err := client.ConfigureTransport(tt.transport); err != nil {
 				t.Fatalf("got error configuring client transport: %v", err)
 			}

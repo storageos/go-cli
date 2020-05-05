@@ -1,4 +1,4 @@
-// Package flagutil exports utility functions focussed on command flag sets.
+// Package flagutil exports utility functions focused on command flag sets.
 // Its purpose is to provide consistency for commands across different packages
 // that share a given flag.
 package flagutil
@@ -26,7 +26,7 @@ func SupportSelectors(flagSet *pflag.FlagSet, p *[]string) {
 func SupportCAS(flagSet *pflag.FlagSet, p *string) func() bool {
 	const casName = "cas"
 
-	flagSet.StringVar(p, casName, "", "make changes to a resource conditional upon matching a provided version")
+	flagSet.StringVar(p, casName, "", "make changes to a resource conditional upon matching the provided version")
 
 	return func() bool {
 		return flagSet.Changed(casName)

@@ -11,6 +11,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd"
 	"code.storageos.net/storageos/c2-cli/config"
 	"code.storageos.net/storageos/c2-cli/config/environment"
+	"code.storageos.net/storageos/c2-cli/config/file"
 	"code.storageos.net/storageos/c2-cli/config/flags"
 )
 
@@ -30,18 +31,16 @@ func main() {
 	// → flags first. note we init the flagset here because it needs to be
 	// given to the InitCommand call (setting up global flags)
 	globalFlags := pflag.NewFlagSet("storageos", pflag.ContinueOnError)
-	configProvider := flags.NewProvider(
-		globalFlags,
-		// → environment next
-		environment.NewProvider(
-			// → TODO(CP-3918) config file next
-			//
-			// → default values as final fallback
-			config.NewDefaulter(),
-		),
-	)
 
-	client := apiclient.New(configProvider)
+	// flags > envs > config file > default
+	defaultProvider := config.NewDefaulter()
+	fileProvider := file.NewProvider(defaultProvider)
+	envProvider := environment.NewProvider(fileProvider)
+	configProvider := flags.NewProvider(globalFlags, envProvider)
+
+	fileProvider.SetConfigProvider(configProvider)
+
+	client := apiclient.New()
 
 	app := cmd.InitCommand(
 		client,

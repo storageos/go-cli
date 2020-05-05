@@ -94,7 +94,7 @@ func NewNodes(nodes []*node.Resource) []*Node {
 // NewNodeDescription constructs a new NodeDescription output representation
 // type for n, decorating it with details about all its local volume
 // deployments which are in hostedVolumes.
-func NewNodeDescription(n *node.Resource, hostedVolumes []*volume.Resource, namespaceForID map[id.Namespace]*namespace.Resource) (*NodeDescription, error) {
+func NewNodeDescription(n *node.Resource, hostedVolumes []*volume.Resource, namespaceForID map[id.Namespace]*namespace.Resource) *NodeDescription {
 
 	nodeDescription := &NodeDescription{
 		Node:          *NewNode(n),
@@ -104,13 +104,14 @@ func NewNodeDescription(n *node.Resource, hostedVolumes []*volume.Resource, name
 	for _, volResource := range hostedVolumes {
 		outputVol, err := newHostedVolumeForNode(n, volResource, namespaceForID[volResource.Namespace])
 		if err != nil {
-			return nil, err
+			// The node does not host the volume, don't add it to the list
+			continue
 		}
 
 		nodeDescription.HostedVolumes = append(nodeDescription.HostedVolumes, outputVol)
 	}
 
-	return nodeDescription, nil
+	return nodeDescription
 }
 
 // newHostedVolumeForNode constructs a new HostedVolume output representation

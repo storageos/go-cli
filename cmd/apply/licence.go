@@ -11,11 +11,18 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
+
+	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
+
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/output"
 )
 
-var errConflictingLicenceSources = errors.New("must specify exactly one input source to read a product licence from")
+var (
+	errConflictingLicenceSources = errors.New("must specify exactly one input source to read a product licence from")
+)
 
 type licenceCommand struct {
 	config  ConfigProvider
@@ -24,6 +31,11 @@ type licenceCommand struct {
 
 	fromStdin    bool
 	fromFilepath string
+
+	// useCAS determines whether the command makes the update licence request
+	// constrained by the provided casVersion.
+	useCAS     func() bool
+	casVersion string
 
 	writer io.Writer
 }
@@ -42,7 +54,14 @@ func (c *licenceCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, arg
 		}
 	}
 
-	updated, err := c.client.UpdateLicence(ctx, licenceKey)
+	var params *apiclient.UpdateLicenceRequestParams
+	if c.useCAS() {
+		params = &apiclient.UpdateLicenceRequestParams{
+			CASVersion: version.FromString(c.casVersion),
+		}
+	}
+
+	updated, err := c.client.UpdateLicence(ctx, licenceKey, params)
 	if err != nil {
 		return err
 	}
@@ -80,10 +99,14 @@ $ echo "<licence file contents>" | storageos apply licence --from-stdin
 			if !c.fromStdin && c.fromFilepath == "" {
 				return errors.New("did not specify any input source to read a product licence from")
 			}
+
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			run := runwrappers.RunWithTimeout(c.config)(c.runWithCtx)
+			run := runwrappers.Chain(
+				runwrappers.RunWithTimeout(c.config),
+				runwrappers.AuthenticateClient(c.config, c.client),
+			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},
 
@@ -92,6 +115,8 @@ $ echo "<licence file contents>" | storageos apply licence --from-stdin
 
 	cobraCommand.Flags().StringVar(&c.fromFilepath, "from-file", "", "reads a StorageOS product licence from a specified file path")
 	cobraCommand.Flags().BoolVar(&c.fromStdin, "from-stdin", false, "reads a StorageOS product licence from the standard input")
+
+	c.useCAS = flagutil.SupportCAS(cobraCommand.Flags(), &c.casVersion)
 
 	return cobraCommand
 }

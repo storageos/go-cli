@@ -83,15 +83,10 @@ func (c *userCommand) createUser(ctx context.Context, _ *cobra.Command, _ []stri
 			groupIDs = append(groupIDs, id.PolicyGroup(gid))
 		}
 
-		policyGroups, err = c.client.GetListPolicyGroups(ctx, groupIDs...)
+		policyGroups, err = c.client.GetListPolicyGroupsByUID(ctx, groupIDs...)
 		if err != nil {
 			return err
 		}
-	}
-
-	groupMapping, err := c.getMappingForGroups(ctx, policyGroups)
-	if err != nil {
-		return err
 	}
 
 	user, err := c.client.CreateUser(
@@ -105,21 +100,7 @@ func (c *userCommand) createUser(ctx context.Context, _ *cobra.Command, _ []stri
 		return err
 	}
 
-	outputUser, err := output.NewUser(user, groupMapping)
-	if err != nil {
-		return err
-	}
-
-	return c.display.CreateUser(ctx, c.writer, outputUser)
-}
-
-func (c *userCommand) getMappingForGroups(ctx context.Context, policyGroupList []*policygroup.Resource) (map[id.PolicyGroup]*policygroup.Resource, error) {
-	policyGroups := map[id.PolicyGroup]*policygroup.Resource{}
-	for _, g := range policyGroupList {
-		policyGroups[g.ID] = g
-	}
-
-	return policyGroups, nil
+	return c.display.CreateUser(ctx, c.writer, output.NewUser(user, policyGroups))
 }
 
 // promptForPassword will interactively request a password from the user,
@@ -188,7 +169,10 @@ $ storageos create user --with-username=alice --with-admin=true
 		}),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			run := runwrappers.RunWithTimeout(c.config)(c.createUser)
+			run := runwrappers.Chain(
+				runwrappers.RunWithTimeout(c.config),
+				runwrappers.AuthenticateClient(c.config, c.client),
+			)(c.createUser)
 
 			return run(context.Background(), cmd, args)
 		},
@@ -198,7 +182,7 @@ $ storageos create user --with-username=alice --with-admin=true
 
 	cobraCommand.Flags().StringVar(&c.username, "with-username", "", "the username to assign")
 	cobraCommand.Flags().StringVar(&c.password, "with-password", "", "the password to assign to the user. If not specified, this will be prompted for.")
-	cobraCommand.Flags().BoolVar(&c.createAsAdmin, "with-admin", false, "control whether the user is given administrative priviledges")
+	cobraCommand.Flags().BoolVar(&c.createAsAdmin, "with-admin", false, "control whether the user is given administrative privileges")
 	cobraCommand.Flags().StringArrayVar(&c.groups, "with-groups", []string{}, "the list of policy groups to assign to the user")
 
 	return cobraCommand

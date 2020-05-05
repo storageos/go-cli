@@ -41,13 +41,13 @@ func TestFormatFromString(t *testing.T) {
 			name:    "toml",
 			s:       "toml",
 			want:    Unknown,
-			wantErr: errInvalidFormat,
+			wantErr: ErrInvalidFormat,
 		},
 		{
 			name:    "xml",
 			s:       "xml",
 			want:    Unknown,
-			wantErr: errInvalidFormat,
+			wantErr: ErrInvalidFormat,
 		},
 	}
 	for _, tt := range tests {
@@ -74,6 +74,7 @@ func TestValidFormats(t *testing.T) {
 		format, err := FormatFromString(f)
 		if err != nil {
 			t.Errorf("ValidFormats contains a non valid format: %s", f)
+			continue
 		}
 
 		if format.String() != f {

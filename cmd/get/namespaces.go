@@ -89,7 +89,7 @@ func (c *namespaceCommand) listNamespaces(ctx context.Context, refs []string) ([
 		uids[i] = id.Namespace(ref)
 	}
 
-	return c.client.GetListNamespaces(ctx, uids...)
+	return c.client.GetListNamespacesByUID(ctx, uids...)
 }
 
 func newNamespace(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
@@ -116,6 +116,7 @@ $ storageos get namespace my-namespace-name
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
 				runwrappers.EnsureTargetOrSelectors(&c.selectors),
+				runwrappers.AuthenticateClient(c.config, c.client),
 			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},

@@ -5,7 +5,6 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** | A unique identifier for a cluster. The format of this type is undefined and may change but the defined properties will not change.  | [optional] [readonly] 
-**Licence** | [**Licence**](Licence.md) |  | [optional] 
 **DisableTelemetry** | **bool** | Disables collection of telemetry data across the cluster. | [optional] [default to false]
 **DisableCrashReporting** | **bool** | Disables collection of reports for any fatal crashes across the cluster.  | [optional] [default to false]
 **DisableVersionCheck** | **bool** | Disables the mechanism responsible for checking if there is an updated version of StorageOS available for installation.  | [optional] [default to false]

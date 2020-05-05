@@ -42,6 +42,16 @@ func (d *Displayer) CreateVolumeAsync(ctx context.Context, w io.Writer) error {
 	return nil
 }
 
+// CreateNamespace encodes namespace as YAML, writing the result to w.
+func (d *Displayer) CreateNamespace(ctx context.Context, w io.Writer, namespace *output.Namespace) error {
+	return d.encode(w, namespace)
+}
+
+// CreatePolicyGroup encodes group as YAML, writing the result to w.
+func (d *Displayer) CreatePolicyGroup(ctx context.Context, w io.Writer, group *output.PolicyGroup) error {
+	return d.encode(w, group)
+}
+
 // -----------------------------------------------------------------------------
 // UPDATE
 // -----------------------------------------------------------------------------
@@ -60,15 +70,20 @@ func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *outpu
 	return d.encode(w, resource)
 }
 
+// GetLicence encodes resource as YAML, writing the result to w.
+func (d *Displayer) GetLicence(ctx context.Context, w io.Writer, resource *output.Licence) error {
+	return d.encode(w, resource)
+}
+
 // GetDiagnostics encodes outputPath as YAML, writing the result to w.
 func (d *Displayer) GetDiagnostics(ctx context.Context, w io.Writer, outputPath string) error {
-	output := struct {
+	o := struct {
 		OutputPath string `yaml:"outputPath"`
 	}{
 		OutputPath: outputPath,
 	}
 
-	return d.encode(w, output)
+	return d.encode(w, o)
 }
 
 // GetUser encodes resources as YAML, writing the result to w.
@@ -111,6 +126,16 @@ func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, volumes []*
 	return d.encode(w, volumes)
 }
 
+// GetPolicyGroup encodes resource as YAML, writing the result to w.
+func (d *Displayer) GetPolicyGroup(ctx context.Context, w io.Writer, group *output.PolicyGroup) error {
+	return d.encode(w, group)
+}
+
+// GetListPolicyGroups encodes resources as YAML, writing the result to w.
+func (d *Displayer) GetListPolicyGroups(ctx context.Context, w io.Writer, groups []*output.PolicyGroup) error {
+	return d.encode(w, groups)
+}
+
 // -----------------------------------------------------------------------------
 // DESCRIBE
 // -----------------------------------------------------------------------------
@@ -118,6 +143,21 @@ func (d *Displayer) GetListVolumes(ctx context.Context, w io.Writer, volumes []*
 // DescribeCluster encodes a cluster as YAML, writing the result to w.
 func (d *Displayer) DescribeCluster(ctx context.Context, w io.Writer, c *output.Cluster) error {
 	return d.encode(w, c)
+}
+
+// DescribeLicence encodes a licence as YAML, writing the result to w.
+func (d *Displayer) DescribeLicence(ctx context.Context, w io.Writer, l *output.Licence) error {
+	return d.encode(w, l)
+}
+
+// DescribeNamespace encodes a namespace as YAML, writing the result to w.
+func (d *Displayer) DescribeNamespace(ctx context.Context, w io.Writer, namespace *output.Namespace) error {
+	return d.encode(w, namespace)
+}
+
+// DescribeListNamespaces encodes a list of namespaces as YAML, writing the result to w.
+func (d *Displayer) DescribeListNamespaces(ctx context.Context, w io.Writer, namespaces []*output.Namespace) error {
+	return d.encode(w, namespaces)
 }
 
 // DescribeNode encodes node as YAML, writing the result to w.
@@ -140,9 +180,35 @@ func (d *Displayer) DescribeListVolumes(ctx context.Context, w io.Writer, volume
 	return d.encode(w, volumes)
 }
 
+// DescribePolicyGroup encodes policy group as YAML, writing the result to w
+func (d *Displayer) DescribePolicyGroup(ctx context.Context, w io.Writer, group *output.PolicyGroup) error {
+	return d.encode(w, group)
+}
+
+// DescribeListPolicyGroups encodes policy groups as YAML, writing the result to w
+func (d *Displayer) DescribeListPolicyGroups(ctx context.Context, w io.Writer, groups []*output.PolicyGroup) error {
+	return d.encode(w, groups)
+}
+
+// DescribeUser encodes user as YAML, writing the result to w
+func (d *Displayer) DescribeUser(ctx context.Context, w io.Writer, user *output.User) error {
+	return d.encode(w, user)
+}
+
+// DescribeListUsers encodes users as YAML, writing the result to w
+func (d *Displayer) DescribeListUsers(ctx context.Context, w io.Writer, users []*output.User) error {
+	return d.encode(w, users)
+}
+
 // -----------------------------------------------------------------------------
 // DELETE
 // -----------------------------------------------------------------------------
+
+// DeleteUser encodes the user deletion confirmation as YAML, writing the
+// results to w.
+func (d *Displayer) DeleteUser(ctx context.Context, w io.Writer, confirmation output.UserDeletion) error {
+	return d.encode(w, confirmation)
+}
 
 // DeleteVolume encodes the deletion confirmation as YAML, writing the result
 // to w.
@@ -153,6 +219,18 @@ func (d *Displayer) DeleteVolume(ctx context.Context, w io.Writer, confirmation 
 // DeleteVolumeAsync writes nothing to w.
 func (d *Displayer) DeleteVolumeAsync(ctx context.Context, w io.Writer) error {
 	return nil
+}
+
+// DeleteNamespace encodes the namespace deletion confirmation as YAML, writing
+// the result to w
+func (d *Displayer) DeleteNamespace(ctx context.Context, w io.Writer, confirmation output.NamespaceDeletion) error {
+	return d.encode(w, confirmation)
+}
+
+// DeletePolicyGroup encodes the policy group deletion confirmation as YAML, writing
+// the result to w
+func (d *Displayer) DeletePolicyGroup(ctx context.Context, w io.Writer, confirmation output.PolicyGroupDeletion) error {
+	return d.encode(w, confirmation)
 }
 
 // -----------------------------------------------------------------------------

@@ -3,7 +3,10 @@
 package environment
 
 import (
+	"bytes"
+	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -13,9 +16,15 @@ import (
 )
 
 const (
+	// AuthCacheDisabledVar keys the environment variable from which we source
+	// the configuration setting which decides whether the auth cache is disabled.
+	AuthCacheDisabledVar = "STORAGEOS_NO_AUTH_CACHE"
 	// APIEndpointsVar keys the environment variable from which we source the
 	// API host endpoints.
 	APIEndpointsVar = "STORAGEOS_ENDPOINTS"
+	// CacheDirVar keys the environment variable from which we source the
+	// directory to use as a data cache.
+	CacheDirVar = "STORAGEOS_CACHE_DIR"
 	// CommandTimeoutVar keys the environment variable from which we source the
 	// timeout for API operations.
 	CommandTimeoutVar = "STORAGEOS_API_TIMEOUT"
@@ -27,7 +36,7 @@ const (
 	PasswordVar = "STORAGEOS_PASSWORD" // #nosec G101
 	// PasswordCommandVar keys the environment variable from which we optionally
 	// source the password of the StorageOS account to authenticate with through
-	// command execution. TODO(CP-3919)
+	// command execution.
 	PasswordCommandVar = "STORAGEOS_PASSWORD_COMMAND" // #nosec G101
 	// UseIDsVar keys the environment variable from which we source the setting
 	// which determines whether existing StorageOS API resources are specified
@@ -40,6 +49,9 @@ const (
 	// OutputFormatVar keys the environment variable from which we source the output
 	// format to use when we print out the results.
 	OutputFormatVar = "STORAGEOS_OUTPUT_FORMAT"
+	// ConfigFilePathVar keys the environment variable from which we source the
+	// config file path to use when we load configs from file.
+	ConfigFilePathVar = "STORAGEOS_CONFIG"
 )
 
 // EnvConfigHelp holds the list of environment variable used to source
@@ -49,9 +61,17 @@ var EnvConfigHelp = []struct {
 	Help string
 }{
 	{
+		Name: AuthCacheDisabledVar,
+		Help: "Disables the caching of authenticated sessions by the CLI",
+	},
+	{
 		// TODO(CP-3924): Update this for multiple endpoints implementation
 		Name: APIEndpointsVar,
 		Help: "Sets the default StorageOS API endpoint for the CLI to connect to",
+	},
+	{
+		Name: CacheDirVar,
+		Help: "Sets the default directory for the CLI to cache re-usable data to",
 	},
 	{
 		Name: CommandTimeoutVar,
@@ -65,12 +85,10 @@ var EnvConfigHelp = []struct {
 		Name: PasswordVar,
 		Help: "Sets the default password provided by the CLI for authentication",
 	},
-	//  TODO(CP-3919): Uncomment/refine this when implemented.
-	//
-	// {
-	// 	Name: PasswordCommandVar,
-	// 	Help: "If set the default password provided by the CLI for authentication is sourced from the output produced by executing the command",
-	// },
+	{
+		Name: PasswordCommandVar,
+		Help: "If set the default password provided by the CLI for authentication is sourced from the output produced by executing the command",
+	},
 	{
 		Name: UseIDsVar,
 		Help: "When set to true, the CLI will use provided values as IDs instead of names for existing resources",
@@ -83,6 +101,10 @@ var EnvConfigHelp = []struct {
 		Name: OutputFormatVar,
 		Help: "Specifies the default format used by the CLI for output",
 	},
+	{
+		Name: ConfigFilePathVar,
+		Help: "Specifies the default path used by the CLI for the config file",
+	},
 }
 
 // Provider exports functionality to retrieve global configuration values from
@@ -90,6 +112,18 @@ var EnvConfigHelp = []struct {
 // available from the environment, the configured fallback is used.
 type Provider struct {
 	fallback config.Provider
+}
+
+// AuthCacheDisabled sources the configuration setting which determines if the
+// auth cache must be disabled from the environment if set. If not set then
+// env's fallback is used.
+func (env *Provider) AuthCacheDisabled() (bool, error) {
+	disabledString := os.Getenv(AuthCacheDisabledVar)
+	if disabledString == "" {
+		return env.fallback.AuthCacheDisabled()
+	}
+
+	return strconv.ParseBool(disabledString)
 }
 
 // APIEndpoints sources the list of comma-separated target API endpoints from
@@ -103,6 +137,17 @@ func (env *Provider) APIEndpoints() ([]string, error) {
 	endpoints := strings.Split(hostString, ",")
 
 	return endpoints, nil
+}
+
+// CacheDir sources the path to the directory for the CLI to use when caching
+// data from the environment if set. If not set in the environment then env's fallback is used.
+func (env *Provider) CacheDir() (string, error) {
+	cacheString := os.Getenv(CacheDirVar)
+	if cacheString == "" {
+		return env.fallback.CacheDir()
+	}
+
+	return cacheString, nil
 }
 
 // CommandTimeout sources the command timeout duration from the environment
@@ -132,6 +177,23 @@ func (env *Provider) Username() (string, error) {
 // the environment if set. If not set in the environment then env's fallback
 // is used.
 func (env *Provider) Password() (string, error) {
+	passwordCommand := os.Getenv(PasswordCommandVar)
+	if passwordCommand != "" {
+		cmd := exec.Command(passwordCommand)
+		b := &bytes.Buffer{}
+		cmd.Stdout = b
+		err := cmd.Run()
+		if err != nil {
+			switch v := err.(type) {
+			case *exec.ExitError:
+				return "", fmt.Errorf("password command exited with error code %d", v.ExitCode())
+			default:
+				return "", err
+			}
+		}
+		return strings.TrimSpace(b.String()), nil
+	}
+
 	password := os.Getenv(PasswordVar)
 	if password == "" {
 		return env.fallback.Password()
@@ -180,6 +242,17 @@ func (env *Provider) OutputFormat() (output.Format, error) {
 	}
 
 	return outputType, nil
+}
+
+// ConfigFilePath sources the config file path taken from the environment, if set.
+// If not set, the env's fallback is used.
+func (env *Provider) ConfigFilePath() (string, error) {
+	path := os.Getenv(ConfigFilePathVar)
+	if path == "" {
+		return env.fallback.ConfigFilePath()
+	}
+
+	return path, nil
 }
 
 // NewProvider returns a configuration provider which sources

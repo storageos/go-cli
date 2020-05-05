@@ -6,14 +6,15 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/licence"
+
 	"code.storageos.net/storageos/c2-cli/apiclient"
-	"code.storageos.net/storageos/c2-cli/cluster"
 )
 
 // LicenceClient is a type capable of fetching a StorageOS cluster API
 // resource containing the licencing information for that installation.
 type LicenceClient interface {
-	GetCluster(ctx context.Context) (*cluster.Resource, error)
+	GetLicence(ctx context.Context) (*licence.Resource, error)
 }
 
 // LicenceLimitError is a command line interface error wrapper for an
@@ -21,7 +22,7 @@ type LicenceClient interface {
 // provide a detailed error message.
 type LicenceLimitError struct {
 	err     apiclient.LicenceCapabilityError
-	licence *cluster.Licence
+	licence *licence.Resource
 }
 
 func (e LicenceLimitError) Error() string {
@@ -43,7 +44,7 @@ Current licence:
 }
 
 // NewLicenceLimitError uses licence to decorate err with a detailed error message.
-func NewLicenceLimitError(err apiclient.LicenceCapabilityError, licence *cluster.Licence) LicenceLimitError {
+func NewLicenceLimitError(err apiclient.LicenceCapabilityError, licence *licence.Resource) LicenceLimitError {
 	return LicenceLimitError{
 		err:     err,
 		licence: licence,
@@ -60,14 +61,14 @@ func HandleLicenceError(client LicenceClient) WrapRunEWithContext {
 			switch v := err.(type) {
 
 			case apiclient.LicenceCapabilityError:
-				cluster, err := client.GetCluster(ctx)
+				lic, err := client.GetLicence(ctx)
 				// If the client fails to get the licence information return the
 				// original error.
 				if err != nil {
 					return v
 				}
 
-				return NewLicenceLimitError(v, cluster.Licence)
+				return NewLicenceLimitError(v, lic)
 
 			default:
 				return err

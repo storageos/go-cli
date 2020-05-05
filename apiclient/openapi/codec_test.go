@@ -7,6 +7,8 @@ import (
 
 	"github.com/kr/pretty"
 
+	"code.storageos.net/storageos/c2-cli/licence"
+
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -19,12 +21,69 @@ import (
 	"code.storageos.net/storageos/openapi"
 )
 
+func TestDecodeLicence(t *testing.T) {
+	t.Parallel()
+
+	mockExpiryTime := time.Date(2020, 01, 01, 0, 0, 0, 2, time.UTC)
+
+	tests := []struct {
+		name string
+
+		model openapi.Licence
+
+		wantResource *licence.Resource
+		wantErr      error
+	}{
+		{
+			name: "ok",
+
+			model: openapi.Licence{
+				ClusterID:            "bananas",
+				ExpiresAt:            mockExpiryTime,
+				ClusterCapacityBytes: 42,
+				UsedBytes:            42 / 2,
+				Kind:                 "mockLicence",
+				CustomerName:         "go testing framework",
+			},
+
+			wantResource: &licence.Resource{
+				ClusterID:            "bananas",
+				ExpiresAt:            mockExpiryTime,
+				ClusterCapacityBytes: 42,
+				UsedBytes:            42 / 2,
+				Kind:                 "mockLicence",
+				CustomerName:         "go testing framework",
+			},
+			wantErr: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		var tt = tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			c := &codec{}
+
+			gotResource, gotErr := c.decodeLicence(tt.model)
+
+			if !reflect.DeepEqual(gotErr, tt.wantErr) {
+				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+			}
+
+			if !reflect.DeepEqual(gotResource, tt.wantResource) {
+				pretty.Ldiff(t, gotResource, tt.wantResource)
+				t.Errorf("got decoded cluster config %v, want %v", pretty.Sprint(gotResource), pretty.Sprint(tt.wantResource))
+			}
+		})
+	}
+}
+
 func TestDecodeCluster(t *testing.T) {
 	t.Parallel()
 
 	mockCreatedAtTime := time.Date(2020, 01, 01, 0, 0, 0, 0, time.UTC)
 	mockUpdatedAtTime := time.Date(2020, 01, 01, 0, 0, 0, 1, time.UTC)
-	mockExpiryTime := time.Date(2020, 01, 01, 0, 0, 0, 2, time.UTC)
 
 	tests := []struct {
 		name string
@@ -39,13 +98,7 @@ func TestDecodeCluster(t *testing.T) {
 
 			model: openapi.Cluster{
 				Id: "bananas",
-				Licence: openapi.Licence{
-					ClusterID:            "bananas",
-					ExpiresAt:            mockExpiryTime,
-					ClusterCapacityBytes: 42,
-					Kind:                 "mockLicence",
-					CustomerName:         "go testing framework",
-				},
+
 				DisableTelemetry:      true,
 				DisableCrashReporting: true,
 				DisableVersionCheck:   true,
@@ -58,14 +111,6 @@ func TestDecodeCluster(t *testing.T) {
 
 			wantResource: &cluster.Resource{
 				ID: "bananas",
-
-				Licence: &cluster.Licence{
-					ClusterID:            "bananas",
-					ExpiresAt:            mockExpiryTime,
-					ClusterCapacityBytes: 42,
-					Kind:                 "mockLicence",
-					CustomerName:         "go testing framework",
-				},
 
 				DisableTelemetry:      true,
 				DisableCrashReporting: true,
@@ -81,14 +126,10 @@ func TestDecodeCluster(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name: "does not panic with no fields",
-
-			model: openapi.Cluster{},
-
-			wantResource: &cluster.Resource{
-				Licence: &cluster.Licence{},
-			},
-			wantErr: nil,
+			name:         "does not panic with no fields",
+			model:        openapi.Cluster{},
+			wantResource: &cluster.Resource{},
+			wantErr:      nil,
 		},
 	}
 
@@ -451,7 +492,7 @@ func TestDecodePolicyGroup(t *testing.T) {
 						Username: "username-2",
 					},
 				},
-				Specs: &[]openapi.PoliciesSpecs{
+				Specs: &[]openapi.PoliciesIdSpecs{
 					{
 						NamespaceID:  "namespace-id",
 						ResourceType: "resource-type",

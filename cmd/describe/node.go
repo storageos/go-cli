@@ -39,12 +39,11 @@ func (c *nodeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 			return err
 		}
 
-		nodeDescription, err := output.NewNodeDescription(n, hostedVols, namespaceForID)
-		if err != nil {
-			return err
-		}
-
-		return c.display.DescribeNode(ctx, c.writer, nodeDescription)
+		return c.display.DescribeNode(
+			ctx,
+			c.writer,
+			output.NewNodeDescription(n, hostedVols, namespaceForID),
+		)
 	default:
 		set, err := selectors.NewSetFromStrings(c.selectors...)
 		if err != nil {
@@ -64,11 +63,10 @@ func (c *nodeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 		nodeDescriptions := []*output.NodeDescription{}
 
 		for _, n := range set.FilterNodes(nodes) {
-			d, err := output.NewNodeDescription(n, hostedVolsMap[n.ID], namespaceForID)
-			if err != nil {
-				return err
-			}
-			nodeDescriptions = append(nodeDescriptions, d)
+			nodeDescriptions = append(
+				nodeDescriptions,
+				output.NewNodeDescription(n, hostedVolsMap[n.ID], namespaceForID),
+			)
 		}
 
 		return c.display.DescribeListNodes(ctx, c.writer, nodeDescriptions)
@@ -142,7 +140,7 @@ func (c *nodeCommand) describeListNodes(ctx context.Context, refs []string) ([]*
 		for i, ref := range refs {
 			uids[i] = id.Node(ref)
 		}
-		nodeList, err = c.client.GetListNodes(ctx, uids...)
+		nodeList, err = c.client.GetListNodesByUID(ctx, uids...)
 	}
 	if err != nil {
 		return nil, nil, err
@@ -166,7 +164,7 @@ func (c *nodeCommand) describeListNodes(ctx context.Context, refs []string) ([]*
 }
 
 func (c *nodeCommand) getNamespaceForID(ctx context.Context) (map[id.Namespace]*namespace.Resource, error) {
-	namespaces, err := c.client.GetAllNamespaces(ctx)
+	namespaces, err := c.client.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -203,6 +201,7 @@ $ storageos describe node my-node-name
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
 				runwrappers.EnsureTargetOrSelectors(&c.selectors),
+				runwrappers.AuthenticateClient(c.config, c.client),
 			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},

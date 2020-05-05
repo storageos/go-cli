@@ -35,7 +35,6 @@ func TestNewVolume(t *testing.T) {
 		nodes map[id.Node]*node.Resource
 
 		wantOutputVol *Volume
-		wantErr       error
 	}{
 		{
 			name: "ok when master with nil sync progress",
@@ -100,7 +99,6 @@ func TestNewVolume(t *testing.T) {
 				UpdatedAt: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
 				Version:   version.FromString("some-version"),
 			},
-			wantErr: nil,
 		},
 		{
 			name: "ok when replicas both with sync progress and without",
@@ -209,7 +207,6 @@ func TestNewVolume(t *testing.T) {
 				UpdatedAt: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
 				Version:   version.FromString("some-version"),
 			},
-			wantErr: nil,
 		},
 		{
 			name: "missing attached on node information",
@@ -246,8 +243,30 @@ func TestNewVolume(t *testing.T) {
 				},
 			},
 
-			wantOutputVol: nil,
-			wantErr:       NewMissingRequiredNodeErr("attached-node"),
+			wantOutputVol: &Volume{
+				ID:             "vol-id",
+				Name:           "vol-name",
+				Description:    "vol-description",
+				AttachedOn:     "attached-node",
+				AttachedOnName: "unknown",
+				Namespace:      "namespace-id",
+				NamespaceName:  "namespace-name",
+				Labels:         labelsFromPairs(t, "b=b", "a=c"),
+				Filesystem:     volume.FsTypeFromString("BLOCK"),
+				SizeBytes:      42,
+				Master: &Deployment{
+					ID:           "deploy-id",
+					Node:         "node-id",
+					NodeName:     "node-name",
+					Health:       health.MasterOnline,
+					Promotable:   true,
+					SyncProgress: nil,
+				},
+				Replicas:  []*Deployment{},
+				CreatedAt: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+				UpdatedAt: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+				Version:   version.FromString("some-version"),
+			},
 		},
 	}
 
@@ -256,10 +275,7 @@ func TestNewVolume(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			gotOutputVol, gotErr := NewVolume(tt.vol, tt.ns, tt.nodes)
-			if gotErr != tt.wantErr {
-				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
-			}
+			gotOutputVol := NewVolume(tt.vol, tt.ns, tt.nodes)
 
 			if !reflect.DeepEqual(gotOutputVol, tt.wantOutputVol) {
 				pretty.Ldiff(t, gotOutputVol, tt.wantOutputVol)
@@ -279,7 +295,6 @@ func TestNewDeployment(t *testing.T) {
 		nodes        map[id.Node]*node.Resource
 
 		wantOutputDeployment *Deployment
-		wantErr              error
 	}{
 		{
 			name: "ok",
@@ -303,7 +318,6 @@ func TestNewDeployment(t *testing.T) {
 				Health:     "health",
 				Promotable: true,
 			},
-			wantErr: nil,
 		},
 		{
 			name: "missing",
@@ -320,8 +334,13 @@ func TestNewDeployment(t *testing.T) {
 				},
 			},
 
-			wantOutputDeployment: nil,
-			wantErr:              NewMissingRequiredNodeErr("node-id"),
+			wantOutputDeployment: &Deployment{
+				ID:         "id",
+				Node:       "node-id",
+				NodeName:   "unknown",
+				Health:     "health",
+				Promotable: true,
+			},
 		},
 	}
 
@@ -330,10 +349,7 @@ func TestNewDeployment(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			gotOutputDeployment, gotErr := newDeployment(tt.inDeployment, tt.nodes)
-			if gotErr != tt.wantErr {
-				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
-			}
+			gotOutputDeployment := newDeployment(tt.inDeployment, tt.nodes)
 
 			if !reflect.DeepEqual(gotOutputDeployment, tt.wantOutputDeployment) {
 				pretty.Ldiff(t, gotOutputDeployment, tt.wantOutputDeployment)

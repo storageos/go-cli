@@ -6,7 +6,14 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
+
+// DeleteNamespaceRequestParams contains optional request parameters for a
+// delete namespace operation.
+type DeleteNamespaceRequestParams struct {
+	CASVersion version.Version
+}
 
 // NamespaceNotFoundError indicates that the API could not find the StorageOS
 // namespace specified.
@@ -44,15 +51,48 @@ func NewNamespaceNameNotFoundError(name string) NamespaceNotFoundError {
 	}
 }
 
-// GetNamespace requests basic information for the namespace resource which
-// corresponds to uid from the StorageOS API.
-func (c *Client) GetNamespace(ctx context.Context, uid id.Namespace) (*namespace.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
+// NamespaceExistsError is returned when a namespace creation request is sent to
+// a cluster where that name is already in use.
+type NamespaceExistsError struct {
+	name string
+}
 
-	return c.transport.GetNamespace(ctx, uid)
+// Error returns an error message indicating that a namespace name is already in
+// use.
+func (e NamespaceExistsError) Error() string {
+	return fmt.Sprintf("namespace name %s is already in use", e.name)
+}
+
+// NewNamespaceExistsError returns an error indicating that a namespace with
+// that name already exists.
+func NewNamespaceExistsError(name string) NamespaceExistsError {
+	return NamespaceExistsError{
+		name: name,
+	}
+}
+
+// InvalidNamespaceCreationError is returned when a namespace creation request
+// sent to the StorageOS API is invalid.
+type InvalidNamespaceCreationError struct {
+	details string
+}
+
+// Error returns an error message indicating that a namespace creation request
+// made to the StorageOS API is invalid, including details if available.
+func (e InvalidNamespaceCreationError) Error() string {
+	msg := "namespace creation request is invalid"
+	if e.details != "" {
+		msg = fmt.Sprintf("%v: %v", msg, e.details)
+	}
+	return msg
+}
+
+// NewInvalidNamespaceCreationError returns an InvalidNamespaceCreationError,
+// using details to provide information about what must be corrected.
+func NewInvalidNamespaceCreationError(details string) InvalidNamespaceCreationError {
+	return InvalidNamespaceCreationError{
+		details: details,
+	}
 }
 
 // GetNamespaceByName requests basic information for the namespace resource
@@ -66,12 +106,7 @@ func (c *Client) GetNamespace(ctx context.Context, uid id.Namespace) (*namespace
 // namespaces from the StorageOS API and returning the first one where the
 // name matches.
 func (c *Client) GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	namespaces, err := c.transport.ListNamespaces(ctx)
+	namespaces, err := c.Transport.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -85,14 +120,14 @@ func (c *Client) GetNamespaceByName(ctx context.Context, name string) (*namespac
 	return nil, NewNamespaceNameNotFoundError(name)
 }
 
-// GetListNamespaces requests a list of namespace resources present in the
+// GetListNamespacesByUID requests a list of namespace resources present in the
 // cluster.
 //
 // The returned list is filtered using uids so that it contains only those
 // namespace resources which have a matching ID. If no uids are given then
 // all namespaces are returned.
-func (c *Client) GetListNamespaces(ctx context.Context, uids ...id.Namespace) ([]*namespace.Resource, error) {
-	resources, err := c.GetAllNamespaces(ctx)
+func (c *Client) GetListNamespacesByUID(ctx context.Context, uids ...id.Namespace) ([]*namespace.Resource, error) {
+	resources, err := c.Transport.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -107,23 +142,12 @@ func (c *Client) GetListNamespaces(ctx context.Context, uids ...id.Namespace) ([
 // namespaces resources which have a matching name. If no names are given then
 // all namespaces are returned.
 func (c *Client) GetListNamespacesByName(ctx context.Context, names ...string) ([]*namespace.Resource, error) {
-	resources, err := c.GetAllNamespaces(ctx)
+	resources, err := c.Transport.ListNamespaces(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return filterNamespacesForNames(resources, names...)
-}
-
-// GetAllNamespaces requests a list containing basic information for every namespace
-// in the StorageOS cluster.
-func (c *Client) GetAllNamespaces(ctx context.Context) ([]*namespace.Resource, error) {
-	_, err := c.authenticate(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c.transport.ListNamespaces(ctx)
 }
 
 // filterNamespacesForNames will return a subset of namespaces containing
@@ -174,10 +198,10 @@ func filterNamespacesForUIDs(namespaces []*namespace.Resource, uids ...id.Namesp
 
 	filtered := make([]*namespace.Resource, 0, len(uids))
 
-	for _, id := range uids {
-		ns, ok := retrieved[id]
+	for _, idVar := range uids {
+		ns, ok := retrieved[idVar]
 		if !ok {
-			return nil, NewNamespaceNotFoundError(id)
+			return nil, NewNamespaceNotFoundError(idVar)
 		}
 		filtered = append(filtered, ns)
 	}

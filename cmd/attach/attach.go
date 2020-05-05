@@ -9,6 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -29,6 +30,9 @@ var (
 // ConfigProvider specifies the configuration settings which commands require
 // access to.
 type ConfigProvider interface {
+	Username() (string, error)
+	Password() (string, error)
+
 	CommandTimeout() (time.Duration, error)
 	UseIDs() (bool, error)
 	Namespace() (string, error)
@@ -38,6 +42,8 @@ type ConfigProvider interface {
 // Client describes the functionality required by the CLI application
 // to reasonably implement the "attach" verb commands.
 type Client interface {
+	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
+
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 	GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error)
 	GetNodeByName(ctx context.Context, name string) (*node.Resource, error)
@@ -91,11 +97,11 @@ func (c *attachCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		volumeID = vol.ID
 
 		nodeName := args[1]
-		node, err := c.client.GetNodeByName(ctx, nodeName)
+		n, err := c.client.GetNodeByName(ctx, nodeName)
 		if err != nil {
 			return err
 		}
-		nodeID = node.ID
+		nodeID = n.ID
 	}
 
 	err = c.client.AttachVolume(ctx, namespaceID, volumeID, nodeID)
@@ -118,7 +124,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 		Use:   "attach",
 		Short: "Attach a volume to a node",
 		Example: `
-$ storageos attach volume --namespace my-namespace-name my-volume my-node
+$ storageos attach --namespace my-namespace-name my-volume my-node
 `,
 
 		Args: argwrappers.WrapInvalidArgsError(func(cmd *cobra.Command, args []string) error {
@@ -147,6 +153,7 @@ $ storageos attach volume --namespace my-namespace-name my-volume my-node
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
 				runwrappers.EnsureNamespaceSetWhenUseIDs(c.config),
+				runwrappers.AuthenticateClient(c.config, c.client),
 			)(c.runWithCtx)
 
 			return run(context.Background(), cmd, args)

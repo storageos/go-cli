@@ -18,8 +18,7 @@ func TestGetNodeByName(t *testing.T) {
 	tests := []struct {
 		name string
 
-		configProvider *mockConfigProvider
-		transport      *mockTransport
+		transport *mockTransport
 
 		nodeName string
 
@@ -29,7 +28,6 @@ func TestGetNodeByName(t *testing.T) {
 		{
 			name: "ok",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				ListNodesResource: []*node.Resource{
 					&node.Resource{
@@ -51,7 +49,6 @@ func TestGetNodeByName(t *testing.T) {
 		{
 			name: "node with name does not exist",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				ListNodesResource: []*node.Resource{
 					&node.Resource{
@@ -73,7 +70,6 @@ func TestGetNodeByName(t *testing.T) {
 		{
 			name: "error getting list of nodes",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				ListNodesError: errors.New("bananas"),
 			},
@@ -90,7 +86,7 @@ func TestGetNodeByName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			client := New(tt.configProvider)
+			client := New()
 			if err := client.ConfigureTransport(tt.transport); err != nil {
 				t.Fatalf("got error configuring client transport: %v", err)
 			}
@@ -120,7 +116,7 @@ func TestFilterNodesForNames(t *testing.T) {
 		wantErr   error
 	}{
 		{
-			name: "dont filter when no names provided",
+			name: "don't filter when no names provided",
 
 			nodes: []*node.Resource{
 				&node.Resource{
@@ -228,7 +224,7 @@ func TestFilterNodesForUIDs(t *testing.T) {
 		wantErr   error
 	}{
 		{
-			name: "dont filter when no uids provided",
+			name: "don't filter when no uids provided",
 
 			nodes: []*node.Resource{
 				&node.Resource{

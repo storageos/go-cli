@@ -10,7 +10,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
-	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 )
 
@@ -30,7 +29,7 @@ func (c *userCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 
 	switch len(args) {
 	case 0:
-		users, err := c.client.GetAllUsers(ctx)
+		users, err := c.client.ListUsers(ctx)
 		if err != nil {
 			return err
 		}
@@ -58,22 +57,12 @@ func (c *userCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 			}
 		}
 
-		policyGroups, err := c.client.GetListPolicyGroups(ctx, u.Groups...)
+		policyGroups, err := c.client.GetListPolicyGroupsByUID(ctx, u.Groups...)
 		if err != nil {
 			return err
 		}
 
-		groupMapping := make(map[id.PolicyGroup]*policygroup.Resource)
-		for _, p := range policyGroups {
-			groupMapping[p.ID] = p
-		}
-
-		outputUser, err := output.NewUser(u, groupMapping)
-		if err != nil {
-			return err
-		}
-
-		return c.display.GetUser(ctx, c.writer, outputUser)
+		return c.display.GetUser(ctx, c.writer, output.NewUser(u, policyGroups))
 
 	default: // more than 1
 		var users []*user.Resource
@@ -85,7 +74,7 @@ func (c *userCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 				ids = append(ids, id.User(arg))
 			}
 
-			users, err = c.client.GetListUsers(ctx, ids)
+			users, err = c.client.GetListUsersByUID(ctx, ids)
 			if err != nil {
 				return err
 			}
@@ -112,22 +101,12 @@ func (c *userCommand) toOutputUsers(ctx context.Context, users []*user.Resource)
 		groups = append(groups, u.Groups...)
 	}
 
-	policyGroups, err := c.client.GetListPolicyGroups(ctx, groups...)
+	policyGroups, err := c.client.GetListPolicyGroupsByUID(ctx, groups...)
 	if err != nil {
 		return nil, err
 	}
 
-	groupMapping := make(map[id.PolicyGroup]*policygroup.Resource)
-	for _, p := range policyGroups {
-		groupMapping[p.ID] = p
-	}
-
-	outputUsers, err := output.NewUsers(users, groupMapping)
-	if err != nil {
-		return nil, err
-	}
-
-	return outputUsers, nil
+	return output.NewUsers(users, policyGroups), nil
 }
 
 func newUser(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
@@ -153,7 +132,10 @@ $ storageos get user --use-ids my-userid-1 my-userid-2
 		}),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			run := runwrappers.RunWithTimeout(c.config)(c.runWithCtx)
+			run := runwrappers.Chain(
+				runwrappers.RunWithTimeout(c.config),
+				runwrappers.AuthenticateClient(c.config, c.client),
+			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
 		},
 

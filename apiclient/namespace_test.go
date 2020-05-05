@@ -15,8 +15,7 @@ func TestGetNamespaceByName(t *testing.T) {
 	tests := []struct {
 		name string
 
-		configProvider *mockConfigProvider
-		transport      *mockTransport
+		transport *mockTransport
 
 		namespaceName string
 
@@ -26,7 +25,6 @@ func TestGetNamespaceByName(t *testing.T) {
 		{
 			name: "ok",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				ListNamespacesResource: []*namespace.Resource{
 					&namespace.Resource{
@@ -48,7 +46,6 @@ func TestGetNamespaceByName(t *testing.T) {
 		{
 			name: "namespace with name does not exist",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				ListNamespacesResource: []*namespace.Resource{
 					&namespace.Resource{
@@ -70,7 +67,6 @@ func TestGetNamespaceByName(t *testing.T) {
 		{
 			name: "error getting list of namespaces",
 
-			configProvider: &mockConfigProvider{},
 			transport: &mockTransport{
 				ListNamespacesError: errors.New("bananas"),
 			},
@@ -87,7 +83,7 @@ func TestGetNamespaceByName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			client := New(tt.configProvider)
+			client := New()
 			if err := client.ConfigureTransport(tt.transport); err != nil {
 				t.Fatalf("got error configuring client transport: %v", err)
 			}

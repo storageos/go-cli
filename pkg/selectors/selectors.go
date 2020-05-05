@@ -41,11 +41,11 @@ func (s *Set) FilterNodes(nodes []*node.Resource) []*node.Resource {
 
 	filtered := make([]*node.Resource, 0)
 
-NEXT_NODE:
+NextNode:
 	for _, n := range nodes {
 		for _, selects := range s.selectors {
 			if !selects(n.Labels) {
-				continue NEXT_NODE
+				continue NextNode
 			}
 		}
 		filtered = append(filtered, n)
@@ -63,11 +63,11 @@ func (s *Set) FilterNamespaces(namespaces []*namespace.Resource) []*namespace.Re
 
 	filtered := make([]*namespace.Resource, 0)
 
-NEXT_NAMESPACE:
+NextNamespace:
 	for _, ns := range namespaces {
 		for _, selects := range s.selectors {
 			if !selects(ns.Labels) {
-				continue NEXT_NAMESPACE
+				continue NextNamespace
 			}
 		}
 		filtered = append(filtered, ns)
@@ -85,11 +85,11 @@ func (s *Set) FilterVolumes(volumes []*volume.Resource) []*volume.Resource {
 
 	filtered := make([]*volume.Resource, 0)
 
-NEXT_VOLUME:
+NextVolume:
 	for _, v := range volumes {
 		for _, selected := range s.selectors {
 			if !selected(v.Labels) {
-				continue NEXT_VOLUME
+				continue NextVolume
 			}
 		}
 		filtered = append(filtered, v)
