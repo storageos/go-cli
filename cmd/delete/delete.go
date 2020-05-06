@@ -10,6 +10,7 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/namespace"
+	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/output/textformat"
@@ -38,11 +39,13 @@ type Client interface {
 	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
 
 	GetUserByName(ctx context.Context, username string) (*user.Resource, error)
+	GetNodeByName(ctx context.Context, name string) (*node.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 	GetVolumeByName(ctx context.Context, namespaceID id.Namespace, name string) (*volume.Resource, error)
 	GetPolicyGroupByName(ctx context.Context, name string) (*policygroup.Resource, error)
 
 	DeleteUser(ctx context.Context, uid id.User, params *apiclient.DeleteUserRequestParams) error
+	DeleteNode(ctx context.Context, nodeID id.Node, params *apiclient.DeleteNodeRequestParams) error
 	DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *apiclient.DeleteVolumeRequestParams) error
 	DeleteNamespace(ctx context.Context, uid id.Namespace, params *apiclient.DeleteNamespaceRequestParams) error
 	DeletePolicyGroup(ctx context.Context, uid id.PolicyGroup, params *apiclient.DeletePolicyGroupRequestParams) error
@@ -53,7 +56,9 @@ type Client interface {
 type Displayer interface {
 	DeleteUser(ctx context.Context, w io.Writer, confirmation output.UserDeletion) error
 	DeleteVolume(ctx context.Context, w io.Writer, confirmation output.VolumeDeletion) error
-	DeleteVolumeAsync(ctx context.Context, w io.Writer) error
+	DeleteVolumeAsync(ctx context.Context, w io.Writer, target output.VolumeDeletion) error
+	DeleteNode(ctx context.Context, w io.Writer, confirmation output.NodeDeletion) error
+	DeleteNodeAsync(ctx context.Context, w io.Writer, target output.NodeDeletion) error
 	DeleteNamespace(ctx context.Context, w io.Writer, confirmation output.NamespaceDeletion) error
 	DeletePolicyGroup(ctx context.Context, w io.Writer, confirmation output.PolicyGroupDeletion) error
 }
@@ -70,6 +75,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 		newNamespace(os.Stdout, client, config),
 		newPolicyGroup(os.Stdout, client, config),
 		newUser(os.Stdout, client, config),
+		newNode(os.Stdout, client, config),
 	)
 
 	return command

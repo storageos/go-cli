@@ -125,6 +125,10 @@ type mockTransport struct {
 	DeleteVolumeGotParams    *DeleteVolumeRequestParams
 	DeleteVolumeError        error
 
+	DeleteNodeGotNode   id.Node
+	DeleteNodeGotParams *DeleteNodeRequestParams
+	DeleteNodeError     error
+
 	DeleteNamespaceGotID     id.Namespace
 	DeleteNamespaceGotParams *DeleteNamespaceRequestParams
 	DeleteNamespaceError     error
@@ -279,6 +283,12 @@ func (m *mockTransport) DeleteVolume(ctx context.Context, namespaceID id.Namespa
 	m.DeleteVolumeGotVolume = volumeID
 	m.DeleteVolumeGotParams = params
 	return m.DeleteVolumeError
+}
+
+func (m *mockTransport) DeleteNode(ctx context.Context, volumeID id.Node, params *DeleteNodeRequestParams) error {
+	m.DeleteNodeGotNode = volumeID
+	m.DeleteNodeGotParams = params
+	return m.DeleteNodeError
 }
 
 func (m *mockTransport) DeleteNamespace(ctx context.Context, uid id.Namespace, params *DeleteNamespaceRequestParams) error {

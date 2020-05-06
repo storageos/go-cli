@@ -92,13 +92,12 @@ type Transport interface {
 	//
 	// The behaviour of the operation is dictated by params:
 	//
-	//
-	//  Asynchrony:
-	//  - If params is nil or params.AsyncMax is empty/zero valued then the create
-	//  request is performed synchronously.
-	//  - If params.AsyncMax is set, the request is performed asynchronously using
-	//  the duration given as the maximum amount of time allowed for the request
-	//  before it times out.
+	//   Asynchrony:
+	//   - If params is nil or params.AsyncMax is empty/zero valued then the
+	//     create request is performed synchronously.
+	//   - If params.AsyncMax is set, the request is performed asynchronously
+	//     using the duration given as the maximum amount of time allowed for
+	//     the request before it times out.
 	CreateVolume(ctx context.Context, namespaceID id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels labels.Set, params *CreateVolumeRequestParams) (*volume.Resource, error)
 	// CreateNamespace requests the creation of a new StorageOS namespace from the
 	// provided fields. If successful the created resource for the namespace is
@@ -124,30 +123,46 @@ type Transport interface {
 	//
 	// The behaviour of the operation is dictated by params:
 	//
+	//   Version constraints:
+	//   - If params is nil or params.CASVersion is empty then the delete
+	//     request is unconditional
+	//   - If params.CASVersion is set, the request is conditional upon it
+	//     matching the volume entity's version as seen by the server.
 	//
-	// 	Version constraints:
-	// 	- If params is nil or params.CASVersion is empty then the delete request is
-	// 	unconditional
-	// 	- If params.CASVersion is set, the request is conditional upon it matching
-	// 	the volume entity's version as seen by the server.
-	//
-	//  Asynchrony:
-	//  - If params is nil or params.AsyncMax is empty/zero valued then the delete
-	//  request is performed synchronously.
-	//  - If params.AsyncMax is set, the request is performed asynchronously using
-	//  the duration given as the maximum amount of time allowed for the request
-	//  before it times out.
+	//   Asynchrony:
+	//   - If params is nil or params.AsyncMax is empty/zero valued then the
+	//     delete request is performed synchronously.
+	//   - If params.AsyncMax is set, the request is performed asynchronously
+	//     using the duration given as the maximum amount of time allowed for
+	//     the request before it times out.
 	DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DeleteVolumeRequestParams) error
 	// DeleteNamespace makes a delete request for a namespace given its id.
 	//
 	// The behaviour of the operation is dictated by params:
 	//
-	//  Version constraints:
-	//  - If params is nil or params.CASVersion is empty then the delete request is
-	//    unconditional
-	//  - If params.CASVersion is set, the request is conditional upon it matching
-	//    the volume entity's version as seen by the server.
+	//   Version constraints:
+	//   - If params is nil or params.CASVersion is empty then the delete
+	//     request is unconditional
+	//   - If params.CASVersion is set, the request is conditional upon it
+	//     matching the volume entity's version as seen by the server.
 	DeleteNamespace(ctx context.Context, uid id.Namespace, params *DeleteNamespaceRequestParams) error
+	// DeleteNode makes a delete request for nodeID.
+	//
+	// The behaviour of the operation is dictated by params:
+	//
+	//   Version constraints:
+	//   - If params is nil or params.CASVersion is empty then the delete
+	//   request is unconditional
+	//   - If params.CASVersion is set, the request is conditional upon it
+	//   matching the node entity's version as seen by the server.
+	//
+	//   Asynchrony:
+	//   - If params is nil or params.AsyncMax is empty/zero valued then the
+	//   delete request is performed synchronously.
+	//   - If params.AsyncMax is set, the request is performed asynchronously
+	//   using the duration given as the maximum amount of time allowed for the
+	//   request before it times out.
+	DeleteNode(ctx context.Context, nodeID id.Node, params *DeleteNodeRequestParams) error
 	// DeleteUser makes a delete request for a user given its id.
 	// The behaviour of the operation is dictated by params:
 	//
@@ -174,12 +189,11 @@ type Transport interface {
 	//
 	// The behaviour of the operation is dictated by params:
 	//
-	//
-	//  Version constraints:
-	// 	- If params is nil or params.CASVersion is empty then the detach request is
-	// 	unconditional
-	// 	- If params.CASVersion is set, the request is conditional upon it matching
-	// 	the volume entity's version as seen by the server.
+	//   Version constraints:
+	//   - If params is nil or params.CASVersion is empty then the detach
+	//     request is unconditional
+	//   - If params.CASVersion is set, the request is conditional upon it
+	//     matching the volume entity's version as seen by the server.
 	DetachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DetachVolumeRequestParams) error
 }
 

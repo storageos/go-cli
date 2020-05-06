@@ -222,7 +222,7 @@ func (d *Displayer) DeleteVolume(ctx context.Context, w io.Writer, confirmation 
 }
 
 // DeleteVolumeAsync writes nothing to w.
-func (d *Displayer) DeleteVolumeAsync(ctx context.Context, w io.Writer) error {
+func (d *Displayer) DeleteVolumeAsync(ctx context.Context, w io.Writer, target output.VolumeDeletion) error {
 	return nil
 }
 
@@ -236,6 +236,17 @@ func (d *Displayer) DeleteNamespace(ctx context.Context, w io.Writer, confirmati
 // the result to w
 func (d *Displayer) DeletePolicyGroup(ctx context.Context, w io.Writer, confirmation output.PolicyGroupDeletion) error {
 	return d.encode(w, confirmation)
+}
+
+// DeleteNode encodes the node deletion confirmation as YAML, writing
+// the result to w
+func (d *Displayer) DeleteNode(ctx context.Context, w io.Writer, confirmation output.NodeDeletion) error {
+	return d.encode(w, confirmation)
+}
+
+// DeleteNodeAsync writes nothing to w.
+func (d *Displayer) DeleteNodeAsync(ctx context.Context, w io.Writer, target output.NodeDeletion) error {
+	return nil
 }
 
 // -----------------------------------------------------------------------------
