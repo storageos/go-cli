@@ -120,6 +120,10 @@ func (t *noTransport) DeleteVolume(ctx context.Context, namespaceID id.Namespace
 	return ErrNoTransportConfigured
 }
 
+func (t *noTransport) DeleteNode(ctx context.Context, volumeID id.Node, params *DeleteNodeRequestParams) error {
+	return ErrNoTransportConfigured
+}
+
 func (t *noTransport) DeleteNamespace(ctx context.Context, uid id.Namespace, params *DeleteNamespaceRequestParams) error {
 	return ErrNoTransportConfigured
 }

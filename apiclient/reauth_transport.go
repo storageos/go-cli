@@ -338,6 +338,17 @@ func (tr *TransportWithReauth) UpdateLicence(ctx context.Context, lic []byte, ca
 	return updated, err
 }
 
+// DeleteNode wraps the inner transport's call with a reauthenticate and retry
+// upon encountering an authentication error.
+func (tr *TransportWithReauth) DeleteNode(ctx context.Context, nodeID id.Node, params *DeleteNodeRequestParams) error {
+
+	err := tr.doWithReauth(ctx, func() error {
+		return tr.inner.DeleteNode(ctx, nodeID, params)
+	})
+
+	return err
+}
+
 // SetReplicas wraps the inner transport's call with a reauthenticate and retry
 // upon encountering an authentication error.
 func (tr *TransportWithReauth) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, version version.Version) error {

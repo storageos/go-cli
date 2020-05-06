@@ -3,10 +3,19 @@ package apiclient
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
+
+// DeleteNodeRequestParams contains optional request parameters for a delete
+// node operation.
+type DeleteNodeRequestParams struct {
+	CASVersion version.Version
+	AsyncMax   time.Duration
+}
 
 // NodeNotFoundError indicates that the API could not find the StorageOS node
 // specified.

@@ -16,14 +16,10 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
 
-var errNoNamespaceSpecified = errors.New("must specify a namespace to remove volumes from")
-
-type volumeCommand struct {
+type nodeCommand struct {
 	config  ConfigProvider
 	client  Client
 	display Displayer
-
-	namespace string
 
 	// useCAS determines whether the command makes the delete request
 	// constrained by the provided casVersion.
@@ -35,13 +31,13 @@ type volumeCommand struct {
 	writer io.Writer
 }
 
-func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args []string) error {
+func (c *nodeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args []string) error {
 	useIDs, err := c.config.UseIDs()
 	if err != nil {
 		return err
 	}
 
-	params := &apiclient.DeleteVolumeRequestParams{}
+	params := &apiclient.DeleteNodeRequestParams{}
 
 	if c.useCAS() {
 		params.CASVersion = version.FromString(c.casVersion)
@@ -54,69 +50,53 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		if err != nil {
 			return err
 		}
-
 		params.AsyncMax = timeout
 	}
 
-	namespaceID := id.Namespace(c.namespace)
-	volumeID := id.Volume(args[0])
+	nodeID := id.Node(args[0])
 
 	if !useIDs {
-		ns, err := c.client.GetNamespaceByName(ctx, c.namespace)
+		nodeName := args[0]
+		n, err := c.client.GetNodeByName(ctx, nodeName)
 		if err != nil {
 			return err
 		}
-
-		namespaceID = ns.ID
-
-		volName := args[0]
-		vol, err := c.client.GetVolumeByName(ctx, namespaceID, volName)
-		if err != nil {
-			return err
-		}
-		volumeID = vol.ID
+		nodeID = n.ID
 	}
 
-	err = c.client.DeleteVolume(
-		ctx,
-		namespaceID,
-		volumeID,
-		params,
-	)
+	err = c.client.DeleteNode(ctx, nodeID, params)
 	if err != nil {
 		return err
 	}
 
-	volumeDisplay := output.NewVolumeDeletion(volumeID, namespaceID)
+	nodeDisplay := output.NodeDeletion{ID: nodeID}
 
 	// Display the "request submitted" message if it was async, instead of
 	// the deletion confirmation below.
 	if c.useAsync {
-		return c.display.DeleteVolumeAsync(ctx, c.writer, volumeDisplay)
+		return c.display.DeleteNodeAsync(ctx, c.writer, nodeDisplay)
 	}
 
-	return c.display.DeleteVolume(ctx, c.writer, volumeDisplay)
+	return c.display.DeleteNode(ctx, c.writer, nodeDisplay)
 }
 
-func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
-	c := &volumeCommand{
+func newNode(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
+	c := &nodeCommand{
 		config: config,
 		client: client,
 		writer: w,
 	}
 
 	cobraCommand := &cobra.Command{
-		Use:   "volume [volume name]",
-		Short: "Delete a volume",
+		Use:   "node [node name]",
+		Short: "Delete a node",
 		Example: `
-$ storageos delete volume my-test-volume my-unneeded-volume
-
-$ storageos delete volume --namespace my-namespace my-old-volume
+$ storagoes delete node my-old-node
 `,
 
 		Args: argwrappers.WrapInvalidArgsError(func(_ *cobra.Command, args []string) error {
 			if len(args) != 1 {
-				return errors.New("must specify exactly one volume for deletion")
+				return errors.New("must specify exactly one node for deletion")
 			}
 			return nil
 		}),
@@ -124,23 +104,12 @@ $ storageos delete volume --namespace my-namespace my-old-volume
 		PreRunE: argwrappers.WrapInvalidArgsError(func(_ *cobra.Command, args []string) error {
 			c.display = SelectDisplayer(c.config)
 
-			ns, err := c.config.Namespace()
-			if err != nil {
-				return err
-			}
-
-			if ns == "" {
-				return errNoNamespaceSpecified
-			}
-			c.namespace = ns
-
 			return nil
 		}),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run := runwrappers.Chain(
 				runwrappers.RunWithTimeout(c.config),
-				runwrappers.EnsureNamespaceSetWhenUseIDs(c.config),
 				runwrappers.AuthenticateClient(c.config, c.client),
 			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)

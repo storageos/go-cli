@@ -62,6 +62,11 @@ type LocalDeployment struct {
 	SyncProgress *SyncProgress      `json:"syncProgress,omitempty" yaml:"syncProgress,omitempty"`
 }
 
+// NodeDeletion defines a node deletion confirmation output representation.
+type NodeDeletion struct {
+	ID id.Node `json:"id" yaml:"id"`
+}
+
 // NewNode creates a new Node output representation containing all the info to
 // be outputted.
 func NewNode(n *node.Resource) *Node {
