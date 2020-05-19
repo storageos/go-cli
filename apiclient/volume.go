@@ -111,8 +111,9 @@ type CreateVolumeRequestParams struct {
 // DeleteVolumeRequestParams contains optional request parameters for a delete
 // volume operation.
 type DeleteVolumeRequestParams struct {
-	CASVersion version.Version
-	AsyncMax   time.Duration
+	CASVersion    version.Version
+	AsyncMax      time.Duration
+	OfflineDelete bool
 }
 
 // DetachVolumeRequestParams contains optional request parameters for a detach

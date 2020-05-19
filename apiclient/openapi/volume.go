@@ -136,6 +136,12 @@ func (o *OpenAPI) ListVolumes(ctx context.Context, namespaceID id.Namespace) ([]
 //  - If params.AsyncMax is set, the request is performed asynchronously using
 //  the duration given as the maximum amount of time allowed for the request
 //  before it times out.
+//
+//  Offline deletion behaviour:
+//  - If params is nil then offline deletion behaviour is not requested,
+//  otherwise the value of params.OfflineDelete determines is used. The default
+//  value of false reflects normal deletion behaviour, so does not need setting
+//  unless offline deletion behaviour is desired.
 func (o *OpenAPI) DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *apiclient.DeleteVolumeRequestParams) error {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
@@ -143,6 +149,7 @@ func (o *OpenAPI) DeleteVolume(ctx context.Context, namespaceID id.Namespace, vo
 	var casVersion string
 	var ignoreVersion optional.Bool = optional.NewBool(true)
 	var asyncMax optional.String = optional.EmptyString()
+	var offlineDelete optional.Bool = optional.NewBool(false)
 
 	if params != nil {
 		if params.CASVersion.String() != "" {
@@ -153,6 +160,8 @@ func (o *OpenAPI) DeleteVolume(ctx context.Context, namespaceID id.Namespace, vo
 		if params.AsyncMax != 0 {
 			asyncMax = optional.NewString(params.AsyncMax.String())
 		}
+
+		offlineDelete = optional.NewBool(params.OfflineDelete)
 	}
 
 	resp, err := o.client.DefaultApi.DeleteVolume(
@@ -163,6 +172,7 @@ func (o *OpenAPI) DeleteVolume(ctx context.Context, namespaceID id.Namespace, vo
 		&openapi.DeleteVolumeOpts{
 			IgnoreVersion: ignoreVersion,
 			AsyncMax:      asyncMax,
+			OfflineDelete: offlineDelete,
 		},
 	)
 	if err != nil {

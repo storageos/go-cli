@@ -30,7 +30,8 @@ type volumeCommand struct {
 	useCAS     func() bool
 	casVersion string
 
-	useAsync bool
+	useAsync         bool
+	useOfflineDelete bool
 
 	writer io.Writer
 }
@@ -41,7 +42,9 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		return err
 	}
 
-	params := &apiclient.DeleteVolumeRequestParams{}
+	params := &apiclient.DeleteVolumeRequestParams{
+		OfflineDelete: c.useOfflineDelete,
+	}
 
 	if c.useCAS() {
 		params.CASVersion = version.FromString(c.casVersion)
@@ -107,7 +110,7 @@ func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command
 
 	cobraCommand := &cobra.Command{
 		Use:   "volume [volume name]",
-		Short: "Delete a volume",
+		Short: "Delete a volume. By default the target volume must be online. If the volume is offline then the request must specify that an offline delete is desired.",
 		Example: `
 $ storageos delete volume my-test-volume my-unneeded-volume
 
@@ -151,6 +154,7 @@ $ storageos delete volume --namespace my-namespace my-old-volume
 
 	c.useCAS = flagutil.SupportCAS(cobraCommand.Flags(), &c.casVersion)
 	flagutil.SupportAsync(cobraCommand.Flags(), &c.useAsync)
+	cobraCommand.Flags().BoolVar(&c.useOfflineDelete, "offline-delete", false, "request deletion of an offline volume. Volume data is not removed until the node reboots")
 
 	return cobraCommand
 }
