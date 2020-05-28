@@ -118,6 +118,9 @@ type Transport interface {
 	// SetReplicas attempts to perform a change in the number of replicas
 	// of a specified volume. If everything is correct, job is accepted.
 	SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, version version.Version) error
+	// UpdateVolume attempts to perform an update of a specified  volume
+	// changing descriptions and labels.
+	UpdateVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, labels labels.Set, version version.Version) (*volume.Resource, error)
 
 	// DeleteVolume makes a delete request for volumeID in namespaceID.
 	//

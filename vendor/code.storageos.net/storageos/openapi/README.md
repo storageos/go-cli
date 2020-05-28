@@ -63,6 +63,7 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**ListUsers**](docs/DefaultApi.md#listusers) | **Get** /users | Fetch the list of users
 *DefaultApi* | [**ListVolumes**](docs/DefaultApi.md#listvolumes) | **Get** /namespaces/{namespaceID}/volumes | Fetch the list of volumes in the given namespace
 *DefaultApi* | [**RefreshJwt**](docs/DefaultApi.md#refreshjwt) | **Post** /auth/refresh | Refresh the JWT
+*DefaultApi* | [**ResizeVolume**](docs/DefaultApi.md#resizevolume) | **Put** /namespaces/{namespaceID}/volumes/{id}/size | Increase the size of a volume.
 *DefaultApi* | [**SetReplicas**](docs/DefaultApi.md#setreplicas) | **Put** /namespaces/{namespaceID}/volumes/{id}/replicas | Set the number of replicas to maintain for the volume.
 *DefaultApi* | [**Spec**](docs/DefaultApi.md#spec) | **Get** /openapi | Serves this openapi spec file
 *DefaultApi* | [**UpdateAuthenticatedUser**](docs/DefaultApi.md#updateauthenticateduser) | **Put** /users/self | Update the authenticated user&#39;s information
@@ -105,6 +106,7 @@ Class | Method | HTTP request | Description
  - [ReplicaDeploymentInfo](docs/ReplicaDeploymentInfo.md)
  - [ReplicaDeploymentInfoAllOf](docs/ReplicaDeploymentInfoAllOf.md)
  - [ReplicaHealth](docs/ReplicaHealth.md)
+ - [ResizeVolumeRequest](docs/ResizeVolumeRequest.md)
  - [SetReplicasRequest](docs/SetReplicasRequest.md)
  - [SyncProgress](docs/SyncProgress.md)
  - [UpdateAuthenticatedUserData](docs/UpdateAuthenticatedUserData.md)

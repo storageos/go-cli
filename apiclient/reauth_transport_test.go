@@ -3,11 +3,14 @@ package apiclient
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"reflect"
 	"testing"
 
 	"github.com/kr/pretty"
+
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -724,6 +727,40 @@ func TestTransportWithReauth(t *testing.T) {
 				DetachError:        errors.New("detach-error"),
 			},
 		},
+		{
+			name: "UpdateVolume",
+
+			innerTransport: &mockTransport{
+				UpdateVolumeResource: &volume.Resource{ID: "bananaID"},
+				UpdateVolumeError:    errors.New("update-error"),
+			},
+
+			doTest: func(t *testing.T, inner *mockTransport) {
+				wrapped := NewTransportWithReauth(inner, &mockCredentialsProvider{})
+
+				_, gotErr := wrapped.UpdateVolume(
+					context.Background(),
+					"namespace-id",
+					"volume-id",
+					"new description",
+					labels.Set{"banana": "kiwi"},
+					version.FromString("42"),
+				)
+				if gotErr != inner.UpdateVolumeError {
+					t.Errorf("got error %v, want %v", gotErr, inner.UpdateVolumeError)
+				}
+			},
+
+			wantInnerTransport: &mockTransport{
+				UpdateVolumeGotNamespaceID: "namespace-id",
+				UpdateVolumeGotVolumeID:    "volume-id",
+				UpdateVolumeGotDescription: "new description",
+				UpdateVolumeGotLabels:      labels.Set{"banana": "kiwi"},
+				UpdateVolumeGotVersion:     version.FromString("42"),
+				UpdateVolumeResource:       &volume.Resource{ID: "bananaID"},
+				UpdateVolumeError:          errors.New("update-error"),
+			},
+		},
 	}
 
 	for _, tt := range testWrapsFunctions {
@@ -734,6 +771,8 @@ func TestTransportWithReauth(t *testing.T) {
 			tt.doTest(t, tt.innerTransport)
 
 			if !reflect.DeepEqual(tt.innerTransport, tt.wantInnerTransport) {
+				fmt.Printf("\n%+v\n\n", tt.innerTransport)
+				fmt.Printf("\n%+v\n\n", tt.wantInnerTransport)
 				t.Errorf("got inner transport state %v, want %v", tt.innerTransport, tt.wantInnerTransport)
 			}
 		})

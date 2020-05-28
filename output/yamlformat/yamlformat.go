@@ -66,6 +66,11 @@ func (d *Displayer) SetReplicas(ctx context.Context, w io.Writer) error {
 	return nil
 }
 
+// UpdateVolumeDescription writes nothing to w.
+func (d *Displayer) UpdateVolumeDescription(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error {
+	return d.encode(w, volUpdate)
+}
+
 // -----------------------------------------------------------------------------
 // GET
 // -----------------------------------------------------------------------------

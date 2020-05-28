@@ -35,6 +35,7 @@ type Client interface {
 	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
 
 	SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, params *apiclient.SetReplicasRequestParams) error
+	UpdateVolumeDescription(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, params *apiclient.UpdateVolumeRequestParams) (*volume.Resource, error)
 
 	GetVolumeByName(ctx context.Context, namespace id.Namespace, name string) (*volume.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
@@ -44,6 +45,7 @@ type Client interface {
 // display the results returned by "update" verb operations.
 type Displayer interface {
 	SetReplicas(ctx context.Context, w io.Writer) error
+	UpdateVolumeDescription(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "update" verb.

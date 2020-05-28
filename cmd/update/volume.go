@@ -7,6 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/output"
+
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/pkg/version"
 
@@ -17,10 +19,16 @@ import (
 )
 
 var (
-	errNoVolumeSpecified      = errors.New("must specify the volume to update")
-	errTooManyArguments       = errors.New("must specify only one volume")
-	errNoNamespaceSpecified   = errors.New("must specify the namespace of the volume to update")
-	errNoNumReplicasSpecified = errors.New("must specify the number of replicas requested")
+	errNoVolumeSpecified        = errors.New("must specify the volume to update")
+	errTooManyArguments         = errors.New("must specify only one volume")
+	errNoNamespaceSpecified     = errors.New("must specify the namespace of the volume to update")
+	errNoFieldToUpdateSpecified = errors.New("must specify one field to update")
+	errOnlyOneFieldAllowed      = errors.New("must specify only one field to change per update")
+)
+
+const (
+	replicasName    = "replicas"
+	descriptionName = "description"
 )
 
 type volumeCommand struct {
@@ -32,10 +40,13 @@ type volumeCommand struct {
 
 	// useCAS determines whether the command makes the set replicas request
 	// constrained by the provided casVersion.
-	useCAS      func() bool
-	casVersion  string
-	useAsync    bool
-	numReplicas uint64
+	useCAS     func() bool
+	casVersion string
+	useAsync   bool
+
+	fieldChanged string
+	numReplicas  uint64
+	description  string
 
 	writer io.Writer
 }
@@ -70,19 +81,34 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		volID = vol.ID
 	}
 
-	params := &apiclient.SetReplicasRequestParams{}
-	if c.useCAS() {
-		params.CASVersion = version.FromString(c.casVersion)
-	}
-	err = c.client.SetReplicas(ctx, nsID, volID, c.numReplicas, params)
-	if err != nil {
-		return err
+	switch c.fieldChanged {
+	case replicasName:
+		params := &apiclient.SetReplicasRequestParams{}
+		if c.useCAS() {
+			params.CASVersion = version.FromString(c.casVersion)
+		}
+		err = c.client.SetReplicas(ctx, nsID, volID, c.numReplicas, params)
+		if err != nil {
+			return err
+		}
+
+		return c.display.SetReplicas(ctx, c.writer)
+
+	case descriptionName:
+		params := &apiclient.UpdateVolumeRequestParams{}
+		if c.useCAS() {
+			params.CASVersion = version.FromString(c.casVersion)
+		}
+		vol, err := c.client.UpdateVolumeDescription(ctx, nsID, volID, c.description, params)
+		if err != nil {
+			return err
+		}
+
+		return c.display.UpdateVolumeDescription(ctx, c.writer, output.NewVolumeUpdate(vol))
 	}
 
-	return c.display.SetReplicas(ctx, c.writer)
+	return errNoFieldToUpdateSpecified
 }
-
-const replicasName = "replicas"
 
 func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 	c := &volumeCommand{
@@ -95,7 +121,12 @@ func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command
 		Use:   "volume",
 		Short: "Update a volume",
 		Example: `
-$ storageos update volume --namespace my-namespace-name my-volume-name --replicas 3`,
+$ storageos update volume --namespace my-namespace-name my-volume-name --replicas 3
+$ storageos update volume --namespace my-namespace-name my-volume-name -r 3
+
+$ storageos update volume --namespace my-namespace-name my-volume-name --description "new description"
+$ storageos update volume --namespace my-namespace-name my-volume-name -d "new description"
+`,
 
 		Args: argwrappers.WrapInvalidArgsError(func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
@@ -105,8 +136,22 @@ $ storageos update volume --namespace my-namespace-name my-volume-name --replica
 				return errTooManyArguments
 			}
 
-			if !cmd.Flags().Changed(replicasName) {
-				return errNoNumReplicasSpecified
+			changed := 0
+			if cmd.Flags().Changed(replicasName) {
+				changed++
+				c.fieldChanged = replicasName
+			}
+			if cmd.Flags().Changed(descriptionName) {
+				changed++
+				c.fieldChanged = descriptionName
+			}
+
+			if changed == 0 {
+				return errNoFieldToUpdateSpecified
+			}
+
+			if changed > 1 {
+				return errOnlyOneFieldAllowed
 			}
 
 			return nil
@@ -143,6 +188,7 @@ $ storageos update volume --namespace my-namespace-name my-volume-name --replica
 	c.useCAS = flagutil.SupportCAS(cobraCommand.Flags(), &c.casVersion)
 	flagutil.SupportAsync(cobraCommand.Flags(), &c.useAsync)
 	cobraCommand.Flags().Uint64VarP(&c.numReplicas, replicasName, "r", 0, "set number of replicas requested")
+	cobraCommand.Flags().StringVarP(&c.description, descriptionName, "d", "", "set a new description")
 
 	return cobraCommand
 }
