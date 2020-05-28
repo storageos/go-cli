@@ -34,6 +34,7 @@ Method | HTTP request | Description
 [**ListUsers**](DefaultApi.md#ListUsers) | **Get** /users | Fetch the list of users
 [**ListVolumes**](DefaultApi.md#ListVolumes) | **Get** /namespaces/{namespaceID}/volumes | Fetch the list of volumes in the given namespace
 [**RefreshJwt**](DefaultApi.md#RefreshJwt) | **Post** /auth/refresh | Refresh the JWT
+[**ResizeVolume**](DefaultApi.md#ResizeVolume) | **Put** /namespaces/{namespaceID}/volumes/{id}/size | Increase the size of a volume.
 [**SetReplicas**](DefaultApi.md#SetReplicas) | **Put** /namespaces/{namespaceID}/volumes/{id}/replicas | Set the number of replicas to maintain for the volume.
 [**Spec**](DefaultApi.md#Spec) | **Get** /openapi | Serves this openapi spec file
 [**UpdateAuthenticatedUser**](DefaultApi.md#UpdateAuthenticatedUser) | **Put** /users/self | Update the authenticated user&#39;s information
@@ -1132,6 +1133,55 @@ This endpoint does not need any parameter.
 ### HTTP request headers
 
 - **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## ResizeVolume
+
+> ResizeVolume(ctx, namespaceID, id, resizeVolumeRequest, optional)
+
+Increase the size of a volume.
+
+Resize the volume identified by id in the namespace identified by namespaceID. A volume's size cannot be reduced. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespaceID** | **string**| ID of a Namespace | 
+**id** | **string**| ID of a Volume | 
+**resizeVolumeRequest** | [**ResizeVolumeRequest**](ResizeVolumeRequest.md)|  | 
+ **optional** | ***ResizeVolumeOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a ResizeVolumeOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+ **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)

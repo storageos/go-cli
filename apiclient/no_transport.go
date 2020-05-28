@@ -112,6 +112,10 @@ func (t *noTransport) SetReplicas(ctx context.Context, nsID id.Namespace, volID 
 	return ErrNoTransportConfigured
 }
 
+func (t *noTransport) UpdateVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, labels labels.Set, version version.Version) (*volume.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
 func (t *noTransport) DeleteUser(ctx context.Context, uid id.User, params *DeleteUserRequestParams) error {
 	return ErrNoTransportConfigured
 }

@@ -128,6 +128,12 @@ type SetReplicasRequestParams struct {
 	CASVersion version.Version
 }
 
+// UpdateVolumeRequestParams contains optional request parameters for a set
+// description or set labels volume operation.
+type UpdateVolumeRequestParams struct {
+	CASVersion version.Version
+}
+
 // GetVolumeByName requests the volume resource which has name in namespace.
 //
 // The resource model for the API is build around using unique identifiers,
@@ -329,4 +335,27 @@ func (c *Client) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Vo
 	}
 
 	return c.Transport.SetReplicas(ctx, nsID, volID, numReplicas, params.CASVersion)
+}
+
+// UpdateVolumeDescription sends a new description for updating the selected volume.
+//
+// The behaviour of the operation is dictated by params:
+//
+//  Version constraints:
+// 	- If params is nil or params.CASVersion is empty then the detach request is
+// 	unconditional
+// 	- If params.CASVersion is set, the request is conditional upon it matching
+// 	the volume entity's version as seen by the server.
+func (c *Client) UpdateVolumeDescription(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, params *UpdateVolumeRequestParams) (*volume.Resource, error) {
+
+	v, err := c.Transport.GetVolume(ctx, nsID, volID)
+	if err != nil {
+		return nil, err
+	}
+
+	if params == nil || params.CASVersion == "" {
+		return c.Transport.UpdateVolume(ctx, nsID, volID, description, v.Labels, v.Version)
+	}
+
+	return c.Transport.UpdateVolume(ctx, nsID, volID, description, v.Labels, params.CASVersion)
 }

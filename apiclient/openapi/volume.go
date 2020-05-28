@@ -281,3 +281,35 @@ func (o *OpenAPI) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.V
 
 	return nil
 }
+
+// UpdateVolume changes the description of a specified volume.
+func (o *OpenAPI) UpdateVolume(
+	ctx context.Context,
+	nsID id.Namespace,
+	volID id.Volume,
+	description string,
+	labels labels.Set,
+	version version.Version,
+) (*volume.Resource, error) {
+
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	request := openapi.UpdateVolumeData{
+		Labels:      labels,
+		Description: description,
+		Version:     version.String(),
+	}
+
+	model, resp, err := o.client.DefaultApi.UpdateVolume(ctx, nsID.String(), volID.String(), request)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return nil, apiclient.NewVolumeNotFoundError(v.msg)
+		default:
+			return nil, v
+		}
+	}
+
+	return o.codec.decodeVolume(model)
+}

@@ -360,6 +360,20 @@ func (tr *TransportWithReauth) SetReplicas(ctx context.Context, nsID id.Namespac
 	return err
 }
 
+// UpdateVolume wraps the inner transport's call with a reauthenticate and
+// retry upon encountering an authentication error.
+func (tr *TransportWithReauth) UpdateVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, labels labels.Set, version version.Version) (*volume.Resource, error) {
+
+	var updated *volume.Resource
+	err := tr.doWithReauth(ctx, func() error {
+		var err error
+		updated, err = tr.inner.UpdateVolume(ctx, nsID, volID, description, labels, version)
+		return err
+	})
+
+	return updated, err
+}
+
 // DeleteVolume wraps the inner transport's call with a reauthenticate and retry
 // upon encountering an authentication error.
 func (tr *TransportWithReauth) DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DeleteVolumeRequestParams) error {

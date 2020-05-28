@@ -26,8 +26,14 @@ func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *out
 	return write(w)
 }
 
-// SetReplicas writes nothing to w.
+// SetReplicas writes a success message to w.
 func (d *Displayer) SetReplicas(ctx context.Context, w io.Writer) error {
 	_, err := fmt.Fprintln(w, "request to change number of replicas accepted")
+	return err
+}
+
+// UpdateVolumeDescription writes a success message to w.
+func (d *Displayer) UpdateVolumeDescription(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error {
+	_, err := fmt.Fprintf(w, "Volume %s (%s) updated.\nNew description: `%s`.", volUpdate.Name, volUpdate.ID, volUpdate.Description)
 	return err
 }

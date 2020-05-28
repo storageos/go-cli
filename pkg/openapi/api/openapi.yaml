@@ -3297,6 +3297,153 @@ paths:
       security:
       - jwt: []
       summary: Set the number of replicas to maintain for the volume.
+  /namespaces/{namespaceID}/volumes/{id}/size:
+    put:
+      description: |
+        Resize the volume identified by id in the namespace identified by namespaceID. A volume's size cannot be reduced.
+      operationId: resizeVolume
+      parameters:
+      - description: ID of a Namespace
+        explode: false
+        in: path
+        name: namespaceID
+        required: true
+        schema:
+          $ref: '#/components/schemas/NamespaceID'
+        style: simple
+      - description: ID of a Volume
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/VolumeID'
+        style: simple
+      - description: |
+          Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect.
+          The URL parameter value overrides the "async-max" header value, if any.
+          The value of this header defines the timeout duration for the request, it must be set to a valid duration string.
+          A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          We reject negative or nil duration values.
+        explode: true
+        in: query
+        name: async-max
+        required: false
+        schema:
+          type: string
+        style: form
+      requestBody:
+        $ref: '#/components/requestBodies/ResizeVolumeRequest'
+        content:
+          application/json:
+            schema:
+              example:
+                version: NDI0MjQyNDI0MjQyNDI0MjQy
+                sizeBytes: 5368709000
+              properties:
+                sizeBytes:
+                  description: |
+                    The desired new size for the volume in  bytes. This value cannot be less than  the current size of the volume.
+                  example: 5368709000
+                  minimum: 1073742000
+                  type: uint64
+                version:
+                  description: |
+                    An opaque representation of an entity version at the time it was obtained from the API.
+                    All operations that mutate the entity must include this version field in the request unchanged.
+                    The format of this type is undefined and may change but the defined properties will not change.
+                  example: NDI0MjQyNDI0MjQyNDI0MjQy
+                  maxLength: 30
+                  type: string
+              title: ResizeVolumeRequest
+              type: object
+        description: The new size to give the volume
+        required: true
+      responses:
+        "200":
+          description: The volume was resized successfully.
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcceptedMessage'
+          description: |
+            An aynchronous request has been accepted
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "422":
+          content:
+            application/json:
+              example:
+                error: invalid state for operation (currently "deleted")
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            An action was requested that cannot be performed on the entity in it's current state.
+            As an example, this error might be returned when trying to delete a currently mounted volume.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Increase the size of a volume.
   /cluster:
     get:
       description: |
@@ -3743,6 +3890,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CreateUserData'
+      required: true
+    ResizeVolumeRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResizeVolumeRequest'
       required: true
     UpdateLicence:
       content:
@@ -4306,7 +4459,7 @@ components:
           env: prod
           rack: db-1
         master: ""
-        sizeBytes: 5000
+        sizeBytes: 5368709000
         attachedOn: ""
         createdAt: 2019-03-10T13:42:42Z
         namespaceID: ""
@@ -4360,8 +4513,8 @@ components:
         sizeBytes:
           description: |
             A volume's size in bytes
-          example: 5000
-          minimum: 0
+          example: 5368709000
+          minimum: 1073742000
           type: uint64
         createdAt:
           description: |
@@ -5190,6 +5343,27 @@ components:
           maxLength: 30
           type: string
       title: SetReplicasRequest
+      type: object
+    ResizeVolumeRequest:
+      example:
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
+        sizeBytes: 5368709000
+      properties:
+        sizeBytes:
+          description: |
+            The desired new size for the volume in  bytes. This value cannot be less than  the current size of the volume.
+          example: 5368709000
+          minimum: 1073742000
+          type: uint64
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      title: ResizeVolumeRequest
       type: object
     UpdateClusterData:
       example:
