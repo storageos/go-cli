@@ -54,9 +54,45 @@ func (s Set) String() string {
 	return strings.TrimRight(sb.String(), ",")
 }
 
+// UpsertExisting sets the keys in toEdit to the values found in new, adding any
+// of the missing values
+func UpsertExisting(toEdit, new Set) Set {
+
+	for k, v := range new {
+		toEdit[k] = v
+	}
+
+	return toEdit
+}
+
+// RemoveExisting deletes the keys contained in toDelete
+func RemoveExisting(toEdit, toDelete Set) Set {
+
+	for k := range toDelete {
+		delete(toEdit, k)
+	}
+
+	return toEdit
+}
+
+// FromString parses a given string to try and extract a label set.
+//
+// it expects the labels in the given string to be comma separated
+func FromString(str string) (Set, error) {
+
+	if str == "" {
+		// don't error if the string given is empty
+		return map[string]string{}, nil
+	}
+
+	splitLabels := strings.Split(str, ",")
+	return NewSetFromPairs(splitLabels)
+}
+
 // NewSetFromPairs constructs a label set from pairs, returning an
 // error if any of the provided items is not a key=value pair.
 func NewSetFromPairs(pairs []string) (Set, error) {
+
 	set := map[string]string{}
 
 	for _, pair := range pairs {

@@ -374,6 +374,20 @@ func (tr *TransportWithReauth) UpdateVolume(ctx context.Context, nsID id.Namespa
 	return updated, err
 }
 
+// ResizeVolume wraps the inner transport's call with a reauthenticate and retry
+// upon encountering an authentication error.
+func (tr *TransportWithReauth) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, version version.Version, params *ResizeVolumeRequestParams) (*volume.Resource, error) {
+
+	var updated *volume.Resource
+	err := tr.doWithReauth(ctx, func() error {
+		var err error
+		updated, err = tr.inner.ResizeVolume(ctx, nsID, volID, sizeBytes, version, params)
+		return err
+	})
+
+	return updated, err
+}
+
 // DeleteVolume wraps the inner transport's call with a reauthenticate and retry
 // upon encountering an authentication error.
 func (tr *TransportWithReauth) DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DeleteVolumeRequestParams) error {

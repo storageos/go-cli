@@ -116,6 +116,10 @@ func (t *noTransport) UpdateVolume(ctx context.Context, nsID id.Namespace, volID
 	return nil, ErrNoTransportConfigured
 }
 
+func (t *noTransport) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, version version.Version, params *ResizeVolumeRequestParams) (*volume.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
 func (t *noTransport) DeleteUser(ctx context.Context, uid id.User, params *DeleteUserRequestParams) error {
 	return ErrNoTransportConfigured
 }

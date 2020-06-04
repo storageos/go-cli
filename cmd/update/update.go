@@ -2,8 +2,8 @@ package update
 
 import (
 	"context"
+	"errors"
 	"io"
-	"os"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -15,7 +15,12 @@ import (
 	"code.storageos.net/storageos/c2-cli/output/textformat"
 	"code.storageos.net/storageos/c2-cli/output/yamlformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/volume"
+)
+
+var (
+	errNoNamespaceSpecified = errors.New("no namespace specified")
 )
 
 // ConfigProvider specifies the configuration
@@ -36,16 +41,19 @@ type Client interface {
 
 	SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, params *apiclient.SetReplicasRequestParams) error
 	UpdateVolumeDescription(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, params *apiclient.UpdateVolumeRequestParams) (*volume.Resource, error)
+	UpdateVolumeLabels(ctx context.Context, nsID id.Namespace, volID id.Volume, labels labels.Set, params *apiclient.UpdateVolumeRequestParams) (*volume.Resource, error)
+	ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, params *apiclient.ResizeVolumeOptionalRequestParams) (*volume.Resource, error)
 
 	GetVolumeByName(ctx context.Context, namespace id.Namespace, name string) (*volume.Resource, error)
+	GetVolume(ctx context.Context, namespaceID id.Namespace, uid id.Volume) (*volume.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
 }
 
 // Displayer defines the functionality required by the CLI application to
 // display the results returned by "update" verb operations.
 type Displayer interface {
-	SetReplicas(ctx context.Context, w io.Writer) error
-	UpdateVolumeDescription(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error
+	UpdateVolume(ctx context.Context, w io.Writer, updatedVol output.VolumeUpdate) error
+	SetReplicas(ctx context.Context, w io.Writer, new uint64) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "update" verb.
@@ -56,7 +64,7 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	}
 
 	command.AddCommand(
-		newVolume(os.Stdout, client, config),
+		newVolumeUpdate(client, config),
 	)
 
 	return command

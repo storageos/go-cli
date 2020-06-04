@@ -9,6 +9,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
@@ -132,6 +133,19 @@ type SetReplicasRequestParams struct {
 // description or set labels volume operation.
 type UpdateVolumeRequestParams struct {
 	CASVersion version.Version
+}
+
+// ResizeVolumeRequestParams contains request parameters for a resize
+// volume operation.
+type ResizeVolumeRequestParams struct {
+	AsyncMax time.Duration
+}
+
+// ResizeVolumeOptionalRequestParams contains optional request parameters for a
+// resize volume operation.
+type ResizeVolumeOptionalRequestParams struct {
+	CASVersion version.Version
+	ResizeVolumeRequestParams
 }
 
 // GetVolumeByName requests the volume resource which has name in namespace.
@@ -342,8 +356,6 @@ func (c *Client) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Vo
 // The behaviour of the operation is dictated by params:
 //
 //  Version constraints:
-// 	- If params is nil or params.CASVersion is empty then the detach request is
-// 	unconditional
 // 	- If params.CASVersion is set, the request is conditional upon it matching
 // 	the volume entity's version as seen by the server.
 func (c *Client) UpdateVolumeDescription(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, params *UpdateVolumeRequestParams) (*volume.Resource, error) {
@@ -358,4 +370,48 @@ func (c *Client) UpdateVolumeDescription(ctx context.Context, nsID id.Namespace,
 	}
 
 	return c.Transport.UpdateVolume(ctx, nsID, volID, description, v.Labels, params.CASVersion)
+}
+
+// UpdateVolumeLabels sends a new set of labels for updating the selected volume
+// labels.
+//
+// The behaviour of the operation is dictated by params:
+//
+//  Version constraints:
+//  - If params.CASVersion is set, the request is conditional upon it matching
+//  the volume entity's version as seen by the server.
+func (c *Client) UpdateVolumeLabels(ctx context.Context, nsID id.Namespace, volID id.Volume, labels labels.Set, params *UpdateVolumeRequestParams) (*volume.Resource, error) {
+
+	v, err := c.Transport.GetVolume(ctx, nsID, volID)
+	if err != nil {
+		return nil, err
+	}
+
+	if params == nil || params.CASVersion == "" {
+		return c.Transport.UpdateVolume(ctx, nsID, volID, v.Description, labels, v.Version)
+	}
+
+	return c.Transport.UpdateVolume(ctx, nsID, volID, v.Description, labels, params.CASVersion)
+}
+
+// ResizeVolume sends a new volume size for updating the selected volume.
+//
+// The behaviour of the operation is dictated by params:
+//
+//  Version constraints:
+// 	- If params is nil or params.CASVersion is empty then the resize request is
+// 	unconditional
+// 	- If params.CASVersion is set, the request is conditional upon it matching
+// 	the volume entity's version as seen by the server.
+func (c *Client) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, params *ResizeVolumeOptionalRequestParams) (*volume.Resource, error) {
+
+	if params == nil || params.CASVersion == "" {
+		v, err := c.Transport.GetVolume(ctx, nsID, volID)
+		if err != nil {
+			return nil, err
+		}
+		return c.Transport.ResizeVolume(ctx, nsID, volID, sizeBytes, v.Version, &params.ResizeVolumeRequestParams)
+	}
+
+	return c.Transport.ResizeVolume(ctx, nsID, volID, sizeBytes, params.CASVersion, &params.ResizeVolumeRequestParams)
 }

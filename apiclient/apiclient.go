@@ -121,6 +121,9 @@ type Transport interface {
 	// UpdateVolume attempts to perform an update of a specified  volume
 	// changing descriptions and labels.
 	UpdateVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, labels labels.Set, version version.Version) (*volume.Resource, error)
+	// ResizeVolume attempts to perform a change in the size of a specified
+	// volume. If everything is correct, job is accepted.
+	ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, version version.Version, params *ResizeVolumeRequestParams) (*volume.Resource, error)
 
 	// DeleteVolume makes a delete request for volumeID in namespaceID.
 	//

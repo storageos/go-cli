@@ -61,14 +61,14 @@ func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *out
 	return d.encode(w, licence)
 }
 
-// SetReplicas writes nothing to w.
-func (d *Displayer) SetReplicas(ctx context.Context, w io.Writer) error {
-	return nil
+// UpdateVolume encodes the updated volume as YAML, writing the result to w.
+func (d *Displayer) UpdateVolume(ctx context.Context, w io.Writer, updatedVol output.VolumeUpdate) error {
+	return d.encode(w, updatedVol)
 }
 
-// UpdateVolumeDescription writes nothing to w.
-func (d *Displayer) UpdateVolumeDescription(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error {
-	return d.encode(w, volUpdate)
+// SetReplicas does not encode anything to w
+func (d *Displayer) SetReplicas(ctx context.Context, w io.Writer, new uint64) error {
+	return nil
 }
 
 // -----------------------------------------------------------------------------
