@@ -54,9 +54,8 @@ func (c codec) decodeLicence(model openapi.Licence) (*licence.Resource, error) {
 
 func (c codec) decodeCapacityStats(stats openapi.CapacityStats) capacity.Stats {
 	return capacity.Stats{
-		Total:     stats.Total,
-		Free:      stats.Free,
-		Available: stats.Available,
+		Total: stats.Total,
+		Free:  stats.Free,
 	}
 }
 

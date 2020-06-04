@@ -142,8 +142,7 @@ func (d *Displayer) describeNode(ctx context.Context, w io.Writer, node *output.
 	capacityStats := "n/a"
 	if node.Capacity != (capacity.Stats{}) {
 		capacityStats = fmt.Sprintf(
-			"%s/%s (%s in use)",
-			humanize.IBytes(node.Capacity.Available),
+			"%s (%s in use)",
 			humanize.IBytes(node.Capacity.Total),
 			humanize.IBytes(node.Capacity.Total-node.Capacity.Free),
 		)
