@@ -49,9 +49,8 @@ func TestDisplayer_DescribeNode(t *testing.T) {
 					Name:   "bananaName",
 					Health: health.NodeOnline,
 					Capacity: capacity.Stats{
-						Total:     humanize.GiByte,
-						Available: 500 * humanize.MiByte,
-						Free:      550 * humanize.MiByte,
+						Total: humanize.GiByte,
+						Free:  550 * humanize.MiByte,
 					},
 					IOAddr:         "io.addr",
 					SupervisorAddr: "supervisor.addr",
@@ -119,7 +118,7 @@ Labels                     1=2,a=b
 Created at                 2000-01-01T00:00:00Z (a long time ago)
 Updated at                 2001-01-01T00:00:00Z (a long time ago)
 Version                    some-version                          
-Available capacity         500 MiB/1.0 GiB (474 MiB in use)      
+Available capacity         1.0 GiB (474 MiB in use)              
 
 Local volume deployments:
   DEPLOYMENT ID            VOLUME                                  NAMESPACE       HEALTH  TYPE     SIZE   
@@ -137,9 +136,8 @@ Local volume deployments:
 					Name:   "bananaName",
 					Health: health.NodeOnline,
 					Capacity: capacity.Stats{
-						Total:     humanize.GiByte,
-						Available: 500 * humanize.MiByte,
-						Free:      550 * humanize.MiByte,
+						Total: humanize.GiByte,
+						Free:  550 * humanize.MiByte,
 					},
 					IOAddr:         "io.addr",
 					SupervisorAddr: "supervisor.addr",
@@ -168,7 +166,7 @@ Labels                   1=2,a=b
 Created at               2000-01-01T00:00:00Z (a long time ago)
 Updated at               2001-01-01T00:00:00Z (a long time ago)
 Version                  some-version                          
-Available capacity       500 MiB/1.0 GiB (474 MiB in use)      
+Available capacity       1.0 GiB (474 MiB in use)              
 `,
 			wantErr: nil,
 		},
