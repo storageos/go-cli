@@ -124,6 +124,14 @@ type mockTransport struct {
 	UpdateVolumeResource       *volume.Resource
 	UpdateVolumeError          error
 
+	ResizeVolumeGotNamespaceID id.Namespace
+	ResizeVolumeGotVolumeID    id.Volume
+	ResizeVolumeGotSizeBytes   uint64
+	ResizeVolumeGotVersion     version.Version
+	ResizeVolumeGotParams      *ResizeVolumeRequestParams
+	ResizeVolumeResource       *volume.Resource
+	ResizeVolumeError          error
+
 	DeleteUserGotID     id.User
 	DeleteUserGotParams *DeleteUserRequestParams
 	DeleteUserError     error
@@ -281,6 +289,15 @@ func (m *mockTransport) UpdateVolume(ctx context.Context, nsID id.Namespace, vol
 	m.UpdateVolumeGotLabels = labels
 	m.UpdateVolumeGotVersion = version
 	return m.UpdateVolumeResource, m.UpdateVolumeError
+}
+
+func (m *mockTransport) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, version version.Version, params *ResizeVolumeRequestParams) (*volume.Resource, error) {
+	m.ResizeVolumeGotNamespaceID = nsID
+	m.ResizeVolumeGotVolumeID = volID
+	m.ResizeVolumeGotSizeBytes = sizeBytes
+	m.ResizeVolumeGotVersion = version
+	m.ResizeVolumeGotParams = params
+	return m.ResizeVolumeResource, m.ResizeVolumeError
 }
 
 func (m *mockTransport) UpdateLicence(ctx context.Context, licence []byte, casVersion version.Version) (*licence.Resource, error) {

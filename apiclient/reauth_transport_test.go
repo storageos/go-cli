@@ -3,11 +3,12 @@ package apiclient
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"reflect"
 	"testing"
+	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/kr/pretty"
 
 	"code.storageos.net/storageos/c2-cli/pkg/version"
@@ -761,6 +762,44 @@ func TestTransportWithReauth(t *testing.T) {
 				UpdateVolumeError:          errors.New("update-error"),
 			},
 		},
+		{
+			name: "ResizeVolume",
+
+			innerTransport: &mockTransport{
+				ResizeVolumeResource: &volume.Resource{ID: "bananaID"},
+				ResizeVolumeError:    errors.New("resize-error"),
+			},
+
+			doTest: func(t *testing.T, inner *mockTransport) {
+				wrapped := NewTransportWithReauth(inner, &mockCredentialsProvider{})
+
+				_, gotErr := wrapped.ResizeVolume(
+					context.Background(),
+					"namespace-id",
+					"volume-id",
+					42*humanize.GiByte,
+					version.FromString("42"),
+					&ResizeVolumeRequestParams{
+						AsyncMax: 42 * time.Second,
+					},
+				)
+				if gotErr != inner.ResizeVolumeError {
+					t.Errorf("got error %v, want %v", gotErr, inner.ResizeVolumeError)
+				}
+			},
+
+			wantInnerTransport: &mockTransport{
+				ResizeVolumeGotNamespaceID: "namespace-id",
+				ResizeVolumeGotVolumeID:    "volume-id",
+				ResizeVolumeGotSizeBytes:   42 * humanize.GiByte,
+				ResizeVolumeGotVersion:     version.FromString("42"),
+				ResizeVolumeGotParams: &ResizeVolumeRequestParams{
+					AsyncMax: 42 * time.Second,
+				},
+				ResizeVolumeResource: &volume.Resource{ID: "bananaID"},
+				ResizeVolumeError:    errors.New("resize-error"),
+			},
+		},
 	}
 
 	for _, tt := range testWrapsFunctions {
@@ -771,9 +810,7 @@ func TestTransportWithReauth(t *testing.T) {
 			tt.doTest(t, tt.innerTransport)
 
 			if !reflect.DeepEqual(tt.innerTransport, tt.wantInnerTransport) {
-				fmt.Printf("\n%+v\n\n", tt.innerTransport)
-				fmt.Printf("\n%+v\n\n", tt.wantInnerTransport)
-				t.Errorf("got inner transport state %v, want %v", tt.innerTransport, tt.wantInnerTransport)
+				t.Errorf("got %# v, want %# v", pretty.Formatter(tt.innerTransport), pretty.Formatter(tt.wantInnerTransport))
 			}
 		})
 	}

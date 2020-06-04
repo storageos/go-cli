@@ -313,3 +313,42 @@ func (o *OpenAPI) UpdateVolume(
 
 	return o.codec.decodeVolume(model)
 }
+
+// ResizeVolume changes the size of a specified volume.
+// Operation is asynchronous, we return nil if the request has been accepted.
+func (o *OpenAPI) ResizeVolume(
+	ctx context.Context,
+	nsID id.Namespace,
+	volID id.Volume,
+	sizeBytes uint64,
+	version version.Version,
+	params *apiclient.ResizeVolumeRequestParams,
+) (*volume.Resource, error) {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	request := openapi.ResizeVolumeRequest{
+		SizeBytes: sizeBytes,
+		Version:   version.String(),
+	}
+
+	var asyncMax optional.String = optional.EmptyString()
+	if params.AsyncMax != 0 {
+		asyncMax = optional.NewString(params.AsyncMax.String())
+	}
+	opts := &openapi.ResizeVolumeOpts{
+		AsyncMax: asyncMax,
+	}
+
+	model, resp, err := o.client.DefaultApi.ResizeVolume(ctx, nsID.String(), volID.String(), request, opts)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return nil, apiclient.NewVolumeNotFoundError(v.msg)
+		default:
+			return nil, v
+		}
+	}
+
+	return o.codec.decodeVolume(model)
+}

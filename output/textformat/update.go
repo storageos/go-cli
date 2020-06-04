@@ -26,14 +26,35 @@ func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *out
 	return write(w)
 }
 
-// SetReplicas writes a success message to w.
-func (d *Displayer) SetReplicas(ctx context.Context, w io.Writer) error {
-	_, err := fmt.Fprintln(w, "request to change number of replicas accepted")
-	return err
+// UpdateVolume prints a user friendly message showing the successful
+// mutation
+func (d *Displayer) UpdateVolume(ctx context.Context, w io.Writer, updatedVol output.VolumeUpdate) error {
+
+	// if we have no updated volume data show a generic msg
+	if updatedVol.ID == "" {
+		fmt.Fprintf(w, "Update successful")
+		return nil
+	}
+
+	fmt.Fprintf(w, "Update successful for volume %s.\n\n", updatedVol.Name)
+
+	table, write := createTable(nil)
+
+	table.AddRow("Name:", updatedVol.Name)
+	table.AddRow("Description:", updatedVol.Description)
+	table.AddRow("Namespace:", updatedVol.Namespace)
+	table.AddRow("Labels:", updatedVol.Labels)
+
+	return write(w)
 }
 
-// UpdateVolumeDescription writes a success message to w.
-func (d *Displayer) UpdateVolumeDescription(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error {
-	_, err := fmt.Fprintf(w, "Volume %s (%s) updated.\nNew description: `%s`.", volUpdate.Name, volUpdate.ID, volUpdate.Description)
-	return err
+// SetReplicas prints a user friendly message denoting that the target
+// replica num has been updated
+func (d *Displayer) SetReplicas(ctx context.Context, w io.Writer, new uint64) error {
+
+	if _, err := fmt.Fprintf(w, "Target replica number accepted, it is now %d", new); err != nil {
+		return err
+	}
+
+	return nil
 }
