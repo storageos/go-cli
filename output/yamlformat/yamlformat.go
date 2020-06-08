@@ -5,6 +5,7 @@ package yamlformat
 import (
 	"context"
 	"io"
+	"strconv"
 
 	"gopkg.in/yaml.v3"
 
@@ -66,9 +67,25 @@ func (d *Displayer) UpdateVolume(ctx context.Context, w io.Writer, updatedVol ou
 	return d.encode(w, updatedVol)
 }
 
-// SetReplicas does not encode anything to w
+// SetReplicas writes the number of the expected replicas.
 func (d *Displayer) SetReplicas(ctx context.Context, w io.Writer, new uint64) error {
-	return nil
+	_, err := w.Write([]byte(strconv.FormatUint(new, 10)))
+	return err
+}
+
+// ResizeVolume encodes resource as YAML, writing the result to w.
+func (d *Displayer) ResizeVolume(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error {
+	return d.encode(w, volUpdate)
+}
+
+// UpdateVolumeDescription encodes resource as YAML, writing the result to w.
+func (d *Displayer) UpdateVolumeDescription(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error {
+	return d.encode(w, volUpdate)
+}
+
+// UpdateVolumeLabels encodes resource as YAML, writing the result to w.
+func (d *Displayer) UpdateVolumeLabels(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error {
+	return d.encode(w, volUpdate)
 }
 
 // -----------------------------------------------------------------------------

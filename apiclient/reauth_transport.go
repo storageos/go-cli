@@ -11,7 +11,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
-	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -310,12 +309,12 @@ func (tr *TransportWithReauth) CreateNamespace(ctx context.Context, name string,
 
 // UpdateCluster wraps the inner transport's call with a reauthenticate and
 // retry upon encountering an authentication error.
-func (tr *TransportWithReauth) UpdateCluster(ctx context.Context, c *cluster.Resource) (*cluster.Resource, error) {
+func (tr *TransportWithReauth) UpdateCluster(ctx context.Context, c *cluster.Resource, params *UpdateClusterRequestParams) (*cluster.Resource, error) {
 
 	var updated *cluster.Resource
 	err := tr.doWithReauth(ctx, func() error {
 		var err error
-		updated, err = tr.inner.UpdateCluster(ctx, c)
+		updated, err = tr.inner.UpdateCluster(ctx, c, params)
 
 		return err
 	})
@@ -325,12 +324,12 @@ func (tr *TransportWithReauth) UpdateCluster(ctx context.Context, c *cluster.Res
 
 // UpdateLicence wraps the inner transport's call with a reauthenticate and
 // retry upon encountering an authentication error.
-func (tr *TransportWithReauth) UpdateLicence(ctx context.Context, lic []byte, casVersion version.Version) (*licence.Resource, error) {
+func (tr *TransportWithReauth) UpdateLicence(ctx context.Context, lic []byte, params *UpdateLicenceRequestParams) (*licence.Resource, error) {
 
 	var updated *licence.Resource
 	err := tr.doWithReauth(ctx, func() error {
 		var err error
-		updated, err = tr.inner.UpdateLicence(ctx, lic, casVersion)
+		updated, err = tr.inner.UpdateLicence(ctx, lic, params)
 
 		return err
 	})
@@ -351,10 +350,10 @@ func (tr *TransportWithReauth) DeleteNode(ctx context.Context, nodeID id.Node, p
 
 // SetReplicas wraps the inner transport's call with a reauthenticate and retry
 // upon encountering an authentication error.
-func (tr *TransportWithReauth) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, version version.Version) error {
+func (tr *TransportWithReauth) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, params *SetReplicasRequestParams) error {
 
 	err := tr.doWithReauth(ctx, func() error {
-		return tr.inner.SetReplicas(ctx, nsID, volID, numReplicas, version)
+		return tr.inner.SetReplicas(ctx, nsID, volID, numReplicas, params)
 	})
 
 	return err
@@ -362,12 +361,12 @@ func (tr *TransportWithReauth) SetReplicas(ctx context.Context, nsID id.Namespac
 
 // UpdateVolume wraps the inner transport's call with a reauthenticate and
 // retry upon encountering an authentication error.
-func (tr *TransportWithReauth) UpdateVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, labels labels.Set, version version.Version) (*volume.Resource, error) {
+func (tr *TransportWithReauth) UpdateVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, labels labels.Set, params *UpdateVolumeRequestParams) (*volume.Resource, error) {
 
 	var updated *volume.Resource
 	err := tr.doWithReauth(ctx, func() error {
 		var err error
-		updated, err = tr.inner.UpdateVolume(ctx, nsID, volID, description, labels, version)
+		updated, err = tr.inner.UpdateVolume(ctx, nsID, volID, description, labels, params)
 		return err
 	})
 
@@ -376,12 +375,12 @@ func (tr *TransportWithReauth) UpdateVolume(ctx context.Context, nsID id.Namespa
 
 // ResizeVolume wraps the inner transport's call with a reauthenticate and retry
 // upon encountering an authentication error.
-func (tr *TransportWithReauth) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, version version.Version, params *ResizeVolumeRequestParams) (*volume.Resource, error) {
+func (tr *TransportWithReauth) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, params *ResizeVolumeRequestParams) (*volume.Resource, error) {
 
 	var updated *volume.Resource
 	err := tr.doWithReauth(ctx, func() error {
 		var err error
-		updated, err = tr.inner.ResizeVolume(ctx, nsID, volID, sizeBytes, version, params)
+		updated, err = tr.inner.ResizeVolume(ctx, nsID, volID, sizeBytes, params)
 		return err
 	})
 

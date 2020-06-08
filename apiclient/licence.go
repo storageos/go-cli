@@ -19,13 +19,15 @@ type UpdateLicenceRequestParams struct {
 // available version from the current licence.
 func (c *Client) UpdateLicence(ctx context.Context, licence []byte, params *UpdateLicenceRequestParams) (*licence.Resource, error) {
 
-	if params == nil {
+	if params == nil || params.CASVersion == "" {
 		l, err := c.Transport.GetLicence(ctx)
 		if err != nil {
 			return nil, err
 		}
-		return c.Transport.UpdateLicence(ctx, licence, l.Version)
+		params = &UpdateLicenceRequestParams{
+			CASVersion: l.Version,
+		}
 	}
 
-	return c.Transport.UpdateLicence(ctx, licence, params.CASVersion)
+	return c.Transport.UpdateLicence(ctx, licence, params)
 }

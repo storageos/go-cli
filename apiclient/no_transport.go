@@ -10,7 +10,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
-	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -100,23 +99,23 @@ func (t *noTransport) CreatePolicyGroup(ctx context.Context, name string, specs 
 	return nil, ErrNoTransportConfigured
 }
 
-func (t *noTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource) (*cluster.Resource, error) {
+func (t *noTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource, params *UpdateClusterRequestParams) (*cluster.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 
-func (t *noTransport) UpdateLicence(ctx context.Context, licence []byte, casVersion version.Version) (*licence.Resource, error) {
+func (t *noTransport) UpdateLicence(ctx context.Context, licence []byte, params *UpdateLicenceRequestParams) (*licence.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 
-func (t *noTransport) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, version version.Version) error {
+func (t *noTransport) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, params *SetReplicasRequestParams) error {
 	return ErrNoTransportConfigured
 }
 
-func (t *noTransport) UpdateVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, labels labels.Set, version version.Version) (*volume.Resource, error) {
+func (t *noTransport) UpdateVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, labels labels.Set, params *UpdateVolumeRequestParams) (*volume.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 
-func (t *noTransport) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, version version.Version, params *ResizeVolumeRequestParams) (*volume.Resource, error) {
+func (t *noTransport) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, params *ResizeVolumeRequestParams) (*volume.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }
 

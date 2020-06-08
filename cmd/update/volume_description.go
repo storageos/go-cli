@@ -74,7 +74,7 @@ func (c *volumeDescriptionCommand) runWithCtx(ctx context.Context, cmd *cobra.Co
 		return err
 	}
 
-	return c.display.UpdateVolume(ctx, c.writer, output.NewVolumeUpdate(updatedVol))
+	return c.display.UpdateVolumeDescription(ctx, c.writer, output.NewVolumeUpdate(updatedVol))
 
 }
 

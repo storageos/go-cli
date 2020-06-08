@@ -12,7 +12,7 @@ type errInvalidSizeArg struct {
 }
 
 func (e *errInvalidSizeArg) Error() string {
-	return fmt.Sprintf("invalid size argument, got %s, use the following notations: '42 MB', '42mib', or '44040192'", e.got)
+	return fmt.Sprintf("invalid size argument, got %s, use the following notations: '42 MiB', '42mib', or '44040192'", e.got)
 }
 
 func newErrInvalidSizeArg(got string) *errInvalidSizeArg {

@@ -11,8 +11,6 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/kr/pretty"
 
-	"code.storageos.net/storageos/c2-cli/pkg/version"
-
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -545,6 +543,7 @@ func TestTransportWithReauth(t *testing.T) {
 					&cluster.Resource{
 						ID: "in",
 					},
+					nil,
 				)
 				if gotErr != inner.UpdateClusterError {
 					t.Errorf("got error %v, want %v", gotErr, inner.UpdateClusterError)
@@ -745,7 +744,7 @@ func TestTransportWithReauth(t *testing.T) {
 					"volume-id",
 					"new description",
 					labels.Set{"banana": "kiwi"},
-					version.FromString("42"),
+					&UpdateVolumeRequestParams{CASVersion: "42"},
 				)
 				if gotErr != inner.UpdateVolumeError {
 					t.Errorf("got error %v, want %v", gotErr, inner.UpdateVolumeError)
@@ -757,7 +756,7 @@ func TestTransportWithReauth(t *testing.T) {
 				UpdateVolumeGotVolumeID:    "volume-id",
 				UpdateVolumeGotDescription: "new description",
 				UpdateVolumeGotLabels:      labels.Set{"banana": "kiwi"},
-				UpdateVolumeGotVersion:     version.FromString("42"),
+				UpdateVolumeGotParams:      &UpdateVolumeRequestParams{CASVersion: "42"},
 				UpdateVolumeResource:       &volume.Resource{ID: "bananaID"},
 				UpdateVolumeError:          errors.New("update-error"),
 			},
@@ -778,9 +777,9 @@ func TestTransportWithReauth(t *testing.T) {
 					"namespace-id",
 					"volume-id",
 					42*humanize.GiByte,
-					version.FromString("42"),
 					&ResizeVolumeRequestParams{
-						AsyncMax: 42 * time.Second,
+						AsyncMax:   42 * time.Second,
+						CASVersion: "42",
 					},
 				)
 				if gotErr != inner.ResizeVolumeError {
@@ -792,9 +791,9 @@ func TestTransportWithReauth(t *testing.T) {
 				ResizeVolumeGotNamespaceID: "namespace-id",
 				ResizeVolumeGotVolumeID:    "volume-id",
 				ResizeVolumeGotSizeBytes:   42 * humanize.GiByte,
-				ResizeVolumeGotVersion:     version.FromString("42"),
 				ResizeVolumeGotParams: &ResizeVolumeRequestParams{
-					AsyncMax: 42 * time.Second,
+					AsyncMax:   42 * time.Second,
+					CASVersion: "42",
 				},
 				ResizeVolumeResource: &volume.Resource{ID: "bananaID"},
 				ResizeVolumeError:    errors.New("resize-error"),

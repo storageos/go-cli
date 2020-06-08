@@ -54,6 +54,17 @@ func (s Set) String() string {
 	return strings.TrimRight(sb.String(), ",")
 }
 
+// Copy creates a deep copy of the Set.
+func (s Set) Copy() Set {
+	newSet := Set{}
+
+	for k, v := range s {
+		newSet[k] = v
+	}
+
+	return newSet
+}
+
 // UpsertExisting sets the keys in toEdit to the values found in new, adding any
 // of the missing values
 func UpsertExisting(toEdit, new Set) Set {

@@ -42,7 +42,7 @@ type Client interface {
 	SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, params *apiclient.SetReplicasRequestParams) error
 	UpdateVolumeDescription(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, params *apiclient.UpdateVolumeRequestParams) (*volume.Resource, error)
 	UpdateVolumeLabels(ctx context.Context, nsID id.Namespace, volID id.Volume, labels labels.Set, params *apiclient.UpdateVolumeRequestParams) (*volume.Resource, error)
-	ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, params *apiclient.ResizeVolumeOptionalRequestParams) (*volume.Resource, error)
+	ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, params *apiclient.ResizeVolumeRequestParams) (*volume.Resource, error)
 
 	GetVolumeByName(ctx context.Context, namespace id.Namespace, name string) (*volume.Resource, error)
 	GetVolume(ctx context.Context, namespaceID id.Namespace, uid id.Volume) (*volume.Resource, error)
@@ -54,6 +54,9 @@ type Client interface {
 type Displayer interface {
 	UpdateVolume(ctx context.Context, w io.Writer, updatedVol output.VolumeUpdate) error
 	SetReplicas(ctx context.Context, w io.Writer, new uint64) error
+	ResizeVolume(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error
+	UpdateVolumeDescription(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error
+	UpdateVolumeLabels(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "update" verb.

@@ -11,7 +11,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
-	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -104,30 +103,30 @@ type mockTransport struct {
 	UpdateClusterResource    *cluster.Resource
 	UpdateClusterError       error
 	UpdateClusterGotResource *cluster.Resource
+	UpdateClusterGotParams   *UpdateClusterRequestParams
 
 	UpdateLicenceGotLicence []byte
-	UpdateLicenceGotVersion version.Version
+	UpdateLicenceGotParams  *UpdateLicenceRequestParams
 	UpdateLicenceResource   *licence.Resource
 	UpdateLicenceError      error
 
 	SetReplicasGotNamespaceID id.Namespace
 	SetReplicasGotVolumeID    id.Volume
 	SetReplicasGotNumReplicas uint64
-	SetReplicasGotVersion     version.Version
+	SetReplicasGotParams      *SetReplicasRequestParams
 	SetReplicasError          error
 
 	UpdateVolumeGotNamespaceID id.Namespace
 	UpdateVolumeGotVolumeID    id.Volume
 	UpdateVolumeGotDescription string
 	UpdateVolumeGotLabels      labels.Set
-	UpdateVolumeGotVersion     version.Version
+	UpdateVolumeGotParams      *UpdateVolumeRequestParams
 	UpdateVolumeResource       *volume.Resource
 	UpdateVolumeError          error
 
 	ResizeVolumeGotNamespaceID id.Namespace
 	ResizeVolumeGotVolumeID    id.Volume
 	ResizeVolumeGotSizeBytes   uint64
-	ResizeVolumeGotVersion     version.Version
 	ResizeVolumeGotParams      *ResizeVolumeRequestParams
 	ResizeVolumeResource       *volume.Resource
 	ResizeVolumeError          error
@@ -269,40 +268,40 @@ func (m *mockTransport) CreatePolicyGroup(ctx context.Context, name string, spec
 	return m.CreatePolicyGroupResource, m.CreatePolicyGroupError
 }
 
-func (m *mockTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource) (*cluster.Resource, error) {
+func (m *mockTransport) UpdateCluster(ctx context.Context, resource *cluster.Resource, params *UpdateClusterRequestParams) (*cluster.Resource, error) {
 	m.UpdateClusterGotResource = resource
+	m.UpdateClusterGotParams = params
 	return m.UpdateClusterResource, m.UpdateClusterError
 }
 
-func (m *mockTransport) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, version version.Version) error {
+func (m *mockTransport) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, params *SetReplicasRequestParams) error {
 	m.SetReplicasGotNamespaceID = nsID
 	m.SetReplicasGotVolumeID = volID
 	m.SetReplicasGotNumReplicas = numReplicas
-	m.SetReplicasGotVersion = version
+	m.SetReplicasGotParams = params
 	return m.SetReplicasError
 }
 
-func (m *mockTransport) UpdateVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, labels labels.Set, version version.Version) (*volume.Resource, error) {
+func (m *mockTransport) UpdateVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, labels labels.Set, params *UpdateVolumeRequestParams) (*volume.Resource, error) {
 	m.UpdateVolumeGotNamespaceID = nsID
 	m.UpdateVolumeGotVolumeID = volID
 	m.UpdateVolumeGotDescription = description
 	m.UpdateVolumeGotLabels = labels
-	m.UpdateVolumeGotVersion = version
+	m.UpdateVolumeGotParams = params
 	return m.UpdateVolumeResource, m.UpdateVolumeError
 }
 
-func (m *mockTransport) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, version version.Version, params *ResizeVolumeRequestParams) (*volume.Resource, error) {
+func (m *mockTransport) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, params *ResizeVolumeRequestParams) (*volume.Resource, error) {
 	m.ResizeVolumeGotNamespaceID = nsID
 	m.ResizeVolumeGotVolumeID = volID
 	m.ResizeVolumeGotSizeBytes = sizeBytes
-	m.ResizeVolumeGotVersion = version
 	m.ResizeVolumeGotParams = params
 	return m.ResizeVolumeResource, m.ResizeVolumeError
 }
 
-func (m *mockTransport) UpdateLicence(ctx context.Context, licence []byte, casVersion version.Version) (*licence.Resource, error) {
+func (m *mockTransport) UpdateLicence(ctx context.Context, licence []byte, params *UpdateLicenceRequestParams) (*licence.Resource, error) {
 	m.UpdateLicenceGotLicence = licence
-	m.UpdateLicenceGotVersion = casVersion
+	m.UpdateLicenceGotParams = params
 	return m.UpdateLicenceResource, m.UpdateLicenceError
 }
 

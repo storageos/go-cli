@@ -8,6 +8,8 @@ import (
 
 	"github.com/dustin/go-humanize"
 
+	"code.storageos.net/storageos/c2-cli/pkg/health"
+
 	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/pkg/version"
@@ -96,17 +98,37 @@ func TestDisplayer_UpdateVolume(t *testing.T) {
 				Filesystem: "ext4",
 				SizeBytes:  42,
 				Master:     nil,
-				Replicas:   []*volume.Deployment{},
-				CreatedAt:  mockTime,
-				UpdatedAt:  mockTime,
-				Version:    version.Version("MQ"),
+				Replicas: []*volume.Deployment{
+					{
+						ID:           "id1",
+						Node:         "node1",
+						Health:       health.ReplicaReady,
+						Promotable:   true,
+						SyncProgress: nil,
+					},
+					{
+						ID:           "id2",
+						Node:         "node2",
+						Health:       health.ReplicaFailed,
+						Promotable:   true,
+						SyncProgress: nil,
+					},
+				},
+				CreatedAt: mockTime,
+				UpdatedAt: mockTime,
+				Version:   version.Version("MQ"),
 			},
-			wantW: `Update successful for volume banana-name.
+			wantW: `Name:                  banana-name        
+ID:                    banana-id          
+Size:                  42 B               
+Description:           ceciestunvolume    
+AttachedOn:            barnacle           
+Replicas:              1x ready, 1x failed
+Labels:                                   
+  - mymarvelouslabels  sogood             
+  - woohoo             woohooo            
 
-Name:         banana-name                            
-Description:  ceciestunvolume                        
-Namespace:    spaaaaace                              
-Labels:       mymarvelouslabels=sogood,woohoo=woohooo
+Volume banana-name (banana-id) updated.
 `,
 			wantErr: false,
 		},
