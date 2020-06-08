@@ -138,14 +138,8 @@ type UpdateVolumeRequestParams struct {
 // ResizeVolumeRequestParams contains request parameters for a resize
 // volume operation.
 type ResizeVolumeRequestParams struct {
-	AsyncMax time.Duration
-}
-
-// ResizeVolumeOptionalRequestParams contains optional request parameters for a
-// resize volume operation.
-type ResizeVolumeOptionalRequestParams struct {
+	AsyncMax   time.Duration
 	CASVersion version.Version
-	ResizeVolumeRequestParams
 }
 
 // GetVolumeByName requests the volume resource which has name in namespace.
@@ -339,16 +333,16 @@ func filterVolumesForNames(volumes []*volume.Resource, names ...string) ([]*volu
 // 	- If params.CASVersion is set, the request is conditional upon it matching
 // 	the volume entity's version as seen by the server.
 func (c *Client) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, params *SetReplicasRequestParams) error {
-
 	if params == nil || params.CASVersion == "" {
 		v, err := c.Transport.GetVolume(ctx, nsID, volID)
 		if err != nil {
 			return err
 		}
-		return c.Transport.SetReplicas(ctx, nsID, volID, numReplicas, v.Version)
+
+		params = &SetReplicasRequestParams{CASVersion: v.Version}
 	}
 
-	return c.Transport.SetReplicas(ctx, nsID, volID, numReplicas, params.CASVersion)
+	return c.Transport.SetReplicas(ctx, nsID, volID, numReplicas, params)
 }
 
 // UpdateVolumeDescription sends a new description for updating the selected volume.
@@ -359,17 +353,18 @@ func (c *Client) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Vo
 // 	- If params.CASVersion is set, the request is conditional upon it matching
 // 	the volume entity's version as seen by the server.
 func (c *Client) UpdateVolumeDescription(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, params *UpdateVolumeRequestParams) (*volume.Resource, error) {
-
 	v, err := c.Transport.GetVolume(ctx, nsID, volID)
 	if err != nil {
 		return nil, err
 	}
 
 	if params == nil || params.CASVersion == "" {
-		return c.Transport.UpdateVolume(ctx, nsID, volID, description, v.Labels, v.Version)
+		params = &UpdateVolumeRequestParams{
+			CASVersion: v.Version,
+		}
 	}
 
-	return c.Transport.UpdateVolume(ctx, nsID, volID, description, v.Labels, params.CASVersion)
+	return c.Transport.UpdateVolume(ctx, nsID, volID, description, v.Labels, params)
 }
 
 // UpdateVolumeLabels sends a new set of labels for updating the selected volume
@@ -381,17 +376,18 @@ func (c *Client) UpdateVolumeDescription(ctx context.Context, nsID id.Namespace,
 //  - If params.CASVersion is set, the request is conditional upon it matching
 //  the volume entity's version as seen by the server.
 func (c *Client) UpdateVolumeLabels(ctx context.Context, nsID id.Namespace, volID id.Volume, labels labels.Set, params *UpdateVolumeRequestParams) (*volume.Resource, error) {
-
 	v, err := c.Transport.GetVolume(ctx, nsID, volID)
 	if err != nil {
 		return nil, err
 	}
 
 	if params == nil || params.CASVersion == "" {
-		return c.Transport.UpdateVolume(ctx, nsID, volID, v.Description, labels, v.Version)
+		params = &UpdateVolumeRequestParams{
+			CASVersion: v.Version,
+		}
 	}
 
-	return c.Transport.UpdateVolume(ctx, nsID, volID, v.Description, labels, params.CASVersion)
+	return c.Transport.UpdateVolume(ctx, nsID, volID, v.Description, labels, params)
 }
 
 // ResizeVolume sends a new volume size for updating the selected volume.
@@ -403,15 +399,21 @@ func (c *Client) UpdateVolumeLabels(ctx context.Context, nsID id.Namespace, volI
 // 	unconditional
 // 	- If params.CASVersion is set, the request is conditional upon it matching
 // 	the volume entity's version as seen by the server.
-func (c *Client) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, params *ResizeVolumeOptionalRequestParams) (*volume.Resource, error) {
+func (c *Client) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, params *ResizeVolumeRequestParams) (*volume.Resource, error) {
+
+	newParams := &ResizeVolumeRequestParams{}
 
 	if params == nil || params.CASVersion == "" {
 		v, err := c.Transport.GetVolume(ctx, nsID, volID)
 		if err != nil {
 			return nil, err
 		}
-		return c.Transport.ResizeVolume(ctx, nsID, volID, sizeBytes, v.Version, &params.ResizeVolumeRequestParams)
+		newParams.CASVersion = v.Version
 	}
 
-	return c.Transport.ResizeVolume(ctx, nsID, volID, sizeBytes, params.CASVersion, &params.ResizeVolumeRequestParams)
+	if params != nil && params.AsyncMax != 0 {
+		newParams.AsyncMax = params.AsyncMax
+	}
+
+	return c.Transport.ResizeVolume(ctx, nsID, volID, sizeBytes, newParams)
 }

@@ -937,7 +937,7 @@ type DeleteAuthenticatedUserOpts struct {
 DeleteAuthenticatedUser Delete the authenticated user
 Remove the authenticated user from the cluster.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DeleteAuthenticatedUserOpts - Optional Parameters:
  * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 */
@@ -1219,7 +1219,7 @@ DeleteNamespace Delete a namespace
 Remove the namespace identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a namespace
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DeleteNamespaceOpts - Optional Parameters:
  * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 */
@@ -1381,7 +1381,7 @@ DeleteNode Delete a node
 Remove the node identified by id. A node can only be deleted if it is currently offline and does not host any master deployments. 
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a node
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DeleteNodeOpts - Optional Parameters:
  * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
  * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values. 
@@ -1566,7 +1566,7 @@ DeletePolicyGroup Delete a policy group
 Remove the policy group identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a policy group
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DeletePolicyGroupOpts - Optional Parameters:
  * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 */
@@ -1863,7 +1863,7 @@ DeleteUser Delete a user
 Remove the user identified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose. 
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a user
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DeleteUserOpts - Optional Parameters:
  * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 */
@@ -2017,7 +2017,7 @@ Remove the volume identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespaceID ID of a Namespace
  * @param id ID of a Volume
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DeleteVolumeOpts - Optional Parameters:
  * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
  * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values. 
@@ -2219,7 +2219,7 @@ Detach the volume identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param namespaceID ID of a Namespace
  * @param id ID of a Volume
- * @param version This value is used to perform a conditional delete of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
+ * @param version This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict. 
  * @param optional nil or *DetachVolumeOpts - Optional Parameters:
  * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 */
@@ -4346,6 +4346,7 @@ func (a *DefaultApiService) RefreshJwt(ctx _context.Context) (UserSession, *_net
 // ResizeVolumeOpts Optional parameters for the method 'ResizeVolume'
 type ResizeVolumeOpts struct {
     AsyncMax optional.String
+    IgnoreVersion optional.Bool
 }
 
 /*
@@ -4357,6 +4358,7 @@ Resize the volume identified by id in the namespace identified by namespaceID. A
  * @param resizeVolumeRequest
  * @param optional nil or *ResizeVolumeOpts - Optional Parameters:
  * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values. 
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 @return Volume
 */
 func (a *DefaultApiService) ResizeVolume(ctx _context.Context, namespaceID string, id string, resizeVolumeRequest ResizeVolumeRequest, localVarOptionals *ResizeVolumeOpts) (Volume, *_nethttp.Response, error) {
@@ -4381,6 +4383,9 @@ func (a *DefaultApiService) ResizeVolume(ctx _context.Context, namespaceID strin
 
 	if localVarOptionals != nil && localVarOptionals.AsyncMax.IsSet() {
 		localVarQueryParams.Add("async-max", parameterToString(localVarOptionals.AsyncMax.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.IgnoreVersion.IsSet() {
+		localVarQueryParams.Add("ignore-version", parameterToString(localVarOptionals.IgnoreVersion.Value(), ""))
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
@@ -4536,6 +4541,11 @@ func (a *DefaultApiService) ResizeVolume(ctx _context.Context, namespaceID strin
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+// SetReplicasOpts Optional parameters for the method 'SetReplicas'
+type SetReplicasOpts struct {
+    IgnoreVersion optional.Bool
+}
+
 /*
 SetReplicas Set the number of replicas to maintain for the volume.
 Set the number of replicas for the volume identified by id to the number specified in the request&#39;s body. This modifies the protected StorageOS system label \&quot;storageos.com/replicas\&quot;. This request changes the desired replica count, and returns an error if changing the desired replica count failed. StorageOS satisfies the new replica configuration asynchronously. 
@@ -4543,9 +4553,11 @@ Set the number of replicas for the volume identified by id to the number specifi
  * @param namespaceID ID of a Namespace
  * @param id ID of a Volume
  * @param setReplicasRequest
+ * @param optional nil or *SetReplicasOpts - Optional Parameters:
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 @return AcceptedMessage
 */
-func (a *DefaultApiService) SetReplicas(ctx _context.Context, namespaceID string, id string, setReplicasRequest SetReplicasRequest) (AcceptedMessage, *_nethttp.Response, error) {
+func (a *DefaultApiService) SetReplicas(ctx _context.Context, namespaceID string, id string, setReplicasRequest SetReplicasRequest, localVarOptionals *SetReplicasOpts) (AcceptedMessage, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -4565,6 +4577,9 @@ func (a *DefaultApiService) SetReplicas(ctx _context.Context, namespaceID string
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if localVarOptionals != nil && localVarOptionals.IgnoreVersion.IsSet() {
+		localVarQueryParams.Add("ignore-version", parameterToString(localVarOptionals.IgnoreVersion.Value(), ""))
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -4793,14 +4808,21 @@ func (a *DefaultApiService) Spec(ctx _context.Context) (string, *_nethttp.Respon
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+// UpdateAuthenticatedUserOpts Optional parameters for the method 'UpdateAuthenticatedUser'
+type UpdateAuthenticatedUserOpts struct {
+    IgnoreVersion optional.Bool
+}
+
 /*
 UpdateAuthenticatedUser Update the authenticated user's information
 Update the authenticated user.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param updateAuthenticatedUserData
+ * @param optional nil or *UpdateAuthenticatedUserOpts - Optional Parameters:
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 @return User
 */
-func (a *DefaultApiService) UpdateAuthenticatedUser(ctx _context.Context, updateAuthenticatedUserData UpdateAuthenticatedUserData) (User, *_nethttp.Response, error) {
+func (a *DefaultApiService) UpdateAuthenticatedUser(ctx _context.Context, updateAuthenticatedUserData UpdateAuthenticatedUserData, localVarOptionals *UpdateAuthenticatedUserOpts) (User, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -4816,6 +4838,9 @@ func (a *DefaultApiService) UpdateAuthenticatedUser(ctx _context.Context, update
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if localVarOptionals != nil && localVarOptionals.IgnoreVersion.IsSet() {
+		localVarQueryParams.Add("ignore-version", parameterToString(localVarOptionals.IgnoreVersion.Value(), ""))
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -4950,14 +4975,21 @@ func (a *DefaultApiService) UpdateAuthenticatedUser(ctx _context.Context, update
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+// UpdateClusterOpts Optional parameters for the method 'UpdateCluster'
+type UpdateClusterOpts struct {
+    IgnoreVersion optional.Bool
+}
+
 /*
 UpdateCluster Update the cluster's global configuration settings
 Update the global configuration settings to use for the cluster.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param updateClusterData
+ * @param optional nil or *UpdateClusterOpts - Optional Parameters:
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 @return Cluster
 */
-func (a *DefaultApiService) UpdateCluster(ctx _context.Context, updateClusterData UpdateClusterData) (Cluster, *_nethttp.Response, error) {
+func (a *DefaultApiService) UpdateCluster(ctx _context.Context, updateClusterData UpdateClusterData, localVarOptionals *UpdateClusterOpts) (Cluster, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -4973,6 +5005,9 @@ func (a *DefaultApiService) UpdateCluster(ctx _context.Context, updateClusterDat
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if localVarOptionals != nil && localVarOptionals.IgnoreVersion.IsSet() {
+		localVarQueryParams.Add("ignore-version", parameterToString(localVarOptionals.IgnoreVersion.Value(), ""))
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -5097,14 +5132,21 @@ func (a *DefaultApiService) UpdateCluster(ctx _context.Context, updateClusterDat
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+// UpdateLicenceOpts Optional parameters for the method 'UpdateLicence'
+type UpdateLicenceOpts struct {
+    IgnoreVersion optional.Bool
+}
+
 /*
 UpdateLicence Update the licence global configuration settings
 Update the cluster&#39;s licence.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param updateLicence
+ * @param optional nil or *UpdateLicenceOpts - Optional Parameters:
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 @return Licence
 */
-func (a *DefaultApiService) UpdateLicence(ctx _context.Context, updateLicence UpdateLicence) (Licence, *_nethttp.Response, error) {
+func (a *DefaultApiService) UpdateLicence(ctx _context.Context, updateLicence UpdateLicence, localVarOptionals *UpdateLicenceOpts) (Licence, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -5120,6 +5162,9 @@ func (a *DefaultApiService) UpdateLicence(ctx _context.Context, updateLicence Up
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if localVarOptionals != nil && localVarOptionals.IgnoreVersion.IsSet() {
+		localVarQueryParams.Add("ignore-version", parameterToString(localVarOptionals.IgnoreVersion.Value(), ""))
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -5244,15 +5289,22 @@ func (a *DefaultApiService) UpdateLicence(ctx _context.Context, updateLicence Up
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+// UpdateNamespaceOpts Optional parameters for the method 'UpdateNamespace'
+type UpdateNamespaceOpts struct {
+    IgnoreVersion optional.Bool
+}
+
 /*
 UpdateNamespace Update a namespace
 Update the namespace identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a namespace
  * @param updateNamespaceData
+ * @param optional nil or *UpdateNamespaceOpts - Optional Parameters:
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 @return Namespace
 */
-func (a *DefaultApiService) UpdateNamespace(ctx _context.Context, id string, updateNamespaceData UpdateNamespaceData) (Namespace, *_nethttp.Response, error) {
+func (a *DefaultApiService) UpdateNamespace(ctx _context.Context, id string, updateNamespaceData UpdateNamespaceData, localVarOptionals *UpdateNamespaceOpts) (Namespace, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -5270,6 +5322,9 @@ func (a *DefaultApiService) UpdateNamespace(ctx _context.Context, id string, upd
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if localVarOptionals != nil && localVarOptionals.IgnoreVersion.IsSet() {
+		localVarQueryParams.Add("ignore-version", parameterToString(localVarOptionals.IgnoreVersion.Value(), ""))
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -5404,15 +5459,22 @@ func (a *DefaultApiService) UpdateNamespace(ctx _context.Context, id string, upd
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+// UpdateNodeOpts Optional parameters for the method 'UpdateNode'
+type UpdateNodeOpts struct {
+    IgnoreVersion optional.Bool
+}
+
 /*
 UpdateNode Update a node
 Update the node identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a node
  * @param updateNodeData
+ * @param optional nil or *UpdateNodeOpts - Optional Parameters:
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 @return Node
 */
-func (a *DefaultApiService) UpdateNode(ctx _context.Context, id string, updateNodeData UpdateNodeData) (Node, *_nethttp.Response, error) {
+func (a *DefaultApiService) UpdateNode(ctx _context.Context, id string, updateNodeData UpdateNodeData, localVarOptionals *UpdateNodeOpts) (Node, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -5430,6 +5492,9 @@ func (a *DefaultApiService) UpdateNode(ctx _context.Context, id string, updateNo
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if localVarOptionals != nil && localVarOptionals.IgnoreVersion.IsSet() {
+		localVarQueryParams.Add("ignore-version", parameterToString(localVarOptionals.IgnoreVersion.Value(), ""))
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -5564,15 +5629,22 @@ func (a *DefaultApiService) UpdateNode(ctx _context.Context, id string, updateNo
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+// UpdatePolicyGroupOpts Optional parameters for the method 'UpdatePolicyGroup'
+type UpdatePolicyGroupOpts struct {
+    IgnoreVersion optional.Bool
+}
+
 /*
 UpdatePolicyGroup Update a policy group
 Update the policy group identified by id.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a policy group
  * @param updatePolicyGroupData
+ * @param optional nil or *UpdatePolicyGroupOpts - Optional Parameters:
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 @return PolicyGroup
 */
-func (a *DefaultApiService) UpdatePolicyGroup(ctx _context.Context, id string, updatePolicyGroupData UpdatePolicyGroupData) (PolicyGroup, *_nethttp.Response, error) {
+func (a *DefaultApiService) UpdatePolicyGroup(ctx _context.Context, id string, updatePolicyGroupData UpdatePolicyGroupData, localVarOptionals *UpdatePolicyGroupOpts) (PolicyGroup, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -5590,6 +5662,9 @@ func (a *DefaultApiService) UpdatePolicyGroup(ctx _context.Context, id string, u
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if localVarOptionals != nil && localVarOptionals.IgnoreVersion.IsSet() {
+		localVarQueryParams.Add("ignore-version", parameterToString(localVarOptionals.IgnoreVersion.Value(), ""))
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -5724,15 +5799,22 @@ func (a *DefaultApiService) UpdatePolicyGroup(ctx _context.Context, id string, u
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+// UpdateUserOpts Optional parameters for the method 'UpdateUser'
+type UpdateUserOpts struct {
+    IgnoreVersion optional.Bool
+}
+
 /*
 UpdateUser Update a user
 Update the user identified by id. This request will not succeed if the target account is the currently authenticated account. Use the separate users/self endpoint for this purpose. 
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id ID of a user
  * @param updateUserData
+ * @param optional nil or *UpdateUserOpts - Optional Parameters:
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 @return User
 */
-func (a *DefaultApiService) UpdateUser(ctx _context.Context, id string, updateUserData UpdateUserData) (User, *_nethttp.Response, error) {
+func (a *DefaultApiService) UpdateUser(ctx _context.Context, id string, updateUserData UpdateUserData, localVarOptionals *UpdateUserOpts) (User, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -5750,6 +5832,9 @@ func (a *DefaultApiService) UpdateUser(ctx _context.Context, id string, updateUs
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if localVarOptionals != nil && localVarOptionals.IgnoreVersion.IsSet() {
+		localVarQueryParams.Add("ignore-version", parameterToString(localVarOptionals.IgnoreVersion.Value(), ""))
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -5884,6 +5969,11 @@ func (a *DefaultApiService) UpdateUser(ctx _context.Context, id string, updateUs
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+// UpdateVolumeOpts Optional parameters for the method 'UpdateVolume'
+type UpdateVolumeOpts struct {
+    IgnoreVersion optional.Bool
+}
+
 /*
 UpdateVolume Update a volume
 Update the description and non-storageos labels configured for the volume identified by id. 
@@ -5891,9 +5981,11 @@ Update the description and non-storageos labels configured for the volume identi
  * @param namespaceID ID of a Namespace
  * @param id ID of a Volume
  * @param updateVolumeData
+ * @param optional nil or *UpdateVolumeOpts - Optional Parameters:
+ * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation. 
 @return Volume
 */
-func (a *DefaultApiService) UpdateVolume(ctx _context.Context, namespaceID string, id string, updateVolumeData UpdateVolumeData) (Volume, *_nethttp.Response, error) {
+func (a *DefaultApiService) UpdateVolume(ctx _context.Context, namespaceID string, id string, updateVolumeData UpdateVolumeData, localVarOptionals *UpdateVolumeOpts) (Volume, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -5913,6 +6005,9 @@ func (a *DefaultApiService) UpdateVolume(ctx _context.Context, namespaceID strin
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
+	if localVarOptionals != nil && localVarOptionals.IgnoreVersion.IsSet() {
+		localVarQueryParams.Add("ignore-version", parameterToString(localVarOptionals.IgnoreVersion.Value(), ""))
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 

@@ -8,7 +8,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
-	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/volume"
 	"code.storageos.net/storageos/openapi"
 )
@@ -260,16 +259,24 @@ func (o *OpenAPI) DetachVolume(ctx context.Context, namespaceID id.Namespace, vo
 
 // SetReplicas changes the number of the replicas of a specified volume.
 // Operation is asynchronous, we return nil if the request has been accepted.
-func (o *OpenAPI) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, version version.Version) error {
+func (o *OpenAPI) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, params *apiclient.SetReplicasRequestParams) error {
+
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 
-	request := openapi.SetReplicasRequest{
-		Replicas: numReplicas,
-		Version:  version.String(),
+	// default
+	request := openapi.SetReplicasRequest{Replicas: numReplicas}
+	opts := &openapi.SetReplicasOpts{
+		IgnoreVersion: optional.NewBool(true),
 	}
 
-	_, resp, err := o.client.DefaultApi.SetReplicas(ctx, nsID.String(), volID.String(), request)
+	// check optional params
+	if params != nil && params.CASVersion != "" {
+		request.Version = params.CASVersion.String()
+		opts.IgnoreVersion = optional.NewBool(false)
+	}
+
+	_, resp, err := o.client.DefaultApi.SetReplicas(ctx, nsID.String(), volID.String(), request, opts)
 	if err != nil {
 		switch v := mapOpenAPIError(err, resp).(type) {
 		case notFoundError:
@@ -289,19 +296,28 @@ func (o *OpenAPI) UpdateVolume(
 	volID id.Volume,
 	description string,
 	labels labels.Set,
-	version version.Version,
+	params *apiclient.UpdateVolumeRequestParams,
 ) (*volume.Resource, error) {
 
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 
+	// default
 	request := openapi.UpdateVolumeData{
 		Labels:      labels,
 		Description: description,
-		Version:     version.String(),
+	}
+	opts := &openapi.UpdateVolumeOpts{
+		IgnoreVersion: optional.NewBool(true),
 	}
 
-	model, resp, err := o.client.DefaultApi.UpdateVolume(ctx, nsID.String(), volID.String(), request)
+	// check optional params
+	if params != nil && params.CASVersion != "" {
+		request.Version = params.CASVersion.String()
+		opts.IgnoreVersion = optional.NewBool(false)
+	}
+
+	model, resp, err := o.client.DefaultApi.UpdateVolume(ctx, nsID.String(), volID.String(), request, opts)
 	if err != nil {
 		switch v := mapOpenAPIError(err, resp).(type) {
 		case notFoundError:
@@ -321,23 +337,30 @@ func (o *OpenAPI) ResizeVolume(
 	nsID id.Namespace,
 	volID id.Volume,
 	sizeBytes uint64,
-	version version.Version,
 	params *apiclient.ResizeVolumeRequestParams,
 ) (*volume.Resource, error) {
+
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 
+	// default
 	request := openapi.ResizeVolumeRequest{
 		SizeBytes: sizeBytes,
-		Version:   version.String(),
-	}
-
-	var asyncMax optional.String = optional.EmptyString()
-	if params.AsyncMax != 0 {
-		asyncMax = optional.NewString(params.AsyncMax.String())
 	}
 	opts := &openapi.ResizeVolumeOpts{
-		AsyncMax: asyncMax,
+		AsyncMax:      optional.EmptyString(),
+		IgnoreVersion: optional.Bool{},
+	}
+
+	// check optional params
+	if params != nil {
+		if params.AsyncMax != 0 {
+			opts.AsyncMax = optional.NewString(params.AsyncMax.String())
+		}
+		if params.CASVersion != "" {
+			request.Version = params.CASVersion.String()
+			opts.IgnoreVersion = optional.NewBool(false)
+		}
 	}
 
 	model, resp, err := o.client.DefaultApi.ResizeVolume(ctx, nsID.String(), volID.String(), request, opts)

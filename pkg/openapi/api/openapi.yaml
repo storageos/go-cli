@@ -330,7 +330,7 @@ paths:
           $ref: '#/components/schemas/UserID'
         style: simple
       - description: |
-          This value is used to perform a conditional delete of the entity.
+          This value is used to perform a conditional delete or update of the entity.
           If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
         explode: true
         in: query
@@ -496,6 +496,15 @@ paths:
         schema:
           $ref: '#/components/schemas/UserID'
         style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateUserData'
         content:
@@ -708,7 +717,7 @@ paths:
       operationId: deleteAuthenticatedUser
       parameters:
       - description: |
-          This value is used to perform a conditional delete of the entity.
+          This value is used to perform a conditional delete or update of the entity.
           If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
         explode: true
         in: query
@@ -854,6 +863,16 @@ paths:
     put:
       description: Update the authenticated user.
       operationId: updateAuthenticatedUser
+      parameters:
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateAuthenticatedUserData'
         content:
@@ -1187,7 +1206,7 @@ paths:
           $ref: '#/components/schemas/NamespaceID'
         style: simple
       - description: |
-          This value is used to perform a conditional delete of the entity.
+          This value is used to perform a conditional delete or update of the entity.
           If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
         explode: true
         in: query
@@ -1368,6 +1387,15 @@ paths:
         schema:
           $ref: '#/components/schemas/NamespaceID'
         style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateNamespaceData'
         content:
@@ -1539,7 +1567,7 @@ paths:
           $ref: '#/components/schemas/NodeID'
         style: simple
       - description: |
-          This value is used to perform a conditional delete of the entity.
+          This value is used to perform a conditional delete or update of the entity.
           If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
         explode: true
         in: query
@@ -1741,6 +1769,15 @@ paths:
         schema:
           $ref: '#/components/schemas/NodeID'
         style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateNodeData'
         content:
@@ -2013,7 +2050,7 @@ paths:
           $ref: '#/components/schemas/PolicyGroupID'
         style: simple
       - description: |
-          This value is used to perform a conditional delete of the entity.
+          This value is used to perform a conditional delete or update of the entity.
           If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
         explode: true
         in: query
@@ -2194,6 +2231,15 @@ paths:
         schema:
           $ref: '#/components/schemas/PolicyGroupID'
         style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdatePolicyGroupData'
         content:
@@ -2558,7 +2604,7 @@ paths:
           $ref: '#/components/schemas/VolumeID'
         style: simple
       - description: |
-          This value is used to perform a conditional delete of the entity.
+          This value is used to perform a conditional delete or update of the entity.
           If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
         explode: true
         in: query
@@ -2807,6 +2853,15 @@ paths:
         schema:
           $ref: '#/components/schemas/VolumeID'
         style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateVolumeData'
         content:
@@ -2950,7 +3005,7 @@ paths:
           $ref: '#/components/schemas/VolumeID'
         style: simple
       - description: |
-          This value is used to perform a conditional delete of the entity.
+          This value is used to perform a conditional delete or update of the entity.
           If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
         explode: true
         in: query
@@ -3186,6 +3241,15 @@ paths:
         schema:
           $ref: '#/components/schemas/VolumeID'
         style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
       requestBody:
         $ref: '#/components/requestBodies/SetReplicasRequest'
         content:
@@ -3332,6 +3396,15 @@ paths:
         schema:
           type: string
         style: form
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
       requestBody:
         $ref: '#/components/requestBodies/ResizeVolumeRequest'
         content:
@@ -3361,6 +3434,10 @@ paths:
         required: true
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Volume'
           description: The volume was resized successfully.
         "202":
           content:
@@ -3497,6 +3574,16 @@ paths:
     put:
       description: Update the global configuration settings to use for the cluster.
       operationId: updateCluster
+      parameters:
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateClusterData'
         content:
@@ -3660,6 +3747,16 @@ paths:
     put:
       description: Update the cluster's licence.
       operationId: updateLicence
+      parameters:
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateLicence'
         content:
@@ -3819,7 +3916,7 @@ components:
   parameters:
     ObjectVersion:
       description: |
-        This value is used to perform a conditional delete of the entity.
+        This value is used to perform a conditional delete or update of the entity.
         If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
       explode: true
       in: query

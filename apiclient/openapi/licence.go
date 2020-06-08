@@ -3,8 +3,10 @@ package openapi
 import (
 	"context"
 
+	"github.com/antihax/optional"
+
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/licence"
-	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/openapi"
 )
 
@@ -24,16 +26,25 @@ func (o *OpenAPI) GetLicence(ctx context.Context) (*licence.Resource, error) {
 
 // UpdateLicence sends a new version of the licence to apply to the current
 // cluster. It returns the new licence resource if correctly applied.
-func (o *OpenAPI) UpdateLicence(ctx context.Context, licence []byte, casVersion version.Version) (*licence.Resource, error) {
+func (o *OpenAPI) UpdateLicence(ctx context.Context, licence []byte, params *apiclient.UpdateLicenceRequestParams) (*licence.Resource, error) {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 
-	updateData := openapi.UpdateLicence{
-		Key:     string(licence),
-		Version: casVersion.String(),
+	// default
+	req := openapi.UpdateLicence{
+		Key: string(licence),
+	}
+	opts := &openapi.UpdateLicenceOpts{
+		IgnoreVersion: optional.NewBool(true),
 	}
 
-	lic, resp, err := o.client.DefaultApi.UpdateLicence(ctx, updateData)
+	// check optional params
+	if params != nil && params.CASVersion != "" {
+		req.Version = params.CASVersion.String()
+		opts.IgnoreVersion = optional.NewBool(false)
+	}
+
+	lic, resp, err := o.client.DefaultApi.UpdateLicence(ctx, req, opts)
 	if err != nil {
 		return nil, mapOpenAPIError(err, resp)
 	}

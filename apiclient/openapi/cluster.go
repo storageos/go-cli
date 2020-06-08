@@ -3,6 +3,9 @@ package openapi
 import (
 	"context"
 
+	"github.com/antihax/optional"
+
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/openapi"
 )
@@ -23,7 +26,7 @@ func (o *OpenAPI) GetCluster(ctx context.Context) (*cluster.Resource, error) {
 
 // UpdateCluster attempts to perform an update of the cluster configuration
 // through the StorageOS API using resource as the update value.
-func (o *OpenAPI) UpdateCluster(ctx context.Context, resource *cluster.Resource) (*cluster.Resource, error) {
+func (o *OpenAPI) UpdateCluster(ctx context.Context, resource *cluster.Resource, params *apiclient.UpdateClusterRequestParams) (*cluster.Resource, error) {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 
@@ -43,10 +46,19 @@ func (o *OpenAPI) UpdateCluster(ctx context.Context, resource *cluster.Resource)
 		DisableVersionCheck:   resource.DisableVersionCheck,
 		LogLevel:              level,
 		LogFormat:             format,
-		Version:               resource.Version.String(),
 	}
 
-	model, resp, err := o.client.DefaultApi.UpdateCluster(ctx, updateData)
+	opts := &openapi.UpdateClusterOpts{
+		IgnoreVersion: optional.NewBool(true),
+	}
+
+	// check optional params
+	if params != nil && params.CASVersion != "" {
+		updateData.Version = params.CASVersion.String()
+		opts.IgnoreVersion = optional.NewBool(false)
+	}
+
+	model, resp, err := o.client.DefaultApi.UpdateCluster(ctx, updateData, opts)
 	if err != nil {
 		return nil, mapOpenAPIError(err, resp)
 	}

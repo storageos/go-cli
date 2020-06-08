@@ -101,7 +101,7 @@ func (c *volumeLabelsCommand) runWithCtx(ctx context.Context, cmd *cobra.Command
 		return err
 	}
 
-	return c.display.UpdateVolume(ctx, c.writer, output.NewVolumeUpdate(updatedVol))
+	return c.display.UpdateVolumeLabels(ctx, c.writer, output.NewVolumeUpdate(updatedVol))
 
 }
 

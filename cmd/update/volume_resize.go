@@ -65,7 +65,7 @@ func (c *volumeSizeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, 
 		volID = vol.ID
 	}
 
-	params := &apiclient.ResizeVolumeOptionalRequestParams{}
+	params := &apiclient.ResizeVolumeRequestParams{}
 	if c.useCAS() {
 		params.CASVersion = version.FromString(c.casVersion)
 	}
@@ -75,7 +75,7 @@ func (c *volumeSizeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, 
 		return err
 	}
 
-	return c.display.UpdateVolume(ctx, c.writer, output.NewVolumeUpdate(updatedVol))
+	return c.display.ResizeVolume(ctx, c.writer, output.NewVolumeUpdate(updatedVol))
 
 }
 
@@ -90,7 +90,7 @@ func newVolumeSize(w io.Writer, client Client, config ConfigProvider) *cobra.Com
 		Use:   "size [volume name] [size]",
 		Short: "Updates a volume's size",
 		Example: `
-$ storageos update volume size my-volume-name 42GB --namespace my-namespace-name
+$ storageos update volume size my-volume-name 42GiB --namespace my-namespace-name
 $ storageos update volume size my-volume-name 42gib --namespace my-namespace-name
 `,
 
@@ -106,6 +106,7 @@ $ storageos update volume size my-volume-name 42gib --namespace my-namespace-nam
 			if err != nil {
 				return newErrInvalidSizeArg(args[1])
 			}
+
 			c.sizeBytes = bytes
 
 			return nil

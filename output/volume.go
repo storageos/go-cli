@@ -140,20 +140,44 @@ func NewVolumeDeletion(volumeID id.Volume, namespaceID id.Namespace) VolumeDelet
 
 // VolumeUpdate defines a volume update confirmation output representation.
 type VolumeUpdate struct {
-	ID          id.Volume    `json:"id" yaml:"id"`
-	Name        string       `json:"name" yaml:"name"`
-	Description string       `json:"description" yaml:"description"`
-	Namespace   id.Namespace `json:"namespaceID" yaml:"namespaceID"`
-	Labels      labels.Set   `json:"labels" yaml:"labels"`
+	ID          id.Volume                 `json:"id" yaml:"id"`
+	Name        string                    `json:"name" yaml:"name"`
+	Description string                    `json:"description" yaml:"description"`
+	Namespace   id.Namespace              `json:"namespaceID" yaml:"namespaceID"`
+	Labels      labels.Set                `json:"labels" yaml:"labels"`
+	SizeBytes   uint64                    `json:"sizeBytes" yaml:"sizeBytes"`
+	AttachedOn  id.Node                   `json:"attachedOn" yaml:"attachedOn"`
+	Replicas    []*VolumeUpdateDeployment `json:"replicas" yaml:"replicas"`
+}
+
+// VolumeUpdateDeployment defines a type that includes all the info that a
+// deployment should have to be outputted in a update command.
+type VolumeUpdateDeployment struct {
+	ID     id.Deployment      `json:"id" yaml:"id"`
+	Node   id.Node            `json:"nodeID" yaml:"nodeID"`
+	Health health.VolumeState `json:"health" yaml:"health"`
 }
 
 // NewVolumeUpdate constructs a volume deletion confirmation output representation.
 func NewVolumeUpdate(vol *volume.Resource) VolumeUpdate {
+	deps := make([]*VolumeUpdateDeployment, 0)
+
+	for _, d := range vol.Replicas {
+		deps = append(deps, &VolumeUpdateDeployment{
+			ID:     d.ID,
+			Node:   d.Node,
+			Health: d.Health,
+		})
+	}
+
 	return VolumeUpdate{
 		ID:          vol.ID,
 		Name:        vol.Name,
 		Description: vol.Description,
 		Namespace:   vol.Namespace,
 		Labels:      vol.Labels,
+		SizeBytes:   vol.SizeBytes,
+		AttachedOn:  vol.AttachedOn,
+		Replicas:    deps,
 	}
 }

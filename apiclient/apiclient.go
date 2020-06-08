@@ -14,7 +14,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
-	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -110,20 +109,20 @@ type Transport interface {
 
 	// UpdateCluster attempts to perform an update of the cluster configuration
 	// through the StorageOS API using resource as the update value.
-	UpdateCluster(ctx context.Context, resource *cluster.Resource) (*cluster.Resource, error)
+	UpdateCluster(ctx context.Context, resource *cluster.Resource, params *UpdateClusterRequestParams) (*cluster.Resource, error)
 	// UpdateLicence attempts to perform an update of the licence currently
 	// applied to the cluster through the StorageOS API.
 	// In case of success, it returns all the info of the licence just applied.
-	UpdateLicence(ctx context.Context, licence []byte, casVersion version.Version) (*licence.Resource, error)
+	UpdateLicence(ctx context.Context, licence []byte, params *UpdateLicenceRequestParams) (*licence.Resource, error)
 	// SetReplicas attempts to perform a change in the number of replicas
 	// of a specified volume. If everything is correct, job is accepted.
-	SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, version version.Version) error
+	SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, params *SetReplicasRequestParams) error
 	// UpdateVolume attempts to perform an update of a specified  volume
 	// changing descriptions and labels.
-	UpdateVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, labels labels.Set, version version.Version) (*volume.Resource, error)
+	UpdateVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, labels labels.Set, params *UpdateVolumeRequestParams) (*volume.Resource, error)
 	// ResizeVolume attempts to perform a change in the size of a specified
 	// volume. If everything is correct, job is accepted.
-	ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, version version.Version, params *ResizeVolumeRequestParams) (*volume.Resource, error)
+	ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, params *ResizeVolumeRequestParams) (*volume.Resource, error)
 
 	// DeleteVolume makes a delete request for volumeID in namespaceID.
 	//
