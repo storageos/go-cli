@@ -9,12 +9,13 @@
  */
 
 package openapi
+
 // PoliciesIdSpecs struct for PoliciesIdSpecs
 type PoliciesIdSpecs struct {
-	// A unique identifier for a namespace. The format of this type is undefined and may change but the defined properties will not change.. 
+	// A unique identifier for a namespace. The format of this type is undefined and may change but the defined properties will not change..
 	NamespaceID string `json:"namespaceID,omitempty"`
-	// The resource type this policy grants access to. 
+	// The resource type this policy grants access to.
 	ResourceType string `json:"resourceType,omitempty"`
-	// If true, disallows requests that attempt to mutate the resource. 
+	// If true, disallows requests that attempt to mutate the resource.
 	ReadOnly bool `json:"readOnly,omitempty"`
 }

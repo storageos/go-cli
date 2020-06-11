@@ -52,11 +52,11 @@ type Client interface {
 // Displayer defines the functionality required by the CLI application to
 // display the results returned by "update" verb operations.
 type Displayer interface {
-	UpdateVolume(ctx context.Context, w io.Writer, updatedVol output.VolumeUpdate) error
 	SetReplicas(ctx context.Context, w io.Writer, new uint64) error
 	ResizeVolume(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error
 	UpdateVolumeDescription(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error
 	UpdateVolumeLabels(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error
+	AsyncRequest(ctx context.Context, w io.Writer) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "update" verb.

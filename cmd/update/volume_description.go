@@ -65,8 +65,19 @@ func (c *volumeDescriptionCommand) runWithCtx(ctx context.Context, cmd *cobra.Co
 	}
 
 	params := &apiclient.UpdateVolumeRequestParams{}
+
 	if c.useCAS() {
 		params.CASVersion = version.FromString(c.casVersion)
+	}
+
+	// If asynchrony is specified then source the timeout and initialise the params.
+	if c.useAsync {
+		timeout, err := c.config.CommandTimeout()
+		if err != nil {
+			return err
+		}
+
+		params.AsyncMax = timeout
 	}
 
 	updatedVol, err := c.client.UpdateVolumeDescription(ctx, nsID, volID, c.description, params)
@@ -74,8 +85,11 @@ func (c *volumeDescriptionCommand) runWithCtx(ctx context.Context, cmd *cobra.Co
 		return err
 	}
 
-	return c.display.UpdateVolumeDescription(ctx, c.writer, output.NewVolumeUpdate(updatedVol))
+	if c.useAsync {
+		return c.display.AsyncRequest(ctx, c.writer)
+	}
 
+	return c.display.UpdateVolumeDescription(ctx, c.writer, output.NewVolumeUpdate(updatedVol))
 }
 
 func newVolumeDescription(w io.Writer, client Client, config ConfigProvider) *cobra.Command {

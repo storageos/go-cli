@@ -27,6 +27,11 @@ func (d *Displayer) encode(w io.Writer, v interface{}) error {
 	return enc.Encode(v)
 }
 
+// AsyncRequest writes nothing to w.
+func (d *Displayer) AsyncRequest(ctx context.Context, w io.Writer) error {
+	return nil
+}
+
 // -----------------------------------------------------------------------------
 // CREATE
 // -----------------------------------------------------------------------------
@@ -39,11 +44,6 @@ func (d *Displayer) CreateUser(ctx context.Context, w io.Writer, user *output.Us
 // CreateVolume encodes volume as JSON, writing the result to w.
 func (d *Displayer) CreateVolume(ctx context.Context, w io.Writer, volume *output.Volume) error {
 	return d.encode(w, volume)
-}
-
-// CreateVolumeAsync writes nothing to w.
-func (d *Displayer) CreateVolumeAsync(ctx context.Context, w io.Writer) error {
-	return nil
 }
 
 // CreateNamespace encodes namespace as JSON, writing the result to w.
@@ -63,11 +63,6 @@ func (d *Displayer) CreatePolicyGroup(ctx context.Context, w io.Writer, group *o
 // UpdateLicence encodes licence as JSON, writing the result to w.
 func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *output.Licence) error {
 	return d.encode(w, licence)
-}
-
-// UpdateVolume encodes licence as JSON, writing the result to w.
-func (d *Displayer) UpdateVolume(ctx context.Context, w io.Writer, updatedVol output.VolumeUpdate) error {
-	return d.encode(w, updatedVol)
 }
 
 // SetReplicas writes the number of the expected replicas.
@@ -246,11 +241,6 @@ func (d *Displayer) DeleteVolume(ctx context.Context, w io.Writer, confirmation 
 	return d.encode(w, confirmation)
 }
 
-// DeleteVolumeAsync writes nothing to w.
-func (d *Displayer) DeleteVolumeAsync(ctx context.Context, w io.Writer, target output.VolumeDeletion) error {
-	return nil
-}
-
 // DeleteNamespace encodes the namespace deletion confirmation as JSON, writing
 // the result to w
 func (d *Displayer) DeleteNamespace(ctx context.Context, w io.Writer, confirmation output.NamespaceDeletion) error {
@@ -267,11 +257,6 @@ func (d *Displayer) DeletePolicyGroup(ctx context.Context, w io.Writer, confirma
 // the result to w
 func (d *Displayer) DeleteNode(ctx context.Context, w io.Writer, confirmation output.NodeDeletion) error {
 	return d.encode(w, confirmation)
-}
-
-// DeleteNodeAsync writes nothing to w.
-func (d *Displayer) DeleteNodeAsync(ctx context.Context, w io.Writer, target output.NodeDeletion) error {
-	return nil
 }
 
 // -----------------------------------------------------------------------------

@@ -72,7 +72,7 @@ Customer name:  bananaCustomer
 	}
 }
 
-func TestDisplayer_UpdateVolume(t *testing.T) {
+func TestDisplayer_UpdateVolumeDescription(t *testing.T) {
 	t.Parallel()
 
 	var mockTime = time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -128,7 +128,7 @@ Labels:
   - mymarvelouslabels  sogood             
   - woohoo             woohooo            
 
-Volume banana-name (banana-id) updated.
+Volume banana-name (banana-id) updated. Description changed.
 `,
 			wantErr: false,
 		},
@@ -142,7 +142,7 @@ Volume banana-name (banana-id) updated.
 			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
 			w := &bytes.Buffer{}
 
-			err := d.UpdateVolume(context.Background(), w, output.NewVolumeUpdate(tt.volume))
+			err := d.UpdateVolumeDescription(context.Background(), w, output.NewVolumeUpdate(tt.volume))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("UpdateVolume() error = %v, wantErr %v", err, tt.wantErr)
 				return

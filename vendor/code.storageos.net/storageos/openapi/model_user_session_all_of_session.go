@@ -9,10 +9,11 @@
  */
 
 package openapi
+
 // UserSessionAllOfSession struct for UserSessionAllOfSession
 type UserSessionAllOfSession struct {
-	// The maximum duration which the auth session  will remain valid for in seconds. 
+	// The maximum duration which the auth session  will remain valid for in seconds.
 	ExpiresInSeconds uint64 `json:"expiresInSeconds,omitempty"`
-	// The JWT token for the auth session. 
+	// The JWT token for the auth session.
 	Token string `json:"token,omitempty"`
 }

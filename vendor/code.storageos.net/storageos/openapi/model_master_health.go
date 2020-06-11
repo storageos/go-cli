@@ -9,12 +9,13 @@
  */
 
 package openapi
-// MasterHealth The operational health of a volume master deployment 
+
+// MasterHealth The operational health of a volume master deployment
 type MasterHealth string
 
 // List of MasterHealth
 const (
-	MASTERHEALTH_ONLINE MasterHealth = "online"
+	MASTERHEALTH_ONLINE  MasterHealth = "online"
 	MASTERHEALTH_OFFLINE MasterHealth = "offline"
 	MASTERHEALTH_UNKNOWN MasterHealth = "unknown"
 )

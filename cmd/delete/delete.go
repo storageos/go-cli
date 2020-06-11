@@ -56,9 +56,8 @@ type Client interface {
 type Displayer interface {
 	DeleteUser(ctx context.Context, w io.Writer, confirmation output.UserDeletion) error
 	DeleteVolume(ctx context.Context, w io.Writer, confirmation output.VolumeDeletion) error
-	DeleteVolumeAsync(ctx context.Context, w io.Writer, target output.VolumeDeletion) error
+	AsyncRequest(ctx context.Context, w io.Writer) error
 	DeleteNode(ctx context.Context, w io.Writer, confirmation output.NodeDeletion) error
-	DeleteNodeAsync(ctx context.Context, w io.Writer, target output.NodeDeletion) error
 	DeleteNamespace(ctx context.Context, w io.Writer, confirmation output.NamespaceDeletion) error
 	DeletePolicyGroup(ctx context.Context, w io.Writer, confirmation output.PolicyGroupDeletion) error
 }

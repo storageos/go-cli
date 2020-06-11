@@ -1,6 +1,7 @@
 package textformat
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -84,4 +85,10 @@ func createTable(headers []interface{}) (*uitable.Table, func(io.Writer) error) 
 		_, err := fmt.Fprintln(w, table)
 		return err
 	}
+}
+
+// AsyncRequest writes nothing to w.
+func (d *Displayer) AsyncRequest(ctx context.Context, w io.Writer) error {
+	_, err := fmt.Fprintln(w, "Async request accepted.")
+	return err
 }

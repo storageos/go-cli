@@ -2212,6 +2212,7 @@ func (a *DefaultApiService) DeleteVolume(ctx _context.Context, namespaceID strin
 // DetachVolumeOpts Optional parameters for the method 'DetachVolume'
 type DetachVolumeOpts struct {
 	IgnoreVersion optional.Bool
+	AsyncMax      optional.String
 }
 
 /*
@@ -2223,6 +2224,7 @@ Detach the volume identified by id.
  * @param version This value is used to perform a conditional delete or update of the entity. If the entity has been modified since the version token was obtained, the request will fail with a HTTP 409 Conflict.
  * @param optional nil or *DetachVolumeOpts - Optional Parameters:
  * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
+ * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.
 */
 func (a *DefaultApiService) DetachVolume(ctx _context.Context, namespaceID string, id string, version string, localVarOptionals *DetachVolumeOpts) (*_nethttp.Response, error) {
 	var (
@@ -2249,6 +2251,9 @@ func (a *DefaultApiService) DetachVolume(ctx _context.Context, namespaceID strin
 	localVarQueryParams.Add("version", parameterToString(version, ""))
 	if localVarOptionals != nil && localVarOptionals.IgnoreVersion.IsSet() {
 		localVarQueryParams.Add("ignore-version", parameterToString(localVarOptionals.IgnoreVersion.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.AsyncMax.IsSet() {
+		localVarQueryParams.Add("async-max", parameterToString(localVarOptionals.AsyncMax.Value(), ""))
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -5973,6 +5978,7 @@ func (a *DefaultApiService) UpdateUser(ctx _context.Context, id string, updateUs
 // UpdateVolumeOpts Optional parameters for the method 'UpdateVolume'
 type UpdateVolumeOpts struct {
 	IgnoreVersion optional.Bool
+	AsyncMax      optional.String
 }
 
 /*
@@ -5984,6 +5990,7 @@ Update the description and non-storageos labels configured for the volume identi
  * @param updateVolumeData
  * @param optional nil or *UpdateVolumeOpts - Optional Parameters:
  * @param "IgnoreVersion" (optional.Bool) -  If set to true this value indicates that the user wants to ignore entity version constraints, thereby \"forcing\" the operation.
+ * @param "AsyncMax" (optional.String) -  Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \"async-max\" header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". We reject negative or nil duration values.
 @return Volume
 */
 func (a *DefaultApiService) UpdateVolume(ctx _context.Context, namespaceID string, id string, updateVolumeData UpdateVolumeData, localVarOptionals *UpdateVolumeOpts) (Volume, *_nethttp.Response, error) {
@@ -6008,6 +6015,9 @@ func (a *DefaultApiService) UpdateVolume(ctx _context.Context, namespaceID strin
 
 	if localVarOptionals != nil && localVarOptionals.IgnoreVersion.IsSet() {
 		localVarQueryParams.Add("ignore-version", parameterToString(localVarOptionals.IgnoreVersion.Value(), ""))
+	}
+	if localVarOptionals != nil && localVarOptionals.AsyncMax.IsSet() {
+		localVarQueryParams.Add("async-max", parameterToString(localVarOptionals.AsyncMax.Value(), ""))
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}

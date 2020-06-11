@@ -2862,6 +2862,19 @@ paths:
         schema:
           $ref: '#/components/schemas/IgnoreVersion'
         style: form
+      - description: |
+          Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect.
+          The URL parameter value overrides the "async-max" header value, if any.
+          The value of this header defines the timeout duration for the request, it must be set to a valid duration string.
+          A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          We reject negative or nil duration values.
+        explode: true
+        in: query
+        name: async-max
+        required: false
+        schema:
+          type: string
+        style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateVolumeData'
         content:
@@ -3022,6 +3035,19 @@ paths:
         required: false
         schema:
           $ref: '#/components/schemas/IgnoreVersion'
+        style: form
+      - description: |
+          Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect.
+          The URL parameter value overrides the "async-max" header value, if any.
+          The value of this header defines the timeout duration for the request, it must be set to a valid duration string.
+          A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          We reject negative or nil duration values.
+        explode: true
+        in: query
+        name: async-max
+        required: false
+        schema:
+          type: string
         style: form
       responses:
         "200":

@@ -124,7 +124,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 	// If the request was async then write our "request submitted" message
 	// and return.
 	if c.useAsync {
-		return c.display.CreateVolumeAsync(ctx, c.writer)
+		return c.display.AsyncRequest(ctx, c.writer)
 	}
 
 	nodes, err := c.getNodeMapping(ctx)

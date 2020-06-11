@@ -69,13 +69,13 @@ func (c *nodeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args [
 		return err
 	}
 
-	nodeDisplay := output.NodeDeletion{ID: nodeID}
-
 	// Display the "request submitted" message if it was async, instead of
 	// the deletion confirmation below.
 	if c.useAsync {
-		return c.display.DeleteNodeAsync(ctx, c.writer, nodeDisplay)
+		return c.display.AsyncRequest(ctx, c.writer)
 	}
+
+	nodeDisplay := output.NodeDeletion{ID: nodeID}
 
 	return c.display.DeleteNode(ctx, c.writer, nodeDisplay)
 }
