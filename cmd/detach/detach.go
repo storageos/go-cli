@@ -54,6 +54,7 @@ type Client interface {
 // to display the resources produced by the "detach" verb commands.
 type Displayer interface {
 	DetachVolume(ctx context.Context, w io.Writer) error
+	AsyncRequest(ctx context.Context, w io.Writer) error
 }
 
 type detachCommand struct {
@@ -67,6 +68,7 @@ type detachCommand struct {
 	// constrained by the provided casVersion.
 	useCAS     func() bool
 	casVersion string
+	useAsync   bool
 
 	writer io.Writer
 }
@@ -97,8 +99,19 @@ func (c *detachCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 	}
 
 	params := &apiclient.DetachVolumeRequestParams{}
+
 	if c.useCAS() {
 		params.CASVersion = version.FromString(c.casVersion)
+	}
+
+	// If asynchrony is specified then source the timeout and initialise the params.
+	if c.useAsync {
+		timeout, err := c.config.CommandTimeout()
+		if err != nil {
+			return err
+		}
+
+		params.AsyncMax = timeout
 	}
 
 	err = c.client.DetachVolume(
@@ -109,6 +122,10 @@ func (c *detachCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 	)
 	if err != nil {
 		return err
+	}
+
+	if c.useAsync {
+		return c.display.AsyncRequest(ctx, c.writer)
 	}
 
 	return c.display.DetachVolume(ctx, c.writer)
@@ -165,6 +182,7 @@ $ storageos detach --namespace my-namespace-name my-volume
 	}
 
 	c.useCAS = flagutil.SupportCAS(cobraCommand.Flags(), &c.casVersion)
+	flagutil.SupportAsync(cobraCommand.Flags(), &c.useAsync)
 
 	return cobraCommand
 }

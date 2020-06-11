@@ -9,6 +9,7 @@
  */
 
 package openapi
+
 // CreatePolicyGroupData struct for CreatePolicyGroupData
 type CreatePolicyGroupData struct {
 	Name string `json:"name,omitempty"`

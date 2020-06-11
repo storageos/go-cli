@@ -2,7 +2,6 @@ package textformat
 
 import (
 	"context"
-	"fmt"
 	"io"
 
 	"code.storageos.net/storageos/c2-cli/output"
@@ -21,12 +20,6 @@ func (d *Displayer) CreateVolume(ctx context.Context, w io.Writer, volume *outpu
 	table, write := createTable(volumeHeaders)
 	d.printVolume(table, volume)
 	return write(w)
-}
-
-// CreateVolumeAsync writes a successful request submission string to w.
-func (d *Displayer) CreateVolumeAsync(ctx context.Context, w io.Writer) error {
-	_, err := fmt.Fprintln(w, "volume provision request accepted")
-	return err
 }
 
 // CreateNamespace builds a human friendly representation of resource, writing

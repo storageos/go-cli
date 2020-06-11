@@ -223,17 +223,33 @@ func (o *OpenAPI) AttachVolume(ctx context.Context, namespaceID id.Namespace, vo
 // 	unconditional
 // 	- If params.CASVersion is set, the request is conditional upon it matching
 // 	the volume entity's version as seen by the server.
+//
+//  Asynchrony:
+//  - If params is nil or params.AsyncMax is empty/zero valued then the delete
+//  request is performed synchronously.
+//  - If params.AsyncMax is set, the request is performed asynchronously using
+//  the duration given as the maximum amount of time allowed for the request
+//  before it times out.
 func (o *OpenAPI) DetachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *apiclient.DetachVolumeRequestParams) error {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 
 	var casVersion string
-	var ignoreVersion optional.Bool = optional.NewBool(true)
+
+	opts := &openapi.DetachVolumeOpts{
+		IgnoreVersion: optional.NewBool(true),
+		AsyncMax:      optional.EmptyString(),
+	}
 
 	// Set the CAS version constraint if provided
-	if params != nil && params.CASVersion.String() != "" {
-		ignoreVersion = optional.NewBool(false)
-		casVersion = params.CASVersion.String()
+	if params != nil {
+		if params.CASVersion.String() != "" {
+			opts.IgnoreVersion = optional.NewBool(false)
+			casVersion = params.CASVersion.String()
+		}
+		if params.AsyncMax != 0 {
+			opts.AsyncMax = optional.NewString(params.AsyncMax.String())
+		}
 	}
 
 	resp, err := o.client.DefaultApi.DetachVolume(
@@ -241,9 +257,7 @@ func (o *OpenAPI) DetachVolume(ctx context.Context, namespaceID id.Namespace, vo
 		namespaceID.String(),
 		volumeID.String(),
 		casVersion,
-		&openapi.DetachVolumeOpts{
-			IgnoreVersion: ignoreVersion,
-		},
+		opts,
 	)
 	if err != nil {
 		switch v := mapOpenAPIError(err, resp).(type) {
@@ -290,6 +304,19 @@ func (o *OpenAPI) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.V
 }
 
 // UpdateVolume changes the description of a specified volume.
+//
+//  Version constraints:
+// 	- If params is nil or params.CASVersion is empty then the detach request is
+// 	unconditional
+// 	- If params.CASVersion is set, the request is conditional upon it matching
+// 	the volume entity's version as seen by the server.
+//
+//  Asynchrony:
+//  - If params is nil or params.AsyncMax is empty/zero valued then the delete
+//  request is performed synchronously.
+//  - If params.AsyncMax is set, the request is performed asynchronously using
+//  the duration given as the maximum amount of time allowed for the request
+//  before it times out.
 func (o *OpenAPI) UpdateVolume(
 	ctx context.Context,
 	nsID id.Namespace,
@@ -309,6 +336,7 @@ func (o *OpenAPI) UpdateVolume(
 	}
 	opts := &openapi.UpdateVolumeOpts{
 		IgnoreVersion: optional.NewBool(true),
+		AsyncMax:      optional.EmptyString(),
 	}
 
 	// check optional params
@@ -357,9 +385,14 @@ func (o *OpenAPI) ResizeVolume(
 		if params.AsyncMax != 0 {
 			opts.AsyncMax = optional.NewString(params.AsyncMax.String())
 		}
+
 		if params.CASVersion != "" {
 			request.Version = params.CASVersion.String()
 			opts.IgnoreVersion = optional.NewBool(false)
+		}
+
+		if params.AsyncMax != 0 {
+			opts.AsyncMax = optional.NewString(params.AsyncMax.String())
 		}
 	}
 

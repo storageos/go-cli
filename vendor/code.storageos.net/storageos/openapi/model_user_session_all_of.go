@@ -9,6 +9,7 @@
  */
 
 package openapi
+
 // UserSessionAllOf struct for UserSessionAllOf
 type UserSessionAllOf struct {
 	Session UserSessionAllOfSession `json:"session,omitempty"`

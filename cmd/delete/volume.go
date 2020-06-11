@@ -90,13 +90,13 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		return err
 	}
 
-	volumeDisplay := output.NewVolumeDeletion(volumeID, namespaceID)
-
 	// Display the "request submitted" message if it was async, instead of
 	// the deletion confirmation below.
 	if c.useAsync {
-		return c.display.DeleteVolumeAsync(ctx, c.writer, volumeDisplay)
+		return c.display.AsyncRequest(ctx, c.writer)
 	}
+
+	volumeDisplay := output.NewVolumeDeletion(volumeID, namespaceID)
 
 	return c.display.DeleteVolume(ctx, c.writer, volumeDisplay)
 }

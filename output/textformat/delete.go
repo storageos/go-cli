@@ -28,12 +28,6 @@ func (d *Displayer) DeleteVolume(ctx context.Context, w io.Writer, confirmation 
 	return err
 }
 
-// DeleteVolumeAsync writes a successful request submission string to w.
-func (d *Displayer) DeleteVolumeAsync(ctx context.Context, w io.Writer, target output.VolumeDeletion) error {
-	_, err := fmt.Fprintf(w, "deletion request for volume %v from namespace %v accepted\n", target.ID, target.Namespace)
-	return err
-}
-
 // DeletePolicyGroup encodes the policy group deletion confirmation as JSON, writing
 // the result to w
 func (d *Displayer) DeletePolicyGroup(ctx context.Context, w io.Writer, confirmation output.PolicyGroupDeletion) error {
@@ -45,11 +39,5 @@ func (d *Displayer) DeletePolicyGroup(ctx context.Context, w io.Writer, confirma
 // the result to w
 func (d *Displayer) DeleteNode(ctx context.Context, w io.Writer, confirmation output.NodeDeletion) error {
 	_, err := fmt.Fprintf(w, "deleted node %s\n", confirmation.ID.String())
-	return err
-}
-
-// DeleteNodeAsync writes a successful request submission string to w.
-func (d *Displayer) DeleteNodeAsync(ctx context.Context, w io.Writer, target output.NodeDeletion) error {
-	_, err := fmt.Fprintf(w, "node deletion request for %s accepted\n", target.ID.String())
 	return err
 }

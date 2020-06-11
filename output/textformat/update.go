@@ -33,22 +33,6 @@ func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *out
 	return write(w)
 }
 
-// UpdateVolume prints a user friendly message showing the successful
-// mutation
-func (d *Displayer) UpdateVolume(ctx context.Context, w io.Writer, updatedVol output.VolumeUpdate) error {
-	err := printVolumeUpdate(w, updatedVol)
-	if err != nil {
-		return err
-	}
-
-	_, err = fmt.Fprintf(w, "\nVolume %s (%s) updated.\n",
-		updatedVol.Name,
-		updatedVol.ID,
-	)
-
-	return err
-}
-
 // SetReplicas prints a user friendly message denoting that the target
 // replica num has been updated
 func (d *Displayer) SetReplicas(ctx context.Context, w io.Writer, new uint64) error {

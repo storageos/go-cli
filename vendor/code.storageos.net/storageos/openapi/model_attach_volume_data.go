@@ -9,8 +9,9 @@
  */
 
 package openapi
+
 // AttachVolumeData struct for AttachVolumeData
 type AttachVolumeData struct {
-	// A unique identifier for a node. The format of this type is undefined and may change but the defined properties will not change. 
+	// A unique identifier for a node. The format of this type is undefined and may change but the defined properties will not change.
 	NodeID string `json:"nodeID,omitempty"`
 }

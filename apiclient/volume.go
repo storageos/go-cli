@@ -121,6 +121,7 @@ type DeleteVolumeRequestParams struct {
 // volume operation.
 type DetachVolumeRequestParams struct {
 	CASVersion version.Version
+	AsyncMax   time.Duration
 }
 
 // SetReplicasRequestParams contains optional request parameters for a set
@@ -133,6 +134,7 @@ type SetReplicasRequestParams struct {
 // description or set labels volume operation.
 type UpdateVolumeRequestParams struct {
 	CASVersion version.Version
+	AsyncMax   time.Duration
 }
 
 // ResizeVolumeRequestParams contains request parameters for a resize
@@ -352,16 +354,33 @@ func (c *Client) SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Vo
 //  Version constraints:
 // 	- If params.CASVersion is set, the request is conditional upon it matching
 // 	the volume entity's version as seen by the server.
+//
+//
+//  Asynchrony:
+//  - If params is nil or params.AsyncMax is empty/zero valued then the create
+//  request is performed synchronously.
+//  - If params.AsyncMax is set, the request is performed asynchronously using
+//  the duration given as the maximum amount of time allowed for the request
+//  before it times out.
 func (c *Client) UpdateVolumeDescription(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, params *UpdateVolumeRequestParams) (*volume.Resource, error) {
 	v, err := c.Transport.GetVolume(ctx, nsID, volID)
 	if err != nil {
 		return nil, err
 	}
 
-	if params == nil || params.CASVersion == "" {
-		params = &UpdateVolumeRequestParams{
-			CASVersion: v.Version,
+	newParams := &UpdateVolumeRequestParams{}
+
+	if params != nil {
+		if params.CASVersion != "" {
+			newParams.CASVersion = params.CASVersion
 		}
+		if params.AsyncMax != 0 {
+			newParams.AsyncMax = params.AsyncMax
+		}
+	}
+
+	if newParams.CASVersion == "" {
+		newParams.CASVersion = v.Version
 	}
 
 	return c.Transport.UpdateVolume(ctx, nsID, volID, description, v.Labels, params)
@@ -375,16 +394,33 @@ func (c *Client) UpdateVolumeDescription(ctx context.Context, nsID id.Namespace,
 //  Version constraints:
 //  - If params.CASVersion is set, the request is conditional upon it matching
 //  the volume entity's version as seen by the server.
+//
+//
+//  Asynchrony:
+//  - If params is nil or params.AsyncMax is empty/zero valued then the create
+//  request is performed synchronously.
+//  - If params.AsyncMax is set, the request is performed asynchronously using
+//  the duration given as the maximum amount of time allowed for the request
+//  before it times out.
 func (c *Client) UpdateVolumeLabels(ctx context.Context, nsID id.Namespace, volID id.Volume, labels labels.Set, params *UpdateVolumeRequestParams) (*volume.Resource, error) {
 	v, err := c.Transport.GetVolume(ctx, nsID, volID)
 	if err != nil {
 		return nil, err
 	}
 
-	if params == nil || params.CASVersion == "" {
-		params = &UpdateVolumeRequestParams{
-			CASVersion: v.Version,
+	newParams := &UpdateVolumeRequestParams{}
+
+	if params != nil {
+		if params.CASVersion != "" {
+			newParams.CASVersion = params.CASVersion
 		}
+		if params.AsyncMax != 0 {
+			newParams.AsyncMax = params.AsyncMax
+		}
+	}
+
+	if newParams.CASVersion == "" {
+		newParams.CASVersion = v.Version
 	}
 
 	return c.Transport.UpdateVolume(ctx, nsID, volID, v.Description, labels, params)

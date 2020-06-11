@@ -61,7 +61,7 @@ type Client interface {
 type Displayer interface {
 	CreateUser(ctx context.Context, w io.Writer, user *output.User) error
 	CreateVolume(ctx context.Context, w io.Writer, volume *output.Volume) error
-	CreateVolumeAsync(ctx context.Context, w io.Writer) error
+	AsyncRequest(ctx context.Context, w io.Writer) error
 	CreateNamespace(ctx context.Context, w io.Writer, namespace *output.Namespace) error
 	CreatePolicyGroup(ctx context.Context, w io.Writer, group *output.PolicyGroup) error
 }
