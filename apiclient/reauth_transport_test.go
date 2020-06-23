@@ -8,8 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dustin/go-humanize"
 	"github.com/kr/pretty"
+
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -776,7 +777,7 @@ func TestTransportWithReauth(t *testing.T) {
 					context.Background(),
 					"namespace-id",
 					"volume-id",
-					42*humanize.GiByte,
+					42*size.GiB,
 					&ResizeVolumeRequestParams{
 						AsyncMax:   42 * time.Second,
 						CASVersion: "42",
@@ -790,7 +791,7 @@ func TestTransportWithReauth(t *testing.T) {
 			wantInnerTransport: &mockTransport{
 				ResizeVolumeGotNamespaceID: "namespace-id",
 				ResizeVolumeGotVolumeID:    "volume-id",
-				ResizeVolumeGotSizeBytes:   42 * humanize.GiByte,
+				ResizeVolumeGotSizeBytes:   42 * size.GiB,
 				ResizeVolumeGotParams: &ResizeVolumeRequestParams{
 					AsyncMax:   42 * time.Second,
 					CASVersion: "42",

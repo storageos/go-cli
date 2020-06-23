@@ -6,9 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dustin/go-humanize"
-
 	"code.storageos.net/storageos/c2-cli/licence"
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -107,8 +106,8 @@ func TestDisplayer_GetLicence(t *testing.T) {
 			resource: &licence.Resource{
 				ClusterID:            "bananaID",
 				ExpiresAt:            mockTime,
-				ClusterCapacityBytes: 42 * humanize.GiByte,
-				UsedBytes:            42 / 2 * humanize.GiByte,
+				ClusterCapacityBytes: 42 * size.GiB,
+				UsedBytes:            42 / 2 * size.GiB,
 				Kind:                 "bananaKind",
 				CustomerName:         "bananaCustomer",
 			},
@@ -850,7 +849,7 @@ func TestDisplayer_GetVolume(t *testing.T) {
 					"pear": "42",
 				},
 				Filesystem: volume.FsTypeFromString("ext4"),
-				SizeBytes:  humanize.GiByte,
+				SizeBytes:  size.GiB,
 				Master: &output.Deployment{
 					ID:         "bananaDeploymentID1",
 					NodeName:   "banana-node1",
@@ -934,7 +933,7 @@ func TestDisplayer_GetListVolumes(t *testing.T) {
 						"pear": "42",
 					},
 					Filesystem: volume.FsTypeFromString("ext4"),
-					SizeBytes:  humanize.GiByte,
+					SizeBytes:  size.GiB,
 					Master: &output.Deployment{
 						ID:         "bananaDeploymentID1",
 						NodeName:   "banana-node1",
@@ -977,7 +976,7 @@ func TestDisplayer_GetListVolumes(t *testing.T) {
 						"pear": "bar",
 					},
 					Filesystem: volume.FsTypeFromString("ext4"),
-					SizeBytes:  2 * humanize.GiByte,
+					SizeBytes:  2 * size.GiB,
 					Master: &output.Deployment{
 						ID:         "bananaDeploymentID1",
 						NodeName:   "banana-node1",

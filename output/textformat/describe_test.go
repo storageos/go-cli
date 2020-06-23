@@ -6,8 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dustin/go-humanize"
 	"github.com/kr/pretty"
+
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 
 	"code.storageos.net/storageos/c2-cli/licence"
 
@@ -49,8 +50,8 @@ func TestDisplayer_DescribeNode(t *testing.T) {
 					Name:   "bananaName",
 					Health: health.NodeOnline,
 					Capacity: capacity.Stats{
-						Total: humanize.GiByte,
-						Free:  550 * humanize.MiByte,
+						Total: size.GiB,
+						Free:  550 * size.MiB,
 					},
 					IOAddr:         "io.addr",
 					SupervisorAddr: "supervisor.addr",
@@ -73,7 +74,7 @@ func TestDisplayer_DescribeNode(t *testing.T) {
 						NamespaceName: "namespaceName",
 						Labels:        labels.Set{},
 						Filesystem:    volume.FsTypeFromString("fs"),
-						SizeBytes:     humanize.GiByte,
+						SizeBytes:     size.GiB,
 						LocalDeployment: output.LocalDeployment{
 							ID:         "deployID",
 							Kind:       "master",
@@ -92,7 +93,7 @@ func TestDisplayer_DescribeNode(t *testing.T) {
 						NamespaceName: "namespaceName2",
 						Labels:        labels.Set{},
 						Filesystem:    volume.FsTypeFromString("fs"),
-						SizeBytes:     2 * humanize.GiByte,
+						SizeBytes:     2 * size.GiB,
 						LocalDeployment: output.LocalDeployment{
 							ID:         "deployID2",
 							Kind:       "replica",
@@ -136,8 +137,8 @@ Local volume deployments:
 					Name:   "bananaName",
 					Health: health.NodeOnline,
 					Capacity: capacity.Stats{
-						Total: humanize.GiByte,
-						Free:  550 * humanize.MiByte,
+						Total: size.GiB,
+						Free:  550 * size.MiB,
 					},
 					IOAddr:         "io.addr",
 					SupervisorAddr: "supervisor.addr",
@@ -306,8 +307,8 @@ func TestDisplayer_DescribeLicence(t *testing.T) {
 			resource: &licence.Resource{
 				ClusterID:            "bananaID",
 				ExpiresAt:            mockTime,
-				ClusterCapacityBytes: 42 * humanize.GiByte,
-				UsedBytes:            42 / 2 * humanize.GiByte,
+				ClusterCapacityBytes: 42 * size.GiB,
+				UsedBytes:            42 / 2 * size.GiB,
 				Kind:                 "bananaKind",
 				CustomerName:         "bananaCustomer",
 			},
@@ -515,7 +516,7 @@ func TestDisplayer_DescribeVolume(t *testing.T) {
 					"pear": "42",
 				},
 				Filesystem: volume.FsTypeFromString("ext4"),
-				SizeBytes:  humanize.GiByte,
+				SizeBytes:  size.GiB,
 				Master: &output.Deployment{
 					ID:         "bananaDeploymentID1",
 					Node:       "banana-node1-id",
@@ -547,7 +548,7 @@ func TestDisplayer_DescribeVolume(t *testing.T) {
 						Health:     health.ReplicaSyncing,
 						Promotable: false,
 						SyncProgress: &output.SyncProgress{
-							BytesRemaining:            256 * humanize.MiByte,
+							BytesRemaining:            256 * size.MiB,
 							ThroughputBytes:           0,
 							EstimatedSecondsRemaining: 1200,
 						},
@@ -610,7 +611,7 @@ Replicas:
 					"pear": "42",
 				},
 				Filesystem: volume.FsTypeFromString("ext4"),
-				SizeBytes:  humanize.GiByte,
+				SizeBytes:  size.GiB,
 				Master: &output.Deployment{
 					ID:         "bananaDeploymentID1",
 					Node:       "banana-node1-id",
@@ -659,7 +660,7 @@ Master:
 					"pear": "42",
 				},
 				Filesystem: volume.FsTypeFromString("ext4"),
-				SizeBytes:  humanize.GiByte,
+				SizeBytes:  size.GiB,
 				Master: &output.Deployment{
 					ID:         "bananaDeploymentID1",
 					Node:       "banana-node1-id",
@@ -762,7 +763,7 @@ func TestDisplayer_DescribeListVolumes(t *testing.T) {
 						"pear": "42",
 					},
 					Filesystem: volume.FsTypeFromString("ext4"),
-					SizeBytes:  humanize.GiByte,
+					SizeBytes:  size.GiB,
 					Master: &output.Deployment{
 						ID:         "bananaDeploymentID1",
 						Node:       "banana-node1-id",
@@ -794,7 +795,7 @@ func TestDisplayer_DescribeListVolumes(t *testing.T) {
 							Health:     health.ReplicaSyncing,
 							Promotable: false,
 							SyncProgress: &output.SyncProgress{
-								BytesRemaining:            256 * humanize.MiByte,
+								BytesRemaining:            256 * size.MiB,
 								ThroughputBytes:           0,
 								EstimatedSecondsRemaining: 1200,
 							},
@@ -817,7 +818,7 @@ func TestDisplayer_DescribeListVolumes(t *testing.T) {
 						"pear": "42",
 					},
 					Filesystem: volume.FsTypeFromString("ext4"),
-					SizeBytes:  humanize.GiByte,
+					SizeBytes:  size.GiB,
 					Master: &output.Deployment{
 						ID:         "kiwiDeploymentID1",
 						Node:       "kiwi-node1-id",
@@ -849,7 +850,7 @@ func TestDisplayer_DescribeListVolumes(t *testing.T) {
 							Health:     health.ReplicaSyncing,
 							Promotable: false,
 							SyncProgress: &output.SyncProgress{
-								BytesRemaining:            256 * humanize.MiByte,
+								BytesRemaining:            256 * size.MiB,
 								ThroughputBytes:           0,
 								EstimatedSecondsRemaining: 1200,
 							},
