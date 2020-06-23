@@ -6,9 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dustin/go-humanize"
-
 	"code.storageos.net/storageos/c2-cli/pkg/health"
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 
 	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
@@ -35,8 +34,8 @@ func TestDisplayer_UpdateLicence(t *testing.T) {
 			licence: &licence.Resource{
 				ClusterID:            "bananaCluster",
 				ExpiresAt:            mockTime,
-				ClusterCapacityBytes: 42 * humanize.GiByte,
-				UsedBytes:            42 / 2 * humanize.GiByte,
+				ClusterCapacityBytes: 42 * size.GiB,
+				UsedBytes:            42 / 2 * size.GiB,
 				Kind:                 "bananaLicence",
 				CustomerName:         "bananaCustomer",
 			},

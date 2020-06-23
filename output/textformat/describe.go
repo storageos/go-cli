@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/dustin/go-humanize"
 	"github.com/gosuri/uitable"
+
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/capacity"
@@ -44,8 +45,8 @@ func (d *Displayer) DescribeCluster(ctx context.Context, w io.Writer, c *output.
 func (d *Displayer) DescribeLicence(ctx context.Context, w io.Writer, l *output.Licence) error {
 	table, write := createTable(nil)
 
-	clusterCapacity := fmt.Sprintf("%s (%d)", humanize.IBytes(l.ClusterCapacityBytes), l.ClusterCapacityBytes)
-	used := fmt.Sprintf("%s (%d)", humanize.IBytes(l.UsedBytes), l.UsedBytes)
+	clusterCapacity := fmt.Sprintf("%s (%d)", size.Format(l.ClusterCapacityBytes), l.ClusterCapacityBytes)
+	used := fmt.Sprintf("%s (%d)", size.Format(l.UsedBytes), l.UsedBytes)
 
 	table.AddRow("ClusterID:", l.ClusterID)
 	table.AddRow("Expiration:", d.timeToHuman(l.ExpiresAt))
@@ -143,8 +144,8 @@ func (d *Displayer) describeNode(ctx context.Context, w io.Writer, node *output.
 	if node.Capacity != (capacity.Stats{}) {
 		capacityStats = fmt.Sprintf(
 			"%s (%s in use)",
-			humanize.IBytes(node.Capacity.Total),
-			humanize.IBytes(node.Capacity.Total-node.Capacity.Free),
+			size.Format(node.Capacity.Total),
+			size.Format(node.Capacity.Total-node.Capacity.Free),
 		)
 	}
 	table.AddRow("Available capacity", capacityStats)
@@ -161,7 +162,7 @@ func (d *Displayer) describeNode(ctx context.Context, w io.Writer, node *output.
 				vol.NamespaceName,
 				vol.LocalDeployment.Health,
 				vol.LocalDeployment.Kind,
-				humanize.IBytes(vol.SizeBytes),
+				size.Format(vol.SizeBytes),
 			)
 		}
 	}
@@ -212,7 +213,7 @@ func (d *Displayer) describeVolume(ctx context.Context, w io.Writer, volume *out
 	table.AddRow("Namespace", fmt.Sprintf("%s (%s)", volume.NamespaceName, volume.Namespace))
 	table.AddRow("Labels", volume.Labels.String())
 	table.AddRow("Filesystem", volume.Filesystem.String())
-	table.AddRow("Size", fmt.Sprintf("%v (%v bytes)", humanize.IBytes(volume.SizeBytes), volume.SizeBytes))
+	table.AddRow("Size", fmt.Sprintf("%v (%v bytes)", size.Format(volume.SizeBytes), volume.SizeBytes))
 
 	table.AddRow("Version", volume.Version)
 	table.AddRow("Created at", d.timeToHuman(volume.CreatedAt))

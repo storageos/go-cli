@@ -4,8 +4,9 @@ import (
 	"context"
 	"io"
 
-	"github.com/dustin/go-humanize"
 	"github.com/spf13/cobra"
+
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/output"
@@ -102,7 +103,7 @@ $ storageos update volume size my-volume-name 42gib --namespace my-namespace-nam
 
 			c.volumeID = args[0]
 
-			bytes, err := humanize.ParseBytes(args[1])
+			bytes, err := size.ParseBytes(args[1])
 			if err != nil {
 				return newErrInvalidSizeArg(args[1])
 			}

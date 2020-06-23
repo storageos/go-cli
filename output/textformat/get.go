@@ -6,8 +6,9 @@ import (
 	"io"
 	"strings"
 
-	"github.com/dustin/go-humanize"
 	"github.com/gosuri/uitable"
+
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/health"
@@ -42,8 +43,8 @@ func (d *Displayer) GetCluster(ctx context.Context, w io.Writer, resource *outpu
 func (d *Displayer) GetLicence(ctx context.Context, w io.Writer, l *output.Licence) error {
 	table, write := createTable(nil)
 
-	clusterCapacity := fmt.Sprintf("%s (%d)", humanize.IBytes(l.ClusterCapacityBytes), l.ClusterCapacityBytes)
-	used := fmt.Sprintf("%s (%d)", humanize.IBytes(l.UsedBytes), l.UsedBytes)
+	clusterCapacity := fmt.Sprintf("%s (%d)", size.Format(l.ClusterCapacityBytes), l.ClusterCapacityBytes)
+	used := fmt.Sprintf("%s (%d)", size.Format(l.UsedBytes), l.UsedBytes)
 
 	table.AddRow("ClusterID:", l.ClusterID)
 	table.AddRow("Expiration:", d.timeToHuman(l.ExpiresAt))
@@ -169,7 +170,7 @@ func (d *Displayer) printVolume(table *uitable.Table, vol *output.Volume) {
 	replicas := fmt.Sprintf("%d/%d", readyReplicas, len(vol.Replicas))
 
 	// Humanized
-	size := humanize.IBytes(vol.SizeBytes)
+	size := size.Format(vol.SizeBytes)
 	age := d.timeHumanizer.TimeToHuman(vol.CreatedAt)
 
 	table.AddRow(vol.NamespaceName, vol.Name, size, location, vol.AttachedOnName, replicas, age)

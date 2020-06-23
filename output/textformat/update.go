@@ -7,8 +7,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/dustin/go-humanize"
 	"github.com/gosuri/uitable"
+
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 
 	"code.storageos.net/storageos/c2-cli/pkg/health"
 
@@ -25,8 +26,8 @@ func (d *Displayer) UpdateLicence(ctx context.Context, w io.Writer, licence *out
 	table, write := createTable(nil)
 
 	table.AddRow("Expiration:", d.timeToHuman(licence.ExpiresAt))
-	table.AddRow("Capacity:", humanize.IBytes(licence.ClusterCapacityBytes))
-	table.AddRow("Used:", humanize.IBytes(licence.UsedBytes))
+	table.AddRow("Capacity:", size.Format(licence.ClusterCapacityBytes))
+	table.AddRow("Used:", size.Format(licence.UsedBytes))
 	table.AddRow("Kind:", licence.Kind)
 	table.AddRow("Customer name:", licence.CustomerName)
 
@@ -92,7 +93,7 @@ func printVolumeUpdate(w io.Writer, updateVol output.VolumeUpdate) error {
 	table, write := createTable(nil)
 	table.AddRow("Name:", updateVol.Name)
 	table.AddRow("ID:", updateVol.ID)
-	table.AddRow("Size:", humanize.Bytes(updateVol.SizeBytes))
+	table.AddRow("Size:", size.Format(updateVol.SizeBytes))
 	table.AddRow("Description:", updateVol.Description)
 	table.AddRow("AttachedOn:", updateVol.AttachedOn)
 	table.AddRow("Replicas:", deploymentsToString(updateVol.Replicas))
