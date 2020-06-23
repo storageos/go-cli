@@ -7,7 +7,6 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/alecthomas/units"
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
@@ -19,6 +18,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
@@ -76,7 +76,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 	// Set any of the internal well-known labels by their specified flag values
 	c.setKnownLabels(labelSet)
 
-	sizeBytes, err := units.ParseStrictBytes(c.sizeStr)
+	sizeBytes, err := size.ParseBytes(c.sizeStr)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 		name,
 		c.description,
 		volume.FsTypeFromString(c.fsType),
-		uint64(sizeBytes),
+		sizeBytes,
 		labelSet,
 		createVolumeRequestParams,
 	)
