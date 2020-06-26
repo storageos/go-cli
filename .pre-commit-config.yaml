@@ -22,7 +22,7 @@ repos:
         stages: [commit, manual]
 
   - repo: https://github.com/domodwyer/pre-commit
-    rev: v1.2.2
+    rev: v1.5.0
     hooks:
       - id: go-test
         stages: [commit, push]
@@ -34,12 +34,16 @@ repos:
         types: [go]
         exclude: \.pb.go$
         args: ["-local=code.storageos.net"]
-      - id: todo-jira-check
+      - id: todo-tagged-jira
         stages: [push, manual]
         types: [go]
         args: ["--tag=CP"]
         exclude: ^vendor/
+      - id: todo-branch-tags
+        stages: [post-checkout]
+        args: ["CP-[0-9]+"]
       - id: branch-name-check
+        args: ['^((feature|bugfix)\/|release\/v\d+\.\d+\.\d+).+']
         stages: [push]
 
   - repo: https://github.com/golangci/golangci-lint
