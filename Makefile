@@ -110,7 +110,7 @@ endif
 # environment.
 %-docker: 
 	docker run --rm \
-    -e SEMANTIC_VERSION="${SEMANTIC_VERSION}" \
+    -e SEMANTIC_VERSION=${SEMANTIC_VERSION} \
     -e GO_TEST_ARGS="${GO_TEST_ARGS}" \
     -e GO_BUILD_ARGS="${GO_BUILD_ARGS}" \
     --net="host" \
