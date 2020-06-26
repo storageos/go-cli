@@ -43,7 +43,7 @@ repos:
         stages: [post-checkout]
         args: ["CP-[0-9]+"]
       - id: branch-name-check
-        args: ['^((feature|bugfix)\/|release\/v\d+\.\d+\.\d+).+']
+        args: ['^((feature|bugfix)\/|release\/v[0-9]+\.[0-9]+\.[0-9]+)']
         stages: [push]
 
   - repo: https://github.com/golangci/golangci-lint
