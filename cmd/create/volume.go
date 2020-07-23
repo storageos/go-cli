@@ -220,7 +220,7 @@ $ storageos create volume --replicas 1 --namespace my-namespace-name my-replicat
 	}
 
 	cobraCommand.Flags().BoolVar(&c.useCaching, "cache", true, "caches volume data")
-	cobraCommand.Flags().BoolVar(&c.useCompression, "compress", true, "compress data stored by the volume at rest and during transit")
+	cobraCommand.Flags().BoolVar(&c.useCompression, "compress", false, "compress data stored by the volume at rest and during transit")
 	cobraCommand.Flags().StringVarP(&c.description, "description", "d", "", "a human-friendly description to give the volume")
 	cobraCommand.Flags().StringVarP(&c.fsType, "fs-type", "f", "ext4", "the filesystem to format the new volume with once provisioned")
 	cobraCommand.Flags().StringSliceVarP(&c.labelPairs, "labels", "l", []string{}, "an optional set of labels to assign to the new volume, provided as a comma-separated list of key=value pairs")

@@ -26,7 +26,7 @@ func TestSetKnownLabels(t *testing.T) {
 			cmd: &volumeCommand{
 				useCaching: false,
 
-				useCompression: true, // default of true
+				useCompression: false,
 			},
 			inputLabels: labels.Set{
 				"arbitrary-label": "arbitrary-value",
@@ -35,15 +35,15 @@ func TestSetKnownLabels(t *testing.T) {
 			wantLabels: labels.Set{
 				"arbitrary-label":          "arbitrary-value",
 				"storageos.com/nocache":    "true",
-				"storageos.com/nocompress": "false",
+				"storageos.com/nocompress": "true",
 				"storageos.com/throttle":   "false",
 			},
 		},
 		{
-			name: "sets storageos.com/nocompress=true",
+			name: "sets storageos.com/nocompress=false",
 
 			cmd: &volumeCommand{
-				useCompression: false,
+				useCompression: true,
 
 				useCaching: true, // default of true
 			},
@@ -54,7 +54,7 @@ func TestSetKnownLabels(t *testing.T) {
 			wantLabels: labels.Set{
 				"arbitrary-label":          "arbitrary-value",
 				"storageos.com/nocache":    "false",
-				"storageos.com/nocompress": "true",
+				"storageos.com/nocompress": "false",
 				"storageos.com/throttle":   "false",
 			},
 		},
@@ -65,8 +65,7 @@ func TestSetKnownLabels(t *testing.T) {
 				useThrottle: true,
 
 				// defaults of true
-				useCaching:     true,
-				useCompression: true,
+				useCaching: true,
 			},
 			inputLabels: labels.Set{
 				"arbitrary-label": "arbitrary-value",
@@ -75,7 +74,7 @@ func TestSetKnownLabels(t *testing.T) {
 			wantLabels: labels.Set{
 				"arbitrary-label":          "arbitrary-value",
 				"storageos.com/nocache":    "false",
-				"storageos.com/nocompress": "false",
+				"storageos.com/nocompress": "true",
 				"storageos.com/throttle":   "true",
 			},
 		},
@@ -86,8 +85,7 @@ func TestSetKnownLabels(t *testing.T) {
 				withReplicas: 5,
 
 				// defaults of true
-				useCaching:     true,
-				useCompression: true,
+				useCaching: true,
 			},
 			inputLabels: labels.Set{
 				"arbitrary-label": "arbitrary-value",
@@ -96,7 +94,7 @@ func TestSetKnownLabels(t *testing.T) {
 			wantLabels: labels.Set{
 				"arbitrary-label":          "arbitrary-value",
 				"storageos.com/nocache":    "false",
-				"storageos.com/nocompress": "false",
+				"storageos.com/nocompress": "true",
 				"storageos.com/replicas":   "5",
 				"storageos.com/throttle":   "false",
 			},
