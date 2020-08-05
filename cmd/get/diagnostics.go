@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
+	"code.storageos.net/storageos/c2-cli/pkg/cmdcontext"
 )
 
 type diagnosticsCommand struct {
@@ -76,6 +77,7 @@ func newDiagnostics(w io.Writer, client Client, config ConfigProvider) *cobra.Co
 	cobraCommand := &cobra.Command{
 		Use:   "diagnostics",
 		Short: "Fetch a cluster diagnostic bundle",
+		Long:  "Fetch a cluster diagnostic bundle from the target node. Due to the work involved this command will run with a minimum command timeout duration of 1h, although accepts longer durations",
 		Example: `
 $ storageos get diagnostics
 
@@ -87,7 +89,16 @@ $ storageos get diagnostics --output-file ~/my-diagnostics
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run := runwrappers.Chain(
-				runwrappers.RunWithTimeout(c.config),
+				runwrappers.RunWithTimeout(
+					// Diagnostic retrieval may take a while - force a minimum
+					// command timeout of an hour (warning if changed from the
+					// user's value)
+					cmdcontext.NewMinimumTimeoutProvider(
+						c.config,
+						time.Hour,
+						os.Stderr,
+					),
+				),
 				runwrappers.AuthenticateClient(c.config, c.client),
 			)(c.runWithCtx)
 			return run(context.Background(), cmd, args)
