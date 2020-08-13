@@ -73,6 +73,9 @@ issues:
     - linters:
         - gosec
       text: "G304: Potential file inclusion via variable"
+    - linters:
+        - gosec
+      text: 'G307: Deferring unsafe method "\*os\.File" on type "Close"'
 
     - path: mock_.+\.go
       text: "should have comment or be unexported"

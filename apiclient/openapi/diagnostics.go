@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/openapi"
 )
 
@@ -40,8 +41,19 @@ func (o *OpenAPI) GetDiagnostics(ctx context.Context) (io.ReadCloser, error) {
 	}
 
 	switch resp.StatusCode {
-	case 200:
+	case http.StatusOK:
 		// Carry on.
+	case http.StatusBadGateway:
+		// Check if the response content-type indicates a partial bundle. That
+		// is, it has a gzip content type.
+		for _, value := range resp.Header["Content-Type"] {
+			if value == "application/gzip" {
+				return nil, apiclient.NewIncompleteDiagnosticsError(resp.Body)
+			}
+		}
+
+		// If not, use the normal error handling code.
+		fallthrough
 	default:
 		defer resp.Body.Close()
 		// Try to read the response body and unmarshal it into an openapi.Error

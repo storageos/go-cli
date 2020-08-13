@@ -1,6 +1,9 @@
 package apiclient
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
 // AuthenticationError indicates that the requested operation could not be
 // performed for the client due to an issue with the authentication credentials
@@ -192,5 +195,27 @@ func NewEncodingError(err error, targetType, value interface{}) EncodingError {
 		err:        err,
 		targetType: targetType,
 		value:      value,
+	}
+}
+
+// IncompleteDiagnosticsError provides an error type
+type IncompleteDiagnosticsError struct {
+	bundleData io.ReadCloser
+}
+
+func (e IncompleteDiagnosticsError) Error() string {
+	return "received an incomplete diagnostic bundle"
+}
+
+// BundleData returns the read closer for the bundle data associated with the error.
+func (e IncompleteDiagnosticsError) BundleData() io.ReadCloser {
+	return e.bundleData
+}
+
+// NewIncompleteDiagnosticsError constructs an incomplete diagnostics error for
+// the provided bundle data.
+func NewIncompleteDiagnosticsError(bundleData io.ReadCloser) IncompleteDiagnosticsError {
+	return IncompleteDiagnosticsError{
+		bundleData: bundleData,
 	}
 }

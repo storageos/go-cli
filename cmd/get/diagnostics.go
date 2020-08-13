@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/pkg/cmdcontext"
 )
@@ -53,9 +54,19 @@ func (c *diagnosticsCommand) runWithCtx(ctx context.Context, cmd *cobra.Command,
 
 	bundle, err := c.client.GetDiagnostics(ctx)
 	if err != nil {
-		// If we failed to get a bundle then remove the file we created.
-		os.Remove(outputfile.Name())
-		return err
+		switch v := err.(type) {
+
+		case apiclient.IncompleteDiagnosticsError:
+			// If the error is for an incomplete diagnostic bundle, extract
+			// the data and warn the user.
+			bundle = v.BundleData()
+			fmt.Fprintf(os.Stderr, "\nWarning: %v\n\n", v)
+
+		default:
+			// If we failed to get a bundle at all then remove the file we created.
+			os.Remove(outputfile.Name())
+			return err
+		}
 	}
 	defer bundle.Close()
 
