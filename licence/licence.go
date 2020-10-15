@@ -6,9 +6,8 @@ import (
 
 	"github.com/alecthomas/units"
 
-	"code.storageos.net/storageos/c2-cli/pkg/version"
-
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
 
 // Resource describes a StorageOS product licence and the features included with
@@ -20,6 +19,7 @@ type Resource struct {
 	UsedBytes            uint64          `json:"usedBytes"`
 	Kind                 string          `json:"kind"`
 	CustomerName         string          `json:"customerName"`
+	Features             []string        `json:"features"`
 	Version              version.Version `json:"version"`
 }
 
@@ -30,6 +30,7 @@ Cluster capacity: %v
 Used Bytes: %v
 Kind: %v
 Customer name: %v
+Features: %v
 Version: %v
 `,
 		l.ClusterID,
@@ -38,6 +39,7 @@ Version: %v
 		units.Base2Bytes(l.UsedBytes).String(),
 		l.Kind,
 		l.CustomerName,
+		l.Features,
 		l.Version,
 	)
 }

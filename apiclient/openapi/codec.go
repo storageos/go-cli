@@ -41,6 +41,11 @@ func (c codec) decodeCluster(model openapi.Cluster) (*cluster.Resource, error) {
 }
 
 func (c codec) decodeLicence(model openapi.Licence) (*licence.Resource, error) {
+	features := make([]string, 0)
+	if model.Features != nil {
+		features = append(features, *model.Features...)
+	}
+
 	return &licence.Resource{
 		ClusterID:            id.Cluster(model.ClusterID),
 		ExpiresAt:            model.ExpiresAt,
@@ -48,6 +53,7 @@ func (c codec) decodeLicence(model openapi.Licence) (*licence.Resource, error) {
 		UsedBytes:            model.UsedBytes,
 		Kind:                 model.Kind,
 		CustomerName:         model.CustomerName,
+		Features:             features,
 		Version:              version.FromString(model.Version),
 	}, nil
 }

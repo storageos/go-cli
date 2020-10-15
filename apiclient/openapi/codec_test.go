@@ -46,6 +46,7 @@ func TestDecodeLicence(t *testing.T) {
 				UsedBytes:            42 / 2,
 				Kind:                 "mockLicence",
 				CustomerName:         "go testing framework",
+				Features:             &[]string{"nfs"},
 				Version:              "bananaVersion",
 			},
 
@@ -56,6 +57,33 @@ func TestDecodeLicence(t *testing.T) {
 				UsedBytes:            42 / 2,
 				Kind:                 "mockLicence",
 				CustomerName:         "go testing framework",
+				Features:             []string{"nfs"},
+				Version:              version.Version("bananaVersion"),
+			},
+			wantErr: nil,
+		},
+		{
+			name: "nil features",
+
+			model: openapi.Licence{
+				ClusterID:            "bananas",
+				ExpiresAt:            mockExpiryTime,
+				ClusterCapacityBytes: 42,
+				UsedBytes:            42 / 2,
+				Kind:                 "mockLicence",
+				CustomerName:         "go testing framework",
+				Features:             nil,
+				Version:              "bananaVersion",
+			},
+
+			wantResource: &licence.Resource{
+				ClusterID:            "bananas",
+				ExpiresAt:            mockExpiryTime,
+				ClusterCapacityBytes: 42,
+				UsedBytes:            42 / 2,
+				Kind:                 "mockLicence",
+				CustomerName:         "go testing framework",
+				Features:             []string{},
 				Version:              version.Version("bananaVersion"),
 			},
 			wantErr: nil,

@@ -4,6 +4,7 @@ All URIs are relative to *http://localhost/v2*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**AttachNFSVolume**](DefaultApi.md#AttachNFSVolume) | **Post** /namespaces/{namespaceID}/volumes/{id}/nfs/attach | attach and share the volume using NFS
 [**AttachVolume**](DefaultApi.md#AttachVolume) | **Post** /namespaces/{namespaceID}/volumes/{id}/attach | Attach a volume to the given node
 [**AuthenticateUser**](DefaultApi.md#AuthenticateUser) | **Post** /auth/login | Authenticate a user
 [**CreateNamespace**](DefaultApi.md#CreateNamespace) | **Post** /namespaces | Create a new namespace
@@ -40,12 +41,64 @@ Method | HTTP request | Description
 [**UpdateAuthenticatedUser**](DefaultApi.md#UpdateAuthenticatedUser) | **Put** /users/self | Update the authenticated user&#39;s information
 [**UpdateCluster**](DefaultApi.md#UpdateCluster) | **Put** /cluster | Update the cluster&#39;s global configuration settings
 [**UpdateLicence**](DefaultApi.md#UpdateLicence) | **Put** /cluster/licence | Update the licence global configuration settings
+[**UpdateNFSVolumeExports**](DefaultApi.md#UpdateNFSVolumeExports) | **Put** /namespaces/{namespaceID}/volumes/{id}/nfs/export-config | Update an nfs volume&#39;s export configuration
+[**UpdateNFSVolumeMountEndpoint**](DefaultApi.md#UpdateNFSVolumeMountEndpoint) | **Put** /namespaces/{namespaceID}/volumes/{id}/nfs/mount-endpoint | Update an nfs volume&#39;s mount endpoint
 [**UpdateNamespace**](DefaultApi.md#UpdateNamespace) | **Put** /namespaces/{id} | Update a namespace
 [**UpdateNode**](DefaultApi.md#UpdateNode) | **Put** /nodes/{id} | Update a node
 [**UpdatePolicyGroup**](DefaultApi.md#UpdatePolicyGroup) | **Put** /policies/{id} | Update a policy group
 [**UpdateUser**](DefaultApi.md#UpdateUser) | **Put** /users/{id} | Update a user
 [**UpdateVolume**](DefaultApi.md#UpdateVolume) | **Put** /namespaces/{namespaceID}/volumes/{id} | Update a volume
 
+
+
+## AttachNFSVolume
+
+> AttachNFSVolume(ctx, namespaceID, id, attachNfsVolumeData, optional)
+
+attach and share the volume using NFS
+
+Attach the given volume as an NFS volume. If no export configuration has been set via the /nfs/export-config endpoint, the nfs service will start with defaults settings (sharing the volume at its root). 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespaceID** | **string**| ID of a Namespace | 
+**id** | **string**| ID of a Volume | 
+**attachNfsVolumeData** | [**AttachNfsVolumeData**](AttachNfsVolumeData.md)|  | 
+ **optional** | ***AttachNFSVolumeOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a AttachNFSVolumeOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
 
 
 ## AttachVolume
@@ -1390,6 +1443,106 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Licence**](Licence.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## UpdateNFSVolumeExports
+
+> UpdateNFSVolumeExports(ctx, namespaceID, id, nfsVolumeExports, optional)
+
+Update an nfs volume's export configuration
+
+Update the NFS volume's export configuration 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespaceID** | **string**| ID of a Namespace | 
+**id** | **string**| ID of a Volume | 
+**nfsVolumeExports** | [**NfsVolumeExports**](NfsVolumeExports.md)|  | 
+ **optional** | ***UpdateNFSVolumeExportsOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a UpdateNFSVolumeExportsOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## UpdateNFSVolumeMountEndpoint
+
+> UpdateNFSVolumeMountEndpoint(ctx, namespaceID, id, nfsVolumeMountEndpoint, optional)
+
+Update an nfs volume's mount endpoint
+
+Update the NFS volume's mount endpoint 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespaceID** | **string**| ID of a Namespace | 
+**id** | **string**| ID of a Volume | 
+**nfsVolumeMountEndpoint** | [**NfsVolumeMountEndpoint**](NfsVolumeMountEndpoint.md)|  | 
+ **optional** | ***UpdateNFSVolumeMountEndpointOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a UpdateNFSVolumeMountEndpointOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+ **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+
+### Return type
+
+ (empty response body)
 
 ### Authorization
 

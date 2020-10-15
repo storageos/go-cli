@@ -53,6 +53,7 @@ func (d *Displayer) GetLicence(ctx context.Context, w io.Writer, l *output.Licen
 	table.AddRow("Capacity:", clusterCapacity)
 	table.AddRow("Used:", used)
 	table.AddRow("Kind:", l.Kind)
+	table.AddRow("Features:", fmt.Sprintf("%v", l.Features))
 	table.AddRow("Customer name:", l.CustomerName)
 
 	return write(w)

@@ -310,6 +310,7 @@ func TestDisplayer_DescribeLicence(t *testing.T) {
 				ClusterCapacityBytes: 42 * size.GiB,
 				UsedBytes:            42 / 2 * size.GiB,
 				Kind:                 "bananaKind",
+				Features:             []string{"nfs", "banana"},
 				CustomerName:         "bananaCustomer",
 			},
 			wantW: `ClusterID:      bananaID                           
@@ -317,6 +318,7 @@ Expiration:     2000-01-01T00:00:00Z (xx aeons ago)
 Capacity:       42 GiB (45097156608)               
 Used:           21 GiB (22548578304)               
 Kind:           bananaKind                         
+Features:       [banana nfs]                       
 Customer name:  bananaCustomer                     
 `,
 			wantErr: false,
