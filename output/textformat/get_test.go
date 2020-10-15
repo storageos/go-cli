@@ -836,7 +836,7 @@ func TestDisplayer_GetVolume(t *testing.T) {
 		wantErr       bool
 	}{
 		{
-			name: "print volume",
+			name: "print volume uses replica length for total count if bad label",
 			volume: &output.Volume{
 				ID:             "bananaID",
 				Name:           "banana-name",
@@ -845,8 +845,9 @@ func TestDisplayer_GetVolume(t *testing.T) {
 				Namespace:      "banana-namespace",
 				NamespaceName:  "kiwi",
 				Labels: labels.Set{
-					"kiwi": "42",
-					"pear": "42",
+					"kiwi":               "42",
+					"pear":               "42",
+					volume.LabelReplicas: "NaN",
 				},
 				Filesystem: volume.FsTypeFromString("ext4"),
 				SizeBytes:  size.GiB,
@@ -882,6 +883,38 @@ func TestDisplayer_GetVolume(t *testing.T) {
 			},
 			wantW: `NAMESPACE  NAME         SIZE     LOCATION              ATTACHED ON    REPLICAS  AGE         
 kiwi       banana-name  1.0 GiB  banana-node1 (ready)  banana-node-a  2/3       xx aeons ago
+`,
+			wantErr: false,
+		},
+		{
+			name: "print volume uses replica label number for total count",
+			volume: &output.Volume{
+				ID:             "bananaID",
+				Name:           "banana-name",
+				Description:    "banana description",
+				AttachedOnName: "banana-node-a",
+				Namespace:      "banana-namespace",
+				NamespaceName:  "kiwi",
+				Labels: labels.Set{
+					"kiwi":               "42",
+					"pear":               "42",
+					volume.LabelReplicas: "3",
+				},
+				Filesystem: volume.FsTypeFromString("ext4"),
+				SizeBytes:  size.GiB,
+				Master: &output.Deployment{
+					ID:         "bananaDeploymentID1",
+					NodeName:   "banana-node1",
+					Health:     "ready",
+					Promotable: true,
+				},
+				Replicas:  []*output.Deployment{},
+				CreatedAt: mockTime,
+				UpdatedAt: mockTime,
+				Version:   "42",
+			},
+			wantW: `NAMESPACE  NAME         SIZE     LOCATION              ATTACHED ON    REPLICAS  AGE         
+kiwi       banana-name  1.0 GiB  banana-node1 (ready)  banana-node-a  0/3       xx aeons ago
 `,
 			wantErr: false,
 		},
