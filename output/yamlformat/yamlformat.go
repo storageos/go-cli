@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"code.storageos.net/storageos/c2-cli/output"
+	"code.storageos.net/storageos/c2-cli/pkg/id"
 )
 
 // Displayer is a type which encodes StorageOS resources to YAML and writes the
@@ -81,6 +82,16 @@ func (d *Displayer) UpdateVolumeDescription(ctx context.Context, w io.Writer, vo
 // UpdateVolumeLabels encodes resource as YAML, writing the result to w.
 func (d *Displayer) UpdateVolumeLabels(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error {
 	return d.encode(w, volUpdate)
+}
+
+// UpdateNFSVolumeMountEndpoint encodes resource as YAML, writing the result to w.
+func (d *Displayer) UpdateNFSVolumeMountEndpoint(ctx context.Context, w io.Writer, volID id.Volume, endpoint string) error {
+	return nil
+}
+
+// UpdateNFSVolumeExports encodes resource as YAML, writing the result to w.
+func (d *Displayer) UpdateNFSVolumeExports(ctx context.Context, w io.Writer, volID id.Volume, exports []output.NFSExportConfig) error {
+	return nil
 }
 
 // -----------------------------------------------------------------------------

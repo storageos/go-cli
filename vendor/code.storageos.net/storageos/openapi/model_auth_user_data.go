@@ -9,7 +9,6 @@
  */
 
 package openapi
-
 // AuthUserData struct for AuthUserData
 type AuthUserData struct {
 	Username string `json:"username"`

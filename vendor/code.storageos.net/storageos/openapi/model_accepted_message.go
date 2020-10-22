@@ -9,7 +9,6 @@
  */
 
 package openapi
-
 // AcceptedMessage struct for AcceptedMessage
 type AcceptedMessage struct {
 	Msg string `json:"msg,omitempty"`

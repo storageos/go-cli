@@ -10,8 +10,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"code.storageos.net/storageos/c2-cli/cmd/update"
-
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/apiclient/cache"
 	"code.storageos.net/storageos/c2-cli/apiclient/openapi"
@@ -22,6 +20,8 @@ import (
 	"code.storageos.net/storageos/c2-cli/cmd/describe"
 	"code.storageos.net/storageos/c2-cli/cmd/detach"
 	"code.storageos.net/storageos/c2-cli/cmd/get"
+	"code.storageos.net/storageos/c2-cli/cmd/nfs"
+	"code.storageos.net/storageos/c2-cli/cmd/update"
 	"code.storageos.net/storageos/c2-cli/config"
 )
 
@@ -115,6 +115,7 @@ To be notified about stable releases and latest features, sign up at https://my.
 		delete.NewCommand(client, config),
 		attach.NewCommand(client, config),
 		detach.NewCommand(client, config),
+		nfs.NewCommand(client, config),
 		versionCommand,
 	)
 

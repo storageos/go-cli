@@ -7,16 +7,14 @@ import (
 
 	"github.com/kr/pretty"
 
-	"code.storageos.net/storageos/c2-cli/pkg/version"
-
-	"code.storageos.net/storageos/c2-cli/licence"
-
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/health"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -284,6 +282,30 @@ func TestDecodeVolume(t *testing.T) {
 				Name:        "my-volume",
 				Description: "some arbitrary description",
 				AttachedOn:  "some-arbitrary-node-id",
+				Nfs: openapi.NfsConfig{
+					Exports: &[]openapi.NfsExportConfig{
+						{
+							ExportID:   1,
+							Path:       "/",
+							PseudoPath: "/",
+							Acls: []openapi.NfsAcl{
+								{
+									Identity: openapi.NfsAclIdentity{
+										IdentityType: "cidr",
+										Matcher:      "10.0.0.0/8",
+									},
+									SquashConfig: openapi.NfsAclSquashConfig{
+										Gid:    0,
+										Uid:    0,
+										Squash: "root",
+									},
+									AccessLevel: "rw",
+								},
+							},
+						},
+					},
+					ServiceEndpoint: func(s string) *string { return &s }("10.0.0.1:/"),
+				},
 				NamespaceID: "some-arbitrary-namespace-id",
 				Labels: map[string]string{
 					"storageos.com/label": "value",
@@ -322,7 +344,31 @@ func TestDecodeVolume(t *testing.T) {
 				SizeBytes:   1337,
 
 				AttachedOn: "some-arbitrary-node-id",
-				Namespace:  "some-arbitrary-namespace-id",
+				Nfs: volume.NFSConfig{
+					Exports: []volume.NFSExportConfig{
+						{
+							ExportID:   1,
+							Path:       "/",
+							PseudoPath: "/",
+							ACLs: []volume.NFSExportConfigACL{
+								{
+									Identity: volume.NFSExportConfigACLIdentity{
+										IdentityType: "cidr",
+										Matcher:      "10.0.0.0/8",
+									},
+									SquashConfig: volume.NFSExportConfigACLSquashConfig{
+										GID:    0,
+										UID:    0,
+										Squash: "root",
+									},
+									AccessLevel: "rw",
+								},
+							},
+						},
+					},
+					ServiceEndpoint: "10.0.0.1:/",
+				},
+				Namespace: "some-arbitrary-namespace-id",
 				Labels: labels.Set{
 					"storageos.com/label": "value",
 				},
@@ -363,6 +409,30 @@ func TestDecodeVolume(t *testing.T) {
 				Name:        "my-volume",
 				Description: "some arbitrary description",
 				AttachedOn:  "some-arbitrary-node-id",
+				Nfs: openapi.NfsConfig{
+					Exports: &[]openapi.NfsExportConfig{
+						{
+							ExportID:   1,
+							Path:       "/",
+							PseudoPath: "/",
+							Acls: []openapi.NfsAcl{
+								{
+									Identity: openapi.NfsAclIdentity{
+										IdentityType: "cidr",
+										Matcher:      "10.0.0.0/8",
+									},
+									SquashConfig: openapi.NfsAclSquashConfig{
+										Gid:    0,
+										Uid:    0,
+										Squash: "root",
+									},
+									AccessLevel: "rw",
+								},
+							},
+						},
+					},
+					ServiceEndpoint: func(s string) *string { return &s }("10.0.0.1:/"),
+				},
 				NamespaceID: "some-arbitrary-namespace-id",
 				Labels: map[string]string{
 					"storageos.com/label": "value",
@@ -387,7 +457,31 @@ func TestDecodeVolume(t *testing.T) {
 				SizeBytes:   1337,
 
 				AttachedOn: "some-arbitrary-node-id",
-				Namespace:  "some-arbitrary-namespace-id",
+				Nfs: volume.NFSConfig{
+					Exports: []volume.NFSExportConfig{
+						{
+							ExportID:   1,
+							Path:       "/",
+							PseudoPath: "/",
+							ACLs: []volume.NFSExportConfigACL{
+								{
+									Identity: volume.NFSExportConfigACLIdentity{
+										IdentityType: "cidr",
+										Matcher:      "10.0.0.0/8",
+									},
+									SquashConfig: volume.NFSExportConfigACLSquashConfig{
+										GID:    0,
+										UID:    0,
+										Squash: "root",
+									},
+									AccessLevel: "rw",
+								},
+							},
+						},
+					},
+					ServiceEndpoint: "10.0.0.1:/",
+				},
+				Namespace: "some-arbitrary-namespace-id",
 				Labels: labels.Set{
 					"storageos.com/label": "value",
 				},

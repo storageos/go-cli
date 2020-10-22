@@ -8,10 +8,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"code.storageos.net/storageos/c2-cli/licence"
-
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"

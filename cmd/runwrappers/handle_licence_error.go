@@ -6,9 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"code.storageos.net/storageos/c2-cli/licence"
-
 	"code.storageos.net/storageos/c2-cli/apiclient"
+	"code.storageos.net/storageos/c2-cli/licence"
 )
 
 // LicenceClient is a type capable of fetching a StorageOS cluster API
@@ -26,10 +25,11 @@ type LicenceLimitError struct {
 }
 
 func (e LicenceLimitError) Error() string {
-	resolution := `for a licence with greater capacity contact us via https://storageos.com/contact`
+	resolution := `for a licence with greater capacity or additional features contact us via https://storageos.com/contact`
 	if e.licence.Kind == "basic" {
 		// TODO(CP-3908): Include instructions for automatic application
 		resolution = `for a free capacity upgrade, create an account and register this cluster at https://my.storageos.com`
+		resolution += "\n\nFor access to additional licence features contact us via https://storageos.com/contact"
 	}
 
 	return fmt.Sprintf(`the requested operation cannot be performed with the current licence configuration. 

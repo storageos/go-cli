@@ -6,15 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"code.storageos.net/storageos/c2-cli/pkg/health"
-	"code.storageos.net/storageos/c2-cli/pkg/size"
-
 	"code.storageos.net/storageos/c2-cli/licence"
+	"code.storageos.net/storageos/c2-cli/output"
+	"code.storageos.net/storageos/c2-cli/pkg/health"
+	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 	"code.storageos.net/storageos/c2-cli/pkg/version"
 	"code.storageos.net/storageos/c2-cli/volume"
-
-	"code.storageos.net/storageos/c2-cli/output"
 )
 
 func TestDisplayer_UpdateLicence(t *testing.T) {
@@ -148,6 +147,193 @@ Volume banana-name (banana-id) updated. Description changed.
 			}
 			if gotW := w.String(); gotW != tt.wantW {
 				t.Errorf("UpdateVolume() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
+			}
+		})
+	}
+}
+
+func TestDisplayer_UpdateNFSVolumeExports(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		volumeID id.Volume
+		exports  []volume.NFSExportConfig
+		wantW    string
+		wantErr  bool
+	}{
+		{
+			name:     "print licence update success",
+			volumeID: "banana",
+			exports: []volume.NFSExportConfig{
+				{
+					ExportID:   42,
+					Path:       "/banana",
+					PseudoPath: "/kiwi",
+					ACLs: []volume.NFSExportConfigACL{
+						{
+							Identity: volume.NFSExportConfigACLIdentity{
+								IdentityType: "bananaIdentity",
+								Matcher:      "bananaMatcher",
+							},
+							SquashConfig: volume.NFSExportConfigACLSquashConfig{
+								GID:    42,
+								UID:    43,
+								Squash: "bananaSquash",
+							},
+							AccessLevel: "bananaAccessLevel",
+						},
+						{
+							Identity: volume.NFSExportConfigACLIdentity{
+								IdentityType: "kiwiIdentity",
+								Matcher:      "kiwiMatcher",
+							},
+							SquashConfig: volume.NFSExportConfigACLSquashConfig{
+								GID:    42,
+								UID:    43,
+								Squash: "kiwiSquash",
+							},
+							AccessLevel: "kiwiAccessLevel",
+						},
+					},
+				},
+				{
+					ExportID:   43,
+					Path:       "/pineapple",
+					PseudoPath: "/orange",
+					ACLs: []volume.NFSExportConfigACL{
+						{
+							Identity: volume.NFSExportConfigACLIdentity{
+								IdentityType: "pineappleIdentity",
+								Matcher:      "pineappleMatcher",
+							},
+							SquashConfig: volume.NFSExportConfigACLSquashConfig{
+								GID:    42,
+								UID:    43,
+								Squash: "pineappleSquash",
+							},
+							AccessLevel: "pineappleAccessLevel",
+						},
+						{
+							Identity: volume.NFSExportConfigACLIdentity{
+								IdentityType: "orangeIdentity",
+								Matcher:      "orangeMatcher",
+							},
+							SquashConfig: volume.NFSExportConfigACLSquashConfig{
+								GID:    42,
+								UID:    43,
+								Squash: "orangeSquash",
+							},
+							AccessLevel: "orangeAccessLevel",
+						},
+					},
+				},
+			},
+			wantW: `Volume banana updated. NFS export configs changed with: 
+                                      
+---                                   
+ID:               42                  
+Path              /banana             
+PseudoPath:       /kiwi               
+ACLs:                                 
+- Access Level:   bananaAccessLevel   
+  Identity:                           
+    Type:         bananaIdentity      
+    Matcher:      bananaMatcher       
+  Squash Config:                      
+    GID:          42                  
+    UID:          43                  
+    Squash:       bananaSquash        
+- Access Level:   kiwiAccessLevel     
+  Identity:                           
+    Type:         kiwiIdentity        
+    Matcher:      kiwiMatcher         
+  Squash Config:                      
+    GID:          42                  
+    UID:          43                  
+    Squash:       kiwiSquash          
+                                      
+---                                   
+ID:               43                  
+Path              /pineapple          
+PseudoPath:       /orange             
+ACLs:                                 
+- Access Level:   pineappleAccessLevel
+  Identity:                           
+    Type:         pineappleIdentity   
+    Matcher:      pineappleMatcher    
+  Squash Config:                      
+    GID:          42                  
+    UID:          43                  
+    Squash:       pineappleSquash     
+- Access Level:   orangeAccessLevel   
+  Identity:                           
+    Type:         orangeIdentity      
+    Matcher:      orangeMatcher       
+  Squash Config:                      
+    GID:          42                  
+    UID:          43                  
+    Squash:       orangeSquash        
+`,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
+			w := &bytes.Buffer{}
+
+			err := d.UpdateNFSVolumeExports(context.Background(), w, tt.volumeID, output.NewNFSExportConfigs(tt.exports))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UpdateNFSVolumeExports() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotW := w.String(); gotW != tt.wantW {
+				t.Errorf("UpdateNFSVolumeExports() gotW = \n%+q\n, want \n%+q\n", gotW, tt.wantW)
+			}
+		})
+	}
+}
+
+func TestDisplayer_UpdateNFSVolumeMountEndpoint(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		volumeID id.Volume
+		endpoint string
+		wantW    string
+		wantErr  bool
+	}{
+		{
+			name:     "print NFS volume mount endpoint update success",
+			volumeID: "banana",
+			endpoint: "10.0.0.1:/",
+			wantW: `Volume banana updated. NFS mount endpoint changed with: 10.0.0.1:/
+`,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			d := NewDisplayer(&mockTimeFormatter{Str: "xx aeons ago"})
+			w := &bytes.Buffer{}
+
+			err := d.UpdateNFSVolumeMountEndpoint(context.Background(), w, tt.volumeID, tt.endpoint)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UpdateNFSVolumeMountEndpoint() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotW := w.String(); gotW != tt.wantW {
+				t.Errorf("UpdateNFSVolumeMountEndpoint() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
 			}
 		})
 	}

@@ -213,6 +213,164 @@ func (o *OpenAPI) AttachVolume(ctx context.Context, namespaceID id.Namespace, vo
 	return nil
 }
 
+// AttachNFSVolume request to attach the volume `volumeID` in the namespace
+// `namespaceID` for a NFS volume. It can return an error or nil if it
+// succeeds.
+func (o *OpenAPI) AttachNFSVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *apiclient.AttachNFSVolumeRequestParams) error {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	var casVersion string
+	var ignoreVersion optional.Bool = optional.NewBool(true)
+	var asyncMax optional.String = optional.EmptyString()
+
+	if params != nil {
+		if params.CASVersion.String() != "" {
+			ignoreVersion = optional.NewBool(false)
+			casVersion = params.CASVersion.String()
+		}
+
+		if params.AsyncMax != 0 {
+			asyncMax = optional.NewString(params.AsyncMax.String())
+		}
+	}
+
+	resp, err := o.client.DefaultApi.AttachNFSVolume(
+		ctx,
+		namespaceID.String(),
+		volumeID.String(),
+		openapi.AttachNfsVolumeData{
+			Version: casVersion,
+		},
+		&openapi.AttachNFSVolumeOpts{
+			IgnoreVersion: ignoreVersion,
+			AsyncMax:      asyncMax,
+		},
+	)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return apiclient.NewVolumeNotFoundError(v.msg)
+		default:
+			return v
+		}
+	}
+
+	return nil
+}
+
+// UpdateNFSVolumeExports request to update the NFS volume exports of `volumeID`
+// in the namespace `namespaceID`. It can return an error or nil if it succeeds.
+func (o *OpenAPI) UpdateNFSVolumeExports(
+	ctx context.Context,
+	namespaceID id.Namespace,
+	volumeID id.Volume,
+	exports []volume.NFSExportConfig,
+	params *apiclient.UpdateNFSVolumeExportsRequestParams,
+) error {
+
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	var casVersion string
+	var ignoreVersion optional.Bool = optional.NewBool(true)
+	var asyncMax optional.String = optional.EmptyString()
+
+	if params != nil {
+		if params.CASVersion.String() != "" {
+			ignoreVersion = optional.NewBool(false)
+			casVersion = params.CASVersion.String()
+		}
+
+		if params.AsyncMax != 0 {
+			asyncMax = optional.NewString(params.AsyncMax.String())
+		}
+	}
+
+	openapiExports := make([]openapi.NfsExportConfig, 0, len(exports))
+	for _, e := range exports {
+		openapiExports = append(openapiExports, o.codec.encodeNFSExport(e))
+	}
+
+	resp, err := o.client.DefaultApi.UpdateNFSVolumeExports(
+		ctx,
+		namespaceID.String(),
+		volumeID.String(),
+		openapi.NfsVolumeExports{
+			Exports: openapiExports,
+			Version: casVersion,
+		},
+		&openapi.UpdateNFSVolumeExportsOpts{
+			IgnoreVersion: ignoreVersion,
+			AsyncMax:      asyncMax,
+		},
+	)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return apiclient.NewVolumeNotFoundError(v.msg)
+		default:
+			return v
+		}
+	}
+
+	return nil
+}
+
+// UpdateNFSVolumeMountEndpoint request to update the NFS mount endpoint of
+// `volumeID` in the namespace `namespaceID`. It can return an error or nil if
+// it succeeds.
+func (o *OpenAPI) UpdateNFSVolumeMountEndpoint(
+	ctx context.Context,
+	namespaceID id.Namespace,
+	volumeID id.Volume,
+	endpoint string,
+	params *apiclient.UpdateNFSVolumeMountEndpointRequestParams,
+) error {
+
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	var casVersion string
+	var ignoreVersion optional.Bool = optional.NewBool(true)
+	var asyncMax optional.String = optional.EmptyString()
+
+	if params != nil {
+		if params.CASVersion.String() != "" {
+			ignoreVersion = optional.NewBool(false)
+			casVersion = params.CASVersion.String()
+		}
+
+		if params.AsyncMax != 0 {
+			asyncMax = optional.NewString(params.AsyncMax.String())
+		}
+	}
+
+	resp, err := o.client.DefaultApi.UpdateNFSVolumeMountEndpoint(
+		ctx,
+		namespaceID.String(),
+		volumeID.String(),
+		openapi.NfsVolumeMountEndpoint{
+			MountEndpoint: endpoint,
+			Version:       casVersion,
+		},
+		&openapi.UpdateNFSVolumeMountEndpointOpts{
+			IgnoreVersion: ignoreVersion,
+			AsyncMax:      asyncMax,
+		},
+	)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return apiclient.NewVolumeNotFoundError(v.msg)
+		default:
+			return v
+		}
+	}
+
+	return nil
+}
+
 // DetachVolume makes a detach request for volumeID in namespaceID.
 //
 // The behaviour of the operation is dictated by params:

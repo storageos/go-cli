@@ -5,11 +5,10 @@ import (
 
 	"github.com/antihax/optional"
 
-	"code.storageos.net/storageos/openapi"
-
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/policygroup"
+	"code.storageos.net/storageos/openapi"
 )
 
 // CreatePolicyGroup requests the creation of a new policy group through the

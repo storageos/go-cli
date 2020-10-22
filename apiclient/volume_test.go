@@ -11,6 +11,7 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
@@ -574,6 +575,706 @@ func TestClientAttachVolume(t *testing.T) {
 
 			if tt.transport.AttachGotNode != tt.wantNodeID {
 				t.Errorf("got %v, want %v", tt.transport.AttachGotNode, tt.wantNodeID)
+			}
+		})
+	}
+}
+
+func TestClientAttachNFSVolume(t *testing.T) {
+	t.Parallel()
+
+	var mockErr = errors.New("banana error")
+
+	tests := []struct {
+		name string
+
+		transport *mockTransport
+
+		nsID   id.Namespace
+		volID  id.Volume
+		params *AttachNFSVolumeRequestParams
+
+		wantErr         error
+		wantNamespaceID id.Namespace
+		wantVolumeID    id.Volume
+		wantParams      *AttachNFSVolumeRequestParams
+	}{
+		{
+			name: "ok, params complete",
+
+			transport: &mockTransport{},
+
+			nsID:  "bananaNamespace",
+			volID: "bananaVolume",
+			params: &AttachNFSVolumeRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+
+			wantErr:         nil,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantParams: &AttachNFSVolumeRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+		},
+		{
+			name: "ok, no params",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{
+					ID:        "bananaVolume",
+					Namespace: "bananaNamespace",
+					Version:   "42",
+				},
+			},
+
+			nsID:   "bananaNamespace",
+			volID:  "bananaVolume",
+			params: nil,
+
+			wantErr:         nil,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantParams: &AttachNFSVolumeRequestParams{
+				CASVersion: "42",
+				AsyncMax:   0,
+			},
+		},
+		{
+			name: "only async, ignore version",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{
+					ID:        "bananaVolume",
+					Namespace: "bananaNamespace",
+					Version:   "42",
+				},
+			},
+
+			nsID:  "bananaNamespace",
+			volID: "bananaVolume",
+			params: &AttachNFSVolumeRequestParams{
+				CASVersion: "",
+				AsyncMax:   42,
+			},
+
+			wantErr:         nil,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantParams: &AttachNFSVolumeRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+		},
+		{
+			name: "attach transport error",
+
+			transport: &mockTransport{
+				AttachNFSError: mockErr,
+			},
+
+			nsID:  "bananaNamespace",
+			volID: "bananaVolume",
+			params: &AttachNFSVolumeRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+
+			wantErr:         mockErr,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantParams: &AttachNFSVolumeRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			client := New()
+			if err := client.ConfigureTransport(tt.transport); err != nil {
+				t.Fatalf("got error configuring client transport: %v", err)
+			}
+
+			gotErr := client.AttachNFSVolume(context.Background(), tt.nsID, tt.volID, tt.params)
+
+			if !reflect.DeepEqual(gotErr, tt.wantErr) {
+				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+			}
+
+			if tt.transport.AttachNFSGotNamespace != tt.wantNamespaceID {
+				t.Errorf("got %v, want %v", tt.transport.AttachGotNamespace, tt.wantNamespaceID)
+			}
+
+			if tt.transport.AttachNFSGotVolume != tt.wantVolumeID {
+				t.Errorf("got %v, want %v", tt.transport.AttachGotVolume, tt.wantVolumeID)
+			}
+
+			if !reflect.DeepEqual(tt.transport.AttachNFSGotParams, tt.wantParams) {
+				t.Errorf("got %v, want %v", tt.transport.AttachNFSGotParams, tt.wantParams)
+			}
+		})
+	}
+}
+
+func TestClient_UpdateNFSVolumeMountEndpoint(t *testing.T) {
+	t.Parallel()
+
+	var mockErr = errors.New("banana error")
+
+	tests := []struct {
+		name string
+
+		transport *mockTransport
+
+		nsID     id.Namespace
+		volID    id.Volume
+		endpoint string
+		params   *UpdateNFSVolumeMountEndpointRequestParams
+
+		wantErr         error
+		wantNamespaceID id.Namespace
+		wantVolumeID    id.Volume
+		wantParams      *UpdateNFSVolumeMountEndpointRequestParams
+	}{
+		{
+			name: "ok, params complete",
+
+			transport: &mockTransport{},
+
+			nsID:  "bananaNamespace",
+			volID: "bananaVolume",
+			params: &UpdateNFSVolumeMountEndpointRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+			endpoint: "10.0.0.1:/",
+
+			wantErr:         nil,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantParams: &UpdateNFSVolumeMountEndpointRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+		},
+		{
+			name: "ok, no params",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{
+					ID:        "bananaVolume",
+					Namespace: "bananaNamespace",
+					Version:   "42",
+				},
+			},
+			endpoint: "10.0.0.1:/",
+
+			nsID:   "bananaNamespace",
+			volID:  "bananaVolume",
+			params: nil,
+
+			wantErr:         nil,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantParams: &UpdateNFSVolumeMountEndpointRequestParams{
+				CASVersion: "42",
+				AsyncMax:   0,
+			},
+		},
+		{
+			name: "only async, ignore version",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{
+					ID:        "bananaVolume",
+					Namespace: "bananaNamespace",
+					Version:   "42",
+				},
+			},
+
+			nsID:  "bananaNamespace",
+			volID: "bananaVolume",
+			params: &UpdateNFSVolumeMountEndpointRequestParams{
+				CASVersion: "",
+				AsyncMax:   42,
+			},
+			endpoint: "10.0.0.1:/",
+
+			wantErr:         nil,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantParams: &UpdateNFSVolumeMountEndpointRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+		},
+		{
+			name: "update NFS volume mount endpoint transport error",
+
+			transport: &mockTransport{
+				UpdateNFSVolumeMountEndpointError: mockErr,
+			},
+
+			nsID:  "bananaNamespace",
+			volID: "bananaVolume",
+			params: &UpdateNFSVolumeMountEndpointRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+			endpoint: "10.0.0.1:/",
+
+			wantErr:         mockErr,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantParams: &UpdateNFSVolumeMountEndpointRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			client := New()
+			if err := client.ConfigureTransport(tt.transport); err != nil {
+				t.Fatalf("got error configuring client transport: %v", err)
+			}
+
+			gotErr := client.UpdateNFSVolumeMountEndpoint(context.Background(), tt.nsID, tt.volID, tt.endpoint, tt.params)
+
+			if !reflect.DeepEqual(gotErr, tt.wantErr) {
+				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+			}
+
+			if tt.transport.UpdateNFSVolumeMountEndpointGotNamespaceID != tt.wantNamespaceID {
+				t.Errorf("got %v, want %v", tt.transport.UpdateNFSVolumeMountEndpointGotNamespaceID, tt.wantNamespaceID)
+			}
+
+			if tt.transport.UpdateNFSVolumeMountEndpointGotVolumeID != tt.wantVolumeID {
+				t.Errorf("got %v, want %v", tt.transport.UpdateNFSVolumeMountEndpointGotVolumeID, tt.wantVolumeID)
+			}
+
+			if tt.transport.UpdateNFSVolumeMountEndpointGotEndpoint != tt.endpoint {
+				t.Errorf("got %v, want %v", tt.transport.UpdateNFSVolumeMountEndpointGotEndpoint, tt.endpoint)
+			}
+
+			if !reflect.DeepEqual(tt.transport.UpdateNFSVolumeMountEndpointGotParams, tt.wantParams) {
+				t.Errorf("got %v, want %v", tt.transport.UpdateNFSVolumeMountEndpointGotParams, tt.wantParams)
+			}
+		})
+	}
+}
+
+func TestClient_UpdateNFSVolumeExports(t *testing.T) {
+	t.Parallel()
+
+	var mockErr = errors.New("banana error")
+
+	tests := []struct {
+		name string
+
+		transport *mockTransport
+
+		nsID    id.Namespace
+		volID   id.Volume
+		exports []volume.NFSExportConfig
+		params  *UpdateNFSVolumeExportsRequestParams
+
+		wantErr         error
+		wantNamespaceID id.Namespace
+		wantVolumeID    id.Volume
+		wantParams      *UpdateNFSVolumeExportsRequestParams
+	}{
+		{
+			name: "ok, params complete",
+
+			transport: &mockTransport{},
+
+			nsID:  "bananaNamespace",
+			volID: "bananaVolume",
+			params: &UpdateNFSVolumeExportsRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+			exports: []volume.NFSExportConfig{
+				{
+					ExportID:   0,
+					Path:       "/",
+					PseudoPath: "/",
+					ACLs: []volume.NFSExportConfigACL{
+						{
+							Identity: volume.NFSExportConfigACLIdentity{
+								IdentityType: "cidr",
+								Matcher:      "10.0.0.1/8",
+							},
+							SquashConfig: volume.NFSExportConfigACLSquashConfig{
+								GID:    1001,
+								UID:    1000,
+								Squash: "all",
+							},
+							AccessLevel: "rw",
+						},
+					},
+				},
+				{
+					ExportID:   1,
+					Path:       "/path",
+					PseudoPath: "/pseudo",
+					ACLs: []volume.NFSExportConfigACL{
+						{
+							Identity: volume.NFSExportConfigACLIdentity{
+								IdentityType: "hostname",
+								Matcher:      "*.storageos.com",
+							},
+							SquashConfig: volume.NFSExportConfigACLSquashConfig{
+								GID:    1001,
+								UID:    1000,
+								Squash: "root",
+							},
+							AccessLevel: "ro",
+						},
+					},
+				},
+			},
+
+			wantErr:         nil,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantParams: &UpdateNFSVolumeExportsRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+		},
+		{
+			name: "ok, no params",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{
+					ID:        "bananaVolume",
+					Namespace: "bananaNamespace",
+					Version:   "42",
+				},
+			},
+			exports: []volume.NFSExportConfig{
+				{
+					ExportID:   0,
+					Path:       "/",
+					PseudoPath: "/",
+					ACLs: []volume.NFSExportConfigACL{
+						{
+							Identity: volume.NFSExportConfigACLIdentity{
+								IdentityType: "cidr",
+								Matcher:      "10.0.0.1/8",
+							},
+							SquashConfig: volume.NFSExportConfigACLSquashConfig{
+								GID:    1001,
+								UID:    1000,
+								Squash: "all",
+							},
+							AccessLevel: "rw",
+						},
+					},
+				},
+				{
+					ExportID:   1,
+					Path:       "/path",
+					PseudoPath: "/pseudo",
+					ACLs: []volume.NFSExportConfigACL{
+						{
+							Identity: volume.NFSExportConfigACLIdentity{
+								IdentityType: "hostname",
+								Matcher:      "*.storageos.com",
+							},
+							SquashConfig: volume.NFSExportConfigACLSquashConfig{
+								GID:    1001,
+								UID:    1000,
+								Squash: "root",
+							},
+							AccessLevel: "ro",
+						},
+					},
+				},
+			},
+
+			nsID:   "bananaNamespace",
+			volID:  "bananaVolume",
+			params: nil,
+
+			wantErr:         nil,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantParams: &UpdateNFSVolumeExportsRequestParams{
+				CASVersion: "42",
+				AsyncMax:   0,
+			},
+		},
+		{
+			name: "only async, ignore version",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{
+					ID:        "bananaVolume",
+					Namespace: "bananaNamespace",
+					Version:   "42",
+				},
+			},
+
+			nsID:  "bananaNamespace",
+			volID: "bananaVolume",
+			params: &UpdateNFSVolumeExportsRequestParams{
+				CASVersion: "",
+				AsyncMax:   42,
+			},
+			exports: []volume.NFSExportConfig{
+				{
+					ExportID:   0,
+					Path:       "/",
+					PseudoPath: "/",
+					ACLs: []volume.NFSExportConfigACL{
+						{
+							Identity: volume.NFSExportConfigACLIdentity{
+								IdentityType: "cidr",
+								Matcher:      "10.0.0.1/8",
+							},
+							SquashConfig: volume.NFSExportConfigACLSquashConfig{
+								GID:    1001,
+								UID:    1000,
+								Squash: "all",
+							},
+							AccessLevel: "rw",
+						},
+					},
+				},
+				{
+					ExportID:   1,
+					Path:       "/path",
+					PseudoPath: "/pseudo",
+					ACLs: []volume.NFSExportConfigACL{
+						{
+							Identity: volume.NFSExportConfigACLIdentity{
+								IdentityType: "hostname",
+								Matcher:      "*.storageos.com",
+							},
+							SquashConfig: volume.NFSExportConfigACLSquashConfig{
+								GID:    1001,
+								UID:    1000,
+								Squash: "root",
+							},
+							AccessLevel: "ro",
+						},
+					},
+				},
+			},
+
+			wantErr:         nil,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantParams: &UpdateNFSVolumeExportsRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+		},
+		{
+			name: "update NFS volume exports transport error",
+
+			transport: &mockTransport{
+				UpdateNFSVolumeExportsError: mockErr,
+			},
+
+			nsID:  "bananaNamespace",
+			volID: "bananaVolume",
+			params: &UpdateNFSVolumeExportsRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+			exports: []volume.NFSExportConfig{
+				{
+					ExportID:   0,
+					Path:       "/",
+					PseudoPath: "/",
+					ACLs: []volume.NFSExportConfigACL{
+						{
+							Identity: volume.NFSExportConfigACLIdentity{
+								IdentityType: "cidr",
+								Matcher:      "10.0.0.1/8",
+							},
+							SquashConfig: volume.NFSExportConfigACLSquashConfig{
+								GID:    1001,
+								UID:    1000,
+								Squash: "all",
+							},
+							AccessLevel: "rw",
+						},
+					},
+				},
+				{
+					ExportID:   1,
+					Path:       "/path",
+					PseudoPath: "/pseudo",
+					ACLs: []volume.NFSExportConfigACL{
+						{
+							Identity: volume.NFSExportConfigACLIdentity{
+								IdentityType: "hostname",
+								Matcher:      "*.storageos.com",
+							},
+							SquashConfig: volume.NFSExportConfigACLSquashConfig{
+								GID:    1001,
+								UID:    1000,
+								Squash: "root",
+							},
+							AccessLevel: "ro",
+						},
+					},
+				},
+			},
+
+			wantErr:         mockErr,
+			wantNamespaceID: "bananaNamespace",
+			wantVolumeID:    "bananaVolume",
+			wantParams: &UpdateNFSVolumeExportsRequestParams{
+				CASVersion: "42",
+				AsyncMax:   42,
+			},
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			client := New()
+			if err := client.ConfigureTransport(tt.transport); err != nil {
+				t.Fatalf("got error configuring client transport: %v", err)
+			}
+
+			gotErr := client.UpdateNFSVolumeExports(context.Background(), tt.nsID, tt.volID, tt.exports, tt.params)
+
+			if !reflect.DeepEqual(gotErr, tt.wantErr) {
+				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+			}
+
+			if tt.transport.UpdateNFSVolumeExportsGotNamespaceID != tt.wantNamespaceID {
+				t.Errorf("got %v, want %v", tt.transport.UpdateNFSVolumeExportsGotNamespaceID, tt.wantNamespaceID)
+			}
+
+			if tt.transport.UpdateNFSVolumeExportsGotVolumeID != tt.wantVolumeID {
+				t.Errorf("got %v, want %v", tt.transport.UpdateNFSVolumeExportsGotVolumeID, tt.wantVolumeID)
+			}
+
+			if !reflect.DeepEqual(tt.transport.UpdateNFSVolumeExportsGotExports, tt.exports) {
+				t.Errorf("got %v, want %v", tt.transport.UpdateNFSVolumeExportsGotExports, tt.exports)
+			}
+
+			if !reflect.DeepEqual(tt.transport.UpdateNFSVolumeExportsGotParams, tt.wantParams) {
+				t.Errorf("got %v, want %v", tt.transport.UpdateNFSVolumeExportsGotParams, tt.wantParams)
+			}
+		})
+	}
+}
+
+func TestClient_ResizeVolume(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+
+		Transport *mockTransport
+		params    *ResizeVolumeRequestParams
+
+		wantParams *ResizeVolumeRequestParams
+	}{
+		{
+			name: "params input nil",
+			Transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{Version: "42"},
+			},
+			params: nil,
+			wantParams: &ResizeVolumeRequestParams{
+				AsyncMax:   0,
+				CASVersion: "42",
+			},
+		},
+		{
+			name: "params input both empty",
+			Transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{Version: "42"},
+			},
+			params: &ResizeVolumeRequestParams{
+				AsyncMax:   0,
+				CASVersion: "",
+			},
+			wantParams: &ResizeVolumeRequestParams{
+				AsyncMax:   0,
+				CASVersion: "42",
+			},
+		},
+		{
+			name: "params input version set, async empty",
+			Transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{Version: "43"},
+			},
+			params: &ResizeVolumeRequestParams{
+				AsyncMax:   0,
+				CASVersion: "42",
+			},
+			wantParams: &ResizeVolumeRequestParams{
+				AsyncMax:   0,
+				CASVersion: "42",
+			},
+		},
+		{
+			name: "params input version empty, async set",
+			Transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{Version: "42"},
+			},
+			params: &ResizeVolumeRequestParams{
+				AsyncMax:   42,
+				CASVersion: "",
+			},
+			wantParams: &ResizeVolumeRequestParams{
+				AsyncMax:   42,
+				CASVersion: "42",
+			},
+		},
+		{
+			name: "params input both set",
+			Transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{Version: "43"},
+			},
+			params: &ResizeVolumeRequestParams{
+				AsyncMax:   42,
+				CASVersion: "42",
+			},
+			wantParams: &ResizeVolumeRequestParams{
+				AsyncMax:   42,
+				CASVersion: "42",
+			},
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			c := New()
+			err := c.ConfigureTransport(tt.Transport)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			_, err = c.ResizeVolume(context.Background(), "bananaNS", "bananaVolume", size.GiB, tt.params)
+			if err != nil {
+				t.Errorf("Resize returns error: %q", err)
+			}
+
+			if !reflect.DeepEqual(tt.Transport.ResizeVolumeGotParams, tt.wantParams) {
+				t.Errorf("ResizeVolume() got = %+v, want %+v", tt.Transport.ResizeVolumeGotParams, tt.wantParams)
 			}
 		})
 	}

@@ -1,20 +1,21 @@
-package update
+package nfs
 
 import (
 	"context"
 	"io"
+	"os"
 	"time"
 
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
+	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/output/jsonformat"
 	"code.storageos.net/storageos/c2-cli/output/textformat"
 	"code.storageos.net/storageos/c2-cli/output/yamlformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
-	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
 
@@ -33,36 +34,37 @@ type ConfigProvider interface {
 // reasonably implement the "update" verb commands.
 type Client interface {
 	Authenticate(ctx context.Context, username, password string) (apiclient.AuthSession, error)
-
-	SetReplicas(ctx context.Context, nsID id.Namespace, volID id.Volume, numReplicas uint64, params *apiclient.SetReplicasRequestParams) error
-	UpdateVolumeDescription(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, params *apiclient.UpdateVolumeRequestParams) (*volume.Resource, error)
-	UpdateVolumeLabels(ctx context.Context, nsID id.Namespace, volID id.Volume, labels labels.Set, params *apiclient.UpdateVolumeRequestParams) (*volume.Resource, error)
-	ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, params *apiclient.ResizeVolumeRequestParams) (*volume.Resource, error)
+	GetLicence(ctx context.Context) (*licence.Resource, error)
 
 	GetVolumeByName(ctx context.Context, namespace id.Namespace, name string) (*volume.Resource, error)
 	GetVolume(ctx context.Context, namespaceID id.Namespace, uid id.Volume) (*volume.Resource, error)
 	GetNamespaceByName(ctx context.Context, name string) (*namespace.Resource, error)
+
+	AttachNFSVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *apiclient.AttachNFSVolumeRequestParams) error
+	UpdateNFSVolumeExports(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, exports []volume.NFSExportConfig, params *apiclient.UpdateNFSVolumeExportsRequestParams) error
+	UpdateNFSVolumeMountEndpoint(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, endpoint string, params *apiclient.UpdateNFSVolumeMountEndpointRequestParams) error
 }
 
 // Displayer defines the functionality required by the CLI application to
 // display the results returned by "update" verb operations.
 type Displayer interface {
-	SetReplicas(ctx context.Context, w io.Writer, new uint64) error
-	ResizeVolume(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error
-	UpdateVolumeDescription(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error
-	UpdateVolumeLabels(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error
+	UpdateNFSVolumeMountEndpoint(ctx context.Context, w io.Writer, volID id.Volume, endpoint string) error
+	UpdateNFSVolumeExports(ctx context.Context, w io.Writer, volID id.Volume, exports []output.NFSExportConfig) error
+	AttachVolume(ctx context.Context, w io.Writer) error
 	AsyncRequest(ctx context.Context, w io.Writer) error
 }
 
-// NewCommand configures the set of commands which are grouped by the "update" verb.
+// NewCommand configures the set of commands which are grouped by the "nfs" verb.
 func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 	command := &cobra.Command{
-		Use:   "update",
-		Short: "Make changes to existing resources",
+		Use:   "nfs",
+		Short: "Make changes and attach nfs volumes",
 	}
 
 	command.AddCommand(
-		newVolumeUpdate(client, config),
+		newAttach(os.Stdout, client, config),
+		newSetEndpoint(os.Stdout, client, config),
+		newSetExports(os.Stdout, client, config),
 	)
 
 	return command

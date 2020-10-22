@@ -2,7 +2,6 @@ package attach
 
 import (
 	"context"
-	"errors"
 	"io"
 	"os"
 	"time"
@@ -11,6 +10,7 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
+	"code.storageos.net/storageos/c2-cli/cmd/clierr"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -20,11 +20,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/output/yamlformat"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/volume"
-)
-
-var (
-	errArguments            = errors.New("must specify exactly two arguments <volume> <node>")
-	errNoNamespaceSpecified = errors.New("must specify the namespace of the volume to attach")
 )
 
 // ConfigProvider specifies the configuration settings which commands require
@@ -54,6 +49,7 @@ type Client interface {
 // to display the resources produced by the "attach" verb commands.
 type Displayer interface {
 	AttachVolume(ctx context.Context, w io.Writer) error
+	AsyncRequest(ctx context.Context, w io.Writer) error
 }
 
 type attachCommand struct {
@@ -127,12 +123,13 @@ func NewCommand(client Client, config ConfigProvider) *cobra.Command {
 $ storageos attach --namespace my-namespace-name my-volume my-node
 `,
 
-		Args: argwrappers.WrapInvalidArgsError(func(cmd *cobra.Command, args []string) error {
+		Args: argwrappers.WrapInvalidArgsError(func(_ *cobra.Command, args []string) error {
 			if len(args) != 2 {
-				return errArguments
+				return clierr.NewErrInvalidArgNum(args, 2, "storageos attach [volume] [node]")
 			}
 			return nil
 		}),
+
 		PreRunE: argwrappers.WrapInvalidArgsError(func(_ *cobra.Command, _ []string) error {
 			c.display = SelectDisplayer(c.config)
 
@@ -142,7 +139,7 @@ $ storageos attach --namespace my-namespace-name my-volume my-node
 			}
 
 			if ns == "" {
-				return errNoNamespaceSpecified
+				return clierr.ErrNoNamespaceSpecified
 			}
 			c.namespace = ns
 

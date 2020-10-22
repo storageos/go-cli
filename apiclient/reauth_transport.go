@@ -387,6 +387,28 @@ func (tr *TransportWithReauth) ResizeVolume(ctx context.Context, nsID id.Namespa
 	return updated, err
 }
 
+// UpdateNFSVolumeExports wraps the inner transport's call with a reauthenticate
+// and retry upon encountering an authentication error.
+func (tr *TransportWithReauth) UpdateNFSVolumeExports(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, exports []volume.NFSExportConfig, params *UpdateNFSVolumeExportsRequestParams) error {
+
+	err := tr.doWithReauth(ctx, func() error {
+		return tr.inner.UpdateNFSVolumeExports(ctx, namespaceID, volumeID, exports, params)
+	})
+
+	return err
+}
+
+// UpdateNFSVolumeMountEndpoint wraps the inner transport's call with a
+// reauthenticate and retry upon encountering an authentication error.
+func (tr *TransportWithReauth) UpdateNFSVolumeMountEndpoint(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, endpoint string, params *UpdateNFSVolumeMountEndpointRequestParams) error {
+
+	err := tr.doWithReauth(ctx, func() error {
+		return tr.inner.UpdateNFSVolumeMountEndpoint(ctx, namespaceID, volumeID, endpoint, params)
+	})
+
+	return err
+}
+
 // DeleteVolume wraps the inner transport's call with a reauthenticate and retry
 // upon encountering an authentication error.
 func (tr *TransportWithReauth) DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DeleteVolumeRequestParams) error {
@@ -437,6 +459,17 @@ func (tr *TransportWithReauth) AttachVolume(ctx context.Context, namespaceID id.
 
 	err := tr.doWithReauth(ctx, func() error {
 		return tr.inner.AttachVolume(ctx, namespaceID, volumeID, nodeID)
+	})
+
+	return err
+}
+
+// AttachNFSVolume wraps the inner transport's call with a reauthenticate and
+// retry upon encountering an authentication error.
+func (tr *TransportWithReauth) AttachNFSVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *AttachNFSVolumeRequestParams) error {
+
+	err := tr.doWithReauth(ctx, func() error {
+		return tr.inner.AttachNFSVolume(ctx, namespaceID, volumeID, params)
 	})
 
 	return err

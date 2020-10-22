@@ -15,21 +15,23 @@ import (
 // Volume defines a type that includes all the info that a volume should have to
 // be outputted
 type Volume struct {
-	ID             id.Volume       `json:"id" yaml:"id"`
-	Name           string          `json:"name" yaml:"name"`
-	Description    string          `json:"description" yaml:"description"`
-	AttachedOn     id.Node         `json:"attachedOn" yaml:"attachedOn"`
-	AttachedOnName string          `json:"attachedOnName" yaml:"attachedOnName"`
-	Namespace      id.Namespace    `json:"namespaceID" yaml:"namespaceID"`
-	NamespaceName  string          `json:"namespaceName" yaml:"namespaceName"`
-	Labels         labels.Set      `json:"labels" yaml:"labels"`
-	Filesystem     volume.FsType   `json:"filesystem" yaml:"filesystem"`
-	SizeBytes      uint64          `json:"sizeBytes" yaml:"sizeBytes"`
-	Master         *Deployment     `json:"master" yaml:"master"`
-	Replicas       []*Deployment   `json:"replicas" yaml:"replicas"`
-	CreatedAt      time.Time       `json:"createdAt" yaml:"createdAt"`
-	UpdatedAt      time.Time       `json:"updatedAt" yaml:"updatedAt"`
-	Version        version.Version `json:"version" yaml:"version"`
+	ID             id.Volume         `json:"id" yaml:"id"`
+	Name           string            `json:"name" yaml:"name"`
+	Description    string            `json:"description" yaml:"description"`
+	AttachedOn     id.Node           `json:"attachedOn" yaml:"attachedOn"`
+	AttachedOnName string            `json:"attachedOnName" yaml:"attachedOnName"`
+	AttachType     volume.AttachType `json:"attachmentType" yaml:"attachmentType"`
+	NFS            NFSConfig         `json:"nfs" yaml:"nfs"`
+	Namespace      id.Namespace      `json:"namespaceID" yaml:"namespaceID"`
+	NamespaceName  string            `json:"namespaceName" yaml:"namespaceName"`
+	Labels         labels.Set        `json:"labels" yaml:"labels"`
+	Filesystem     volume.FsType     `json:"filesystem" yaml:"filesystem"`
+	SizeBytes      uint64            `json:"sizeBytes" yaml:"sizeBytes"`
+	Master         *Deployment       `json:"master" yaml:"master"`
+	Replicas       []*Deployment     `json:"replicas" yaml:"replicas"`
+	CreatedAt      time.Time         `json:"createdAt" yaml:"createdAt"`
+	UpdatedAt      time.Time         `json:"updatedAt" yaml:"updatedAt"`
+	Version        version.Version   `json:"version" yaml:"version"`
 }
 
 // Deployment defines a type that includes all the info that a deployment should
@@ -71,6 +73,8 @@ func NewVolume(vol *volume.Resource, ns *namespace.Resource, nodes map[id.Node]*
 		Description:    vol.Description,
 		AttachedOn:     vol.AttachedOn,
 		AttachedOnName: attachedOnName,
+		AttachType:     vol.AttachmentType,
+		NFS:            NewNFSConfig(vol.Nfs),
 		Namespace:      vol.Namespace,
 		NamespaceName:  ns.Name,
 		Labels:         vol.Labels,
@@ -140,14 +144,16 @@ func NewVolumeDeletion(volumeID id.Volume, namespaceID id.Namespace) VolumeDelet
 
 // VolumeUpdate defines a volume update confirmation output representation.
 type VolumeUpdate struct {
-	ID          id.Volume                 `json:"id" yaml:"id"`
-	Name        string                    `json:"name" yaml:"name"`
-	Description string                    `json:"description" yaml:"description"`
-	Namespace   id.Namespace              `json:"namespaceID" yaml:"namespaceID"`
-	Labels      labels.Set                `json:"labels" yaml:"labels"`
-	SizeBytes   uint64                    `json:"sizeBytes" yaml:"sizeBytes"`
-	AttachedOn  id.Node                   `json:"attachedOn" yaml:"attachedOn"`
-	Replicas    []*VolumeUpdateDeployment `json:"replicas" yaml:"replicas"`
+	ID             id.Volume                 `json:"id" yaml:"id"`
+	Name           string                    `json:"name" yaml:"name"`
+	Description    string                    `json:"description" yaml:"description"`
+	Namespace      id.Namespace              `json:"namespaceID" yaml:"namespaceID"`
+	Labels         labels.Set                `json:"labels" yaml:"labels"`
+	SizeBytes      uint64                    `json:"sizeBytes" yaml:"sizeBytes"`
+	AttachedOn     id.Node                   `json:"attachedOn" yaml:"attachedOn"`
+	AttachmentType volume.AttachType         `json:"attachmentType" yaml:"attachmentType"`
+	Replicas       []*VolumeUpdateDeployment `json:"replicas" yaml:"replicas"`
+	NFS            NFSConfig                 `json:"nfs" yaml:"nfs"`
 }
 
 // VolumeUpdateDeployment defines a type that includes all the info that a
@@ -158,7 +164,7 @@ type VolumeUpdateDeployment struct {
 	Health health.VolumeState `json:"health" yaml:"health"`
 }
 
-// NewVolumeUpdate constructs a volume deletion confirmation output representation.
+// NewVolumeUpdate constructs a volume update confirmation output representation.
 func NewVolumeUpdate(vol *volume.Resource) VolumeUpdate {
 	deps := make([]*VolumeUpdateDeployment, 0)
 
@@ -171,13 +177,15 @@ func NewVolumeUpdate(vol *volume.Resource) VolumeUpdate {
 	}
 
 	return VolumeUpdate{
-		ID:          vol.ID,
-		Name:        vol.Name,
-		Description: vol.Description,
-		Namespace:   vol.Namespace,
-		Labels:      vol.Labels,
-		SizeBytes:   vol.SizeBytes,
-		AttachedOn:  vol.AttachedOn,
-		Replicas:    deps,
+		ID:             vol.ID,
+		Name:           vol.Name,
+		Description:    vol.Description,
+		Namespace:      vol.Namespace,
+		Labels:         vol.Labels,
+		SizeBytes:      vol.SizeBytes,
+		AttachedOn:     vol.AttachedOn,
+		AttachmentType: vol.AttachmentType,
+		Replicas:       deps,
+		NFS:            NewNFSConfig(vol.Nfs),
 	}
 }

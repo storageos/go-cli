@@ -9,11 +9,10 @@ import (
 
 	"github.com/gosuri/uitable"
 
-	"code.storageos.net/storageos/c2-cli/pkg/size"
-	"code.storageos.net/storageos/c2-cli/volume"
-
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/health"
+	"code.storageos.net/storageos/c2-cli/pkg/size"
+	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 // GetCluster creates human-readable strings, writing the result to w.

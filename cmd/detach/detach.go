@@ -11,6 +11,7 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
+	"code.storageos.net/storageos/c2-cli/cmd/clierr"
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -24,8 +25,7 @@ import (
 )
 
 var (
-	errArguments            = errors.New("must specify exactly one volume to detach")
-	errNoNamespaceSpecified = errors.New("must specify the namespace of the volume to detach")
+	errArguments = errors.New("must specify exactly one volume to detach")
 )
 
 // ConfigProvider specifies the configuration settings which commands require
@@ -161,7 +161,7 @@ $ storageos detach --namespace my-namespace-name my-volume
 			}
 
 			if ns == "" {
-				return errNoNamespaceSpecified
+				return clierr.ErrNoNamespaceSpecified
 			}
 			c.namespace = ns
 
