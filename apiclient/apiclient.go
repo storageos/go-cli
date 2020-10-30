@@ -123,6 +123,12 @@ type Transport interface {
 	// ResizeVolume attempts to perform a change in the size of a specified
 	// volume. If everything is correct, job is accepted.
 	ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, params *ResizeVolumeRequestParams) (*volume.Resource, error)
+	// UpdateNFSVolumeExports attempts to perform an update of the NFS export
+	// configuration for the specific volume.
+	UpdateNFSVolumeExports(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, exports []volume.NFSExportConfig, params *UpdateNFSVolumeExportsRequestParams) error
+	// UpdateNFSVolumeMountEndpoint attempts to perform an update of the NFS
+	// mount endpoint for the specific volume.
+	UpdateNFSVolumeMountEndpoint(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, endpoint string, params *UpdateNFSVolumeMountEndpointRequestParams) error
 
 	// DeleteVolume makes a delete request for volumeID in namespaceID.
 	//
@@ -190,6 +196,9 @@ type Transport interface {
 
 	// AttachVolume requests volumeID in namespaceID is attached to nodeID.
 	AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error
+	// AttachNFSVolume requests volumeID in namespaceID is attached with the
+	// already defined mount endpoints and export configurations.
+	AttachNFSVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *AttachNFSVolumeRequestParams) error
 	// DetachVolume makes a detach request for volumeID in namespaceID.
 	//
 	// The behaviour of the operation is dictated by params:

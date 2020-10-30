@@ -2,12 +2,12 @@ package describe
 
 import (
 	"context"
-	"errors"
 	"io"
 
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
+	"code.storageos.net/storageos/c2-cli/cmd/clierr"
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -16,10 +16,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/selectors"
 	"code.storageos.net/storageos/c2-cli/volume"
-)
-
-var (
-	errNoNamespaceSpecified = errors.New("must specify a namespace to describe volumes from")
 )
 
 type volumeCommand struct {
@@ -164,7 +160,7 @@ $ storageos describe volume --namespace my-namespace-name my-volume-name
 			}
 
 			if ns == "" {
-				return errNoNamespaceSpecified
+				return clierr.ErrNoNamespaceSpecified
 			}
 			c.namespace = ns
 

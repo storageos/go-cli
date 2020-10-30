@@ -12,28 +12,12 @@ type errInvalidSizeArg struct {
 }
 
 func (e *errInvalidSizeArg) Error() string {
-	return fmt.Sprintf("invalid size argument, got %s, use the following notations: '42 MiB', '42mib', or '44040192'", e.got)
+	return fmt.Sprintf("invalid size argument, got %s, please use the following notations: '42 MiB', '42mib', or '44040192'", e.got)
 }
 
 func newErrInvalidSizeArg(got string) *errInvalidSizeArg {
 	return &errInvalidSizeArg{
 		got: got,
-	}
-}
-
-type errInvalidArgNum struct {
-	got  []string
-	want int
-}
-
-func (e *errInvalidArgNum) Error() string {
-	return fmt.Sprintf("invalid number of arguments, got %v, expected %d", e.got, e.want)
-}
-
-func newErrInvalidArgNum(got []string, want int) *errInvalidArgNum {
-	return &errInvalidArgNum{
-		got:  got,
-		want: want,
 	}
 }
 

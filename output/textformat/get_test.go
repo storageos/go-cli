@@ -6,15 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"code.storageos.net/storageos/c2-cli/licence"
-	"code.storageos.net/storageos/c2-cli/pkg/size"
-
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/health"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/volume"
 )
@@ -109,6 +108,7 @@ func TestDisplayer_GetLicence(t *testing.T) {
 				ClusterCapacityBytes: 42 * size.GiB,
 				UsedBytes:            42 / 2 * size.GiB,
 				Kind:                 "bananaKind",
+				Features:             []string{"nfs", "banana"},
 				CustomerName:         "bananaCustomer",
 			},
 			wantW: `ClusterID:      bananaID                           
@@ -116,6 +116,7 @@ Expiration:     2000-01-01T00:00:00Z (xx aeons ago)
 Capacity:       42 GiB (45097156608)               
 Used:           21 GiB (22548578304)               
 Kind:           bananaKind                         
+Features:       [banana nfs]                       
 Customer name:  bananaCustomer                     
 `,
 			wantErr: false,
@@ -836,7 +837,7 @@ func TestDisplayer_GetVolume(t *testing.T) {
 		wantErr       bool
 	}{
 		{
-			name: "print volume",
+			name: "print volume uses replica length for total count if bad label",
 			volume: &output.Volume{
 				ID:             "bananaID",
 				Name:           "banana-name",
@@ -845,8 +846,9 @@ func TestDisplayer_GetVolume(t *testing.T) {
 				Namespace:      "banana-namespace",
 				NamespaceName:  "kiwi",
 				Labels: labels.Set{
-					"kiwi": "42",
-					"pear": "42",
+					"kiwi":               "42",
+					"pear":               "42",
+					volume.LabelReplicas: "NaN",
 				},
 				Filesystem: volume.FsTypeFromString("ext4"),
 				SizeBytes:  size.GiB,
@@ -882,6 +884,38 @@ func TestDisplayer_GetVolume(t *testing.T) {
 			},
 			wantW: `NAMESPACE  NAME         SIZE     LOCATION              ATTACHED ON    REPLICAS  AGE         
 kiwi       banana-name  1.0 GiB  banana-node1 (ready)  banana-node-a  2/3       xx aeons ago
+`,
+			wantErr: false,
+		},
+		{
+			name: "print volume uses replica label number for total count",
+			volume: &output.Volume{
+				ID:             "bananaID",
+				Name:           "banana-name",
+				Description:    "banana description",
+				AttachedOnName: "banana-node-a",
+				Namespace:      "banana-namespace",
+				NamespaceName:  "kiwi",
+				Labels: labels.Set{
+					"kiwi":               "42",
+					"pear":               "42",
+					volume.LabelReplicas: "3",
+				},
+				Filesystem: volume.FsTypeFromString("ext4"),
+				SizeBytes:  size.GiB,
+				Master: &output.Deployment{
+					ID:         "bananaDeploymentID1",
+					NodeName:   "banana-node1",
+					Health:     "ready",
+					Promotable: true,
+				},
+				Replicas:  []*output.Deployment{},
+				CreatedAt: mockTime,
+				UpdatedAt: mockTime,
+				Version:   "42",
+			},
+			wantW: `NAMESPACE  NAME         SIZE     LOCATION              ATTACHED ON    REPLICAS  AGE         
+kiwi       banana-name  1.0 GiB  banana-node1 (ready)  banana-node-a  0/3       xx aeons ago
 `,
 			wantErr: false,
 		},

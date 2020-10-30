@@ -7,13 +7,13 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
-	"code.storageos.net/storageos/c2-cli/output"
-	"code.storageos.net/storageos/c2-cli/pkg/version"
-
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
+	"code.storageos.net/storageos/c2-cli/cmd/clierr"
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
+	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
 
 type volumeDescriptionCommand struct {
@@ -109,7 +109,7 @@ $ storageos update volume description my-volume-name "Houston we have liftoff ðŸ
 		Args: argwrappers.WrapInvalidArgsError(func(cmd *cobra.Command, args []string) error {
 
 			if len(args) != 2 {
-				return newErrInvalidArgNum(args, 2)
+				return clierr.NewErrInvalidArgNum(args, 2, "storageos update volume description [volume] [description]")
 			}
 
 			c.volumeID = args[0]
@@ -127,7 +127,7 @@ $ storageos update volume description my-volume-name "Houston we have liftoff ðŸ
 			}
 
 			if ns == "" {
-				return errNoNamespaceSpecified
+				return clierr.ErrNoNamespaceSpecified
 			}
 			c.namespace = ns
 

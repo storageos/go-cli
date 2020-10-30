@@ -4,6 +4,8 @@
 package flagutil
 
 import (
+	"fmt"
+
 	"github.com/spf13/pflag"
 )
 
@@ -27,6 +29,27 @@ func SupportCAS(flagSet *pflag.FlagSet, p *string) func() bool {
 	const casName = "cas"
 
 	flagSet.StringVar(p, casName, "", "make changes to a resource conditional upon matching the provided version")
+
+	return func() bool {
+		return flagSet.Changed(casName)
+	}
+}
+
+// SupportCASWithRestrictions has the same behaviour of SupportCAS but specifies
+// restriction on the helper description.
+func SupportCASWithRestrictions(flagSet *pflag.FlagSet, p *string, restrictions map[string]string) func() bool {
+	const casName = "cas"
+
+	description := "make changes to a resource conditional upon matching the provided version"
+
+	if len(restrictions) > 0 {
+		description += ". Valid only if "
+		for k, v := range restrictions {
+			description += fmt.Sprintf("%s=%s ", k, v)
+		}
+	}
+
+	flagSet.StringVar(p, casName, "", description)
 
 	return func() bool {
 		return flagSet.Changed(casName)

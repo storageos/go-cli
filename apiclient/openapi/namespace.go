@@ -5,12 +5,11 @@ import (
 
 	"github.com/antihax/optional"
 
-	"code.storageos.net/storageos/openapi"
-
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/openapi"
 )
 
 // GetNamespace requests the namespace with uid from the StorageOS API,

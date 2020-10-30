@@ -2,7 +2,6 @@ package update
 
 import (
 	"context"
-	"errors"
 	"io"
 	"time"
 
@@ -17,10 +16,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
 	"code.storageos.net/storageos/c2-cli/volume"
-)
-
-var (
-	errNoNamespaceSpecified = errors.New("no namespace specified")
 )
 
 // ConfigProvider specifies the configuration

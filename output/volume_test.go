@@ -44,7 +44,30 @@ func TestNewVolume(t *testing.T) {
 				Name:        "vol-name",
 				Description: "vol-description",
 				AttachedOn:  "attached-node",
-
+				Nfs: volume.NFSConfig{
+					Exports: []volume.NFSExportConfig{
+						{
+							ExportID:   1,
+							Path:       "/",
+							PseudoPath: "/",
+							ACLs: []volume.NFSExportConfigACL{
+								{
+									Identity: volume.NFSExportConfigACLIdentity{
+										IdentityType: "cidr",
+										Matcher:      "10.0.0.0/8",
+									},
+									SquashConfig: volume.NFSExportConfigACLSquashConfig{
+										GID:    0,
+										UID:    0,
+										Squash: "root",
+									},
+									AccessLevel: "rw",
+								},
+							},
+						},
+					},
+					ServiceEndpoint: "10.0.0.1:/",
+				},
 				Namespace:  "namespace-id",
 				Labels:     labelsFromPairs(t, "a=b", "b=c"),
 				Filesystem: volume.FsTypeFromString("BLOCK"),
@@ -81,11 +104,35 @@ func TestNewVolume(t *testing.T) {
 				Description:    "vol-description",
 				AttachedOn:     "attached-node",
 				AttachedOnName: "attached-node-name",
-				Namespace:      "namespace-id",
-				NamespaceName:  "namespace-name",
-				Labels:         labelsFromPairs(t, "a=b", "b=c"),
-				Filesystem:     volume.FsTypeFromString("BLOCK"),
-				SizeBytes:      42,
+				NFS: NFSConfig{
+					Exports: []NFSExportConfig{
+						{
+							ExportID:   1,
+							Path:       "/",
+							PseudoPath: "/",
+							ACLs: []NFSExportConfigACL{
+								{
+									Identity: NFSExportConfigACLIdentity{
+										IdentityType: "cidr",
+										Matcher:      "10.0.0.0/8",
+									},
+									SquashConfig: NFSExportConfigACLSquashConfig{
+										GID:    0,
+										UID:    0,
+										Squash: "root",
+									},
+									AccessLevel: "rw",
+								},
+							},
+						},
+					},
+					ServiceEndpoint: "10.0.0.1:/",
+				},
+				Namespace:     "namespace-id",
+				NamespaceName: "namespace-name",
+				Labels:        labelsFromPairs(t, "a=b", "b=c"),
+				Filesystem:    volume.FsTypeFromString("BLOCK"),
+				SizeBytes:     42,
 				Master: &Deployment{
 					ID:           "deploy-id",
 					Node:         "node-id",
@@ -108,7 +155,30 @@ func TestNewVolume(t *testing.T) {
 				Name:        "vol-name",
 				Description: "vol-description",
 				AttachedOn:  "attached-node",
-
+				Nfs: volume.NFSConfig{
+					Exports: []volume.NFSExportConfig{
+						{
+							ExportID:   1,
+							Path:       "/",
+							PseudoPath: "/",
+							ACLs: []volume.NFSExportConfigACL{
+								{
+									Identity: volume.NFSExportConfigACLIdentity{
+										IdentityType: "cidr",
+										Matcher:      "10.0.0.0/8",
+									},
+									SquashConfig: volume.NFSExportConfigACLSquashConfig{
+										GID:    0,
+										UID:    0,
+										Squash: "root",
+									},
+									AccessLevel: "rw",
+								},
+							},
+						},
+					},
+					ServiceEndpoint: "10.0.0.1:/",
+				},
 				Namespace:  "namespace-id",
 				Labels:     labelsFromPairs(t, "b=b", "a=c"),
 				Filesystem: volume.FsTypeFromString("BLOCK"),
@@ -169,11 +239,35 @@ func TestNewVolume(t *testing.T) {
 				Description:    "vol-description",
 				AttachedOn:     "attached-node",
 				AttachedOnName: "attached-node-name",
-				Namespace:      "namespace-id",
-				NamespaceName:  "namespace-name",
-				Labels:         labelsFromPairs(t, "b=b", "a=c"),
-				Filesystem:     volume.FsTypeFromString("BLOCK"),
-				SizeBytes:      42,
+				NFS: NFSConfig{
+					Exports: []NFSExportConfig{
+						{
+							ExportID:   1,
+							Path:       "/",
+							PseudoPath: "/",
+							ACLs: []NFSExportConfigACL{
+								{
+									Identity: NFSExportConfigACLIdentity{
+										IdentityType: "cidr",
+										Matcher:      "10.0.0.0/8",
+									},
+									SquashConfig: NFSExportConfigACLSquashConfig{
+										GID:    0,
+										UID:    0,
+										Squash: "root",
+									},
+									AccessLevel: "rw",
+								},
+							},
+						},
+					},
+					ServiceEndpoint: "10.0.0.1:/",
+				},
+				Namespace:     "namespace-id",
+				NamespaceName: "namespace-name",
+				Labels:        labelsFromPairs(t, "b=b", "a=c"),
+				Filesystem:    volume.FsTypeFromString("BLOCK"),
+				SizeBytes:     42,
 				Master: &Deployment{
 					ID:         "deploy-id",
 					Node:       "node-id",
@@ -216,7 +310,30 @@ func TestNewVolume(t *testing.T) {
 				Name:        "vol-name",
 				Description: "vol-description",
 				AttachedOn:  "attached-node",
-
+				Nfs: volume.NFSConfig{
+					Exports: []volume.NFSExportConfig{
+						{
+							ExportID:   1,
+							Path:       "/",
+							PseudoPath: "/",
+							ACLs: []volume.NFSExportConfigACL{
+								{
+									Identity: volume.NFSExportConfigACLIdentity{
+										IdentityType: "cidr",
+										Matcher:      "10.0.0.0/8",
+									},
+									SquashConfig: volume.NFSExportConfigACLSquashConfig{
+										GID:    0,
+										UID:    0,
+										Squash: "root",
+									},
+									AccessLevel: "rw",
+								},
+							},
+						},
+					},
+					ServiceEndpoint: "10.0.0.1:/",
+				},
 				Namespace:  "namespace-id",
 				Labels:     labelsFromPairs(t, "b=b", "a=c"),
 				Filesystem: volume.FsTypeFromString("BLOCK"),
@@ -249,11 +366,35 @@ func TestNewVolume(t *testing.T) {
 				Description:    "vol-description",
 				AttachedOn:     "attached-node",
 				AttachedOnName: "unknown",
-				Namespace:      "namespace-id",
-				NamespaceName:  "namespace-name",
-				Labels:         labelsFromPairs(t, "b=b", "a=c"),
-				Filesystem:     volume.FsTypeFromString("BLOCK"),
-				SizeBytes:      42,
+				NFS: NFSConfig{
+					Exports: []NFSExportConfig{
+						{
+							ExportID:   1,
+							Path:       "/",
+							PseudoPath: "/",
+							ACLs: []NFSExportConfigACL{
+								{
+									Identity: NFSExportConfigACLIdentity{
+										IdentityType: "cidr",
+										Matcher:      "10.0.0.0/8",
+									},
+									SquashConfig: NFSExportConfigACLSquashConfig{
+										GID:    0,
+										UID:    0,
+										Squash: "root",
+									},
+									AccessLevel: "rw",
+								},
+							},
+						},
+					},
+					ServiceEndpoint: "10.0.0.1:/",
+				},
+				Namespace:     "namespace-id",
+				NamespaceName: "namespace-name",
+				Labels:        labelsFromPairs(t, "b=b", "a=c"),
+				Filesystem:    volume.FsTypeFromString("BLOCK"),
+				SizeBytes:     42,
 				Master: &Deployment{
 					ID:           "deploy-id",
 					Node:         "node-id",

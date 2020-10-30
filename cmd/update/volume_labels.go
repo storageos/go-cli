@@ -7,14 +7,14 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
-	"code.storageos.net/storageos/c2-cli/output"
-	"code.storageos.net/storageos/c2-cli/pkg/labels"
-	"code.storageos.net/storageos/c2-cli/pkg/version"
-
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
+	"code.storageos.net/storageos/c2-cli/cmd/clierr"
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
+	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
+	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
 
 type volumeLabelsCommand struct {
@@ -150,10 +150,19 @@ $ storageos update volume labels my-volume-name --delete myvolume=isthebest --na
 				return err
 			}
 
-			if len(c.deleteLabels) != 0 || len(c.upsertLabels) != 0 {
-
+			if len(c.deleteLabels) != 0 {
 				if len(args) != 1 {
-					return newErrInvalidArgNum(args, 1)
+					return clierr.NewErrInvalidArgNum(args, 1, "storageos update volume labels --delete a=1 [volume]")
+				}
+
+				c.volumeID = args[0]
+				// the user used the --upsert or --delete flag
+				return nil
+			}
+
+			if len(c.upsertLabels) != 0 {
+				if len(args) != 1 {
+					return clierr.NewErrInvalidArgNum(args, 1, "storageos update volume labels --upsert a=2 [volume]")
 				}
 
 				c.volumeID = args[0]
@@ -165,7 +174,7 @@ $ storageos update volume labels my-volume-name --delete myvolume=isthebest --na
 			// flags
 
 			if len(args) != 2 {
-				return newErrInvalidArgNum(args, 2)
+				return clierr.NewErrInvalidArgNum(args, 2, "storageos update volume labels [volume] [labels]")
 			}
 
 			c.volumeID = args[0]
@@ -189,7 +198,7 @@ $ storageos update volume labels my-volume-name --delete myvolume=isthebest --na
 			}
 
 			if ns == "" {
-				return errNoNamespaceSpecified
+				return clierr.ErrNoNamespaceSpecified
 			}
 			c.namespace = ns
 

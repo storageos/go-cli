@@ -119,6 +119,14 @@ func (t *noTransport) ResizeVolume(ctx context.Context, nsID id.Namespace, volID
 	return nil, ErrNoTransportConfigured
 }
 
+func (t *noTransport) UpdateNFSVolumeExports(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, exports []volume.NFSExportConfig, params *UpdateNFSVolumeExportsRequestParams) error {
+	return ErrNoTransportConfigured
+}
+
+func (t *noTransport) UpdateNFSVolumeMountEndpoint(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, endpoint string, params *UpdateNFSVolumeMountEndpointRequestParams) error {
+	return ErrNoTransportConfigured
+}
+
 func (t *noTransport) DeleteUser(ctx context.Context, uid id.User, params *DeleteUserRequestParams) error {
 	return ErrNoTransportConfigured
 }
@@ -140,6 +148,10 @@ func (t *noTransport) DeletePolicyGroup(ctx context.Context, uid id.PolicyGroup,
 }
 
 func (t *noTransport) AttachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, nodeID id.Node) error {
+	return ErrNoTransportConfigured
+}
+
+func (t *noTransport) AttachNFSVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *AttachNFSVolumeRequestParams) error {
 	return ErrNoTransportConfigured
 }
 

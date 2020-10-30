@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 
 	"github.com/gosuri/uitable"
 
-	"code.storageos.net/storageos/c2-cli/pkg/size"
-
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/health"
+	"code.storageos.net/storageos/c2-cli/pkg/size"
+	"code.storageos.net/storageos/c2-cli/volume"
 )
 
 // GetCluster creates human-readable strings, writing the result to w.
@@ -51,6 +52,7 @@ func (d *Displayer) GetLicence(ctx context.Context, w io.Writer, l *output.Licen
 	table.AddRow("Capacity:", clusterCapacity)
 	table.AddRow("Used:", used)
 	table.AddRow("Kind:", l.Kind)
+	table.AddRow("Features:", fmt.Sprintf("%v", l.Features))
 	table.AddRow("Customer name:", l.CustomerName)
 
 	return write(w)
@@ -167,7 +169,16 @@ func (d *Displayer) printVolume(table *uitable.Table, vol *output.Volume) {
 			readyReplicas++
 		}
 	}
-	replicas := fmt.Sprintf("%d/%d", readyReplicas, len(vol.Replicas))
+
+	// Attempt to extract the target replica number from the volume label set.
+	targetReplicas, err := strconv.ParseUint(vol.Labels[volume.LabelReplicas], 10, 0)
+	if err != nil {
+		// If this fails then the length of the returned volume replica set
+		// provides the best estimate.
+		targetReplicas = uint64(len(vol.Replicas))
+	}
+
+	replicas := fmt.Sprintf("%d/%d", readyReplicas, targetReplicas)
 
 	// Humanized
 	size := size.Format(vol.SizeBytes)

@@ -7,11 +7,10 @@ import (
 
 	"github.com/gosuri/uitable"
 
-	"code.storageos.net/storageos/c2-cli/pkg/size"
-
 	"code.storageos.net/storageos/c2-cli/output"
 	"code.storageos.net/storageos/c2-cli/pkg/capacity"
 	"code.storageos.net/storageos/c2-cli/pkg/health"
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 )
 
 // DescribeCluster prints all the detailed information about a cluster
@@ -53,6 +52,7 @@ func (d *Displayer) DescribeLicence(ctx context.Context, w io.Writer, l *output.
 	table.AddRow("Capacity:", clusterCapacity)
 	table.AddRow("Used:", used)
 	table.AddRow("Kind:", l.Kind)
+	table.AddRow("Features:", fmt.Sprintf("%v", l.Features))
 	table.AddRow("Customer name:", l.CustomerName)
 
 	return write(w)
@@ -210,6 +210,25 @@ func (d *Displayer) describeVolume(ctx context.Context, w io.Writer, volume *out
 	}
 
 	table.AddRow("AttachedOn", attachedOnString)
+	table.AddRow("Attachment Type", volume.AttachType)
+
+	table.AddRow("NFS", "")
+	table.AddRow("  Service Endpoint", volume.NFS.ServiceEndpoint)
+	table.AddRow("  Exports:", "")
+	for _, e := range volume.NFS.Exports {
+		table.AddRow("  - ID", e.ExportID)
+		table.AddRow("    Path", e.Path)
+		table.AddRow("    Pseudo Path", e.PseudoPath)
+		table.AddRow("    ACLs", "")
+		for _, a := range e.ACLs {
+			table.AddRow("    - Identity Type", a.Identity.IdentityType)
+			table.AddRow("      Identity Matcher", a.Identity.Matcher)
+			table.AddRow("      Squash", a.SquashConfig.Squash)
+			table.AddRow("      Squash UID", a.SquashConfig.UID)
+			table.AddRow("      Squash GUID", a.SquashConfig.GID)
+		}
+	}
+
 	table.AddRow("Namespace", fmt.Sprintf("%s (%s)", volume.NamespaceName, volume.Namespace))
 	table.AddRow("Labels", volume.Labels.String())
 	table.AddRow("Filesystem", volume.Filesystem.String())

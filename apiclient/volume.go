@@ -117,6 +117,27 @@ type DeleteVolumeRequestParams struct {
 	OfflineDelete bool
 }
 
+// AttachNFSVolumeRequestParams contains optional request parameters for an
+// Attach NFS volume operation.
+type AttachNFSVolumeRequestParams struct {
+	CASVersion version.Version
+	AsyncMax   time.Duration
+}
+
+// UpdateNFSVolumeExportsRequestParams contains optional request parameters for
+// an Update NFS volume exports operation.
+type UpdateNFSVolumeExportsRequestParams struct {
+	CASVersion version.Version
+	AsyncMax   time.Duration
+}
+
+// UpdateNFSVolumeMountEndpointRequestParams contains optional request
+// parameters for an Update NFS volume mount endpoint operation.
+type UpdateNFSVolumeMountEndpointRequestParams struct {
+	CASVersion version.Version
+	AsyncMax   time.Duration
+}
+
 // DetachVolumeRequestParams contains optional request parameters for a detach
 // volume operation.
 type DetachVolumeRequestParams struct {
@@ -445,6 +466,8 @@ func (c *Client) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.V
 			return nil, err
 		}
 		newParams.CASVersion = v.Version
+	} else {
+		newParams.CASVersion = params.CASVersion
 	}
 
 	if params != nil && params.AsyncMax != 0 {
@@ -452,4 +475,107 @@ func (c *Client) ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.V
 	}
 
 	return c.Transport.ResizeVolume(ctx, nsID, volID, sizeBytes, newParams)
+}
+
+// AttachNFSVolume sends a new attach volume request for NFS.
+//
+// The behaviour of the operation is dictated by params:
+//
+//  Version constraints:
+// 	- If params is nil or params.CASVersion is empty then the attach request is
+// 	unconditional
+// 	- If params.CASVersion is set, the request is conditional upon it matching
+// 	the volume entity's version as seen by the server.
+func (c *Client) AttachNFSVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *AttachNFSVolumeRequestParams) error {
+
+	newParams := &AttachNFSVolumeRequestParams{}
+
+	if params == nil || params.CASVersion == "" {
+		v, err := c.Transport.GetVolume(ctx, namespaceID, volumeID)
+		if err != nil {
+			return err
+		}
+		newParams.CASVersion = v.Version
+	} else {
+		newParams.CASVersion = params.CASVersion
+	}
+
+	if params != nil && params.AsyncMax != 0 {
+		newParams.AsyncMax = params.AsyncMax
+	}
+
+	return c.Transport.AttachNFSVolume(ctx, namespaceID, volumeID, newParams)
+}
+
+// UpdateNFSVolumeExports sends a new NFS volume export update request.
+//
+// The behaviour of the operation is dictated by params:
+//
+//  Version constraints:
+//  - If params is nil or params.CASVersion is empty then the attach request is
+//    unconditional
+//  - If params.CASVersion is set, the request is conditional upon it matching
+//    the volume entity's version as seen by the server.
+func (c *Client) UpdateNFSVolumeExports(
+	ctx context.Context,
+	namespaceID id.Namespace,
+	volumeID id.Volume,
+	exports []volume.NFSExportConfig,
+	params *UpdateNFSVolumeExportsRequestParams,
+) error {
+
+	newParams := &UpdateNFSVolumeExportsRequestParams{}
+
+	if params == nil || params.CASVersion == "" {
+		v, err := c.Transport.GetVolume(ctx, namespaceID, volumeID)
+		if err != nil {
+			return err
+		}
+		newParams.CASVersion = v.Version
+	} else {
+		newParams.CASVersion = params.CASVersion
+	}
+
+	if params != nil && params.AsyncMax != 0 {
+		newParams.AsyncMax = params.AsyncMax
+	}
+
+	return c.Transport.UpdateNFSVolumeExports(ctx, namespaceID, volumeID, exports, newParams)
+}
+
+// UpdateNFSVolumeMountEndpoint sends a new NFS volume mount endpoint update
+// request.
+//
+// The behaviour of the operation is dictated by params:
+//
+//  Version constraints:
+//  - If params is nil or params.CASVersion is empty then the attach request is
+//    unconditional
+//  - If params.CASVersion is set, the request is conditional upon it matching
+//    the volume entity's version as seen by the server.
+func (c *Client) UpdateNFSVolumeMountEndpoint(
+	ctx context.Context,
+	namespaceID id.Namespace,
+	volumeID id.Volume,
+	endpoint string,
+	params *UpdateNFSVolumeMountEndpointRequestParams,
+) error {
+
+	newParams := &UpdateNFSVolumeMountEndpointRequestParams{}
+
+	if params == nil || params.CASVersion == "" {
+		v, err := c.Transport.GetVolume(ctx, namespaceID, volumeID)
+		if err != nil {
+			return err
+		}
+		newParams.CASVersion = v.Version
+	} else {
+		newParams.CASVersion = params.CASVersion
+	}
+
+	if params != nil && params.AsyncMax != 0 {
+		newParams.AsyncMax = params.AsyncMax
+	}
+
+	return c.Transport.UpdateNFSVolumeMountEndpoint(ctx, namespaceID, volumeID, endpoint, newParams)
 }

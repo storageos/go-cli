@@ -5,7 +5,7 @@ info:
     name: StorageOS
     url: https://storageos.com
   title: StorageOS API
-  version: 2.0.0
+  version: 2.3.0-alpha
 externalDocs:
   description: The latest StorageOS user documentation
   url: https://docs.storageos.com/
@@ -2578,7 +2578,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: |
-            Available storage is not enough to handle the request.
+            Available storage is not enough to handle the request or target node has reached maximum number of attached volumes.
       security:
       - jwt: []
       summary: Create a new Volume in the specified namespace
@@ -3241,9 +3241,435 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
+        "507":
+          content:
+            application/json:
+              example:
+                error: insufficient storage capacity available
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            Available storage is not enough to handle the request or target node has reached maximum number of attached volumes.
       security:
       - jwt: []
       summary: Attach a volume to the given node
+  /namespaces/{namespaceID}/volumes/{id}/nfs/attach:
+    post:
+      description: |
+        Attach the given volume as an NFS volume.
+        If no export configuration has been set via the /nfs/export-config endpoint, the nfs service will start with defaults settings (sharing the volume at its root).
+      operationId: attachNFSVolume
+      parameters:
+      - description: ID of a Namespace
+        explode: false
+        in: path
+        name: namespaceID
+        required: true
+        schema:
+          $ref: '#/components/schemas/NamespaceID'
+        style: simple
+      - description: ID of a Volume
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/VolumeID'
+        style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
+      - description: |
+          Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect.
+          The URL parameter value overrides the "async-max" header value, if any.
+          The value of this header defines the timeout duration for the request, it must be set to a valid duration string.
+          A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          We reject negative or nil duration values.
+        explode: true
+        in: query
+        name: async-max
+        required: false
+        schema:
+          type: string
+        style: form
+      requestBody:
+        $ref: '#/components/requestBodies/AttachNFSVolumeData'
+        content:
+          application/json:
+            schema:
+              properties:
+                version:
+                  description: |
+                    An opaque representation of an entity version at the time it was obtained from the API.
+                    All operations that mutate the entity must include this version field in the request unchanged.
+                    The format of this type is undefined and may change but the defined properties will not change.
+                  example: NDI0MjQyNDI0MjQyNDI0MjQy
+                  maxLength: 30
+                  type: string
+              title: AttachNFSVolumeData
+              type: object
+        description: NFS volume configuration. The version is the corresponding volume's
+          version.
+        required: true
+      responses:
+        "200":
+          description: The volume was successfully attached.
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "409":
+          content:
+            application/json:
+              example:
+                error: in use
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced entity is currently in use.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "422":
+          content:
+            application/json:
+              example:
+                error: invalid state for operation (currently "deleted")
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            An action was requested that cannot be performed on the entity in it's current state.
+            As an example, this error might be returned when trying to delete a currently mounted volume.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: attach and share the volume using NFS
+  /namespaces/{namespaceID}/volumes/{id}/nfs/mount-endpoint:
+    put:
+      description: |
+        Update the NFS volume's mount endpoint
+      operationId: updateNFSVolumeMountEndpoint
+      parameters:
+      - description: ID of a Namespace
+        explode: false
+        in: path
+        name: namespaceID
+        required: true
+        schema:
+          $ref: '#/components/schemas/NamespaceID'
+        style: simple
+      - description: ID of a Volume
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/VolumeID'
+        style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
+      - description: |
+          Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect.
+          The URL parameter value overrides the "async-max" header value, if any.
+          The value of this header defines the timeout duration for the request, it must be set to a valid duration string.
+          A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          We reject negative or nil duration values.
+        explode: true
+        in: query
+        name: async-max
+        required: false
+        schema:
+          type: string
+        style: form
+      requestBody:
+        $ref: '#/components/requestBodies/NFSVolumeMountEndpoint'
+        content:
+          application/json:
+            schema:
+              properties:
+                mountEndpoint:
+                  default: ""
+                  description: |
+                    The address to which the NFS server is bound.
+                  type: string
+                version:
+                  description: |
+                    An opaque representation of an entity version at the time it was obtained from the API.
+                    All operations that mutate the entity must include this version field in the request unchanged.
+                    The format of this type is undefined and may change but the defined properties will not change.
+                  example: NDI0MjQyNDI0MjQyNDI0MjQy
+                  maxLength: 30
+                  type: string
+              title: NFSVolumeMountEndpoint
+              type: object
+        description: |
+          Update an existing NFS volume's mount endpoint
+        required: true
+      responses:
+        "200":
+          description: The volume's mount endpoint was successfully updated.
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "409":
+          content:
+            application/json:
+              example:
+                error: in use
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced entity is currently in use.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Update an nfs volume's mount endpoint
+  /namespaces/{namespaceID}/volumes/{id}/nfs/export-config:
+    put:
+      description: |
+        Update the NFS volume's export configuration
+      operationId: updateNFSVolumeExports
+      parameters:
+      - description: ID of a Namespace
+        explode: false
+        in: path
+        name: namespaceID
+        required: true
+        schema:
+          $ref: '#/components/schemas/NamespaceID'
+        style: simple
+      - description: ID of a Volume
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/VolumeID'
+        style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
+      - description: |
+          Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect.
+          The URL parameter value overrides the "async-max" header value, if any.
+          The value of this header defines the timeout duration for the request, it must be set to a valid duration string.
+          A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          We reject negative or nil duration values.
+        explode: true
+        in: query
+        name: async-max
+        required: false
+        schema:
+          type: string
+        style: form
+      requestBody:
+        $ref: '#/components/requestBodies/NFSVolumeExports'
+        content:
+          application/json:
+            schema:
+              properties:
+                exports:
+                  items:
+                    $ref: '#/components/schemas/NfsExportConfig'
+                  type: array
+                version:
+                  description: |
+                    An opaque representation of an entity version at the time it was obtained from the API.
+                    All operations that mutate the entity must include this version field in the request unchanged.
+                    The format of this type is undefined and may change but the defined properties will not change.
+                  example: NDI0MjQyNDI0MjQyNDI0MjQy
+                  maxLength: 30
+                  type: string
+              title: NFSVolumeExports
+              type: object
+        description: |
+          Updates an existing volume's NFS export configuration.
+          The volume will use the given export configuration once attached.
+        required: true
+      responses:
+        "200":
+          description: The volume's NFS export configuration was successfully updated.
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "409":
+          content:
+            application/json:
+              example:
+                error: in use
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced entity is currently in use.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Update an nfs volume's export configuration
   /namespaces/{namespaceID}/volumes/{id}/replicas:
     put:
       description: |
@@ -3915,6 +4341,15 @@ paths:
           description: |
             The request caused an internal server error and should be retried.
             Check the health of the node/cluster and if the error persists, contact support.
+        "502":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is returning an incomplete diagnostic bundle.
+            A bundle may contain partial information if one or more nodes failed to respond, or some other error occured during the collection process.
+            The returned bundle is still valid and should be sent to StorageOS.
         "503":
           content:
             application/json:
@@ -4008,6 +4443,12 @@ components:
           schema:
             $ref: '#/components/schemas/UpdateUserData'
       required: true
+    NFSVolumeMountEndpoint:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NFSVolumeMountEndpoint'
+      required: true
     CreateUserData:
       content:
         application/json:
@@ -4026,6 +4467,12 @@ components:
           schema:
             $ref: '#/components/schemas/UpdateLicence'
       required: true
+    AttachNFSVolumeData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AttachNFSVolumeData'
+      required: true
     CreatePolicyGroupData:
       content:
         application/json:
@@ -4037,6 +4484,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UpdatePolicyGroupData'
+      required: true
+    NFSVolumeExports:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NFSVolumeExports'
       required: true
     SetReplicasRequest:
       content:
@@ -4157,7 +4610,7 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: |
-        Available storage is not enough to handle the request.
+        Available storage is not enough to handle the request or target node has reached maximum number of attached volumes.
     StaleWrite:
       content:
         application/json:
@@ -4283,6 +4736,17 @@ components:
       - block
       example: ext4
       type: string
+    AttachType:
+      description: |
+        The attachment type of a volume. "host" indicates that the volume is consumed by the node it is attached to.
+      enum:
+      - unknown
+      - detached
+      - nfs
+      - host
+      example: host
+      readOnly: true
+      type: string
     NodeHealth:
       description: |
         The operational health of a node entity
@@ -4359,6 +4823,133 @@ components:
             Byte value available to an unprivileged user
           example: 42
           type: uint64
+      type: object
+    NfsAcl:
+      example:
+        squashConfig:
+          uid: ""
+          gid: ""
+          squash: root
+        accessLevel: rw
+        identity:
+          identityType: hostname
+          matcher: '*.prod.storageos.com'
+      properties:
+        identity:
+          $ref: '#/components/schemas/NfsAcl_identity'
+        squashConfig:
+          $ref: '#/components/schemas/NfsAcl_squashConfig'
+        accessLevel:
+          description: |
+            The access level this ACL grants - read-only, or read-write.
+          enum:
+          - ro
+          - rw
+          example: rw
+          type: string
+      type: object
+    NfsExportConfig:
+      example:
+        path: /very/important/files/
+        acls:
+        - squashConfig:
+            uid: ""
+            gid: ""
+            squash: root
+          accessLevel: rw
+          identity:
+            identityType: hostname
+            matcher: '*.prod.storageos.com'
+        - squashConfig:
+            uid: ""
+            gid: ""
+            squash: root
+          accessLevel: rw
+          identity:
+            identityType: hostname
+            matcher: '*.prod.storageos.com'
+        pseudoPath: /very/important/files/somewhere/else
+        exportID: 42
+      properties:
+        exportID:
+          description: |
+            ID for this export
+          example: 42
+          type: uint64
+        path:
+          default: ""
+          description: |
+            The path relative to the volume root to serve as the export root
+          example: /very/important/files/
+          type: string
+        pseudoPath:
+          default: ""
+          description: |
+            The configured pseudo path in the NFS virtual filesystem. This is the path clients will see when traversing to this export on the NFS share.
+          example: /very/important/files/somewhere/else
+          type: string
+        acls:
+          items:
+            $ref: '#/components/schemas/NfsAcl'
+          type: array
+      type: object
+    NFSConfig:
+      example:
+        exports:
+        - path: /very/important/files/
+          acls:
+          - squashConfig:
+              uid: ""
+              gid: ""
+              squash: root
+            accessLevel: rw
+            identity:
+              identityType: hostname
+              matcher: '*.prod.storageos.com'
+          - squashConfig:
+              uid: ""
+              gid: ""
+              squash: root
+            accessLevel: rw
+            identity:
+              identityType: hostname
+              matcher: '*.prod.storageos.com'
+          pseudoPath: /very/important/files/somewhere/else
+          exportID: 42
+        - path: /very/important/files/
+          acls:
+          - squashConfig:
+              uid: ""
+              gid: ""
+              squash: root
+            accessLevel: rw
+            identity:
+              identityType: hostname
+              matcher: '*.prod.storageos.com'
+          - squashConfig:
+              uid: ""
+              gid: ""
+              squash: root
+            accessLevel: rw
+            identity:
+              identityType: hostname
+              matcher: '*.prod.storageos.com'
+          pseudoPath: /very/important/files/somewhere/else
+          exportID: 42
+        serviceEndpoint: serviceEndpoint
+      properties:
+        exports:
+          items:
+            $ref: '#/components/schemas/NfsExportConfig'
+          nullable: true
+          type: array
+        serviceEndpoint:
+          default: ""
+          description: |
+            The address to which the NFS server is bound.
+          nullable: true
+          readOnly: true
+          type: string
       type: object
     Labels:
       additionalProperties:
@@ -4572,6 +5163,7 @@ components:
       - $ref: '#/components/schemas/UserSession_allOf'
     Volume:
       example:
+        attachmentType: host
         replicas:
         - null
         - null
@@ -4587,6 +5179,49 @@ components:
         createdAt: 2019-03-10T13:42:42Z
         namespaceID: ""
         name: app-data
+        nfs:
+          exports:
+          - path: /very/important/files/
+            acls:
+            - squashConfig:
+                uid: ""
+                gid: ""
+                squash: root
+              accessLevel: rw
+              identity:
+                identityType: hostname
+                matcher: '*.prod.storageos.com'
+            - squashConfig:
+                uid: ""
+                gid: ""
+                squash: root
+              accessLevel: rw
+              identity:
+                identityType: hostname
+                matcher: '*.prod.storageos.com'
+            pseudoPath: /very/important/files/somewhere/else
+            exportID: 42
+          - path: /very/important/files/
+            acls:
+            - squashConfig:
+                uid: ""
+                gid: ""
+                squash: root
+              accessLevel: rw
+              identity:
+                identityType: hostname
+                matcher: '*.prod.storageos.com'
+            - squashConfig:
+                uid: ""
+                gid: ""
+                squash: root
+              accessLevel: rw
+              identity:
+                identityType: hostname
+                matcher: '*.prod.storageos.com'
+            pseudoPath: /very/important/files/somewhere/else
+            exportID: 42
+          serviceEndpoint: serviceEndpoint
         id: c5666b58-b805-4215-ab4a-cb094948ccc6
         updatedAt: 2019-03-29T23:13:13Z
       properties:
@@ -4605,6 +5240,8 @@ components:
           allOf:
           - $ref: '#/components/schemas/NodeID'
           readOnly: true
+        nfs:
+          $ref: '#/components/schemas/NFSConfig'
         namespaceID:
           allOf:
           - $ref: '#/components/schemas/NamespaceID'
@@ -4622,6 +5259,8 @@ components:
           type: object
         fsType:
           $ref: '#/components/schemas/FsType'
+        attachmentType:
+          $ref: '#/components/schemas/AttachType'
         master:
           allOf:
           - $ref: '#/components/schemas/MasterDeploymentInfo'
@@ -4950,6 +5589,9 @@ components:
         A representation of a cluster's licence properties
       example:
         clusterCapacityBytes: 1000000
+        features:
+        - features
+        - features
         kind: unregistered
         clusterID: c5666b58-b805-4215-ab4a-cb094948ccc6
         usedBytes: 42
@@ -4994,6 +5636,13 @@ components:
             A user friendly reference to the customer
           example: Desmond
           type: string
+        features:
+          description: |
+            A list of product features which are enabled by the  licence, subject to the installed version.
+          items:
+            type: string
+          nullable: true
+          type: array
         version:
           description: |
             An opaque representation of an entity version at the time it was obtained from the API.
@@ -5445,6 +6094,51 @@ components:
           type: string
       title: AttachVolumeData
       type: object
+    AttachNFSVolumeData:
+      properties:
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      title: AttachNFSVolumeData
+      type: object
+    NFSVolumeMountEndpoint:
+      properties:
+        mountEndpoint:
+          default: ""
+          description: |
+            The address to which the NFS server is bound.
+          type: string
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      title: NFSVolumeMountEndpoint
+      type: object
+    NFSVolumeExports:
+      properties:
+        exports:
+          items:
+            $ref: '#/components/schemas/NfsExportConfig'
+          type: array
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      title: NFSVolumeExports
+      type: object
     SetReplicasRequest:
       example:
         replicas: 2
@@ -5548,6 +6242,55 @@ components:
           type: string
       title: UpdateLicence
       type: object
+    NfsAcl_identity:
+      example:
+        identityType: hostname
+        matcher: '*.prod.storageos.com'
+      properties:
+        identityType:
+          description: |
+            The identity type used to identify the nfs client.
+          enum:
+          - cidr
+          - hostname
+          - netgroup
+          example: hostname
+          type: string
+        matcher:
+          description: |
+            NFS identity matcher.
+            For "cidr", this should be a valid CIDR block string such as "10.0.0.0/8".
+            For "hostname", this must be the hostname sent by the client, with ? and * wildcard characters.
+            For netgroup, this must be in the form of "@netgroup" with ? and * wildcard characters.
+          example: '*.prod.storageos.com'
+          type: string
+    NfsAcl_squashConfig:
+      example:
+        uid: ""
+        gid: ""
+        squash: root
+      properties:
+        uid:
+          type: int64
+        gid:
+          type: int64
+        squash:
+          description: "SquashConfig defines the root squashing behaviour. \nWhen\
+            \ a client creates a file, it sends the user UID from the client. If the\
+            \ client is running as root, this sends uid=0. Root squashing allows the\
+            \ NFS administrator to prevent the client from writing as \"root\" to\
+            \ the NFS share, instead mapping the client to a new UID/GID (usually\
+            \ nfsnobody, -2).\n\"none\" performs no UID/GID alterations, using the\
+            \ values sent by the client.\n\"root\" mapps UID & GID 0 to the values\
+            \ specified.\n\"rootuid\" maps UID 0 and a GID of any value to the value\
+            \ specified.\n\"all\" maps changes all UID and GID values to those specified.\n"
+          enum:
+          - none
+          - root
+          - rootuid
+          - all
+          example: root
+          type: string
     UserSession_allOf_session:
       properties:
         expiresInSeconds:

@@ -12,12 +12,10 @@ import (
 	"github.com/spf13/cobra"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
-
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
-	"code.storageos.net/storageos/c2-cli/pkg/version"
-
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/output"
+	"code.storageos.net/storageos/c2-cli/pkg/version"
 )
 
 var (

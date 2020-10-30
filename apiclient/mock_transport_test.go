@@ -131,6 +131,18 @@ type mockTransport struct {
 	ResizeVolumeResource       *volume.Resource
 	ResizeVolumeError          error
 
+	UpdateNFSVolumeExportsGotNamespaceID id.Namespace
+	UpdateNFSVolumeExportsGotVolumeID    id.Volume
+	UpdateNFSVolumeExportsGotExports     []volume.NFSExportConfig
+	UpdateNFSVolumeExportsGotParams      *UpdateNFSVolumeExportsRequestParams
+	UpdateNFSVolumeExportsError          error
+
+	UpdateNFSVolumeMountEndpointGotNamespaceID id.Namespace
+	UpdateNFSVolumeMountEndpointGotVolumeID    id.Volume
+	UpdateNFSVolumeMountEndpointGotEndpoint    string
+	UpdateNFSVolumeMountEndpointGotParams      *UpdateNFSVolumeMountEndpointRequestParams
+	UpdateNFSVolumeMountEndpointError          error
+
 	DeleteUserGotID     id.User
 	DeleteUserGotParams *DeleteUserRequestParams
 	DeleteUserError     error
@@ -156,6 +168,11 @@ type mockTransport struct {
 	AttachGotVolume    id.Volume
 	AttachGotNode      id.Node
 	AttachError        error
+
+	AttachNFSGotNamespace id.Namespace
+	AttachNFSGotVolume    id.Volume
+	AttachNFSGotParams    *AttachNFSVolumeRequestParams
+	AttachNFSError        error
 
 	DetachGotNamespace id.Namespace
 	DetachGotVolume    id.Volume
@@ -299,6 +316,22 @@ func (m *mockTransport) ResizeVolume(ctx context.Context, nsID id.Namespace, vol
 	return m.ResizeVolumeResource, m.ResizeVolumeError
 }
 
+func (m *mockTransport) UpdateNFSVolumeExports(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, exports []volume.NFSExportConfig, params *UpdateNFSVolumeExportsRequestParams) error {
+	m.UpdateNFSVolumeExportsGotNamespaceID = namespaceID
+	m.UpdateNFSVolumeExportsGotVolumeID = volumeID
+	m.UpdateNFSVolumeExportsGotExports = exports
+	m.UpdateNFSVolumeExportsGotParams = params
+	return m.UpdateNFSVolumeExportsError
+}
+
+func (m *mockTransport) UpdateNFSVolumeMountEndpoint(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, endpoint string, params *UpdateNFSVolumeMountEndpointRequestParams) error {
+	m.UpdateNFSVolumeMountEndpointGotNamespaceID = namespaceID
+	m.UpdateNFSVolumeMountEndpointGotVolumeID = volumeID
+	m.UpdateNFSVolumeMountEndpointGotEndpoint = endpoint
+	m.UpdateNFSVolumeMountEndpointGotParams = params
+	return m.UpdateNFSVolumeMountEndpointError
+}
+
 func (m *mockTransport) UpdateLicence(ctx context.Context, licence []byte, params *UpdateLicenceRequestParams) (*licence.Resource, error) {
 	m.UpdateLicenceGotLicence = licence
 	m.UpdateLicenceGotParams = params
@@ -341,6 +374,13 @@ func (m *mockTransport) AttachVolume(ctx context.Context, namespaceID id.Namespa
 	m.AttachGotVolume = volumeID
 	m.AttachGotNode = nodeID
 	return m.AttachError
+}
+
+func (m *mockTransport) AttachNFSVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *AttachNFSVolumeRequestParams) error {
+	m.AttachNFSGotNamespace = namespaceID
+	m.AttachNFSGotVolume = volumeID
+	m.AttachNFSGotParams = params
+	return m.AttachNFSError
 }
 
 func (m *mockTransport) DetachVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DetachVolumeRequestParams) error {

@@ -11,6 +11,7 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cmd/argwrappers"
+	"code.storageos.net/storageos/c2-cli/cmd/clierr"
 	"code.storageos.net/storageos/c2-cli/cmd/flagutil"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
 	"code.storageos.net/storageos/c2-cli/namespace"
@@ -24,7 +25,6 @@ import (
 
 var (
 	errVolumeNameSpecifiedWrong = errors.New("must specify exactly one name for the volume")
-	errNoNamespaceSpecified     = errors.New("must specify a namespace to create the volume in")
 )
 
 type volumeCommand struct {
@@ -198,7 +198,7 @@ $ storageos create volume --replicas 1 --namespace my-namespace-name my-replicat
 			}
 
 			if ns == "" {
-				return errNoNamespaceSpecified
+				return clierr.ErrNoNamespaceSpecified
 			}
 			c.namespace = ns
 

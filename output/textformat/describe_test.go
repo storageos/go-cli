@@ -3,16 +3,14 @@ package textformat
 import (
 	"bytes"
 	"context"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/kr/pretty"
 
-	"code.storageos.net/storageos/c2-cli/pkg/size"
-
-	"code.storageos.net/storageos/c2-cli/licence"
-
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/output"
@@ -20,6 +18,7 @@ import (
 	"code.storageos.net/storageos/c2-cli/pkg/health"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
 	"code.storageos.net/storageos/c2-cli/pkg/labels"
+	"code.storageos.net/storageos/c2-cli/pkg/size"
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
@@ -310,6 +309,7 @@ func TestDisplayer_DescribeLicence(t *testing.T) {
 				ClusterCapacityBytes: 42 * size.GiB,
 				UsedBytes:            42 / 2 * size.GiB,
 				Kind:                 "bananaKind",
+				Features:             []string{"nfs", "banana"},
 				CustomerName:         "bananaCustomer",
 			},
 			wantW: `ClusterID:      bananaID                           
@@ -317,6 +317,7 @@ Expiration:     2000-01-01T00:00:00Z (xx aeons ago)
 Capacity:       42 GiB (45097156608)               
 Used:           21 GiB (22548578304)               
 Kind:           bananaKind                         
+Features:       [banana nfs]                       
 Customer name:  bananaCustomer                     
 `,
 			wantErr: false,
@@ -509,8 +510,51 @@ func TestDisplayer_DescribeVolume(t *testing.T) {
 				Description:    "banana description",
 				AttachedOn:     "banana-node-a-id",
 				AttachedOnName: "banana-node-a",
-				Namespace:      "banana-namespace-id",
-				NamespaceName:  "banana-namespace",
+				AttachType:     volume.AttachTypeHost,
+				NFS: output.NFSConfig{
+					Exports: []output.NFSExportConfig{
+						{
+							ExportID:   1,
+							Path:       "/",
+							PseudoPath: "/",
+							ACLs: []output.NFSExportConfigACL{
+								{
+									Identity: output.NFSExportConfigACLIdentity{
+										IdentityType: "cidr",
+										Matcher:      "10.0.0.0/8",
+									},
+									SquashConfig: output.NFSExportConfigACLSquashConfig{
+										GID:    0,
+										UID:    0,
+										Squash: "root",
+									},
+									AccessLevel: "rw",
+								},
+								{
+									Identity: output.NFSExportConfigACLIdentity{
+										IdentityType: "hostname",
+										Matcher:      "*.storageos.com",
+									},
+									SquashConfig: output.NFSExportConfigACLSquashConfig{
+										GID:    1000,
+										UID:    1000,
+										Squash: "rootuid",
+									},
+									AccessLevel: "ro",
+								},
+							},
+						},
+						{
+							ExportID:   2,
+							Path:       "/path",
+							PseudoPath: "/psuedo",
+							ACLs:       []output.NFSExportConfigACL{},
+						},
+					},
+					ServiceEndpoint: "10.0.0.1:/",
+				},
+				Namespace:     "banana-namespace-id",
+				NamespaceName: "banana-namespace",
 				Labels: labels.Set{
 					"kiwi": "42",
 					"pear": "42",
@@ -559,39 +603,61 @@ func TestDisplayer_DescribeVolume(t *testing.T) {
 				Version:   "42",
 			},
 
-			wantOutput: `ID               bananaID                                                                        
-Name             banana-name                                                                     
-Description      banana description                                                              
-AttachedOn       banana-node-a (banana-node-a-id)                                                
-Namespace        banana-namespace (banana-namespace-id)                                          
-Labels           kiwi=42,pear=42                                                                 
-Filesystem       ext4                                                                            
-Size             1.0 GiB (1073741824 bytes)                                                      
-Version          42                                                                              
-Created at       2000-01-01T00:00:00Z (xx aeons ago)                                             
-Updated at       2000-01-01T00:00:00Z (xx aeons ago)                                             
-                                                                                                 
-Master:        
-  ID             bananaDeploymentID1                                                             
-  Node           banana-node1 (banana-node1-id)                                                  
-  Health         ready                                                                           
-                                                                                                 
-Replicas:      
-  ID             bananaDeploymentID2                                                             
-  Node           banana-node2 (banana-node2-id)                                                  
-  Health         ready                                                                           
-  Promotable     true                                                                            
-                                                                                                 
-  ID             bananaDeploymentID3                                                             
-  Node           banana-node3 (banana-node3-id)                                                  
-  Health         deleted                                                                         
-  Promotable     false                                                                           
-                                                                                                 
-  ID             bananaDeploymentID4                                                             
-  Node           banana-node4 (banana-node4-id)                                                  
-  Health         syncing                                                                         
-  Promotable     false                                                                           
-  Sync Progress  768.00 MiB / 1.00 GiB [##########################........] 75.00%  -  ETA: 20m0s
+			wantOutput: `ID                      bananaID                                                                        
+Name                    banana-name                                                                     
+Description             banana description                                                              
+AttachedOn              banana-node-a (banana-node-a-id)                                                
+Attachment Type         host                                                                            
+NFS                                                                                                     
+  Service Endpoint      10.0.0.1:/                                                                      
+  Exports:                                                                                              
+  - ID                  1                                                                               
+    Path                /                                                                               
+    Pseudo Path         /                                                                               
+    ACLs                                                                                                
+    - Identity Type     cidr                                                                            
+      Identity Matcher  10.0.0.0/8                                                                      
+      Squash            root                                                                            
+      Squash UID        0                                                                               
+      Squash GUID       0                                                                               
+    - Identity Type     hostname                                                                        
+      Identity Matcher  *.storageos.com                                                                 
+      Squash            rootuid                                                                         
+      Squash UID        1000                                                                            
+      Squash GUID       1000                                                                            
+  - ID                  2                                                                               
+    Path                /path                                                                           
+    Pseudo Path         /psuedo                                                                         
+    ACLs                                                                                                
+Namespace               banana-namespace (banana-namespace-id)                                          
+Labels                  kiwi=42,pear=42                                                                 
+Filesystem              ext4                                                                            
+Size                    1.0 GiB (1073741824 bytes)                                                      
+Version                 42                                                                              
+Created at              2000-01-01T00:00:00Z (xx aeons ago)                                             
+Updated at              2000-01-01T00:00:00Z (xx aeons ago)                                             
+                                                                                                        
+Master:               
+  ID                    bananaDeploymentID1                                                             
+  Node                  banana-node1 (banana-node1-id)                                                  
+  Health                ready                                                                           
+                                                                                                        
+Replicas:             
+  ID                    bananaDeploymentID2                                                             
+  Node                  banana-node2 (banana-node2-id)                                                  
+  Health                ready                                                                           
+  Promotable            true                                                                            
+                                                                                                        
+  ID                    bananaDeploymentID3                                                             
+  Node                  banana-node3 (banana-node3-id)                                                  
+  Health                deleted                                                                         
+  Promotable            false                                                                           
+                                                                                                        
+  ID                    bananaDeploymentID4                                                             
+  Node                  banana-node4 (banana-node4-id)                                                  
+  Health                syncing                                                                         
+  Promotable            false                                                                           
+  Sync Progress         768.00 MiB / 1.00 GiB [##########################........] 75.00%  -  ETA: 20m0s
 `,
 			wantErr: nil,
 		},
@@ -604,8 +670,51 @@ Replicas:
 				Description:    "banana description",
 				AttachedOn:     "banana-node-a-id",
 				AttachedOnName: "banana-node-a",
-				Namespace:      "banana-namespace-id",
-				NamespaceName:  "banana-namespace",
+				AttachType:     volume.AttachTypeHost,
+				NFS: output.NFSConfig{
+					Exports: []output.NFSExportConfig{
+						{
+							ExportID:   1,
+							Path:       "/",
+							PseudoPath: "/",
+							ACLs: []output.NFSExportConfigACL{
+								{
+									Identity: output.NFSExportConfigACLIdentity{
+										IdentityType: "cidr",
+										Matcher:      "10.0.0.0/8",
+									},
+									SquashConfig: output.NFSExportConfigACLSquashConfig{
+										GID:    0,
+										UID:    0,
+										Squash: "root",
+									},
+									AccessLevel: "rw",
+								},
+								{
+									Identity: output.NFSExportConfigACLIdentity{
+										IdentityType: "hostname",
+										Matcher:      "*.storageos.com",
+									},
+									SquashConfig: output.NFSExportConfigACLSquashConfig{
+										GID:    1000,
+										UID:    1000,
+										Squash: "rootuid",
+									},
+									AccessLevel: "ro",
+								},
+							},
+						},
+						{
+							ExportID:   2,
+							Path:       "/path",
+							PseudoPath: "/psuedo",
+							ACLs:       []output.NFSExportConfigACL{},
+						},
+					},
+					ServiceEndpoint: "10.0.0.1:/",
+				},
+				Namespace:     "banana-namespace-id",
+				NamespaceName: "banana-namespace",
 				Labels: labels.Set{
 					"kiwi": "42",
 					"pear": "42",
@@ -625,22 +734,44 @@ Replicas:
 				Version:   "42",
 			},
 
-			wantOutput: `ID           bananaID                              
-Name         banana-name                           
-Description  banana description                    
-AttachedOn   banana-node-a (banana-node-a-id)      
-Namespace    banana-namespace (banana-namespace-id)
-Labels       kiwi=42,pear=42                       
-Filesystem   ext4                                  
-Size         1.0 GiB (1073741824 bytes)            
-Version      42                                    
-Created at   2000-01-01T00:00:00Z (xx aeons ago)   
-Updated at   2000-01-01T00:00:00Z (xx aeons ago)   
-                                                   
-Master:    
-  ID         bananaDeploymentID1                   
-  Node       banana-node1 (banana-node1-id)        
-  Health     ready                                 
+			wantOutput: `ID                      bananaID                              
+Name                    banana-name                           
+Description             banana description                    
+AttachedOn              banana-node-a (banana-node-a-id)      
+Attachment Type         host                                  
+NFS                                                           
+  Service Endpoint      10.0.0.1:/                            
+  Exports:                                                    
+  - ID                  1                                     
+    Path                /                                     
+    Pseudo Path         /                                     
+    ACLs                                                      
+    - Identity Type     cidr                                  
+      Identity Matcher  10.0.0.0/8                            
+      Squash            root                                  
+      Squash UID        0                                     
+      Squash GUID       0                                     
+    - Identity Type     hostname                              
+      Identity Matcher  *.storageos.com                       
+      Squash            rootuid                               
+      Squash UID        1000                                  
+      Squash GUID       1000                                  
+  - ID                  2                                     
+    Path                /path                                 
+    Pseudo Path         /psuedo                               
+    ACLs                                                      
+Namespace               banana-namespace (banana-namespace-id)
+Labels                  kiwi=42,pear=42                       
+Filesystem              ext4                                  
+Size                    1.0 GiB (1073741824 bytes)            
+Version                 42                                    
+Created at              2000-01-01T00:00:00Z (xx aeons ago)   
+Updated at              2000-01-01T00:00:00Z (xx aeons ago)   
+                                                              
+Master:               
+  ID                    bananaDeploymentID1                   
+  Node                  banana-node1 (banana-node1-id)        
+  Health                ready                                 
 `,
 			wantErr: nil,
 		},
@@ -653,8 +784,51 @@ Master:
 				Description:    "banana description",
 				AttachedOn:     "banana-node-a-id",
 				AttachedOnName: "banana-node-a",
-				Namespace:      "banana-namespace-id",
-				NamespaceName:  "banana-namespace",
+				AttachType:     volume.AttachTypeHost,
+				NFS: output.NFSConfig{
+					Exports: []output.NFSExportConfig{
+						{
+							ExportID:   1,
+							Path:       "/",
+							PseudoPath: "/",
+							ACLs: []output.NFSExportConfigACL{
+								{
+									Identity: output.NFSExportConfigACLIdentity{
+										IdentityType: "cidr",
+										Matcher:      "10.0.0.0/8",
+									},
+									SquashConfig: output.NFSExportConfigACLSquashConfig{
+										GID:    0,
+										UID:    0,
+										Squash: "root",
+									},
+									AccessLevel: "rw",
+								},
+								{
+									Identity: output.NFSExportConfigACLIdentity{
+										IdentityType: "hostname",
+										Matcher:      "*.storageos.com",
+									},
+									SquashConfig: output.NFSExportConfigACLSquashConfig{
+										GID:    1000,
+										UID:    1000,
+										Squash: "rootuid",
+									},
+									AccessLevel: "ro",
+								},
+							},
+						},
+						{
+							ExportID:   2,
+							Path:       "/path",
+							PseudoPath: "/psuedo",
+							ACLs:       []output.NFSExportConfigACL{},
+						},
+					},
+					ServiceEndpoint: "10.0.0.1:/",
+				},
+				Namespace:     "banana-namespace-id",
+				NamespaceName: "banana-namespace",
 				Labels: labels.Set{
 					"kiwi": "42",
 					"pear": "42",
@@ -683,29 +857,51 @@ Master:
 				Version:   "42",
 			},
 
-			wantOutput: `ID               bananaID                              
-Name             banana-name                           
-Description      banana description                    
-AttachedOn       banana-node-a (banana-node-a-id)      
-Namespace        banana-namespace (banana-namespace-id)
-Labels           kiwi=42,pear=42                       
-Filesystem       ext4                                  
-Size             1.0 GiB (1073741824 bytes)            
-Version          42                                    
-Created at       2000-01-01T00:00:00Z (xx aeons ago)   
-Updated at       2000-01-01T00:00:00Z (xx aeons ago)   
-                                                       
-Master:        
-  ID             bananaDeploymentID1                   
-  Node           banana-node1 (banana-node1-id)        
-  Health         ready                                 
-                                                       
-Replicas:      
-  ID             bananaDeploymentID2                   
-  Node           banana-node2 (banana-node2-id)        
-  Health         syncing                               
-  Promotable     false                                 
-  Sync Progress  n/a                                   
+			wantOutput: `ID                      bananaID                              
+Name                    banana-name                           
+Description             banana description                    
+AttachedOn              banana-node-a (banana-node-a-id)      
+Attachment Type         host                                  
+NFS                                                           
+  Service Endpoint      10.0.0.1:/                            
+  Exports:                                                    
+  - ID                  1                                     
+    Path                /                                     
+    Pseudo Path         /                                     
+    ACLs                                                      
+    - Identity Type     cidr                                  
+      Identity Matcher  10.0.0.0/8                            
+      Squash            root                                  
+      Squash UID        0                                     
+      Squash GUID       0                                     
+    - Identity Type     hostname                              
+      Identity Matcher  *.storageos.com                       
+      Squash            rootuid                               
+      Squash UID        1000                                  
+      Squash GUID       1000                                  
+  - ID                  2                                     
+    Path                /path                                 
+    Pseudo Path         /psuedo                               
+    ACLs                                                      
+Namespace               banana-namespace (banana-namespace-id)
+Labels                  kiwi=42,pear=42                       
+Filesystem              ext4                                  
+Size                    1.0 GiB (1073741824 bytes)            
+Version                 42                                    
+Created at              2000-01-01T00:00:00Z (xx aeons ago)   
+Updated at              2000-01-01T00:00:00Z (xx aeons ago)   
+                                                              
+Master:               
+  ID                    bananaDeploymentID1                   
+  Node                  banana-node1 (banana-node1-id)        
+  Health                ready                                 
+                                                              
+Replicas:             
+  ID                    bananaDeploymentID2                   
+  Node                  banana-node2 (banana-node2-id)        
+  Health                syncing                               
+  Promotable            false                                 
+  Sync Progress         n/a                                   
 `,
 			wantErr: nil,
 		},
@@ -726,10 +922,28 @@ Replicas:
 
 			gotOutput := w.String()
 			if gotOutput != tt.wantOutput {
-				pretty.Ldiff(t, gotOutput, tt.wantOutput)
-				t.Errorf("got output: \n%v\n\nwant: \n%v\n", gotOutput, tt.wantOutput)
+				compareOutput(t, gotOutput, tt.wantOutput)
 			}
 		})
+	}
+}
+
+func compareOutput(t *testing.T, gotOutput string, wantOutput string) {
+	t.Helper()
+
+	wantLines := strings.Split(wantOutput, "\n")
+	gotLines := strings.Split(gotOutput, "\n")
+
+	if len(wantLines) != len(gotLines) {
+		t.Errorf("different number of lines. Got %d, want %d", len(gotLines), len(wantLines))
+		return
+	}
+
+	for i := range gotLines {
+		if gotLines[i] != wantLines[i] {
+			t.Errorf("Line %d is different.\nGOT:\n%q\nWANT:\n%q\n", i, gotLines[i], wantLines[i])
+			return
+		}
 	}
 }
 
@@ -756,8 +970,51 @@ func TestDisplayer_DescribeListVolumes(t *testing.T) {
 					Description:    "banana description",
 					AttachedOn:     "banana-node-a-id",
 					AttachedOnName: "banana-node-a",
-					Namespace:      "banana-namespace-id",
-					NamespaceName:  "banana-namespace",
+					AttachType:     volume.AttachTypeHost,
+					NFS: output.NFSConfig{
+						Exports: []output.NFSExportConfig{
+							{
+								ExportID:   1,
+								Path:       "/",
+								PseudoPath: "/",
+								ACLs: []output.NFSExportConfigACL{
+									{
+										Identity: output.NFSExportConfigACLIdentity{
+											IdentityType: "cidr",
+											Matcher:      "10.0.0.0/8",
+										},
+										SquashConfig: output.NFSExportConfigACLSquashConfig{
+											GID:    0,
+											UID:    0,
+											Squash: "root",
+										},
+										AccessLevel: "rw",
+									},
+									{
+										Identity: output.NFSExportConfigACLIdentity{
+											IdentityType: "hostname",
+											Matcher:      "*.storageos.com",
+										},
+										SquashConfig: output.NFSExportConfigACLSquashConfig{
+											GID:    1000,
+											UID:    1000,
+											Squash: "rootuid",
+										},
+										AccessLevel: "ro",
+									},
+								},
+							},
+							{
+								ExportID:   2,
+								Path:       "/path",
+								PseudoPath: "/psuedo",
+								ACLs:       []output.NFSExportConfigACL{},
+							},
+						},
+						ServiceEndpoint: "10.0.0.1:/",
+					},
+					Namespace:     "banana-namespace-id",
+					NamespaceName: "banana-namespace",
 					Labels: labels.Set{
 						"kiwi": "42",
 						"pear": "42",
@@ -811,8 +1068,51 @@ func TestDisplayer_DescribeListVolumes(t *testing.T) {
 					Description:    "kiwi description",
 					AttachedOn:     "kiwi-node-a-id",
 					AttachedOnName: "kiwi-node-a",
-					Namespace:      "kiwi-namespace-id",
-					NamespaceName:  "kiwi-namespace",
+					AttachType:     volume.AttachTypeHost,
+					NFS: output.NFSConfig{
+						Exports: []output.NFSExportConfig{
+							{
+								ExportID:   1,
+								Path:       "/",
+								PseudoPath: "/",
+								ACLs: []output.NFSExportConfigACL{
+									{
+										Identity: output.NFSExportConfigACLIdentity{
+											IdentityType: "cidr",
+											Matcher:      "10.0.0.0/8",
+										},
+										SquashConfig: output.NFSExportConfigACLSquashConfig{
+											GID:    0,
+											UID:    0,
+											Squash: "root",
+										},
+										AccessLevel: "rw",
+									},
+									{
+										Identity: output.NFSExportConfigACLIdentity{
+											IdentityType: "hostname",
+											Matcher:      "*.storageos.com",
+										},
+										SquashConfig: output.NFSExportConfigACLSquashConfig{
+											GID:    1000,
+											UID:    1000,
+											Squash: "rootuid",
+										},
+										AccessLevel: "ro",
+									},
+								},
+							},
+							{
+								ExportID:   2,
+								Path:       "/path",
+								PseudoPath: "/psuedo",
+								ACLs:       []output.NFSExportConfigACL{},
+							},
+						},
+						ServiceEndpoint: "10.0.0.1:/",
+					},
+					Namespace:     "kiwi-namespace-id",
+					NamespaceName: "kiwi-namespace",
 					Labels: labels.Set{
 						"kiwi": "42",
 						"pear": "42",
@@ -862,73 +1162,117 @@ func TestDisplayer_DescribeListVolumes(t *testing.T) {
 				},
 			},
 
-			wantOutput: `ID               bananaID                                                                        
-Name             banana-name                                                                     
-Description      banana description                                                              
-AttachedOn       banana-node-a (banana-node-a-id)                                                
-Namespace        banana-namespace (banana-namespace-id)                                          
-Labels           kiwi=42,pear=42                                                                 
-Filesystem       ext4                                                                            
-Size             1.0 GiB (1073741824 bytes)                                                      
-Version          42                                                                              
-Created at       2000-01-01T00:00:00Z (xx aeons ago)                                             
-Updated at       2000-01-01T00:00:00Z (xx aeons ago)                                             
-                                                                                                 
-Master:        
-  ID             bananaDeploymentID1                                                             
-  Node           banana-node1 (banana-node1-id)                                                  
-  Health         ready                                                                           
-                                                                                                 
-Replicas:      
-  ID             bananaDeploymentID2                                                             
-  Node           banana-node2 (banana-node2-id)                                                  
-  Health         ready                                                                           
-  Promotable     true                                                                            
-                                                                                                 
-  ID             bananaDeploymentID3                                                             
-  Node           banana-node3 (banana-node3-id)                                                  
-  Health         deleted                                                                         
-  Promotable     false                                                                           
-                                                                                                 
-  ID             bananaDeploymentID4                                                             
-  Node           banana-node4 (banana-node4-id)                                                  
-  Health         syncing                                                                         
-  Promotable     false                                                                           
-  Sync Progress  768.00 MiB / 1.00 GiB [##########################........] 75.00%  -  ETA: 20m0s
+			wantOutput: `ID                      bananaID                                                                        
+Name                    banana-name                                                                     
+Description             banana description                                                              
+AttachedOn              banana-node-a (banana-node-a-id)                                                
+Attachment Type         host                                                                            
+NFS                                                                                                     
+  Service Endpoint      10.0.0.1:/                                                                      
+  Exports:                                                                                              
+  - ID                  1                                                                               
+    Path                /                                                                               
+    Pseudo Path         /                                                                               
+    ACLs                                                                                                
+    - Identity Type     cidr                                                                            
+      Identity Matcher  10.0.0.0/8                                                                      
+      Squash            root                                                                            
+      Squash UID        0                                                                               
+      Squash GUID       0                                                                               
+    - Identity Type     hostname                                                                        
+      Identity Matcher  *.storageos.com                                                                 
+      Squash            rootuid                                                                         
+      Squash UID        1000                                                                            
+      Squash GUID       1000                                                                            
+  - ID                  2                                                                               
+    Path                /path                                                                           
+    Pseudo Path         /psuedo                                                                         
+    ACLs                                                                                                
+Namespace               banana-namespace (banana-namespace-id)                                          
+Labels                  kiwi=42,pear=42                                                                 
+Filesystem              ext4                                                                            
+Size                    1.0 GiB (1073741824 bytes)                                                      
+Version                 42                                                                              
+Created at              2000-01-01T00:00:00Z (xx aeons ago)                                             
+Updated at              2000-01-01T00:00:00Z (xx aeons ago)                                             
+                                                                                                        
+Master:               
+  ID                    bananaDeploymentID1                                                             
+  Node                  banana-node1 (banana-node1-id)                                                  
+  Health                ready                                                                           
+                                                                                                        
+Replicas:             
+  ID                    bananaDeploymentID2                                                             
+  Node                  banana-node2 (banana-node2-id)                                                  
+  Health                ready                                                                           
+  Promotable            true                                                                            
+                                                                                                        
+  ID                    bananaDeploymentID3                                                             
+  Node                  banana-node3 (banana-node3-id)                                                  
+  Health                deleted                                                                         
+  Promotable            false                                                                           
+                                                                                                        
+  ID                    bananaDeploymentID4                                                             
+  Node                  banana-node4 (banana-node4-id)                                                  
+  Health                syncing                                                                         
+  Promotable            false                                                                           
+  Sync Progress         768.00 MiB / 1.00 GiB [##########################........] 75.00%  -  ETA: 20m0s
 
-ID               kiwiID                                                                          
-Name             kiwi-name                                                                       
-Description      kiwi description                                                                
-AttachedOn       kiwi-node-a (kiwi-node-a-id)                                                    
-Namespace        kiwi-namespace (kiwi-namespace-id)                                              
-Labels           kiwi=42,pear=42                                                                 
-Filesystem       ext4                                                                            
-Size             1.0 GiB (1073741824 bytes)                                                      
-Version          42                                                                              
-Created at       2000-01-01T00:00:00Z (xx aeons ago)                                             
-Updated at       2000-01-01T00:00:00Z (xx aeons ago)                                             
-                                                                                                 
-Master:        
-  ID             kiwiDeploymentID1                                                               
-  Node           kiwi-node1 (kiwi-node1-id)                                                      
-  Health         ready                                                                           
-                                                                                                 
-Replicas:      
-  ID             kiwiDeploymentID2                                                               
-  Node           kiwi-node2 (kiwi-node2-id)                                                      
-  Health         ready                                                                           
-  Promotable     true                                                                            
-                                                                                                 
-  ID             kiwiDeploymentID3                                                               
-  Node           kiwi-node3 (kiwi-node3-id)                                                      
-  Health         deleted                                                                         
-  Promotable     false                                                                           
-                                                                                                 
-  ID             kiwiDeploymentID4                                                               
-  Node           kiwi-node4 (kiwi-node4-id)                                                      
-  Health         syncing                                                                         
-  Promotable     false                                                                           
-  Sync Progress  768.00 MiB / 1.00 GiB [##########################........] 75.00%  -  ETA: 20m0s
+ID                      kiwiID                                                                          
+Name                    kiwi-name                                                                       
+Description             kiwi description                                                                
+AttachedOn              kiwi-node-a (kiwi-node-a-id)                                                    
+Attachment Type         host                                                                            
+NFS                                                                                                     
+  Service Endpoint      10.0.0.1:/                                                                      
+  Exports:                                                                                              
+  - ID                  1                                                                               
+    Path                /                                                                               
+    Pseudo Path         /                                                                               
+    ACLs                                                                                                
+    - Identity Type     cidr                                                                            
+      Identity Matcher  10.0.0.0/8                                                                      
+      Squash            root                                                                            
+      Squash UID        0                                                                               
+      Squash GUID       0                                                                               
+    - Identity Type     hostname                                                                        
+      Identity Matcher  *.storageos.com                                                                 
+      Squash            rootuid                                                                         
+      Squash UID        1000                                                                            
+      Squash GUID       1000                                                                            
+  - ID                  2                                                                               
+    Path                /path                                                                           
+    Pseudo Path         /psuedo                                                                         
+    ACLs                                                                                                
+Namespace               kiwi-namespace (kiwi-namespace-id)                                              
+Labels                  kiwi=42,pear=42                                                                 
+Filesystem              ext4                                                                            
+Size                    1.0 GiB (1073741824 bytes)                                                      
+Version                 42                                                                              
+Created at              2000-01-01T00:00:00Z (xx aeons ago)                                             
+Updated at              2000-01-01T00:00:00Z (xx aeons ago)                                             
+                                                                                                        
+Master:               
+  ID                    kiwiDeploymentID1                                                               
+  Node                  kiwi-node1 (kiwi-node1-id)                                                      
+  Health                ready                                                                           
+                                                                                                        
+Replicas:             
+  ID                    kiwiDeploymentID2                                                               
+  Node                  kiwi-node2 (kiwi-node2-id)                                                      
+  Health                ready                                                                           
+  Promotable            true                                                                            
+                                                                                                        
+  ID                    kiwiDeploymentID3                                                               
+  Node                  kiwi-node3 (kiwi-node3-id)                                                      
+  Health                deleted                                                                         
+  Promotable            false                                                                           
+                                                                                                        
+  ID                    kiwiDeploymentID4                                                               
+  Node                  kiwi-node4 (kiwi-node4-id)                                                      
+  Health                syncing                                                                         
+  Promotable            false                                                                           
+  Sync Progress         768.00 MiB / 1.00 GiB [##########################........] 75.00%  -  ETA: 20m0s
 `,
 			wantErr: nil,
 		},
@@ -949,8 +1293,7 @@ Replicas:
 
 			gotOutput := w.String()
 			if gotOutput != tt.wantOutput {
-				pretty.Ldiff(t, gotOutput, tt.wantOutput)
-				t.Errorf("got output: \n%v\n\nwant: \n%v\n", gotOutput, tt.wantOutput)
+				compareOutput(t, gotOutput, tt.wantOutput)
 			}
 		})
 	}
@@ -1144,10 +1487,7 @@ Version     42
 
 			gotOutput := w.String()
 			if gotOutput != tt.wantOutput {
-				pretty.Ldiff(t, gotOutput, tt.wantOutput)
-				// gotOutput = strings.ReplaceAll(w.String(), " ", "•")
-				// gotOutput = strings.ReplaceAll(gotOutput, "\n", "%\n")
-				t.Errorf("got output: \n%v\n\nwant: \n%v\n", gotOutput, tt.wantOutput)
+				compareOutput(t, gotOutput, tt.wantOutput)
 			}
 		})
 	}
@@ -1502,7 +1842,7 @@ func TestDisplayer_DescribeListUsers(t *testing.T) {
 		wantErr    error
 	}{
 		{
-			name: "describe volume ok",
+			name: "describe list user ok",
 			users: []*user.Resource{
 				{
 					ID:       "bananaID",

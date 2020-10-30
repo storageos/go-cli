@@ -15,7 +15,6 @@ import (
 	"code.storageos.net/storageos/c2-cli/policygroup"
 	"code.storageos.net/storageos/c2-cli/user"
 	"code.storageos.net/storageos/c2-cli/volume"
-
 	"code.storageos.net/storageos/openapi"
 )
 
@@ -41,6 +40,11 @@ func (c codec) decodeCluster(model openapi.Cluster) (*cluster.Resource, error) {
 }
 
 func (c codec) decodeLicence(model openapi.Licence) (*licence.Resource, error) {
+	features := make([]string, 0)
+	if model.Features != nil {
+		features = append(features, *model.Features...)
+	}
+
 	return &licence.Resource{
 		ClusterID:            id.Cluster(model.ClusterID),
 		ExpiresAt:            model.ExpiresAt,
@@ -48,6 +52,7 @@ func (c codec) decodeLicence(model openapi.Licence) (*licence.Resource, error) {
 		UsedBytes:            model.UsedBytes,
 		Kind:                 model.Kind,
 		CustomerName:         model.CustomerName,
+		Features:             features,
 		Version:              version.FromString(model.Version),
 	}, nil
 }
@@ -81,12 +86,14 @@ func (c codec) decodeNode(model openapi.Node) (*node.Resource, error) {
 
 func (c codec) decodeVolume(model openapi.Volume) (*volume.Resource, error) {
 	v := &volume.Resource{
-		ID:          id.Volume(model.Id),
-		Name:        model.Name,
-		Description: model.Description,
-		SizeBytes:   model.SizeBytes,
+		ID:             id.Volume(model.Id),
+		Name:           model.Name,
+		Description:    model.Description,
+		SizeBytes:      model.SizeBytes,
+		AttachedOn:     id.Node(model.AttachedOn),
+		AttachmentType: volume.AttachTypeFromString(string(model.AttachmentType)),
+		Nfs:            c.decodeNFSConfig(model.Nfs),
 
-		AttachedOn: id.Node(model.AttachedOn),
 		Namespace:  id.Namespace(model.NamespaceID),
 		Labels:     model.Labels,
 		Filesystem: volume.FsTypeFromString(string(model.FsType)),
@@ -202,6 +209,76 @@ func (c codec) decodeUser(model openapi.User) (*user.Resource, error) {
 		UpdatedAt: model.UpdatedAt,
 		Version:   version.FromString(model.Version),
 	}, nil
+}
+
+func (c codec) decodeNFSConfig(model openapi.NfsConfig) volume.NFSConfig {
+	cfg := volume.NFSConfig{
+		Exports:         make([]volume.NFSExportConfig, 0),
+		ServiceEndpoint: "",
+	}
+
+	if model.ServiceEndpoint != nil {
+		cfg.ServiceEndpoint = *model.ServiceEndpoint
+	}
+
+	if model.Exports != nil {
+		for _, e := range *model.Exports {
+			cfg.Exports = append(cfg.Exports, c.decodeNFSExportConfig(e))
+		}
+	}
+
+	return cfg
+}
+
+func (c codec) decodeNFSExportConfig(model openapi.NfsExportConfig) volume.NFSExportConfig {
+	cfg := volume.NFSExportConfig{
+		ExportID:   uint(model.ExportID),
+		Path:       model.Path,
+		PseudoPath: model.PseudoPath,
+		ACLs:       make([]volume.NFSExportConfigACL, 0, len(model.Acls)),
+	}
+
+	for _, a := range model.Acls {
+		cfg.ACLs = append(cfg.ACLs, volume.NFSExportConfigACL{
+			Identity: volume.NFSExportConfigACLIdentity{
+				IdentityType: a.Identity.IdentityType,
+				Matcher:      a.Identity.Matcher,
+			},
+			SquashConfig: volume.NFSExportConfigACLSquashConfig{
+				GID:    a.SquashConfig.Gid,
+				UID:    a.SquashConfig.Uid,
+				Squash: a.SquashConfig.Squash,
+			},
+			AccessLevel: a.AccessLevel,
+		})
+	}
+	return cfg
+}
+
+func (c codec) encodeNFSExport(export volume.NFSExportConfig) openapi.NfsExportConfig {
+	cfg := openapi.NfsExportConfig{
+		ExportID:   uint64(export.ExportID),
+		Path:       export.Path,
+		PseudoPath: export.PseudoPath,
+		Acls:       []openapi.NfsAcl{},
+	}
+
+	for _, a := range export.ACLs {
+		cfg.Acls = append(cfg.Acls, openapi.NfsAcl{
+			Identity: openapi.NfsAclIdentity{
+				IdentityType: a.Identity.IdentityType,
+				Matcher:      a.Identity.Matcher,
+			},
+			SquashConfig: openapi.NfsAclSquashConfig{
+				Uid:    a.SquashConfig.UID,
+				Gid:    a.SquashConfig.GID,
+				Squash: a.SquashConfig.Squash,
+			},
+			AccessLevel: a.AccessLevel,
+		})
+	}
+
+	return cfg
 }
 
 func (c codec) encodeFsType(filesystem volume.FsType) (openapi.FsType, error) {
