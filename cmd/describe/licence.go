@@ -34,8 +34,9 @@ func newLicence(w io.Writer, client Client, config ConfigProvider) *cobra.Comman
 		writer: w,
 	}
 	cobraCommand := &cobra.Command{
-		Use:   "licence",
-		Short: "Fetch current licence configuration details",
+		Use:     "licence",
+		Aliases: []string{"license"},
+		Short:   "Fetch current licence configuration details",
 		Example: `
 $ storageos describe licence
 `,
