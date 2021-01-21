@@ -33,7 +33,7 @@ func (o *OpenAPI) GetDiagnostics(ctx context.Context) (io.ReadCloser, error) {
 	}
 
 	req.Header["Authorization"] = []string{token}
-	req.Header["Accept"] = []string{"application/gzip", "application/json"}
+	req.Header["Accept"] = []string{"application/octet-stream", "application/gzip", "application/json"}
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -45,9 +45,10 @@ func (o *OpenAPI) GetDiagnostics(ctx context.Context) (io.ReadCloser, error) {
 		// Carry on.
 	case http.StatusBadGateway:
 		// Check if the response content-type indicates a partial bundle. That
-		// is, it has a gzip content type.
+		// is, it has a gzip or octet-stream content type.
 		for _, value := range resp.Header["Content-Type"] {
-			if value == "application/gzip" {
+			switch value {
+			case "application/gzip", "application/octet-stream":
 				return nil, apiclient.NewIncompleteDiagnosticsError(resp.Body)
 			}
 		}
