@@ -2,9 +2,9 @@ package apiclient
 
 import (
 	"context"
-	"io"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/diagnostics"
 	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -39,7 +39,7 @@ func (t *noTransport) GetLicence(ctx context.Context) (*licence.Resource, error)
 	return nil, ErrNoTransportConfigured
 }
 
-func (t *noTransport) GetDiagnostics(ctx context.Context) (io.ReadCloser, error) {
+func (t *noTransport) GetDiagnostics(ctx context.Context) (*diagnostics.BundleReadCloser, error) {
 	return nil, ErrNoTransportConfigured
 }
 

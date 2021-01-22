@@ -26,7 +26,28 @@ type diagnosticsCommand struct {
 }
 
 func (c *diagnosticsCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, _ []string) error {
-	// If no output path specified by the user, set the output file path to:
+
+	// Slightly inefficient in case of fs failure, but the client now needs to
+	// care about the server specified name.
+	bundle, err := c.client.GetDiagnostics(ctx)
+	if err != nil {
+		switch v := err.(type) {
+
+		case apiclient.IncompleteDiagnosticsError:
+			// If the error is for an incomplete diagnostic bundle, extract
+			// the data and warn the user.
+			bundle = v.BundleReadCloser()
+			fmt.Fprintf(os.Stderr, "\nWarning: %v\n\n", v)
+
+		default:
+			// If we failed to get a bundle at all then remove the file we created.
+			return err
+		}
+	}
+	defer bundle.Close()
+
+	// If no output path specified by the user, try to use the name provided by
+	// the server. Failing that default to:
 	//
 	// 		<working_dir>/diagnostics-<current_time>.gz
 	//
@@ -36,7 +57,13 @@ func (c *diagnosticsCommand) runWithCtx(ctx context.Context, cmd *cobra.Command,
 			return err
 		}
 
-		filename := fmt.Sprintf("diagnostics-%v.gz", time.Now().Format(time.RFC3339Nano))
+		var filename string
+		if provided, ok := bundle.Named(); ok {
+			filename = provided
+		} else {
+			filename = fmt.Sprintf("diagnostics-%v.gz", time.Now().Format(time.RFC3339Nano))
+
+		}
 
 		c.outputPath = filepath.Join(wd, filename)
 	}
@@ -51,24 +78,6 @@ func (c *diagnosticsCommand) runWithCtx(ctx context.Context, cmd *cobra.Command,
 		return err
 	}
 	defer outputfile.Close()
-
-	bundle, err := c.client.GetDiagnostics(ctx)
-	if err != nil {
-		switch v := err.(type) {
-
-		case apiclient.IncompleteDiagnosticsError:
-			// If the error is for an incomplete diagnostic bundle, extract
-			// the data and warn the user.
-			bundle = v.BundleData()
-			fmt.Fprintf(os.Stderr, "\nWarning: %v\n\n", v)
-
-		default:
-			// If we failed to get a bundle at all then remove the file we created.
-			os.Remove(outputfile.Name())
-			return err
-		}
-	}
-	defer bundle.Close()
 
 	// Move the bundle to the output path.
 	_, err = io.Copy(outputfile, bundle)
@@ -92,7 +101,7 @@ func newDiagnostics(w io.Writer, client Client, config ConfigProvider) *cobra.Co
 		Example: `
 $ storageos get diagnostics
 
-$ storageos get diagnostics --output-file ~/my-diagnostics
+$ storageos get diagnostics --output-file ~/my-diagnostics.gz
 `,
 		PreRun: func(_ *cobra.Command, _ []string) {
 			c.display = SelectDisplayer(c.config)

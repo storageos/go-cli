@@ -11,6 +11,7 @@ import (
 	"github.com/kr/pretty"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/diagnostics"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
 	"code.storageos.net/storageos/c2-cli/pkg/id"
@@ -108,8 +109,11 @@ func TestTransportWithReauth(t *testing.T) {
 			name: "GetDiagnostics",
 
 			innerTransport: &mockTransport{
-				GetDiagnosticsReadCloser: http.Response{}.Body,
-				GetDiagnosticsError:      errors.New("diagnostics-error"),
+				GetDiagnosticsReadCloser: diagnostics.NewBundleReadCloser(
+					http.Response{}.Body,
+					"name.bin",
+				),
+				GetDiagnosticsError: errors.New("diagnostics-error"),
 			},
 
 			doTest: func(t *testing.T, inner *mockTransport) {
@@ -127,8 +131,11 @@ func TestTransportWithReauth(t *testing.T) {
 			},
 
 			wantInnerTransport: &mockTransport{
-				GetDiagnosticsReadCloser: http.Response{}.Body,
-				GetDiagnosticsError:      errors.New("diagnostics-error"),
+				GetDiagnosticsReadCloser: diagnostics.NewBundleReadCloser(
+					http.Response{}.Body,
+					"name.bin",
+				),
+				GetDiagnosticsError: errors.New("diagnostics-error"),
 			},
 		},
 		{

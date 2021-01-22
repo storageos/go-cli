@@ -3,12 +3,20 @@ package openapi
 import (
 	"context"
 	"encoding/json"
-	"io"
+	"errors"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
+	"code.storageos.net/storageos/c2-cli/diagnostics"
 	"code.storageos.net/storageos/openapi"
+)
+
+var (
+	// errExtractingFilename is an error indicating a filename was not extracted
+	// from the response header.
+	errExtractingFilename = errors.New("failed to extract filename from response header")
 )
 
 // GetDiagnostics makes a request to the StorageOS API for a cluster diagnostic
@@ -17,7 +25,7 @@ import (
 // Because the OpenAPI code generator produces broken code for this method,
 // we source the target path, authorization token and http client from it but
 // handle the response ourselves.
-func (o *OpenAPI) GetDiagnostics(ctx context.Context) (io.ReadCloser, error) {
+func (o *OpenAPI) GetDiagnostics(ctx context.Context) (*diagnostics.BundleReadCloser, error) {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 
@@ -40,6 +48,11 @@ func (o *OpenAPI) GetDiagnostics(ctx context.Context) (io.ReadCloser, error) {
 		return nil, err
 	}
 
+	var name string
+	if extracted, err := getFilenameFromHeader(resp.Header); err == nil {
+		name = extracted
+	}
+
 	switch resp.StatusCode {
 	case http.StatusOK:
 		// Carry on.
@@ -47,8 +60,11 @@ func (o *OpenAPI) GetDiagnostics(ctx context.Context) (io.ReadCloser, error) {
 		// Check if the response content-type indicates a partial bundle. That
 		// is, it has a gzip content type.
 		for _, value := range resp.Header["Content-Type"] {
-			if value == "application/gzip" {
-				return nil, apiclient.NewIncompleteDiagnosticsError(resp.Body)
+			switch value {
+			case "application/gzip", "application/octet-stream":
+				return nil, apiclient.NewIncompleteDiagnosticsError(
+					diagnostics.NewBundleReadCloser(resp.Body, name),
+				)
 			}
 		}
 
@@ -76,5 +92,43 @@ func (o *OpenAPI) GetDiagnostics(ctx context.Context) (io.ReadCloser, error) {
 		)
 	}
 
-	return resp.Body, nil
+	return diagnostics.NewBundleReadCloser(resp.Body, name), nil
+}
+
+// getFileNameFromHeader attempts to extract an attachment filename from the
+// provided HTTP response header.
+func getFilenameFromHeader(header http.Header) (string, error) {
+
+	// Try grab a name from the content disposition header.
+	//
+	// Expected form if present is `attachment; filename="some-name.ext"`.
+	for _, value := range header["Content-Disposition"] {
+		parts := strings.Split(value, ";")
+		// If it doesn't split at least in two, can't have filename key and be
+		// correct
+		if len(parts) != 2 {
+			continue
+		}
+
+		if parts[0] != "attachment" {
+			continue
+		}
+
+		parts = strings.Split(parts[1], "=")
+		// If the second part doesn't split in two on an equals sign, can't be
+		// correct
+		if len(parts) != 2 {
+			continue
+		}
+
+		if strings.Trim(parts[0], " ") != "filename" {
+			continue
+		}
+
+		// Cut quotes and whitespace from head and tail, then break out
+		name := strings.Trim(parts[1], " \"")
+		return name, nil
+	}
+
+	return "", errExtractingFilename
 }

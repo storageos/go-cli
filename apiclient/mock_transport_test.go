@@ -2,10 +2,10 @@ package apiclient
 
 import (
 	"context"
-	"io"
 	"sync"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/diagnostics"
 	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -37,7 +37,7 @@ type mockTransport struct {
 	GetUserResource *user.Resource
 	GetUserError    error
 
-	GetDiagnosticsReadCloser io.ReadCloser
+	GetDiagnosticsReadCloser *diagnostics.BundleReadCloser
 	GetDiagnosticsError      error
 
 	GetNodeGotID    id.Node
@@ -210,7 +210,7 @@ func (m *mockTransport) ListUsers(ctx context.Context) ([]*user.Resource, error)
 	return m.ListUsersResource, m.ListUserError
 }
 
-func (m *mockTransport) GetDiagnostics(ctx context.Context) (io.ReadCloser, error) {
+func (m *mockTransport) GetDiagnostics(ctx context.Context) (*diagnostics.BundleReadCloser, error) {
 	return m.GetDiagnosticsReadCloser, m.GetDiagnosticsError
 }
 
