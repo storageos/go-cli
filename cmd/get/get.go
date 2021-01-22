@@ -10,6 +10,7 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/diagnostics"
 	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -42,7 +43,7 @@ type Client interface {
 
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
 	GetLicence(ctx context.Context) (*licence.Resource, error)
-	GetDiagnostics(ctx context.Context) (io.ReadCloser, error)
+	GetDiagnostics(ctx context.Context) (*diagnostics.BundleReadCloser, error)
 
 	GetUser(ctx context.Context, userID id.User) (*user.Resource, error)
 	GetUserByName(ctx context.Context, username string) (*user.Resource, error)

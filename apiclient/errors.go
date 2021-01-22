@@ -2,7 +2,8 @@ package apiclient
 
 import (
 	"fmt"
-	"io"
+
+	"code.storageos.net/storageos/c2-cli/diagnostics"
 )
 
 // AuthenticationError indicates that the requested operation could not be
@@ -200,22 +201,22 @@ func NewEncodingError(err error, targetType, value interface{}) EncodingError {
 
 // IncompleteDiagnosticsError provides an error type
 type IncompleteDiagnosticsError struct {
-	bundleData io.ReadCloser
+	bundleReadCloser *diagnostics.BundleReadCloser
 }
 
 func (e IncompleteDiagnosticsError) Error() string {
 	return "received an incomplete diagnostic bundle"
 }
 
-// BundleData returns the read closer for the bundle data associated with the error.
-func (e IncompleteDiagnosticsError) BundleData() io.ReadCloser {
-	return e.bundleData
+// BundleReadCloser returns the read closer for the bundle data associated with the error.
+func (e IncompleteDiagnosticsError) BundleReadCloser() *diagnostics.BundleReadCloser {
+	return e.bundleReadCloser
 }
 
 // NewIncompleteDiagnosticsError constructs an incomplete diagnostics error for
-// the provided bundle data.
-func NewIncompleteDiagnosticsError(bundleData io.ReadCloser) IncompleteDiagnosticsError {
+// the provided bundle read closer.
+func NewIncompleteDiagnosticsError(bundleReadCloser *diagnostics.BundleReadCloser) IncompleteDiagnosticsError {
 	return IncompleteDiagnosticsError{
-		bundleData: bundleData,
+		bundleReadCloser: bundleReadCloser,
 	}
 }

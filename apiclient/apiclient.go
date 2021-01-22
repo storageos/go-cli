@@ -5,10 +5,10 @@ package apiclient
 import (
 	"context"
 	"errors"
-	"io"
 	"sync"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/diagnostics"
 	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -66,7 +66,7 @@ type Transport interface {
 	GetNamespace(ctx context.Context, namespaceID id.Namespace) (*namespace.Resource, error)
 	// GetDiagnostics requests a new diagnostics bundle for the cluster
 	// from the StorageOS API.
-	GetDiagnostics(ctx context.Context) (io.ReadCloser, error)
+	GetDiagnostics(ctx context.Context) (*diagnostics.BundleReadCloser, error)
 	// GetPolicyGroup requests a new policy group resource which corresponds to
 	// uid from the StorageOS API.
 	GetPolicyGroup(ctx context.Context, uid id.PolicyGroup) (*policygroup.Resource, error)

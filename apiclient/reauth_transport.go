@@ -3,9 +3,9 @@ package apiclient
 import (
 	"context"
 	"errors"
-	"io"
 
 	"code.storageos.net/storageos/c2-cli/cluster"
+	"code.storageos.net/storageos/c2-cli/diagnostics"
 	"code.storageos.net/storageos/c2-cli/licence"
 	"code.storageos.net/storageos/c2-cli/namespace"
 	"code.storageos.net/storageos/c2-cli/node"
@@ -135,9 +135,9 @@ func (tr *TransportWithReauth) GetNamespace(ctx context.Context, namespaceID id.
 
 // GetDiagnostics wraps the inner transport's call with a reauthenticate and
 // retry upon encountering an authentication error.
-func (tr *TransportWithReauth) GetDiagnostics(ctx context.Context) (io.ReadCloser, error) {
+func (tr *TransportWithReauth) GetDiagnostics(ctx context.Context) (*diagnostics.BundleReadCloser, error) {
 
-	var diagnostics io.ReadCloser
+	var diagnostics *diagnostics.BundleReadCloser
 	err := tr.doWithReauth(ctx, func() error {
 		var err error
 		diagnostics, err = tr.inner.GetDiagnostics(ctx)
