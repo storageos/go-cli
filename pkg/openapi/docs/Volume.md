@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **Name** | **string** |  | [optional] 
 **Description** | **string** |  | [optional] 
 **AttachedOn** | **string** |  | [optional] [readonly] 
-**Nfs** | [**NfsConfig**](NFSConfig.md) |  | [optional] 
+**Nfs** | [**NfsConfig**](NfsConfig.md) |  | [optional] 
 **NamespaceID** | **string** |  | [optional] [readonly] 
 **Labels** | **map[string]string** | A set of arbitrary key value labels to apply to the entity.  | [optional] 
 **FsType** | [**FsType**](FsType.md) |  | [optional] 

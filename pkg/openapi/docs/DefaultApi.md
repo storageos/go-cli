@@ -27,6 +27,7 @@ Method | HTTP request | Description
 [**GetNamespace**](DefaultApi.md#GetNamespace) | **Get** /namespaces/{id} | Fetch a namespace
 [**GetNode**](DefaultApi.md#GetNode) | **Get** /nodes/{id} | Fetch a node
 [**GetPolicyGroup**](DefaultApi.md#GetPolicyGroup) | **Get** /policies/{id} | Fetch a policy group
+[**GetSingleNodeDiagnostics**](DefaultApi.md#GetSingleNodeDiagnostics) | **Get** /diagnostics/{id} | Retrieves a single node diagnostics bundle from the target node
 [**GetUser**](DefaultApi.md#GetUser) | **Get** /users/{id} | Fetch a user
 [**GetVolume**](DefaultApi.md#GetVolume) | **Get** /namespaces/{namespaceID}/volumes/{id} | Fetch a volume
 [**ListNamespaces**](DefaultApi.md#ListNamespaces) | **Get** /namespaces | Fetch the list of namespaces
@@ -36,6 +37,8 @@ Method | HTTP request | Description
 [**ListVolumes**](DefaultApi.md#ListVolumes) | **Get** /namespaces/{namespaceID}/volumes | Fetch the list of volumes in the given namespace
 [**RefreshJwt**](DefaultApi.md#RefreshJwt) | **Post** /auth/refresh | Refresh the JWT
 [**ResizeVolume**](DefaultApi.md#ResizeVolume) | **Put** /namespaces/{namespaceID}/volumes/{id}/size | Increase the size of a volume.
+[**SetComputeOnly**](DefaultApi.md#SetComputeOnly) | **Put** /nodes/{id}/compute-only | Modify the computeonly behaviour state for a node
+[**SetFailureMode**](DefaultApi.md#SetFailureMode) | **Put** /namespaces/{namespaceID}/volumes/{id}/failure-mode | Set the failure mode of the volume.
 [**SetReplicas**](DefaultApi.md#SetReplicas) | **Put** /namespaces/{namespaceID}/volumes/{id}/replicas | Set the number of replicas to maintain for the volume.
 [**Spec**](DefaultApi.md#Spec) | **Get** /openapi | Serves this openapi spec file
 [**UpdateAuthenticatedUser**](DefaultApi.md#UpdateAuthenticatedUser) | **Put** /users/self | Update the authenticated user&#39;s information
@@ -941,6 +944,40 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## GetSingleNodeDiagnostics
+
+> *os.File GetSingleNodeDiagnostics(ctx, id)
+
+Retrieves a single node diagnostics bundle from the target node
+
+Requests that the target node gathers detailed information about the state of the cluster, using it to then build and return a bundle which can be used for troubleshooting. The request will only be served when the authenticated user is an administrator. The node will attempt to gather information about its local state, as well as cluster-wide state in the cluster. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string**| ID of a node | 
+
+### Return type
+
+[***os.File**](*os.File.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/gzip, application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## GetUser
 
 > User GetUser(ctx, id)
@@ -1224,6 +1261,102 @@ Name | Type | Description  | Notes
 
 
  **asyncMax** | **optional.String**| Optional parameter which will make the api request asynchronous. The operation will not be cancelled even if the client disconnect. The URL parameter value overrides the \&quot;async-max\&quot; header value, if any. The value of this header defines the timeout duration for the request, it must be set to a valid duration string. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \&quot;300ms\&quot;, or \&quot;2h45m\&quot;. Valid time units are \&quot;ns\&quot;, \&quot;us\&quot; (or \&quot;µs\&quot;), \&quot;ms\&quot;, \&quot;s\&quot;, \&quot;m\&quot;, \&quot;h\&quot;. We reject negative or nil duration values.  | 
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+
+### Return type
+
+[**Volume**](Volume.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SetComputeOnly
+
+> Node SetComputeOnly(ctx, id, setComputeOnlyNodeData, optional)
+
+Modify the computeonly behaviour state for a node
+
+Set the compute-only configuration state for the node corresponding  to id given by the request. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string**| ID of a Node | 
+**setComputeOnlyNodeData** | [**SetComputeOnlyNodeData**](SetComputeOnlyNodeData.md)|  | 
+ **optional** | ***SetComputeOnlyOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a SetComputeOnlyOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
+
+### Return type
+
+[**Node**](Node.md)
+
+### Authorization
+
+[jwt](../README.md#jwt)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SetFailureMode
+
+> Volume SetFailureMode(ctx, namespaceID, id, setFailureModeRequest, optional)
+
+Set the failure mode of the volume.
+
+Set the behaviour of the volume identified by id when responding to observed replica failure. This modifies the protected  StorageOS system label \"storageos.com/failure-mode\". This request may either specify a precise failure threshold or a more flexible intent-based failure mode operating with respect  to the volume's current replication target. A request will be denied if the current state of the volume does not satisfy the requested failure behaviour. 
+
+### Required Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespaceID** | **string**| ID of a Namespace | 
+**id** | **string**| ID of a Volume | 
+**setFailureModeRequest** | [**SetFailureModeRequest**](SetFailureModeRequest.md)| Failure mode to use | 
+ **optional** | ***SetFailureModeOpts** | optional parameters | nil if no parameters
+
+### Optional Parameters
+
+Optional parameters are passed through a pointer to a SetFailureModeOpts struct
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
  **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
@@ -1607,11 +1740,11 @@ Name | Type | Description  | Notes
 
 ## UpdateNode
 
-> Node UpdateNode(ctx, id, updateNodeData, optional)
+> Node UpdateNode(ctx, id, updateNodeData)
 
 Update a node
 
-Update the node identified by id.
+Update the non-storageos labels configured for the node  identified by id. 
 
 ### Required Parameters
 
@@ -1621,18 +1754,6 @@ Name | Type | Description  | Notes
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **id** | **string**| ID of a node | 
 **updateNodeData** | [**UpdateNodeData**](UpdateNodeData.md)|  | 
- **optional** | ***UpdateNodeOpts** | optional parameters | nil if no parameters
-
-### Optional Parameters
-
-Optional parameters are passed through a pointer to a UpdateNodeOpts struct
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
-
- **ignoreVersion** | **optional.Bool**| If set to true this value indicates that the user wants to ignore entity version constraints, thereby \&quot;forcing\&quot; the operation.  | [default to false]
 
 ### Return type
 

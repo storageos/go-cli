@@ -5,7 +5,7 @@ info:
     name: StorageOS
     url: https://storageos.com
   title: StorageOS API
-  version: 2.3.0-alpha
+  version: 2.4.0-alpha
 externalDocs:
   description: The latest StorageOS user documentation
   url: https://docs.storageos.com/
@@ -1758,7 +1758,8 @@ paths:
       - jwt: []
       summary: Fetch a node
     put:
-      description: Update the node identified by id.
+      description: |
+        Update the non-storageos labels configured for the node  identified by id.
       operationId: updateNode
       parameters:
       - description: ID of a node
@@ -1769,15 +1770,6 @@ paths:
         schema:
           $ref: '#/components/schemas/NodeID'
         style: simple
-      - description: |
-          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
-        explode: true
-        in: query
-        name: ignore-version
-        required: false
-        schema:
-          $ref: '#/components/schemas/IgnoreVersion'
-        style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateNodeData'
         content:
@@ -1810,7 +1802,8 @@ paths:
                   type: string
               title: UpdateNodeData
               type: object
-        description: The new node data to store.
+        description: "Update the label configuration of the node to the desired state.\
+          \ Alterations of StorageOS labels are rejected. \n"
         required: true
       responses:
         "200":
@@ -1884,6 +1877,127 @@ paths:
       security:
       - jwt: []
       summary: Update a node
+  /nodes/{id}/compute-only:
+    put:
+      description: |
+        Set the compute-only configuration state for the node corresponding  to id given by the request.
+      operationId: setComputeOnly
+      parameters:
+      - description: ID of a Node
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/NodeID'
+        style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
+      requestBody:
+        $ref: '#/components/requestBodies/SetComputeOnlyNodeData'
+        content:
+          application/json:
+            schema:
+              example:
+                computeOnly: true
+                version: NDI0MjQyNDI0MjQyNDI0MjQy
+              properties:
+                computeOnly:
+                  description: |
+                    Marks the node's desired configuration  state as compute-only. This will result in the node being avoided for volume placement
+                  example: true
+                  type: boolean
+                version:
+                  description: |
+                    An opaque representation of an entity version at the time it was obtained from the API.
+                    All operations that mutate the entity must include this version field in the request unchanged.
+                    The format of this type is undefined and may change but the defined properties will not change.
+                  example: NDI0MjQyNDI0MjQyNDI0MjQy
+                  maxLength: 30
+                  type: string
+              title: SetComputeOnlyNodeData
+              type: object
+        description: Desired compute-only configuration state for the node.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+          description: The node was successfullly updated
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Modify the computeonly behaviour state for a node
   /policies:
     get:
       description: Fetch the list of policy groups in the cluster.
@@ -3813,6 +3927,138 @@ paths:
       security:
       - jwt: []
       summary: Set the number of replicas to maintain for the volume.
+  /namespaces/{namespaceID}/volumes/{id}/failure-mode:
+    put:
+      description: |
+        Set the behaviour of the volume identified by id when responding to observed replica failure. This modifies the protected  StorageOS system label "storageos.com/failure-mode".
+        This request may either specify a precise failure threshold or a more flexible intent-based failure mode operating with respect  to the volume's current replication target.
+        A request will be denied if the current state of the volume does not satisfy the requested failure behaviour.
+      operationId: setFailureMode
+      parameters:
+      - description: ID of a Namespace
+        explode: false
+        in: path
+        name: namespaceID
+        required: true
+        schema:
+          $ref: '#/components/schemas/NamespaceID'
+        style: simple
+      - description: ID of a Volume
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/VolumeID'
+        style: simple
+      - description: |
+          If set to true this value indicates that the user wants to ignore entity version constraints, thereby "forcing" the operation.
+        explode: true
+        in: query
+        name: ignore-version
+        required: false
+        schema:
+          $ref: '#/components/schemas/IgnoreVersion'
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetFailureModeRequest'
+        description: Failure mode to use
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Volume'
+          description: The updated volume information.
+        "400":
+          content:
+            application/json:
+              example:
+                error: a short description of the validation failure
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request does not conform to the API specification.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "404":
+          content:
+            application/json:
+              example:
+                error: not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            A referenced resource does not exist.
+        "409":
+          content:
+            application/json:
+              example:
+                error: label \"a\" with value \"b\" conflicts with label \"c\" with
+                  value \"d\"
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested configuration change for the referenced entity cannot be made as it would result in a conflict which invalidates the resultant config.
+        "412":
+          content:
+            application/json:
+              example:
+                error: attempting to write stale object
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The entity to be wrote has been concurrently updated by another request - the submitted entity data has been replaced.
+            The caller should fetch the entity again, check the actions are still required and resubmit the request with the new entity version field.
+        "422":
+          content:
+            application/json:
+              example:
+                error: invalid state for operation (currently "deleted")
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            An action was requested that cannot be performed on the entity in it's current state.
+            As an example, this error might be returned when trying to delete a currently mounted volume.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Set the failure mode of the volume.
   /namespaces/{namespaceID}/volumes/{id}/size:
     put:
       description: |
@@ -4361,6 +4607,78 @@ paths:
       security:
       - jwt: []
       summary: Retrieves a diagnostics bundle from the target node
+  /diagnostics/{id}:
+    get:
+      description: |
+        Requests that the target node gathers detailed information about the state of the cluster, using it to then build and return a bundle which can be used for troubleshooting.
+        The request will only be served when the authenticated user is an administrator.
+        The node will attempt to gather information about its local state, as well as cluster-wide state in the cluster.
+      operationId: getSingleNodeDiagnostics
+      parameters:
+      - description: ID of a node
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/NodeID'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/gzip:
+              schema:
+                format: binary
+                type: string
+          description: |
+            A diagnostics bundle was successfully built and returned.
+        "401":
+          content:
+            application/json:
+              example:
+                error: authentication required
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The requested endpoint requires authentication - you must log in first.
+            If attempting to log in, your credentials were not recognised.
+        "403":
+          content:
+            application/json:
+              example:
+                error: unauthorised
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The authenticated user does not have permission to perform the requested action.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The request caused an internal server error and should be retried.
+            Check the health of the node/cluster and if the error persists, contact support.
+        "502":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is returning an incomplete diagnostic bundle.
+            A bundle may contain partial information if one or more nodes failed to respond, or some other error occured during the collection process.
+            The returned bundle is still valid and should be sent to StorageOS.
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: |
+            The server is currently unable to handle the request due to a temporary store failure.
+            Check the health of the node/cluster and if the error persists, contact support.
+      security:
+      - jwt: []
+      summary: Retrieves a single node diagnostics bundle from the target node
   /openapi:
     get:
       description: Serves this openapi spec file
@@ -4425,6 +4743,12 @@ components:
         type: string
       style: form
   requestBodies:
+    SetComputeOnlyNodeData:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SetComputeOnlyNodeData'
+      required: true
     CreateVolumeData:
       content:
         application/json:
@@ -4649,6 +4973,16 @@ components:
             $ref: '#/components/schemas/Error'
       description: |
         A referenced entity is currently in use.
+    InvalidResult:
+      content:
+        application/json:
+          example:
+            error: label \"a\" with value \"b\" conflicts with label \"c\" with value
+              \"d\"
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: |
+        The requested configuration change for the referenced entity cannot be made as it would result in a conflict which invalidates the resultant config.
     Locked:
       content:
         application/json:
@@ -4746,6 +5080,16 @@ components:
       - host
       example: host
       readOnly: true
+      type: string
+    FailureModeIntent:
+      description: "The intent-based failure mode behaviour of a volume. The default\
+        \ behaviour for a volume is \"hard\", in the absence of a directly  configured\
+        \ intent or numerical failure threshold. \n"
+      enum:
+      - hard
+      - soft
+      - alwayson
+      example: hard
       type: string
     NodeHealth:
       description: |
@@ -4893,7 +5237,7 @@ components:
             $ref: '#/components/schemas/NfsAcl'
           type: array
       type: object
-    NFSConfig:
+    NfsConfig:
       example:
         exports:
         - path: /very/important/files/
@@ -5241,7 +5585,7 @@ components:
           - $ref: '#/components/schemas/NodeID'
           readOnly: true
         nfs:
-          $ref: '#/components/schemas/NFSConfig'
+          $ref: '#/components/schemas/NfsConfig'
         namespaceID:
           allOf:
           - $ref: '#/components/schemas/NamespaceID'
@@ -5679,6 +6023,41 @@ components:
       items:
         $ref: '#/components/schemas/Volume'
       type: array
+    SetFailureThresholdRequestData:
+      properties:
+        failureThreshold:
+          description: |
+            The minimum number of replicas required to be online and receiving writes in order for the volume to remain read-writable. This value replaces any previously set failure threshold or intent-based failure mode.
+          example: 2
+          maximum: 5
+          minimum: 0
+          type: uint64
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      type: object
+    SetFailureModeIntentRequestData:
+      properties:
+        mode:
+          $ref: '#/components/schemas/FailureModeIntent'
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      type: object
+    SetFailureModeRequest:
+      oneOf:
+      - $ref: '#/components/schemas/SetFailureThresholdRequestData'
+      - $ref: '#/components/schemas/SetFailureModeIntentRequestData'
     AuthUserData:
       example:
         username: admin
@@ -5885,6 +6264,26 @@ components:
           maxLength: 30
           type: string
       title: UpdateNodeData
+      type: object
+    SetComputeOnlyNodeData:
+      example:
+        computeOnly: true
+        version: NDI0MjQyNDI0MjQyNDI0MjQy
+      properties:
+        computeOnly:
+          description: |
+            Marks the node's desired configuration  state as compute-only. This will result in the node being avoided for volume placement
+          example: true
+          type: boolean
+        version:
+          description: |
+            An opaque representation of an entity version at the time it was obtained from the API.
+            All operations that mutate the entity must include this version field in the request unchanged.
+            The format of this type is undefined and may change but the defined properties will not change.
+          example: NDI0MjQyNDI0MjQyNDI0MjQy
+          maxLength: 30
+          type: string
+      title: SetComputeOnlyNodeData
       type: object
     _policies_specs:
       properties:
