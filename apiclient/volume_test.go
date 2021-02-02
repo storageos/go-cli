@@ -1177,7 +1177,7 @@ func TestClient_UpdateNFSVolumeExports(t *testing.T) {
 	}
 }
 
-func TestClient_ResizeVolume(t *testing.T) {
+func TestClientResizeVolume(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -1275,6 +1275,302 @@ func TestClient_ResizeVolume(t *testing.T) {
 
 			if !reflect.DeepEqual(tt.Transport.ResizeVolumeGotParams, tt.wantParams) {
 				t.Errorf("ResizeVolume() got = %+v, want %+v", tt.Transport.ResizeVolumeGotParams, tt.wantParams)
+			}
+		})
+	}
+}
+
+func TestClientSetFailureModeIntent(t *testing.T) {
+	t.Parallel()
+
+	mockErr := errors.New("arbitrary failure")
+
+	tests := []struct {
+		name string
+
+		transport *mockTransport
+
+		intent string
+		params *SetFailureModeRequestParams
+
+		wantResource *volume.Resource
+		wantErr      error
+		wantIntent   string
+		wantParams   *SetFailureModeRequestParams
+	}{
+		{
+			name: "ok, nil request params",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{Version: "42"},
+
+				SetFailureModeIntentResource: &volume.Resource{Version: "43"},
+			},
+
+			intent: "hard",
+			params: nil,
+
+			wantResource: &volume.Resource{Version: "43"},
+			wantErr:      nil,
+			wantIntent:   "hard",
+			wantParams: &SetFailureModeRequestParams{
+				CASVersion: "42",
+			},
+		},
+		{
+			name: "ok, empty request params",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{Version: "42"},
+
+				SetFailureModeIntentResource: &volume.Resource{Version: "43"},
+			},
+
+			intent: "soft",
+			params: &SetFailureModeRequestParams{
+				CASVersion: "",
+			},
+
+			wantResource: &volume.Resource{Version: "43"},
+			wantErr:      nil,
+			wantIntent:   "soft",
+			wantParams: &SetFailureModeRequestParams{
+				CASVersion: "42",
+			},
+		},
+		{
+			name: "ok, version set in request params",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{Version: "41"},
+
+				SetFailureModeIntentResource: &volume.Resource{Version: "43"},
+			},
+
+			intent: "alwayson",
+			params: &SetFailureModeRequestParams{
+				CASVersion: "42",
+			},
+
+			wantResource: &volume.Resource{Version: "43"},
+			wantErr:      nil,
+			wantIntent:   "alwayson",
+			wantParams: &SetFailureModeRequestParams{
+				CASVersion: "42",
+			},
+		},
+		{
+			name: "fails to fetch volume when no version in request params",
+
+			transport: &mockTransport{
+				GetVolumeError: mockErr,
+
+				SetFailureModeIntentError: errors.New("do not call"),
+			},
+
+			intent: "alwayson",
+			params: &SetFailureModeRequestParams{},
+
+			wantResource: nil,
+			wantErr:      mockErr,
+			wantIntent:   "",  // not invoked
+			wantParams:   nil, // not invoked
+		},
+		{
+			name: "fails to set failure mode via transport",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{Version: "42"},
+
+				SetFailureModeIntentError: mockErr,
+			},
+
+			intent: "hard",
+			params: nil,
+
+			wantResource: nil,
+			wantErr:      mockErr,
+			wantIntent:   "hard",
+			wantParams: &SetFailureModeRequestParams{
+				CASVersion: "42",
+			},
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			c := New()
+			err := c.ConfigureTransport(tt.transport)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			gotResource, gotErr := c.SetFailureModeIntent(context.Background(), "namespace-id", "volume-id", tt.intent, tt.params)
+			if !errors.Is(gotErr, tt.wantErr) {
+				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+			}
+
+			if !reflect.DeepEqual(gotResource, tt.wantResource) {
+				t.Errorf("got resource %v, want %v", gotResource, tt.wantResource)
+			}
+
+			if tt.transport.SetFailureModeIntentGotIntent != tt.wantIntent {
+				t.Errorf("transport got intent %v, want %v", tt.transport.SetFailureModeIntentGotIntent, tt.wantIntent)
+			}
+
+			if !reflect.DeepEqual(tt.transport.SetFailureModeIntentGotParams, tt.wantParams) {
+				t.Errorf("got request params %v, want %v", pretty.Sprint(tt.transport.SetFailureModeIntentGotParams), pretty.Sprint(tt.wantParams))
+			}
+		})
+	}
+}
+
+func TestClientSetFailureThreshold(t *testing.T) {
+	t.Parallel()
+
+	mockErr := errors.New("unknown error")
+
+	tests := []struct {
+		name string
+
+		transport *mockTransport
+
+		threshold uint64
+		params    *SetFailureModeRequestParams
+
+		wantResource  *volume.Resource
+		wantErr       error
+		wantThreshold uint64
+		wantParams    *SetFailureModeRequestParams
+	}{
+		{
+			name: "ok, nil request params",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{Version: "42"},
+
+				SetFailureThresholdResource: &volume.Resource{Version: "43"},
+			},
+
+			threshold: 2,
+			params:    nil,
+
+			wantResource:  &volume.Resource{Version: "43"},
+			wantErr:       nil,
+			wantThreshold: 2,
+			wantParams: &SetFailureModeRequestParams{
+				CASVersion: "42",
+			},
+		},
+		{
+			name: "ok, empty request params",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{Version: "42"},
+
+				SetFailureThresholdResource: &volume.Resource{Version: "43"},
+			},
+
+			threshold: 1,
+			params: &SetFailureModeRequestParams{
+				CASVersion: "",
+			},
+
+			wantResource:  &volume.Resource{Version: "43"},
+			wantErr:       nil,
+			wantThreshold: 1,
+			wantParams: &SetFailureModeRequestParams{
+				CASVersion: "42",
+			},
+		},
+		{
+			name: "ok, version set in request params",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{Version: "41"},
+
+				SetFailureThresholdResource: &volume.Resource{Version: "43"},
+			},
+
+			threshold: 0,
+			params: &SetFailureModeRequestParams{
+				CASVersion: "42",
+			},
+
+			wantResource:  &volume.Resource{Version: "43"},
+			wantErr:       nil,
+			wantThreshold: 0,
+			wantParams: &SetFailureModeRequestParams{
+				CASVersion: "42",
+			},
+		},
+		{
+			name: "fails to fetch volume when no version in request params",
+
+			transport: &mockTransport{
+				GetVolumeError: mockErr,
+
+				SetFailureThresholdError: errors.New("do not call"),
+			},
+
+			threshold: 3,
+			params:    &SetFailureModeRequestParams{},
+
+			wantResource:  nil,
+			wantErr:       mockErr,
+			wantThreshold: 0,   // not invoked
+			wantParams:    nil, // not invoked
+		},
+		{
+			name: "fails to set failure mode via transport",
+
+			transport: &mockTransport{
+				GetVolumeResource: &volume.Resource{Version: "42"},
+
+				SetFailureThresholdError: mockErr,
+			},
+
+			threshold: 2,
+			params:    nil,
+
+			wantResource:  nil,
+			wantErr:       mockErr,
+			wantThreshold: 2,
+			wantParams: &SetFailureModeRequestParams{
+				CASVersion: "42",
+			},
+		},
+	}
+	for _, tt := range tests {
+		var tt = tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			c := New()
+			err := c.ConfigureTransport(tt.transport)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			gotResource, gotErr := c.SetFailureThreshold(context.Background(), "namespace-id", "volume-id", tt.threshold, tt.params)
+			if !errors.Is(gotErr, tt.wantErr) {
+				t.Errorf("got error %v, want %v", gotErr, tt.wantErr)
+			}
+
+			if !reflect.DeepEqual(gotResource, tt.wantResource) {
+				t.Errorf("got resource %v, want %v", gotResource, tt.wantResource)
+			}
+
+			if tt.transport.SetFailureThresholdGotThreshold != tt.wantThreshold {
+				t.Errorf("transport got threshold %v, want %v", tt.transport.SetFailureThresholdGotThreshold, tt.wantThreshold)
+			}
+
+			if !reflect.DeepEqual(tt.transport.SetFailureThresholdGotParams, tt.wantParams) {
+				t.Errorf("got request params %v, want %v", pretty.Sprint(tt.transport.SetFailureThresholdGotParams), pretty.Sprint(tt.wantParams))
 			}
 		})
 	}

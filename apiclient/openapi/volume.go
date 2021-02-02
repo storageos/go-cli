@@ -25,6 +25,8 @@ import (
 //  the duration given as the maximum amount of time allowed for the request
 //  before it times out.
 func (o *OpenAPI) CreateVolume(ctx context.Context, namespace id.Namespace, name, description string, fs volume.FsType, sizeBytes uint64, labels labels.Set, params *apiclient.CreateVolumeRequestParams) (*volume.Resource, error) {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
 
 	fsType, err := o.codec.encodeFsType(fs)
 	if err != nil {
@@ -369,6 +371,63 @@ func (o *OpenAPI) UpdateNFSVolumeMountEndpoint(
 	}
 
 	return nil
+}
+
+// SetFailureModeIntent attempts to perform an update of the failure mode
+// for the target volume to the provided intent-based behaviour.
+func (o *OpenAPI) SetFailureModeIntent(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, intent string, params *apiclient.SetFailureModeRequestParams) (*volume.Resource, error) {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	partialRequest := openapi.SetFailureModeRequest{
+		Mode: openapi.FailureModeIntent(intent),
+	}
+
+	return o.setFailureMode(ctx, namespaceID, volumeID, partialRequest, params)
+}
+
+// SetFailureThreshold attempts to perform an update of the failure mode
+// for the target volume to the provided numerical threshold.
+func (o *OpenAPI) SetFailureThreshold(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, threshold uint64, params *apiclient.SetFailureModeRequestParams) (*volume.Resource, error) {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
+	partialRequest := openapi.SetFailureModeRequest{
+		FailureThreshold: threshold,
+	}
+
+	return o.setFailureMode(ctx, namespaceID, volumeID, partialRequest, params)
+}
+
+// setFailureMode takes the partial request provided to it, completing it as
+// appropriate for the given params.
+func (o *OpenAPI) setFailureMode(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, partialRequest openapi.SetFailureModeRequest, params *apiclient.SetFailureModeRequestParams) (*volume.Resource, error) {
+	opts := &openapi.SetFailureModeOpts{
+		IgnoreVersion: optional.NewBool(true),
+	}
+
+	if params != nil && params.CASVersion != "" {
+		partialRequest.Version = params.CASVersion.String()
+		opts.IgnoreVersion = optional.NewBool(false)
+	}
+
+	model, resp, err := o.client.DefaultApi.SetFailureMode(
+		ctx,
+		namespaceID.String(),
+		volumeID.String(),
+		partialRequest,
+		opts,
+	)
+	if err != nil {
+		switch v := mapOpenAPIError(err, resp).(type) {
+		case notFoundError:
+			return nil, apiclient.NewVolumeNotFoundError(v.msg)
+		default:
+			return nil, v
+		}
+	}
+
+	return o.codec.decodeVolume(model)
 }
 
 // DetachVolume makes a detach request for volumeID in namespaceID.

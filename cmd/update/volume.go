@@ -48,6 +48,7 @@ func newVolumeUpdate(client Client, config ConfigProvider) *cobra.Command {
 		newVolumeDescription(os.Stdout, client, config),
 		newVolumeLabels(os.Stdout, client, config),
 		newVolumeSize(os.Stdout, client, config),
+		newVolumeFailureMode(os.Stdout, client, config),
 	)
 
 	return command

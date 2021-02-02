@@ -129,6 +129,12 @@ type Transport interface {
 	// UpdateNFSVolumeMountEndpoint attempts to perform an update of the NFS
 	// mount endpoint for the specific volume.
 	UpdateNFSVolumeMountEndpoint(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, endpoint string, params *UpdateNFSVolumeMountEndpointRequestParams) error
+	// SetFailureModeIntent attempts to perform an update of the failure mode
+	// for the target volume to the provided intent-based behaviour.
+	SetFailureModeIntent(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, intent string, params *SetFailureModeRequestParams) (*volume.Resource, error)
+	// SetFailureThreshold attempts to perform an update of the failure mode
+	// for the target volume to the provided numerical threshold.
+	SetFailureThreshold(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, threshold uint64, params *SetFailureModeRequestParams) (*volume.Resource, error)
 
 	// DeleteVolume makes a delete request for volumeID in namespaceID.
 	//

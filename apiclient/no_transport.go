@@ -127,6 +127,14 @@ func (t *noTransport) UpdateNFSVolumeMountEndpoint(ctx context.Context, namespac
 	return ErrNoTransportConfigured
 }
 
+func (t *noTransport) SetFailureModeIntent(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, intent string, params *SetFailureModeRequestParams) (*volume.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
+func (t *noTransport) SetFailureThreshold(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, threshold uint64, params *SetFailureModeRequestParams) (*volume.Resource, error) {
+	return nil, ErrNoTransportConfigured
+}
+
 func (t *noTransport) DeleteUser(ctx context.Context, uid id.User, params *DeleteUserRequestParams) error {
 	return ErrNoTransportConfigured
 }

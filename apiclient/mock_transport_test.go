@@ -143,6 +143,20 @@ type mockTransport struct {
 	UpdateNFSVolumeMountEndpointGotParams      *UpdateNFSVolumeMountEndpointRequestParams
 	UpdateNFSVolumeMountEndpointError          error
 
+	SetFailureModeIntentGotNamespaceID id.Namespace
+	SetFailureModeIntentGotVolumeID    id.Volume
+	SetFailureModeIntentGotIntent      string
+	SetFailureModeIntentGotParams      *SetFailureModeRequestParams
+	SetFailureModeIntentResource       *volume.Resource
+	SetFailureModeIntentError          error
+
+	SetFailureThresholdGotNamespaceID id.Namespace
+	SetFailureThresholdGotVolumeID    id.Volume
+	SetFailureThresholdGotThreshold   uint64
+	SetFailureThresholdGotParams      *SetFailureModeRequestParams
+	SetFailureThresholdResource       *volume.Resource
+	SetFailureThresholdError          error
+
 	DeleteUserGotID     id.User
 	DeleteUserGotParams *DeleteUserRequestParams
 	DeleteUserError     error
@@ -330,6 +344,22 @@ func (m *mockTransport) UpdateNFSVolumeMountEndpoint(ctx context.Context, namesp
 	m.UpdateNFSVolumeMountEndpointGotEndpoint = endpoint
 	m.UpdateNFSVolumeMountEndpointGotParams = params
 	return m.UpdateNFSVolumeMountEndpointError
+}
+
+func (m *mockTransport) SetFailureModeIntent(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, intent string, params *SetFailureModeRequestParams) (*volume.Resource, error) {
+	m.SetFailureModeIntentGotNamespaceID = namespaceID
+	m.SetFailureModeIntentGotVolumeID = volumeID
+	m.SetFailureModeIntentGotIntent = intent
+	m.SetFailureModeIntentGotParams = params
+	return m.SetFailureModeIntentResource, m.SetFailureModeIntentError
+}
+
+func (m *mockTransport) SetFailureThreshold(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, threshold uint64, params *SetFailureModeRequestParams) (*volume.Resource, error) {
+	m.SetFailureThresholdGotNamespaceID = namespaceID
+	m.SetFailureThresholdGotVolumeID = volumeID
+	m.SetFailureThresholdGotThreshold = threshold
+	m.SetFailureThresholdGotParams = params
+	return m.SetFailureThresholdResource, m.SetFailureThresholdError
 }
 
 func (m *mockTransport) UpdateLicence(ctx context.Context, licence []byte, params *UpdateLicenceRequestParams) (*licence.Resource, error) {

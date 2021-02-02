@@ -38,6 +38,8 @@ type Client interface {
 	UpdateVolumeDescription(ctx context.Context, nsID id.Namespace, volID id.Volume, description string, params *apiclient.UpdateVolumeRequestParams) (*volume.Resource, error)
 	UpdateVolumeLabels(ctx context.Context, nsID id.Namespace, volID id.Volume, labels labels.Set, params *apiclient.UpdateVolumeRequestParams) (*volume.Resource, error)
 	ResizeVolume(ctx context.Context, nsID id.Namespace, volID id.Volume, sizeBytes uint64, params *apiclient.ResizeVolumeRequestParams) (*volume.Resource, error)
+	SetFailureModeIntent(ctx context.Context, nsID id.Namespace, volID id.Volume, intent string, params *apiclient.SetFailureModeRequestParams) (*volume.Resource, error)
+	SetFailureThreshold(ctx context.Context, nsID id.Namespace, volID id.Volume, threshold uint64, params *apiclient.SetFailureModeRequestParams) (*volume.Resource, error)
 
 	GetVolumeByName(ctx context.Context, namespace id.Namespace, name string) (*volume.Resource, error)
 	GetVolume(ctx context.Context, namespaceID id.Namespace, uid id.Volume) (*volume.Resource, error)
@@ -52,6 +54,7 @@ type Displayer interface {
 	UpdateVolumeDescription(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error
 	UpdateVolumeLabels(ctx context.Context, w io.Writer, volUpdate output.VolumeUpdate) error
 	AsyncRequest(ctx context.Context, w io.Writer) error
+	SetFailureMode(ctx context.Context, w io.Writer, updatedVol output.VolumeUpdate) error
 }
 
 // NewCommand configures the set of commands which are grouped by the "update" verb.

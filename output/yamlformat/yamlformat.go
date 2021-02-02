@@ -94,6 +94,11 @@ func (d *Displayer) UpdateNFSVolumeExports(ctx context.Context, w io.Writer, vol
 	return nil
 }
 
+// SetFailureMode encodes resource as YAML, writing the result to w.
+func (d *Displayer) SetFailureMode(ctx context.Context, w io.Writer, updatedVol output.VolumeUpdate) error {
+	return d.encode(w, updatedVol)
+}
+
 // -----------------------------------------------------------------------------
 // GET
 // -----------------------------------------------------------------------------

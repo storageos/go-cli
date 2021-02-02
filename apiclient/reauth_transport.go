@@ -409,6 +409,34 @@ func (tr *TransportWithReauth) UpdateNFSVolumeMountEndpoint(ctx context.Context,
 	return err
 }
 
+// SetFailureModeIntent wraps the inner transport's call with a reauthenticate and retry
+// upon encountering an authentication error.
+func (tr *TransportWithReauth) SetFailureModeIntent(ctx context.Context, nsID id.Namespace, volID id.Volume, intent string, params *SetFailureModeRequestParams) (*volume.Resource, error) {
+
+	var updated *volume.Resource
+	err := tr.doWithReauth(ctx, func() error {
+		var err error
+		updated, err = tr.inner.SetFailureModeIntent(ctx, nsID, volID, intent, params)
+		return err
+	})
+
+	return updated, err
+}
+
+// SetFailureThreshold wraps the inner transport's call with a reauthenticate and retry
+// upon encountering an authentication error.
+func (tr *TransportWithReauth) SetFailureThreshold(ctx context.Context, nsID id.Namespace, volID id.Volume, intent uint64, params *SetFailureModeRequestParams) (*volume.Resource, error) {
+
+	var updated *volume.Resource
+	err := tr.doWithReauth(ctx, func() error {
+		var err error
+		updated, err = tr.inner.SetFailureThreshold(ctx, nsID, volID, intent, params)
+		return err
+	})
+
+	return updated, err
+}
+
 // DeleteVolume wraps the inner transport's call with a reauthenticate and retry
 // upon encountering an authentication error.
 func (tr *TransportWithReauth) DeleteVolume(ctx context.Context, namespaceID id.Namespace, volumeID id.Volume, params *DeleteVolumeRequestParams) error {

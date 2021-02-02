@@ -165,6 +165,12 @@ type ResizeVolumeRequestParams struct {
 	CASVersion version.Version
 }
 
+// SetFailureModeRequestParams contains request parameters for a set failure
+// mode volume operation.
+type SetFailureModeRequestParams struct {
+	CASVersion version.Version
+}
+
 // GetVolumeByName requests the volume resource which has name in namespace.
 //
 // The resource model for the API is build around using unique identifiers,
@@ -578,4 +584,68 @@ func (c *Client) UpdateNFSVolumeMountEndpoint(
 	}
 
 	return c.Transport.UpdateNFSVolumeMountEndpoint(ctx, namespaceID, volumeID, endpoint, newParams)
+}
+
+// SetFailureModeIntent attempts to set the intent based failure mode for the
+// target volume to the behaviour with the provided name.
+//
+// The behaviour of the operation is dictated by params:
+//
+//  Version constraints:
+//  - If params is nil or params.CASVersion is empty then the attach request is
+//    unconditional
+//  - If params.CASVersion is set, the request is conditional upon it matching
+//    the volume entity's version as seen by the server.
+func (c *Client) SetFailureModeIntent(
+	ctx context.Context,
+	namespaceID id.Namespace,
+	volumeID id.Volume,
+	intent string,
+	params *SetFailureModeRequestParams,
+) (*volume.Resource, error) {
+	newParams := &SetFailureModeRequestParams{}
+
+	if params == nil || params.CASVersion == "" {
+		v, err := c.Transport.GetVolume(ctx, namespaceID, volumeID)
+		if err != nil {
+			return nil, err
+		}
+		newParams.CASVersion = v.Version
+	} else {
+		newParams.CASVersion = params.CASVersion
+	}
+
+	return c.Transport.SetFailureModeIntent(ctx, namespaceID, volumeID, intent, newParams)
+}
+
+// SetFailureThreshold attempts to set the failure mode for the target volume
+// to the numerical threshold given.
+//
+// The behaviour of the operation is dictated by params:
+//
+//  Version constraints:
+//  - If params is nil or params.CASVersion is empty then the attach request is
+//    unconditional
+//  - If params.CASVersion is set, the request is conditional upon it matching
+//    the volume entity's version as seen by the server.
+func (c *Client) SetFailureThreshold(
+	ctx context.Context,
+	namespaceID id.Namespace,
+	volumeID id.Volume,
+	threshold uint64,
+	params *SetFailureModeRequestParams,
+) (*volume.Resource, error) {
+	newParams := &SetFailureModeRequestParams{}
+
+	if params == nil || params.CASVersion == "" {
+		v, err := c.Transport.GetVolume(ctx, namespaceID, volumeID)
+		if err != nil {
+			return nil, err
+		}
+		newParams.CASVersion = v.Version
+	} else {
+		newParams.CASVersion = params.CASVersion
+	}
+
+	return c.Transport.SetFailureThreshold(ctx, namespaceID, volumeID, threshold, newParams)
 }

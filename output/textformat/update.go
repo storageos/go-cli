@@ -106,6 +106,21 @@ func (d *Displayer) UpdateNFSVolumeExports(ctx context.Context, w io.Writer, vol
 	return printNFSExportConfigs(w, exports)
 }
 
+// SetFailureMode writes a success message to w with the updated volume.
+func (d *Displayer) SetFailureMode(ctx context.Context, w io.Writer, updatedVol output.VolumeUpdate) error {
+	err := printVolumeUpdate(w, updatedVol)
+	if err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprintf(w, "\nVolume %s (%s) updated. Failure mode behaviour changed.\n",
+		updatedVol.Name,
+		updatedVol.ID,
+	)
+
+	return err
+}
+
 func printVolumeUpdate(w io.Writer, updateVol output.VolumeUpdate) error {
 	table, write := createTable(nil)
 	table.AddRow("Name:", updateVol.Name)
