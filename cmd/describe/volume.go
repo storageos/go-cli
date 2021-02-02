@@ -23,8 +23,9 @@ type volumeCommand struct {
 	client  Client
 	display Displayer
 
-	namespace string
-	selectors []string
+	allNamespaces bool
+	namespace     string
+	selectors     []string
 
 	writer io.Writer
 }
@@ -38,6 +39,47 @@ func (c *volumeCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, args
 	set, err := selectors.NewSetFromStrings(c.selectors...)
 	if err != nil {
 		return err
+	}
+
+	if c.allNamespaces {
+		volumes, err := c.client.GetAllVolumes(ctx)
+		if err != nil {
+			return err
+		}
+
+		volumes = set.FilterVolumes(volumes)
+
+		// If no volumes match the filter then return
+		if len(volumes) == 0 {
+			return c.display.DescribeVolume(ctx, c.writer, nil)
+		}
+
+		namespaces, err := c.getNamespaces(ctx)
+		if err != nil {
+			return err
+		}
+
+		nodes, err := c.getNodeMapping(ctx)
+		if err != nil {
+			return err
+		}
+
+		outputVolumes := make([]*output.Volume, 0, len(volumes))
+		for _, v := range volumes {
+
+			ns, ok := namespaces[v.Namespace]
+			if !ok {
+				return clierr.ErrNoNamespaceSpecified
+			}
+
+			outputVolumes = append(outputVolumes, output.NewVolume(v, ns, nodes))
+		}
+
+		return c.display.DescribeListVolumes(
+			ctx,
+			c.writer,
+			outputVolumes,
+		)
 	}
 
 	var ns *namespace.Resource
@@ -134,6 +176,23 @@ func (c *volumeCommand) listVolumes(ctx context.Context, ns id.Namespace, vols [
 	return c.client.GetNamespaceVolumesByUID(ctx, ns, volIDs...)
 }
 
+// getNamespaceNames returns a map with namespace id as keys and namespace names
+// (string) as value.
+// List of volumes in input is used to filter out all unnecessary namespaces
+func (c *volumeCommand) getNamespaces(ctx context.Context) (map[id.Namespace]*namespace.Resource, error) {
+	namespaces, err := c.client.ListNamespaces(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	namespacesMap := make(map[id.Namespace]*namespace.Resource)
+	for _, n := range namespaces {
+		namespacesMap[n.ID] = n
+	}
+
+	return namespacesMap, nil
+}
+
 func newVolume(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
 	c := &volumeCommand{
 		config: config,
@@ -181,6 +240,8 @@ $ storageos describe volume --namespace my-namespace-name my-volume-name
 		// we don't need to barf the usage template.
 		SilenceUsage: true,
 	}
+
+	cobraCommand.Flags().BoolVarP(&c.allNamespaces, "all-namespaces", "A", false, "retrieves volumes from all accessible namespaces. This option overrides the namespace configuration")
 
 	flagutil.SupportSelectors(cobraCommand.Flags(), &c.selectors)
 
