@@ -286,7 +286,7 @@ $ storageos get volume --namespace my-namespace-name my-volume-name
 		SilenceUsage: true,
 	}
 
-	cobraCommand.Flags().BoolVar(&c.allNamespaces, "all-namespaces", false, "retrieves volumes from all accessible namespaces. This option overrides the namespace configuration")
+	cobraCommand.Flags().BoolVarP(&c.allNamespaces, "all-namespaces", "A", false, "retrieves volumes from all accessible namespaces. This option overrides the namespace configuration")
 
 	flagutil.SupportSelectors(cobraCommand.Flags(), &c.selectors)
 
