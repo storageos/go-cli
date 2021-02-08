@@ -148,6 +148,21 @@ func (tr *TransportWithReauth) GetDiagnostics(ctx context.Context) (*diagnostics
 	return diagnostics, err
 }
 
+// GetSingleNodeDiagnostics wraps the inner transport's call with a
+// reauthenticate and retry upon encountering an authentication error.
+func (tr *TransportWithReauth) GetSingleNodeDiagnostics(ctx context.Context, nodeID id.Node) (*diagnostics.BundleReadCloser, error) {
+
+	var diagnostics *diagnostics.BundleReadCloser
+	err := tr.doWithReauth(ctx, func() error {
+		var err error
+		diagnostics, err = tr.inner.GetSingleNodeDiagnostics(ctx, nodeID)
+
+		return err
+	})
+
+	return diagnostics, err
+}
+
 // GetPolicyGroup wraps the inner transport's call with a reauthenticate and
 // retry upon encountering an authentication error.
 func (tr *TransportWithReauth) GetPolicyGroup(ctx context.Context, uid id.PolicyGroup) (*policygroup.Resource, error) {

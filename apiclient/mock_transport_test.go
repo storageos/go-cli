@@ -40,6 +40,9 @@ type mockTransport struct {
 	GetDiagnosticsReadCloser *diagnostics.BundleReadCloser
 	GetDiagnosticsError      error
 
+	GetSingleNodeDiagnosticsReadCloser *diagnostics.BundleReadCloser
+	GetSingleNodeDiagnosticsError      error
+
 	GetNodeGotID    id.Node
 	GetNodeResource *node.Resource
 	GetNodeError    error
@@ -226,6 +229,10 @@ func (m *mockTransport) ListUsers(ctx context.Context) ([]*user.Resource, error)
 
 func (m *mockTransport) GetDiagnostics(ctx context.Context) (*diagnostics.BundleReadCloser, error) {
 	return m.GetDiagnosticsReadCloser, m.GetDiagnosticsError
+}
+
+func (m *mockTransport) GetSingleNodeDiagnostics(ctx context.Context, nodeID id.Node) (*diagnostics.BundleReadCloser, error) {
+	return m.GetSingleNodeDiagnosticsReadCloser, m.GetSingleNodeDiagnosticsError
 }
 
 func (m *mockTransport) GetNode(ctx context.Context, nodeID id.Node) (*node.Resource, error) {

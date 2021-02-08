@@ -44,6 +44,8 @@ type Client interface {
 	GetCluster(ctx context.Context) (*cluster.Resource, error)
 	GetLicence(ctx context.Context) (*licence.Resource, error)
 	GetDiagnostics(ctx context.Context) (*diagnostics.BundleReadCloser, error)
+	GetSingleNodeDiagnostics(ctx context.Context, id id.Node) (*diagnostics.BundleReadCloser, error)
+	GetSingleNodeDiagnosticsByName(ctx context.Context, name string) (*diagnostics.BundleReadCloser, error)
 
 	GetUser(ctx context.Context, userID id.User) (*user.Resource, error)
 	GetUserByName(ctx context.Context, username string) (*user.Resource, error)

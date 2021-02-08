@@ -43,6 +43,10 @@ func (t *noTransport) GetDiagnostics(ctx context.Context) (*diagnostics.BundleRe
 	return nil, ErrNoTransportConfigured
 }
 
+func (t *noTransport) GetSingleNodeDiagnostics(ctx context.Context, nodeID id.Node) (*diagnostics.BundleReadCloser, error) {
+	return nil, ErrNoTransportConfigured
+}
+
 func (t *noTransport) GetUser(ctx context.Context, username id.User) (*user.Resource, error) {
 	return nil, ErrNoTransportConfigured
 }

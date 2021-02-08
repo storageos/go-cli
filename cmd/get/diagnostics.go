@@ -12,7 +12,9 @@ import (
 
 	"code.storageos.net/storageos/c2-cli/apiclient"
 	"code.storageos.net/storageos/c2-cli/cmd/runwrappers"
+	"code.storageos.net/storageos/c2-cli/diagnostics"
 	"code.storageos.net/storageos/c2-cli/pkg/cmdcontext"
+	"code.storageos.net/storageos/c2-cli/pkg/id"
 )
 
 type diagnosticsCommand struct {
@@ -21,11 +23,47 @@ type diagnosticsCommand struct {
 	display Displayer
 
 	outputPath string
+	target     string
 
 	writer io.Writer
 }
 
 func (c *diagnosticsCommand) runWithCtx(ctx context.Context, cmd *cobra.Command, _ []string) error {
+
+	var bundle *diagnostics.BundleReadCloser
+	var err error
+
+	if c.target != "" {
+
+		// user wants a single node bundle
+
+		bundle, err = c.getLocalBundle(ctx)
+		if err != nil {
+			return err
+		}
+
+	} else {
+
+		// user wants a global bundle with all node states
+
+		bundle, err = c.getGlobalBundle(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	defer bundle.Close()
+
+	// save the resulting bundle
+
+	err = c.saveOutput(ctx, bundle)
+	if err != nil {
+		return err
+	}
+
+	return c.display.GetDiagnostics(ctx, c.writer, c.outputPath)
+}
+
+func (c *diagnosticsCommand) getGlobalBundle(ctx context.Context) (*diagnostics.BundleReadCloser, error) {
 
 	// Slightly inefficient in case of fs failure, but the client now needs to
 	// care about the server specified name.
@@ -41,10 +79,47 @@ func (c *diagnosticsCommand) runWithCtx(ctx context.Context, cmd *cobra.Command,
 
 		default:
 			// If we failed to get a bundle at all then remove the file we created.
-			return err
+			return nil, err
 		}
 	}
-	defer bundle.Close()
+
+	return bundle, nil
+}
+
+func (c *diagnosticsCommand) getLocalBundle(ctx context.Context) (*diagnostics.BundleReadCloser, error) {
+
+	useIDs, err := c.config.UseIDs()
+	if err != nil {
+		return nil, err
+	}
+
+	var bundle *diagnostics.BundleReadCloser
+
+	if !useIDs {
+		bundle, err = c.client.GetSingleNodeDiagnosticsByName(ctx, c.target)
+	} else {
+		bundle, err = c.client.GetSingleNodeDiagnostics(ctx, id.Node(c.target))
+	}
+
+	if err != nil {
+		switch v := err.(type) {
+
+		case apiclient.IncompleteDiagnosticsError:
+			// If the error is for an incomplete diagnostic bundle, extract
+			// the data and warn the user.
+			bundle = v.BundleReadCloser()
+			fmt.Fprintf(os.Stderr, "\nWarning: %v\n\n", v)
+
+		default:
+			// If we failed to get a bundle at all then remove the file we created.
+			return nil, err
+		}
+	}
+
+	return bundle, nil
+}
+
+func (c *diagnosticsCommand) saveOutput(ctx context.Context, bundle *diagnostics.BundleReadCloser) error {
 
 	// If no output path specified by the user, try to use the name provided by
 	// the server. Failing that default to:
@@ -85,7 +160,7 @@ func (c *diagnosticsCommand) runWithCtx(ctx context.Context, cmd *cobra.Command,
 		return err
 	}
 
-	return c.display.GetDiagnostics(ctx, c.writer, c.outputPath)
+	return nil
 }
 
 func newDiagnostics(w io.Writer, client Client, config ConfigProvider) *cobra.Command {
@@ -97,9 +172,11 @@ func newDiagnostics(w io.Writer, client Client, config ConfigProvider) *cobra.Co
 	cobraCommand := &cobra.Command{
 		Use:   "diagnostics",
 		Short: "Fetch a cluster diagnostic bundle",
-		Long:  "Fetch a cluster diagnostic bundle from the target node. Due to the work involved this command will run with a minimum command timeout duration of 1h, although accepts longer durations",
+		Long:  "Fetch a cluster diagnostic bundle with either information about one node or the whole cluster. Due to the work involved this command will run with a minimum command timeout duration of 1h, although accepts longer durations",
 		Example: `
 $ storageos get diagnostics
+
+$ storageos get diagnostics --target node-name
 
 $ storageos get diagnostics --output-file ~/my-diagnostics
 `,
@@ -128,6 +205,7 @@ $ storageos get diagnostics --output-file ~/my-diagnostics
 	}
 
 	cobraCommand.Flags().StringVar(&c.outputPath, "output-file", "", "writes the generated diagnostic bundle to a specified file path")
+	cobraCommand.Flags().StringVar(&c.target, "target", "", "fetches a diagnostics bundle from the specified node (uses node name). The resulting bundle will only contain the target node's data.")
 
 	return cobraCommand
 }

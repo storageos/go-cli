@@ -67,6 +67,9 @@ type Transport interface {
 	// GetDiagnostics requests a new diagnostics bundle for the cluster
 	// from the StorageOS API.
 	GetDiagnostics(ctx context.Context) (*diagnostics.BundleReadCloser, error)
+	// GetSingleNodeDiagnostics requests a new single node diagnostics bundle for
+	// the cluster from the StorageOS API.
+	GetSingleNodeDiagnostics(ctx context.Context, nodeID id.Node) (*diagnostics.BundleReadCloser, error)
 	// GetPolicyGroup requests a new policy group resource which corresponds to
 	// uid from the StorageOS API.
 	GetPolicyGroup(ctx context.Context, uid id.PolicyGroup) (*policygroup.Resource, error)
