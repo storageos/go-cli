@@ -75,6 +75,7 @@ func createTable(headers []interface{}) (*uitable.Table, func(io.Writer) error) 
 	table := uitable.New()
 	table.MaxColWidth = 50
 	table.Separator = "  "
+	table.Wrap = true
 
 	// header
 	if headers != nil {

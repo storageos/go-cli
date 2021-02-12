@@ -114,7 +114,8 @@ Addresses:
   Gossip address           gossip.addr                           
   Supervisor address       supervisor.addr                       
   Clustering address       clustering.addr                       
-Labels                     1=2,a=b                               
+Labels                     1=2,                                  
+                           a=b                                   
 Created at                 2000-01-01T00:00:00Z (a long time ago)
 Updated at                 2001-01-01T00:00:00Z (a long time ago)
 Version                    some-version                          
@@ -162,7 +163,8 @@ Addresses:
   Gossip address         gossip.addr                           
   Supervisor address     supervisor.addr                       
   Clustering address     clustering.addr                       
-Labels                   1=2,a=b                               
+Labels                   1=2,                                  
+                         a=b                                   
 Created at               2000-01-01T00:00:00Z (a long time ago)
 Updated at               2001-01-01T00:00:00Z (a long time ago)
 Version                  some-version                          
@@ -187,8 +189,7 @@ Available capacity       1.0 GiB (474 MiB in use)
 
 			gotOutput := w.String()
 			if gotOutput != tt.wantOutput {
-				pretty.Ldiff(t, gotOutput, tt.wantOutput)
-				t.Errorf("got output: \n%v\n\nwant: \n%v\n", gotOutput, tt.wantOutput)
+				compareOutput(t, gotOutput, tt.wantOutput)
 			}
 		})
 	}
@@ -204,7 +205,7 @@ func TestDisplayer_DescribeCluster(t *testing.T) {
 		timeHumanizer output.TimeHumanizer
 		resource      *cluster.Resource
 		nodes         []*node.Resource
-		wantW         string
+		wantOutput    string
 		wantErr       bool
 	}{
 		{
@@ -240,7 +241,7 @@ func TestDisplayer_DescribeCluster(t *testing.T) {
 					Health: health.NodeOffline,
 				},
 			},
-			wantW: `ID:               bananaCluster                      
+			wantOutput: `ID:               bananaCluster                      
 Version:          42                                 
 Created at:       2000-01-01T00:00:00Z (xx aeons ago)
 Updated at:       2000-01-01T00:00:00Z (xx aeons ago)
@@ -282,8 +283,10 @@ Nodes:
 				t.Errorf("DescribeCluster() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if gotW := w.String(); gotW != tt.wantW {
-				t.Errorf("DescribeCluster() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
+
+			gotOutput := w.String()
+			if gotOutput != tt.wantOutput {
+				compareOutput(t, gotOutput, tt.wantOutput)
 			}
 		})
 	}
@@ -298,7 +301,7 @@ func TestDisplayer_DescribeLicence(t *testing.T) {
 		name          string
 		timeHumanizer output.TimeHumanizer
 		resource      *licence.Resource
-		wantW         string
+		wantOutput    string
 		wantErr       bool
 	}{
 		{
@@ -312,7 +315,7 @@ func TestDisplayer_DescribeLicence(t *testing.T) {
 				Features:             []string{"nfs", "banana"},
 				CustomerName:         "bananaCustomer",
 			},
-			wantW: `ClusterID:      bananaID                           
+			wantOutput: `ClusterID:      bananaID                           
 Expiration:     2000-01-01T00:00:00Z (xx aeons ago)
 Capacity:       42 GiB (45097156608)               
 Used:           21 GiB (22548578304)               
@@ -337,8 +340,9 @@ Customer name:  bananaCustomer
 				t.Errorf("DescribeLicence() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if gotW := w.String(); gotW != tt.wantW {
-				t.Errorf("DescribeLicence() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
+			gotOutput := w.String()
+			if gotOutput != tt.wantOutput {
+				compareOutput(t, gotOutput, tt.wantOutput)
 			}
 		})
 	}
@@ -353,7 +357,7 @@ func TestDisplayer_DescribeNamespace(t *testing.T) {
 		name          string
 		timeHumanizer output.TimeHumanizer
 		resource      *namespace.Resource
-		wantW         string
+		wantOutput    string
 		wantErr       bool
 	}{
 		{
@@ -369,12 +373,13 @@ func TestDisplayer_DescribeNamespace(t *testing.T) {
 				UpdatedAt: mockTime,
 				Version:   "42",
 			},
-			wantW: `ID:          bananaNamespaceID                      
-Name:        bananaNamespaceName                    
-Labels:      bananaKey=bananaValue,kiwiKey=kiwiValue
-Version:     42                                     
-Created at:  2000-01-01T00:00:00Z (xx aeons ago)    
-Updated at:  2000-01-01T00:00:00Z (xx aeons ago)    
+			wantOutput: `ID:          bananaNamespaceID                  
+Name:        bananaNamespaceName                
+Labels:      bananaKey=bananaValue,             
+             kiwiKey=kiwiValue                  
+Version:     42                                 
+Created at:  2000-01-01T00:00:00Z (xx aeons ago)
+Updated at:  2000-01-01T00:00:00Z (xx aeons ago)
 `,
 			wantErr: false,
 		},
@@ -393,8 +398,10 @@ Updated at:  2000-01-01T00:00:00Z (xx aeons ago)
 				t.Errorf("DescribeNamespace() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if gotW := w.String(); gotW != tt.wantW {
-				t.Errorf("DescribeNamespace() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
+
+			gotOutput := w.String()
+			if gotOutput != tt.wantOutput {
+				compareOutput(t, gotOutput, tt.wantOutput)
 			}
 		})
 	}
@@ -409,7 +416,7 @@ func TestDisplayer_DescribeListNamespaces(t *testing.T) {
 		name          string
 		timeHumanizer output.TimeHumanizer
 		resource      []*namespace.Resource
-		wantW         string
+		wantOutput    string
 		wantErr       bool
 	}{
 		{
@@ -443,12 +450,13 @@ func TestDisplayer_DescribeListNamespaces(t *testing.T) {
 					Version:   "44",
 				},
 			},
-			wantW: `ID:          bananaNamespaceID                      
-Name:        bananaNamespaceName                    
-Labels:      bananaKey=bananaValue,kiwiKey=kiwiValue
-Version:     42                                     
-Created at:  2000-01-01T00:00:00Z (xx aeons ago)    
-Updated at:  2000-01-01T00:00:00Z (xx aeons ago)    
+			wantOutput: `ID:          bananaNamespaceID                  
+Name:        bananaNamespaceName                
+Labels:      bananaKey=bananaValue,             
+             kiwiKey=kiwiValue                  
+Version:     42                                 
+Created at:  2000-01-01T00:00:00Z (xx aeons ago)
+Updated at:  2000-01-01T00:00:00Z (xx aeons ago)
 
 ID:          kiwiNamespaceID                    
 Name:        kiwiNamespaceName                  
@@ -481,8 +489,10 @@ Updated at:  2000-01-01T00:00:00Z (xx aeons ago)
 				t.Errorf("DescribeListNamespaces() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if gotW := w.String(); gotW != tt.wantW {
-				t.Errorf("DescribeListNamespaces() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
+
+			gotOutput := w.String()
+			if gotOutput != tt.wantOutput {
+				compareOutput(t, gotOutput, tt.wantOutput)
 			}
 		})
 	}
@@ -630,7 +640,8 @@ NFS
     Pseudo Path         /psuedo                                                                         
     ACLs                                                                                                
 Namespace               banana-namespace (banana-namespace-id)                                          
-Labels                  kiwi=42,pear=42                                                                 
+Labels                  kiwi=42,                                                                        
+                        pear=42                                                                         
 Filesystem              ext4                                                                            
 Size                    1.0 GiB (1073741824 bytes)                                                      
 Version                 42                                                                              
@@ -761,7 +772,8 @@ NFS
     Pseudo Path         /psuedo                               
     ACLs                                                      
 Namespace               banana-namespace (banana-namespace-id)
-Labels                  kiwi=42,pear=42                       
+Labels                  kiwi=42,                              
+                        pear=42                               
 Filesystem              ext4                                  
 Size                    1.0 GiB (1073741824 bytes)            
 Version                 42                                    
@@ -884,7 +896,8 @@ NFS
     Pseudo Path         /psuedo                               
     ACLs                                                      
 Namespace               banana-namespace (banana-namespace-id)
-Labels                  kiwi=42,pear=42                       
+Labels                  kiwi=42,                              
+                        pear=42                               
 Filesystem              ext4                                  
 Size                    1.0 GiB (1073741824 bytes)            
 Version                 42                                    
@@ -1189,7 +1202,8 @@ NFS
     Pseudo Path         /psuedo                                                                         
     ACLs                                                                                                
 Namespace               banana-namespace (banana-namespace-id)                                          
-Labels                  kiwi=42,pear=42                                                                 
+Labels                  kiwi=42,                                                                        
+                        pear=42                                                                         
 Filesystem              ext4                                                                            
 Size                    1.0 GiB (1073741824 bytes)                                                      
 Version                 42                                                                              
@@ -1245,7 +1259,8 @@ NFS
     Pseudo Path         /psuedo                                                                         
     ACLs                                                                                                
 Namespace               kiwi-namespace (kiwi-namespace-id)                                              
-Labels                  kiwi=42,pear=42                                                                 
+Labels                  kiwi=42,                                                                        
+                        pear=42                                                                         
 Filesystem              ext4                                                                            
 Size                    1.0 GiB (1073741824 bytes)                                                      
 Version                 42                                                                              

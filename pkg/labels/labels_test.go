@@ -109,7 +109,8 @@ func TestSet_String(t *testing.T) {
 				"bananaKey": "bananaValue",
 				"kiwiKey":   "kiwiValue",
 			},
-			want: "bananaKey=bananaValue,kiwiKey=kiwiValue",
+			want: `bananaKey=bananaValue,
+kiwiKey=kiwiValue`,
 		},
 		{
 			name: "three elems",
@@ -118,7 +119,9 @@ func TestSet_String(t *testing.T) {
 				"kiwiKey":   "kiwiValue",
 				"peachKey":  "peachValue",
 			},
-			want: "bananaKey=bananaValue,kiwiKey=kiwiValue,peachKey=peachValue",
+			want: `bananaKey=bananaValue,
+kiwiKey=kiwiValue,
+peachKey=peachValue`,
 		},
 		{
 			name: "three elems, different order",
@@ -127,7 +130,9 @@ func TestSet_String(t *testing.T) {
 				"kiwiKey":   "kiwiValue",
 				"bananaKey": "bananaValue",
 			},
-			want: "bananaKey=bananaValue,kiwiKey=kiwiValue,peachKey=peachValue",
+			want: `bananaKey=bananaValue,
+kiwiKey=kiwiValue,
+peachKey=peachValue`,
 		},
 	}
 	for _, tt := range tests {
@@ -135,7 +140,7 @@ func TestSet_String(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			if got := tt.s.String(); got != tt.want {
-				t.Errorf("String() = %v, want %v", got, tt.want)
+				t.Errorf("String() = \n%v,\n want \n%v", got, tt.want)
 			}
 		})
 	}

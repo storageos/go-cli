@@ -124,6 +124,7 @@ func (d *Displayer) describeNode(ctx context.Context, w io.Writer, node *output.
 	table := uitable.New()
 	table.MaxColWidth = 80
 	table.Separator = "  "
+	table.Wrap = true
 
 	table.AddRow("ID", node.ID.String())
 	table.AddRow("Name", node.Name)

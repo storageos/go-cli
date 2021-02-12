@@ -49,9 +49,9 @@ func (s Set) String() string {
 
 	// print keys/values ordered alphabetically by key
 	for _, k := range keys {
-		sb.WriteString(k + "=" + s[k] + ",")
+		sb.WriteString(k + "=" + s[k] + ",\n")
 	}
-	return strings.TrimRight(sb.String(), ",")
+	return strings.TrimRight(sb.String(), ",\n")
 }
 
 // Copy creates a deep copy of the Set.
