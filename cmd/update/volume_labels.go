@@ -130,10 +130,10 @@ func newVolumeLabels(w io.Writer, client Client, config ConfigProvider) *cobra.C
 		Use:   "labels [volume name] [labels]",
 		Short: "Updates a volume's labels",
 		Example: `
-$ storageos update volume labels my-volume-name myvolume=isthebest,theother=isnot --namespace my-namespace-name 
-$ storageos update volume labels my-volume-name --delete myvolume=isthebest --upsert theother=isnot --namespace my-namespace-name 
-$ storageos update volume labels my-volume-name --upsert theother=isnot --namespace my-namespace-name 
-$ storageos update volume labels my-volume-name --delete myvolume=isthebest --namespace my-namespace-name 
+$ storageos update volume labels my-volume-name app=myapp,tier=production --namespace my-namespace-name
+$ storageos update volume labels my-volume-name --delete app=myapp --upsert tier=production --namespace my-namespace-name
+$ storageos update volume labels my-volume-name --upsert tier=production --namespace my-namespace-name
+$ storageos update volume labels my-volume-name --delete app=myapp --namespace my-namespace-name
 `,
 
 		Args: argwrappers.WrapInvalidArgsError(func(cmd *cobra.Command, args []string) error {
