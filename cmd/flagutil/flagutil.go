@@ -6,6 +6,7 @@ package flagutil
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
@@ -63,4 +64,17 @@ func SupportCASWithRestrictions(flagSet *pflag.FlagSet, p *string, restrictions 
 // It will replace the flag lookup for "async".
 func SupportAsync(flagSet *pflag.FlagSet, p *bool) {
 	flagSet.BoolVar(p, "async", false, "perform the operation asynchronously, using the configured timeout duration")
+}
+
+// WarnAboutValueBeingOverwrittenByK8s adds a required flag that makes sure that the user
+// undertstand that the values being set will be overwrtitten by the kubernetes controller
+// label synchronisation mechanism
+func WarnAboutValueBeingOverwrittenByK8s(flagSet *pflag.FlagSet) {
+	// ignore the returned boolean pointer - we don't need to check what the value of this flag is
+	_ = flagSet.Bool("i-understand-that-this-value-will-be-overwritten-by-kubernetes", false,
+		"this flag must be set to indicate that the user understands the label synchronisation behaviour "+
+			"of the kubernetes controller. The flag value (true/false) does not matter.")
+
+	// we know that the flag exist, so we can safely ingore the returned error
+	_ = cobra.MarkFlagRequired(flagSet, "i-understand-that-this-value-will-be-overwritten-by-kubernetes")
 }

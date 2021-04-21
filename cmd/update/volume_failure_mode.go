@@ -155,6 +155,7 @@ $ storageos update volume failure-mode my-volume-name 2 --namespace my-namespace
 	}
 
 	c.useCAS = flagutil.SupportCAS(cobraCommand.Flags(), &c.casVersion)
+	flagutil.WarnAboutValueBeingOverwrittenByK8s(cobraCommand.Flags())
 
 	return cobraCommand
 }

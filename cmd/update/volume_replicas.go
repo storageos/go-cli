@@ -145,6 +145,7 @@ $ storageos update volume replicas my-volume-name 3 --namespace my-namespace-nam
 
 	c.useCAS = flagutil.SupportCAS(cobraCommand.Flags(), &c.casVersion)
 	flagutil.SupportAsync(cobraCommand.Flags(), &c.useAsync)
+	flagutil.WarnAboutValueBeingOverwrittenByK8s(cobraCommand.Flags())
 
 	return cobraCommand
 }

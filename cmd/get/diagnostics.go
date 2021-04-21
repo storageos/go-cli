@@ -152,6 +152,7 @@ func (c *diagnosticsCommand) saveOutput(ctx context.Context, bundle *diagnostics
 	if err != nil {
 		return err
 	}
+	// nolint:gosec
 	defer outputfile.Close()
 
 	// Move the bundle to the output path.

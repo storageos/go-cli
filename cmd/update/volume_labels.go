@@ -220,7 +220,7 @@ func newVolumeLabels(w io.Writer, client Client, config ConfigProvider) *cobra.C
 
 	c.useCAS = flagutil.SupportCAS(cobraCommand.Flags(), &c.casVersion)
 	flagutil.SupportAsync(cobraCommand.Flags(), &c.useAsync)
-
+	flagutil.WarnAboutValueBeingOverwrittenByK8s(cobraCommand.Flags())
 	// local flags
 	cobraCommand.Flags().StringVar(&c.upsertStr, "upsert", "", "upsert labels to the volume's existing set")
 	cobraCommand.Flags().StringVar(&c.deleteStr, "delete", "", "delete labels from the volume's existing set")
