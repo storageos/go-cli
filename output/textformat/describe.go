@@ -155,12 +155,12 @@ func (d *Displayer) describeNode(ctx context.Context, w io.Writer, node *output.
 	if len(node.HostedVolumes) > 0 {
 		table.AddRow()
 		table.AddRow("Local volume deployments:")
-		table.AddRow("  DEPLOYMENT ID", "VOLUME", "NAMESPACE", "HEALTH", "TYPE", "SIZE")
+		table.AddRow("  NAMESPACE", "VOLUME", "DEPLOYMENT ID", "HEALTH", "TYPE", "SIZE")
 		for _, vol := range node.HostedVolumes {
 			table.AddRow(
-				"  "+vol.LocalDeployment.ID,
+				"  "+vol.NamespaceName,
 				vol.Name,
-				vol.NamespaceName,
+				vol.LocalDeployment.ID,
 				vol.LocalDeployment.Health,
 				vol.LocalDeployment.Kind,
 				size.Format(vol.SizeBytes),
@@ -200,6 +200,7 @@ func (d *Displayer) DescribeListVolumes(ctx context.Context, w io.Writer, volume
 func (d *Displayer) describeVolume(ctx context.Context, w io.Writer, volume *output.Volume) error {
 	table := uitable.New()
 	table.Separator = "  "
+	table.Wrap = true
 
 	table.AddRow("ID", volume.ID.String())
 	table.AddRow("Name", volume.Name)

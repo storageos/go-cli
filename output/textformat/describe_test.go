@@ -122,9 +122,9 @@ Version                    some-version
 Available capacity         1.0 GiB (474 MiB in use)              
 
 Local volume deployments:
-  DEPLOYMENT ID            VOLUME                                  NAMESPACE       HEALTH  TYPE     SIZE   
-  deployID                 volumeName                              namespaceName   online  master   1.0 GiB
-  deployID2                volumeName2                             namespaceName2  ready   replica  2.0 GiB
+  NAMESPACE                VOLUME                                  DEPLOYMENT ID  HEALTH  TYPE     SIZE   
+  namespaceName            volumeName                              deployID       online  master   1.0 GiB
+  namespaceName2           volumeName2                             deployID2      ready   replica  2.0 GiB
 `,
 			wantErr: nil,
 		},
