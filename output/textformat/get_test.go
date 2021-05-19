@@ -411,8 +411,8 @@ func TestDisplayer_GetNode(t *testing.T) {
 				UpdatedAt: mockTime,
 				Version:   "42",
 			},
-			wantW: `NAME        HEALTH  AGE           LABELS                         
-bananaName  ready   xx aeons ago  bananaLabelKey=bananaLabelValue
+			wantW: `NAME        HEALTH  AGE         
+bananaName  ready   xx aeons ago
 `,
 			wantErr: false,
 		},
@@ -431,7 +431,7 @@ bananaName  ready   xx aeons ago  bananaLabelKey=bananaLabelValue
 				return
 			}
 			if gotW := w.String(); gotW != tt.wantW {
-				t.Errorf("GetNode() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
+				compareOutput(t, gotW, tt.wantW)
 			}
 		})
 	}
@@ -485,10 +485,10 @@ func TestDisplayer_GetListNodes(t *testing.T) {
 					Version:   "42",
 				},
 			},
-			wantW: `NAME           HEALTH   AGE           LABELS                               
-bananaName     ready    xx aeons ago  bananaLabelKey=bananaLabelValue      
-kiwiName       ready    xx aeons ago  kiwiLabelKey=kiwiLabelValue          
-pineappleName  offline  xx aeons ago  pineappleLabelKey=pineappleLabelValue
+			wantW: `NAME           HEALTH   AGE         
+bananaName     ready    xx aeons ago
+kiwiName       ready    xx aeons ago
+pineappleName  offline  xx aeons ago
 `,
 			wantErr: false,
 		},
@@ -505,7 +505,7 @@ pineappleName  offline  xx aeons ago  pineappleLabelKey=pineappleLabelValue
 				return
 			}
 			if gotW := w.String(); gotW != tt.wantW {
-				t.Errorf("GetListNodes() gotW = \n%v\n, want \n%v\n", gotW, tt.wantW)
+				compareOutput(t, gotW, tt.wantW)
 			}
 		})
 	}

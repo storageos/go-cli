@@ -114,7 +114,7 @@ func (d *Displayer) GetListNodes(ctx context.Context, w io.Writer, resources []*
 
 func (d *Displayer) printNode(table *uitable.Table, node *output.Node) {
 	age := d.timeHumanizer.TimeToHuman(node.CreatedAt)
-	table.AddRow(node.Name, node.Health.String(), age, node.Labels.String())
+	table.AddRow(node.Name, node.Health.String(), age)
 }
 
 // GetNamespace creates human-readable strings, writing the result to w.

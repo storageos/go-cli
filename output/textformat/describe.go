@@ -82,6 +82,7 @@ func (d *Displayer) DescribeListNamespaces(ctx context.Context, w io.Writer, nam
 
 func (d *Displayer) describeNamespace(ctx context.Context, w io.Writer, ns *output.Namespace) error {
 	table, write := createTable(nil)
+	table.Wrap = true
 
 	table.AddRow("ID:", ns.ID)
 	table.AddRow("Name:", ns.Name)

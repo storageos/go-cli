@@ -64,7 +64,7 @@ func disableToHuman(b bool) string {
 }
 
 var (
-	nodeHeaders        = []interface{}{"NAME", "HEALTH", "AGE", "LABELS"}
+	nodeHeaders        = []interface{}{"NAME", "HEALTH", "AGE"}
 	namespaceHeaders   = []interface{}{"NAME", "AGE"}
 	userHeaders        = []interface{}{"NAME", "ROLE", "AGE", "GROUPS"}
 	volumeHeaders      = []interface{}{"NAMESPACE", "NAME", "SIZE", "LOCATION", "ATTACHED ON", "REPLICAS", "AGE"}
@@ -75,7 +75,6 @@ func createTable(headers []interface{}) (*uitable.Table, func(io.Writer) error) 
 	table := uitable.New()
 	table.MaxColWidth = 50
 	table.Separator = "  "
-	table.Wrap = true
 
 	// header
 	if headers != nil {
