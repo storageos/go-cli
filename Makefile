@@ -12,7 +12,7 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 # version information
-SEMANTIC_VERSION ?= "2.4.0-rc.1"
+SEMANTIC_VERSION ?= "2.4.0"
 
 # build flags
 LDFLAGS		+= -X main.Version=$(SEMANTIC_VERSION)

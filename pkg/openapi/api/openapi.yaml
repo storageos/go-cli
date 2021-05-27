@@ -5,7 +5,7 @@ info:
     name: StorageOS
     url: https://storageos.com
   title: StorageOS API
-  version: 2.4.0-alpha
+  version: 2.4.0
 externalDocs:
   description: The latest StorageOS user documentation
   url: https://docs.storageos.com/
@@ -18,25 +18,6 @@ paths:
       operationId: authenticateUser
       requestBody:
         $ref: '#/components/requestBodies/AuthUserData'
-        content:
-          application/json:
-            schema:
-              example:
-                username: admin
-                password: supersecret
-              properties:
-                username:
-                  type: string
-                password:
-                  format: password
-                  type: string
-              required:
-              - password
-              - username
-              title: AuthUserData
-              type: object
-        description: The credentials to use for authentication.
-        required: true
       responses:
         "200":
           content:
@@ -205,53 +186,6 @@ paths:
       operationId: createUser
       requestBody:
         $ref: '#/components/requestBodies/CreateUserData'
-        content:
-          application/json:
-            schema:
-              example:
-                password: turtlesaregreat
-                groups:
-                - 24d5db6f-9738-4f17-a257-b9dd41a35309
-                - 4223b453-4d47-49d5-960f-23fc7a8153ba
-                isAdmin: true
-                username: admin
-              properties:
-                username:
-                  example: admin
-                  type: string
-                password:
-                  default: unchanged
-                  description: If not present, the existing password is not changed
-                  example: turtlesaregreat
-                  format: password
-                  type: string
-                  writeOnly: true
-                isAdmin:
-                  default: false
-                  description: |
-                    If true, this user is an administrator of the cluster.
-                    Administrators bypass the usual authentication checks and are granted access to all resources. Some actions (such as adding a new user) can only be performed by an administrator.
-                  example: true
-                  type: boolean
-                groups:
-                  default: []
-                  description: |
-                    Defines a set of policy group IDs this user is a member of.
-                    Policy groups can be used to logically group users and apply authorisation  policies to all members.
-                  example:
-                  - 24d5db6f-9738-4f17-a257-b9dd41a35309
-                  - 4223b453-4d47-49d5-960f-23fc7a8153ba
-                  items:
-                    $ref: '#/components/schemas/PolicyGroupID'
-                  nullable: true
-                  type: array
-              required:
-              - password
-              - username
-              title: CreateUserData
-              type: object
-        description: Data required to create a new user in the cluster.
-        required: true
       responses:
         "201":
           content:
@@ -507,55 +441,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateUserData'
-        content:
-          application/json:
-            schema:
-              example:
-                password: turtlesaregreat
-                groups:
-                - 24d5db6f-9738-4f17-a257-b9dd41a35309
-                - 4223b453-4d47-49d5-960f-23fc7a8153ba
-                isAdmin: true
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-              properties:
-                password:
-                  default: unchanged
-                  description: If not present, the existing password is not changed
-                  example: turtlesaregreat
-                  format: password
-                  type: string
-                  writeOnly: true
-                isAdmin:
-                  default: false
-                  description: |
-                    If true, this user is an administrator of the cluster.
-                    Administrators bypass the usual authentication checks and are granted access to all resources. Some actions (such as adding a new user) can only be performed by an administrator.
-                  example: true
-                  type: boolean
-                groups:
-                  default: []
-                  description: |
-                    Defines a set of policy group IDs this user is a member of.
-                    Policy groups can be used to logically group users and apply authorisation  policies to all members.
-                  example:
-                  - 24d5db6f-9738-4f17-a257-b9dd41a35309
-                  - 4223b453-4d47-49d5-960f-23fc7a8153ba
-                  items:
-                    $ref: '#/components/schemas/PolicyGroupID'
-                  nullable: true
-                  type: array
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: UpdateUserData
-              type: object
-        description: The new User data to store.
-        required: true
       responses:
         "200":
           content:
@@ -875,32 +760,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateAuthenticatedUserData'
-        content:
-          application/json:
-            schema:
-              example:
-                password: turtlesaregreat
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-              properties:
-                password:
-                  default: unchanged
-                  description: If not present, the existing password is not changed
-                  example: turtlesaregreat
-                  format: password
-                  type: string
-                  writeOnly: true
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: UpdateAuthenticatedUserData
-              type: object
-        description: The new authenticated user's data.
-        required: true
       responses:
         "200":
           content:
@@ -1100,36 +959,6 @@ paths:
       operationId: createNamespace
       requestBody:
         $ref: '#/components/requestBodies/CreateNamespaceData'
-        content:
-          application/json:
-            schema:
-              example:
-                name: dev
-                labels:
-                  env: prod
-                  rack: db-1
-              properties:
-                name:
-                  description: |
-                    The name of the namespace shown in the CLI and UI
-                  example: dev
-                  pattern: ^[a-z0-9.\-]{1,253}$
-                  type: string
-                labels:
-                  additionalProperties:
-                    type: string
-                  description: |
-                    A set of arbitrary key value labels to apply to the entity.
-                  example:
-                    env: prod
-                    rack: db-1
-                  externalDocs:
-                    url: https://docs.storageos.com/v2/openapi-help/labels
-                  type: object
-              title: CreateNamespaceData
-              type: object
-        description: Data required to create a new namespace in the cluster.
-        required: true
       responses:
         "201":
           content:
@@ -1398,38 +1227,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateNamespaceData'
-        content:
-          application/json:
-            schema:
-              example:
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-                labels:
-                  env: prod
-                  rack: db-1
-              properties:
-                labels:
-                  additionalProperties:
-                    type: string
-                  description: |
-                    A set of arbitrary key value labels to apply to the entity.
-                  example:
-                    env: prod
-                    rack: db-1
-                  externalDocs:
-                    url: https://docs.storageos.com/v2/openapi-help/labels
-                  type: object
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: UpdateNamespaceData
-              type: object
-        description: The new namespace data to store.
-        required: true
       responses:
         "200":
           content:
@@ -1772,39 +1569,6 @@ paths:
         style: simple
       requestBody:
         $ref: '#/components/requestBodies/UpdateNodeData'
-        content:
-          application/json:
-            schema:
-              example:
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-                labels:
-                  env: prod
-                  rack: db-1
-              properties:
-                labels:
-                  additionalProperties:
-                    type: string
-                  description: |
-                    A set of arbitrary key value labels to apply to the entity.
-                  example:
-                    env: prod
-                    rack: db-1
-                  externalDocs:
-                    url: https://docs.storageos.com/v2/openapi-help/labels
-                  type: object
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: UpdateNodeData
-              type: object
-        description: "Update the label configuration of the node to the desired state.\
-          \ Alterations of StorageOS labels are rejected. \n"
-        required: true
       responses:
         "200":
           content:
@@ -1902,30 +1666,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/SetComputeOnlyNodeData'
-        content:
-          application/json:
-            schema:
-              example:
-                computeOnly: true
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-              properties:
-                computeOnly:
-                  description: |
-                    Marks the node's desired configuration  state as compute-only. This will result in the node being avoided for volume placement
-                  example: true
-                  type: boolean
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: SetComputeOnlyNodeData
-              type: object
-        description: Desired compute-only configuration state for the node.
-        required: true
       responses:
         "200":
           content:
@@ -2053,41 +1793,6 @@ paths:
       operationId: createPolicyGroup
       requestBody:
         $ref: '#/components/requestBodies/CreatePolicyGroupData'
-        content:
-          application/json:
-            schema:
-              example:
-                specs:
-                - namespaceID: 251f065a-d89b-4426-a752-5fdd144d00e8
-                  resourceType: '*'
-                  readOnly: false
-                - namespaceID: 5f009d1f-6618-43c2-9ae4-e699461dda8e
-                  resourceType: volume
-                  readOnly: true
-                name: dev-users
-              properties:
-                name:
-                  example: dev-users
-                  type: string
-                specs:
-                  default: []
-                  description: A set of authorisation policies to apply to the policy
-                    group.
-                  example:
-                  - namespaceID: 251f065a-d89b-4426-a752-5fdd144d00e8
-                    resourceType: '*'
-                    readOnly: false
-                  - namespaceID: 5f009d1f-6618-43c2-9ae4-e699461dda8e
-                    resourceType: volume
-                    readOnly: true
-                  items:
-                    $ref: '#/components/schemas/_policies_specs'
-                  nullable: true
-                  type: array
-              title: CreatePolicyGroupData
-              type: object
-        description: Data required to create a new policy group in the cluster.
-        required: true
       responses:
         "201":
           content:
@@ -2356,46 +2061,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdatePolicyGroupData'
-        content:
-          application/json:
-            schema:
-              example:
-                specs:
-                - namespaceID: 251f065a-d89b-4426-a752-5fdd144d00e8
-                  resourceType: '*'
-                  readOnly: false
-                - namespaceID: 5f009d1f-6618-43c2-9ae4-e699461dda8e
-                  resourceType: volume
-                  readOnly: true
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-              properties:
-                specs:
-                  default: []
-                  description: A set of authorisation policies to apply to the policy
-                    group.
-                  example:
-                  - namespaceID: 251f065a-d89b-4426-a752-5fdd144d00e8
-                    resourceType: '*'
-                    readOnly: false
-                  - namespaceID: 5f009d1f-6618-43c2-9ae4-e699461dda8e
-                    resourceType: volume
-                    readOnly: true
-                  items:
-                    $ref: '#/components/schemas/_policies__id__specs'
-                  nullable: true
-                  type: array
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: UpdatePolicyGroupData
-              type: object
-        description: The new policy group data to store.
-        required: true
       responses:
         "200":
           content:
@@ -2553,61 +2218,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/CreateVolumeData'
-        content:
-          application/json:
-            schema:
-              example:
-                namespaceID: c5666b58-b805-4215-ab4a-cb094948ccc6
-                name: data
-                description: This volume contains the data for my app
-                fsType: ext4
-                labels:
-                  env: prod
-                  rack: db-1
-                sizeBytes: 5000
-              properties:
-                namespaceID:
-                  description: |
-                    A unique identifier for a namespace. The format of this type is undefined and may change but the defined properties will not change..
-                  example: c5666b58-b805-4215-ab4a-cb094948ccc6
-                  type: string
-                labels:
-                  additionalProperties:
-                    type: string
-                  description: |
-                    A set of arbitrary key value labels to apply to the entity.
-                  example:
-                    env: prod
-                    rack: db-1
-                  externalDocs:
-                    url: https://docs.storageos.com/v2/openapi-help/labels
-                  type: object
-                name:
-                  description: |
-                    The name of the volume shown in the CLI and UI
-                  example: data
-                  pattern: ^[a-z0-9.\-]{1,253}$
-                  type: string
-                fsType:
-                  $ref: '#/components/schemas/FsType'
-                description:
-                  example: This volume contains the data for my app
-                  type: string
-                sizeBytes:
-                  description: |
-                    A volume's size in bytes
-                  example: 5000
-                  minimum: 0
-                  type: uint64
-              required:
-              - fsType
-              - name
-              - namespaceID
-              - sizeBytes
-              title: CreateVolumeData
-              type: object
-        description: Data required to create a new volume in the cluster.
-        required: true
       responses:
         "201":
           content:
@@ -2991,43 +2601,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateVolumeData'
-        content:
-          application/json:
-            schema:
-              example:
-                description: This volume contains the data for my app
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-                labels:
-                  env: prod
-                  rack: db-1
-              properties:
-                labels:
-                  additionalProperties:
-                    type: string
-                  description: |
-                    A set of arbitrary key value labels to apply to the entity.
-                  example:
-                    env: prod
-                    rack: db-1
-                  externalDocs:
-                    url: https://docs.storageos.com/v2/openapi-help/labels
-                  type: object
-                description:
-                  example: This volume contains the data for my app
-                  type: string
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: UpdateVolumeData
-              type: object
-        description: |
-          Update the volume description and label configuration to the desired state. Alterations of StorageOS labels are rejected.
-        required: true
       responses:
         "200":
           content:
@@ -3273,22 +2846,6 @@ paths:
         style: simple
       requestBody:
         $ref: '#/components/requestBodies/AttachVolumeData'
-        content:
-          application/json:
-            schema:
-              example:
-                nodeID: c5666b58-b805-4215-ab4a-cb094948ccc6
-              properties:
-                nodeID:
-                  description: |
-                    A unique identifier for a node. The format of this type is undefined and may change but the defined properties will not change.
-                  example: c5666b58-b805-4215-ab4a-cb094948ccc6
-                  readOnly: true
-                  type: string
-              title: AttachVolumeData
-              type: object
-        description: Node ID to which the volume will be attached.
-        required: true
       responses:
         "200":
           description: The volume was successfully attached.
@@ -3414,23 +2971,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/AttachNFSVolumeData'
-        content:
-          application/json:
-            schema:
-              properties:
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: AttachNFSVolumeData
-              type: object
-        description: NFS volume configuration. The version is the corresponding volume's
-          version.
-        required: true
       responses:
         "200":
           description: The volume was successfully attached.
@@ -3556,28 +3096,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/NFSVolumeMountEndpoint'
-        content:
-          application/json:
-            schema:
-              properties:
-                mountEndpoint:
-                  default: ""
-                  description: |
-                    The address to which the NFS server is bound.
-                  type: string
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: NFSVolumeMountEndpoint
-              type: object
-        description: |
-          Update an existing NFS volume's mount endpoint
-        required: true
       responses:
         "200":
           description: The volume's mount endpoint was successfully updated.
@@ -3693,28 +3211,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/NFSVolumeExports'
-        content:
-          application/json:
-            schema:
-              properties:
-                exports:
-                  items:
-                    $ref: '#/components/schemas/NfsExportConfig'
-                  type: array
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: NFSVolumeExports
-              type: object
-        description: |
-          Updates an existing volume's NFS export configuration.
-          The volume will use the given export configuration once attached.
-        required: true
       responses:
         "200":
           description: The volume's NFS export configuration was successfully updated.
@@ -3818,32 +3314,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/SetReplicasRequest'
-        content:
-          application/json:
-            schema:
-              example:
-                replicas: 2
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-              properties:
-                replicas:
-                  description: |
-                    The number of replicas desired.
-                  example: 2
-                  maximum: 5
-                  minimum: 0
-                  type: uint64
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: SetReplicasRequest
-              type: object
-        description: Number of replicas
-        required: true
       responses:
         "202":
           content:
@@ -4105,31 +3575,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/ResizeVolumeRequest'
-        content:
-          application/json:
-            schema:
-              example:
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-                sizeBytes: 5368709000
-              properties:
-                sizeBytes:
-                  description: |
-                    The desired new size for the volume in  bytes. This value cannot be less than  the current size of the volume.
-                  example: 5368709000
-                  minimum: 1073742000
-                  type: uint64
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: ResizeVolumeRequest
-              type: object
-        description: The new size to give the volume
-        required: true
       responses:
         "200":
           content:
@@ -4284,51 +3729,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateClusterData'
-        content:
-          application/json:
-            schema:
-              example:
-                disableVersionCheck: false
-                disableCrashReporting: false
-                logFormat: json
-                logLevel: debug
-                disableTelemetry: false
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-              properties:
-                disableTelemetry:
-                  default: false
-                  description: |
-                    Disables collection of telemetry data across the cluster.
-                  example: false
-                  type: boolean
-                disableCrashReporting:
-                  default: false
-                  description: |
-                    Disables collection of reports for any fatal crashes across the cluster.
-                  example: false
-                  type: boolean
-                disableVersionCheck:
-                  default: false
-                  description: |
-                    Disables the mechanism responsible for checking if there is an updated version of StorageOS available for installation.
-                  example: false
-                  type: boolean
-                logLevel:
-                  $ref: '#/components/schemas/LogLevel'
-                logFormat:
-                  $ref: '#/components/schemas/LogFormat'
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: UpdateClusterData
-              type: object
-        description: The new cluster-wide configuration settings to apply.
-        required: true
       responses:
         "200":
           content:
@@ -4457,30 +3857,6 @@ paths:
         style: form
       requestBody:
         $ref: '#/components/requestBodies/UpdateLicence'
-        content:
-          application/json:
-            schema:
-              example:
-                version: NDI0MjQyNDI0MjQyNDI0MjQy
-                key: key
-              properties:
-                key:
-                  description: |
-                    A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
-                  type: string
-                version:
-                  description: |
-                    An opaque representation of an entity version at the time it was obtained from the API.
-                    All operations that mutate the entity must include this version field in the request unchanged.
-                    The format of this type is undefined and may change but the defined properties will not change.
-                  example: NDI0MjQyNDI0MjQyNDI0MjQy
-                  maxLength: 30
-                  type: string
-              title: UpdateLicence
-              type: object
-        description: |
-          A StorageOS product licence key, used to register a cluster. The format of this type is opaque and may change.
-        required: true
       responses:
         "200":
           content:
